@@ -1,0 +1,307 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h2 class="mb-0"><i class="fas fa-dna me-2"></i>Body Analysis Results</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    These results identify your genetic traits to help optimize your training approach. Remember that genetics are just one factor - consistency and proper technique are equally important!
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-5">
+        <!-- Image and Body Type Section -->
+        <div class="card mb-4">
+            <div class="card-header bg-dark">
+                <h4 class="mb-0"><i class="fas fa-camera me-2"></i>Your Analysis</h4>
+            </div>
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <img src="data:image/jpeg;base64,{{ image_data }}" class="img-fluid rounded" alt="Body Analysis" style="max-height: 500px;">
+                </div>
+                
+                <div class="d-flex justify-content-center mb-3">
+                    <div class="badge bg-primary p-2 fs-5">
+                        Body Type: {{ traits.body_type }}
+                    </div>
+                </div>
+                
+                <p class="text-start body-description">
+                    {{ traits.description }}
+                </p>
+            </div>
+        </div>
+
+        <!-- User Info Section -->
+        <div class="card mb-4">
+            <div class="card-header bg-secondary">
+                <h5 class="mb-0"><i class="fas fa-user me-2"></i>Your Info</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% if user_info.height %}
+                    <div class="col-6">
+                        <p class="mb-1"><strong>Height:</strong></p>
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-ruler-vertical me-2"></i>
+                            <span>{{ user_info.height }} cm</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if user_info.weight %}
+                    <div class="col-6">
+                        <p class="mb-1"><strong>Weight:</strong></p>
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-weight me-2"></i>
+                            <span>{{ user_info.weight }} kg</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="mt-3">
+                    <p class="mb-1"><strong>Experience Level:</strong></p>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-dumbbell me-2"></i>
+                        <span>{{ user_info.experience|capitalize }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-7">
+        <!-- Genetic Traits Section -->
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Your Genetic Traits</h4>
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <canvas id="traitsChart" width="400" height="250"></canvas>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Trait</th>
+                                <th>Rating</th>
+                                <th>Training Impact</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for trait, data in traits.items() %}
+                                {% if trait not in ['body_type', 'description'] and data is mapping %}
+                                    <tr>
+                                        <td>
+                                            {{ ' '.join(trait.split('_')).title() }}
+                                        </td>
+                                        <td>
+                                            {% if data.rating == 'excellent' %}
+                                                <span class="badge bg-success">Excellent</span>
+                                            {% elif data.rating == 'good' %}
+                                                <span class="badge bg-info">Good</span>
+                                            {% elif data.rating == 'average' %}
+                                                <span class="badge bg-warning">Average</span>
+                                            {% elif data.rating == 'below_average' %}
+                                                <span class="badge bg-danger">Below Average</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if trait == 'shoulder_width' %}
+                                                Affects upper body development and V-taper
+                                            {% elif trait == 'shoulder_hip_ratio' %}
+                                                Influences visual proportions and waist definition
+                                            {% elif trait == 'arm_length' %}
+                                                Impacts leverage in pushing/pulling exercises
+                                            {% elif trait == 'leg_length' %}
+                                                Affects squat mechanics and running stride
+                                            {% elif trait == 'arm_torso_ratio' %}
+                                                Influences deadlift mechanics and reach
+                                            {% elif trait == 'torso_length' %}
+                                                Affects core stability and exercise selection
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <!-- Recommendations Section -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-clipboard-list me-2"></i>Your Customized Fitness Plan</h4>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0"><i class="fas fa-star me-2"></i>Your Genetic Strengths</h5>
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-group list-group-flush">
+                                    {% for strength in recommendations.strengths %}
+                                        <li class="list-group-item">
+                                            <i class="fas fa-check-circle text-success me-2"></i>{{ strength }}
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header bg-warning text-dark">
+                                <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Areas to Focus On</h5>
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-group list-group-flush">
+                                    {% for focus in recommendations.focus_areas %}
+                                        <li class="list-group-item">
+                                            <i class="fas fa-bullseye text-warning me-2"></i>{{ focus }}
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header bg-info text-white">
+                                <h5 class="mb-0"><i class="fas fa-dumbbell me-2"></i>Recommended Training</h5>
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-group list-group-flush">
+                                    {% for exercise in recommendations.exercise_recommendations %}
+                                        <li class="list-group-item">
+                                            <i class="fas fa-angle-right text-info me-2"></i>{{ exercise }}
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header bg-danger text-white">
+                                <h5 class="mb-0"><i class="fas fa-apple-alt me-2"></i>Nutrition Tips</h5>
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-group list-group-flush">
+                                    {% for tip in recommendations.nutrition_tips %}
+                                        <li class="list-group-item">
+                                            <i class="fas fa-utensils text-danger me-2"></i>{{ tip }}
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header bg-dark">
+                        <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Recommended Training Split</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead class="bg-secondary text-white">
+                                    <tr>
+                                        {% for day in recommendations.training_split %}
+                                            <th class="text-center">{{ day }}</th>
+                                        {% endfor %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        {% for day, workout in recommendations.training_split.items() %}
+                                            <td class="text-center">{{ workout }}</td>
+                                        {% endfor %}
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <a href="/" class="btn btn-primary btn-lg">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Home
+                    </a>
+                    <a href="/education" class="btn btn-success btn-lg ms-2">
+                        <i class="fas fa-book me-2"></i>Learn More About Genetic Traits
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/chart_utils.js') }}"></script>
+<script>
+    // Fetch trait data for chart
+    fetch('/api/traits/{{ analysis_id }}')
+        .then(response => response.json())
+        .then(data => {
+            const ctx = document.getElementById('traitsChart').getContext('2d');
+            
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Your Genetic Traits',
+                        data: data.values,
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: data.colors,
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(54, 162, 235, 1)'
+                    }]
+                },
+                options: {
+                    scales: {
+                        r: {
+                            angleLines: {
+                                display: true
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 100
+                        }
+                    }
+                }
+            });
+        })
+        .catch(error => console.error('Error loading chart data:', error));
+</script>
+{% endblock %}

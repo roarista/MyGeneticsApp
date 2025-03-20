@@ -1,0 +1,162 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h1 class="card-title fw-bold">
+                    <i class="fas fa-dna me-2 text-primary"></i>Discover Your Genetic Potential
+                </h1>
+                <p class="lead">
+                    Optimize your fitness routine based on your unique body structure. Upload a photo to analyze your genetic traits and get personalized workout recommendations.
+                </p>
+                <hr>
+                <h5><i class="fas fa-check-circle text-success me-2"></i>How It Works</h5>
+                <ol class="mb-4">
+                    <li>Upload a full-body photo in neutral standing position</li>
+                    <li>Our AI analyzes your body's structural traits</li>
+                    <li>Get customized training recommendations based on your genetics</li>
+                    <li>Focus your training effort where it matters most</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-camera me-2"></i>Upload Your Photo</h5>
+            </div>
+            <div class="card-body">
+                <form action="/analyze" method="POST" enctype="multipart/form-data" id="upload-form">
+                    <div class="mb-3">
+                        <label for="file" class="form-label">Photo Upload</label>
+                        <input class="form-control" type="file" id="file" name="file" accept="image/png, image/jpeg, image/jpg" required>
+                        <div class="form-text">Upload a clear, full-body photo in a neutral standing position.</div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="height" class="form-label">Height (cm)</label>
+                            <input type="number" class="form-control" id="height" name="height" placeholder="Enter your height">
+                            <div class="form-text">Optional, but improves accuracy</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="weight" class="form-label">Weight (kg)</label>
+                            <input type="number" class="form-control" id="weight" name="weight" placeholder="Enter your weight">
+                            <div class="form-text">Optional, but improves accuracy</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="experience" class="form-label">Training Experience</label>
+                        <select class="form-select" id="experience" name="experience">
+                            <option value="beginner">Beginner (0-1 years)</option>
+                            <option value="intermediate">Intermediate (1-3 years)</option>
+                            <option value="advanced">Advanced (3+ years)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary" id="analyze-btn">
+                            <i class="fas fa-dna me-2"></i>Analyze My Genetics
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6">
+        <div class="card mb-4">
+            <div class="card-header bg-dark">
+                <h5 class="mb-0"><i class="fas fa-lightbulb me-2 text-warning"></i>Why Body Analysis Matters</h5>
+            </div>
+            <div class="card-body">
+                <p>
+                    Your body's structure significantly affects how you should train. Everyone has genetic advantages and limitations:
+                </p>
+                <ul class="feature-list">
+                    <li class="mb-2">
+                        <span class="badge bg-primary me-2">Muscle Insertions</span>
+                        The points where muscles attach to bones determine leverage and growth potential
+                    </li>
+                    <li class="mb-2">
+                        <span class="badge bg-primary me-2">Limb Proportions</span>
+                        Arm and leg length affect exercise mechanics and muscle activation
+                    </li>
+                    <li class="mb-2">
+                        <span class="badge bg-primary me-2">Bone Structure</span>
+                        Frame size influences muscle appearance and functional strength
+                    </li>
+                    <li class="mb-2">
+                        <span class="badge bg-primary me-2">Body Type</span>
+                        Your natural somatotype affects ideal training and nutrition approaches
+                    </li>
+                </ul>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Understanding your genetic advantages allows you to train smarter, focus on areas with the most potential, and avoid wasted effort.
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Benefits of Genetic Analysis</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex mb-3 align-items-center">
+                    <div class="feature-icon bg-success text-white rounded-circle p-3 me-3">
+                        <i class="fas fa-bullseye"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-1">Targeted Training</h5>
+                        <p class="mb-0">Focus your efforts on exercises that work best for your body type</p>
+                    </div>
+                </div>
+                
+                <div class="d-flex mb-3 align-items-center">
+                    <div class="feature-icon bg-info text-white rounded-circle p-3 me-3">
+                        <i class="fas fa-ban"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-1">Avoid Genetic Limitations</h5>
+                        <p class="mb-0">Stop fighting your genetics and work with your natural advantages</p>
+                    </div>
+                </div>
+                
+                <div class="d-flex mb-3 align-items-center">
+                    <div class="feature-icon bg-warning text-dark rounded-circle p-3 me-3">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-1">Optimize Workouts</h5>
+                        <p class="mb-0">Customize your training split based on recovery patterns</p>
+                    </div>
+                </div>
+                
+                <div class="d-flex align-items-center">
+                    <div class="feature-icon bg-danger text-white rounded-circle p-3 me-3">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-1">Maximize Results</h5>
+                        <p class="mb-0">Achieve your physique goals faster with personalized training</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Show loading indicator when form is submitted
+    document.getElementById('upload-form').addEventListener('submit', function() {
+        const button = document.getElementById('analyze-btn');
+        button.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Analyzing...';
+        button.disabled = true;
+    });
+</script>
+{% endblock %}

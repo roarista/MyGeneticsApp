@@ -1,0 +1,84 @@
+/* General styling enhancements */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+/* Card styling */
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: none;
+    margin-bottom: 1.5rem;
+}
+
+.card-header {
+    font-weight: 500;
+}
+
+/* Feature list icons */
+.feature-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Body description styling */
+.body-description {
+    line-height: 1.6;
+    font-size: 1.05rem;
+}
+
+/* Trait section spacing */
+.trait-section {
+    margin-bottom: 1.5rem;
+}
+
+/* Chart container */
+#traitsChart {
+    max-height: 400px;
+}
+
+/* Table responsiveness enhancements */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Style adjustments for feature list */
+.feature-list li {
+    margin-bottom: 0.75rem;
+    list-style-type: none;
+}
+
+/* Image display enhancements */
+img.img-fluid {
+    border: 1px solid rgba(0,0,0,0.125);
+}
+
+/* Loading spinner styles */
+.spinner-border {
+    vertical-align: middle;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card-title {
+        font-size: 1.5rem;
+    }
+    
+    .lead {
+        font-size: 1.1rem;
+    }
+    
+    .feature-icon {
+        width: 40px;
+        height: 40px;
+    }
+}
