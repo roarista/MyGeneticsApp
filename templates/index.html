@@ -30,7 +30,10 @@
                 <form action="/analyze" method="POST" enctype="multipart/form-data" id="upload-form">
                     <div class="mb-3">
                         <label for="file" class="form-label">Photo Upload</label>
-                        <input class="form-control" type="file" id="file" name="file" accept="image/png, image/jpeg, image/jpg" required>
+                        <div class="input-group">
+                            <input class="form-control" type="file" id="file" name="file" accept="image/png, image/jpeg, image/jpg" required>
+                            <label class="input-group-text" for="file">Browse</label>
+                        </div>
                         <div class="form-text">Upload a clear, full-body photo in a neutral standing position.</div>
                     </div>
                     
@@ -157,6 +160,32 @@
         const button = document.getElementById('analyze-btn');
         button.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Analyzing...';
         button.disabled = true;
+    });
+
+    // Enhance file input functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const fileInput = document.getElementById('file');
+        const fileLabel = document.querySelector('.input-group-text');
+        const fileName = document.createElement('span');
+        fileName.className = 'file-name ms-2';
+        
+        // Insert the fileName element after the input
+        fileInput.parentNode.insertBefore(fileName, fileInput.nextSibling);
+        
+        // Add a click handler to the browse button
+        fileLabel.addEventListener('click', function(e) {
+            e.preventDefault();
+            fileInput.click();
+        });
+        
+        // Update file name when file is selected
+        fileInput.addEventListener('change', function() {
+            if (fileInput.files.length > 0) {
+                fileName.textContent = fileInput.files[0].name;
+            } else {
+                fileName.textContent = '';
+            }
+        });
     });
 </script>
 {% endblock %}

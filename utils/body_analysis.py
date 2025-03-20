@@ -19,14 +19,14 @@ def calculate_angle(p1, p2, p3):
                          math.atan2(p1['y'] - p2['y'], p1['x'] - p2['x']))
     return angle + 360 if angle < 0 else angle
 
-def analyze_body_traits(landmarks, height_cm=0, weight_kg=0):
+def analyze_body_traits(landmarks, height_cm=0.0, weight_kg=0.0):
     """
     Analyze body landmarks to identify genetic traits
     
     Args:
         landmarks: Dictionary of body landmarks from MediaPipe
-        height_cm: User's height in cm (optional)
-        weight_kg: User's weight in kg (optional)
+        height_cm: User's height in cm (optional, float)
+        weight_kg: User's weight in kg (optional, float)
         
     Returns:
         Dictionary of body traits and measurements
