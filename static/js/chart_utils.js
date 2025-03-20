@@ -27,7 +27,9 @@ function formatTraitDataForRadar(traits) {
         'shoulder_width', 'shoulder_hip_ratio', 'arm_length', 
         'leg_length', 'arm_torso_ratio', 'torso_length', 'waist_hip_ratio',
         // Body composition traits (if available)
-        'bmi', 'body_fat_percentage', 'muscle_potential'
+        'bmi', 'body_fat_percentage', 'muscle_potential', 'ffmi',
+        // Athletic potential traits
+        'arm_span_height_ratio'
     ];
     
     // Process traits in the priority order

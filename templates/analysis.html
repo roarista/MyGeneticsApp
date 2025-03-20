@@ -161,7 +161,7 @@
                 <!-- Advanced Body Composition Metrics -->
                 {% if 'bmi' in traits or 'body_fat_percentage' in traits or 'lean_body_mass' in traits %}
                 <h5 class="mb-3">Body Composition Metrics</h5>
-                <div class="table-responsive">
+                <div class="table-responsive mb-4">
                     <table class="table table-hover">
                         <thead>
                             <tr>
@@ -221,6 +221,36 @@
                             </tr>
                             {% endif %}
                             
+                            {% if 'ffmi' in traits %}
+                            <tr>
+                                <td>Fat-Free Mass Index (FFMI)</td>
+                                <td>{{ traits.ffmi.value }}</td>
+                                <td>
+                                    {% if traits.ffmi.rating == 'excellent' %}
+                                        <span class="badge bg-success">Excellent</span>
+                                    {% elif traits.ffmi.rating == 'good' %}
+                                        <span class="badge bg-info">Good</span>
+                                    {% elif traits.ffmi.rating == 'average' %}
+                                        <span class="badge bg-warning">Average</span>
+                                    {% elif traits.ffmi.rating == 'below_average' %}
+                                        <span class="badge bg-danger">Below Average</span>
+                                    {% endif %}
+                                </td>
+                                <td>Measures muscularity normalized for height</td>
+                            </tr>
+                            {% endif %}
+                            
+                            {% if 'normalized_ffmi' in traits %}
+                            <tr>
+                                <td>Normalized FFMI</td>
+                                <td>{{ traits.normalized_ffmi.value }}</td>
+                                <td>
+                                    <span class="badge bg-secondary">Info</span>
+                                </td>
+                                <td>Height-adjusted measure of muscular development</td>
+                            </tr>
+                            {% endif %}
+                            
                             {% if 'frame_size' in traits %}
                             <tr>
                                 <td>Frame Size</td>
@@ -265,6 +295,83 @@
                     </table>
                 </div>
                 {% endif %}
+                
+                <!-- Bone Structure & Joint Mechanics -->
+                <h5 class="mb-3">Bone Structure & Biomechanics</h5>
+                <div class="table-responsive mb-4">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Metric</th>
+                                <th>Value</th>
+                                <th>Rating</th>
+                                <th>Athletic Impact</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if 'arm_span_height_ratio' in traits %}
+                            <tr>
+                                <td>Arm Span to Height Ratio</td>
+                                <td>{{ traits.arm_span_height_ratio.value }}</td>
+                                <td>
+                                    {% if traits.arm_span_height_ratio.rating == 'excellent' %}
+                                        <span class="badge bg-success">Excellent</span>
+                                    {% elif traits.arm_span_height_ratio.rating == 'good' %}
+                                        <span class="badge bg-info">Good</span>
+                                    {% elif traits.arm_span_height_ratio.rating == 'average' %}
+                                        <span class="badge bg-warning">Average</span>
+                                    {% elif traits.arm_span_height_ratio.rating == 'below_average' %}
+                                        <span class="badge bg-danger">Below Average</span>
+                                    {% endif %}
+                                </td>
+                                <td>Affects reach advantage in sports; ideal for swimming, boxing, basketball</td>
+                            </tr>
+                            {% endif %}
+                            
+                            <tr>
+                                <td>Leg to Torso Ratio</td>
+                                <td>{{ "%.2f"|format(traits.leg_length.value / traits.torso_length.value) if 'leg_length' in traits and 'torso_length' in traits else 'N/A' }}</td>
+                                <td>
+                                    <span class="badge bg-secondary">Info</span>
+                                </td>
+                                <td>Higher ratios favor running; lower ratios favor powerlifting</td>
+                            </tr>
+                            
+                            {% if 'femur_tibia_ratio' in traits %}
+                            <tr>
+                                <td>Femur to Tibia Ratio</td>
+                                <td>{{ traits.femur_tibia_ratio.value }}</td>
+                                <td>
+                                    <span class="badge bg-secondary">Info</span>
+                                </td>
+                                <td>Affects squat mechanics and running stride efficiency</td>
+                            </tr>
+                            {% endif %}
+                            
+                            {% if 'humerus_length' in traits %}
+                            <tr>
+                                <td>Humerus Length</td>
+                                <td>{{ traits.humerus_length.value }}</td>
+                                <td>
+                                    <span class="badge bg-secondary">Info</span>
+                                </td>
+                                <td>Influences bench press and overhead pressing strength</td>
+                            </tr>
+                            {% endif %}
+                            
+                            {% if 'clavicle_width' in traits %}
+                            <tr>
+                                <td>Clavicle Width</td>
+                                <td>{{ traits.clavicle_width.value }}</td>
+                                <td>
+                                    <span class="badge bg-secondary">Info</span>
+                                </td>
+                                <td>Wider clavicles provide greater potential for upper body muscle</td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>

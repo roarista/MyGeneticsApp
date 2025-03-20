@@ -63,6 +63,10 @@ def analyze_body_traits(landmarks, height_cm=0.0, weight_kg=0.0):
         LEFT_ANKLE = 27
         RIGHT_ANKLE = 28
         
+        # Feet (for wingspan calculation)
+        LEFT_FOOT_INDEX = 31
+        RIGHT_FOOT_INDEX = 32
+        
         # 1. Calculate shoulder width
         shoulder_width = calculate_distance(landmarks[LEFT_SHOULDER], landmarks[RIGHT_SHOULDER])
         
@@ -150,34 +154,65 @@ def analyze_body_traits(landmarks, height_cm=0.0, weight_kg=0.0):
                                         'y': landmarks[RIGHT_WRIST]['y'], 
                                         'z': landmarks[RIGHT_WRIST]['z']})) / 2
         
+        # New proportional measurements
+        # 16. Estimate arm span (using shoulder width and arm length)
+        arm_span = shoulder_width + (2 * arm_length)
+        
+        # 17. Calculate humerus length (upper arm)
+        humerus_length = (left_upper_arm + right_upper_arm) / 2
+        
+        # 18. Calculate femur length (upper leg)
+        femur_length = (left_upper_leg + right_upper_leg) / 2
+        
+        # 19. Calculate tibia length (lower leg)
+        tibia_length = (left_lower_leg + right_lower_leg) / 2
+        
+        # 20. Calculate femur-to-tibia ratio
+        femur_tibia_ratio = femur_length / tibia_length if tibia_length > 0 else 0
+        
+        # 21. Estimate clavicle width (as proportion of shoulder width)
+        clavicle_width = shoulder_width * 0.85
+        
         # Advanced calculations using height and weight if available
         if has_height_weight:
-            # 16. Calculate BMI
+            # 22. Calculate BMI
             bmi = weight_kg / ((height_cm / 100) ** 2)
             
-            # 17. Estimate body fat percentage using the BMI method
+            # 23. Estimate body fat percentage using the BMI method
             # Different formulas for biological males vs females, using a neutral approach
             body_fat_bmi = (1.39 * bmi) + (0.16 * 30) - 19.34  # Average adult formula
             
-            # 18. Estimate body fat using waist-to-height ratio
+            # 24. Estimate body fat using waist-to-height ratio
             waist_to_height = waist_width / height_cm
             body_fat_wth = (waist_to_height * 100) - 10  # Simple approximation
             
-            # 19. Average the two body fat estimates for a more balanced result
+            # 25. Average the two body fat estimates for a more balanced result
             body_fat_percentage = (body_fat_bmi + body_fat_wth) / 2
             
-            # 20. Estimate lean body mass
+            # 26. Estimate lean body mass
             lean_body_mass = weight_kg * (1 - (body_fat_percentage / 100))
             
-            # 21. Estimate frame size based on wrist circumference and height
+            # 27. Calculate Fat-Free Mass Index (FFMI)
+            # FFMI = LBM in kg / (height in meters)^2
+            ffmi = lean_body_mass / ((height_cm / 100) ** 2)
+            
+            # 28. Normalize FFMI (commonly done to compare across heights)
+            # Formula: Normalized FFMI = FFMI + (6.1 * (1.8 - height_m))
+            height_m = height_cm / 100
+            normalized_ffmi = ffmi + (6.1 * (1.8 - height_m))
+            
+            # 29. Estimate frame size based on wrist circumference and height
             wrist_height_ratio = wrist_width / height_cm
             
-            # 22. Calculate ideal weight range based on frame size
+            # 30. Calculate ideal weight range based on frame size
             lower_ideal_weight = (height_cm - 100) - ((height_cm - 150) / 4)
             upper_ideal_weight = lower_ideal_weight + (lower_ideal_weight * 0.1)
             
-            # 23. Calculate muscle potential (based on frame size, height, and genetic factors)
+            # 31. Calculate muscle potential (based on frame size, height, and genetic factors)
             muscle_potential = ((shoulder_width * wrist_width * ankle_width) / height_cm) * 50
+            
+            # 32. Calculate arm span to height ratio - important for athletic potential
+            arm_span_height_ratio = arm_span / height_cm
             
             # Add the advanced metrics to traits
             traits['bmi'] = {
@@ -195,6 +230,16 @@ def analyze_body_traits(landmarks, height_cm=0.0, weight_kg=0.0):
                 'rating': 'informational'  # This is just informational, no classification
             }
             
+            traits['ffmi'] = {
+                'value': round(ffmi, 1),
+                'rating': classify_ffmi(ffmi)
+            }
+            
+            traits['normalized_ffmi'] = {
+                'value': round(normalized_ffmi, 1),
+                'rating': 'informational'
+            }
+            
             traits['frame_size'] = {
                 'value': classify_frame_size(wrist_height_ratio),
                 'rating': 'informational'  # Categorical value
@@ -208,6 +253,11 @@ def analyze_body_traits(landmarks, height_cm=0.0, weight_kg=0.0):
             traits['muscle_potential'] = {
                 'value': round(muscle_potential, 1),
                 'rating': classify_muscle_potential(muscle_potential)
+            }
+            
+            traits['arm_span_height_ratio'] = {
+                'value': round(arm_span_height_ratio, 2),
+                'rating': classify_arm_span_ratio(arm_span_height_ratio)
             }
         
         # Store the basic measured values
@@ -239,6 +289,22 @@ def analyze_body_traits(landmarks, height_cm=0.0, weight_kg=0.0):
         traits['torso_length'] = {
             'value': torso_length,
             'rating': classify_torso_length(torso_length, height_cm)
+        }
+        
+        # Add bone structure and joint metrics
+        traits['femur_tibia_ratio'] = {
+            'value': round(femur_tibia_ratio, 2),
+            'rating': 'informational'
+        }
+        
+        traits['humerus_length'] = {
+            'value': round(humerus_length, 1),
+            'rating': 'informational'
+        }
+        
+        traits['clavicle_width'] = {
+            'value': round(clavicle_width, 1),
+            'rating': 'informational'
         }
         
         # Add waist-to-hip ratio, important for fitness assessment
@@ -458,6 +524,31 @@ def classify_waist_hip_ratio(ratio):
         return 'average'
     else:
         return 'below_average'  # Higher health risk
+        
+def classify_ffmi(ffmi):
+    """Classify Fat-Free Mass Index"""
+    # FFMI is a measure of muscularity normalized for height
+    if ffmi > 25:
+        return 'excellent'  # Exceptional muscularity
+    elif ffmi > 22:
+        return 'good'       # Above average muscularity
+    elif ffmi > 19:
+        return 'average'    # Average muscularity
+    else:
+        return 'below_average'  # Below average muscularity
+        
+def classify_arm_span_ratio(ratio):
+    """Classify arm span to height ratio"""
+    # Typical arm span is roughly equal to height
+    # Values over 1.0 indicate longer reach
+    if ratio > 1.05:
+        return 'excellent'  # Exceptional reach advantage
+    elif ratio > 1.01:
+        return 'good'       # Good reach
+    elif ratio > 0.97:
+        return 'average'    # Average proportions
+    else:
+        return 'below_average'  # Shorter reach
 
 def get_trait_descriptions(body_type):
     """Get detailed descriptions of what body type means for fitness"""
