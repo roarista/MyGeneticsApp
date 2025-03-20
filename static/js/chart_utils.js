@@ -9,7 +9,8 @@ function formatTraitDataForRadar(traits) {
         'excellent': 'rgba(40, 167, 69, 0.7)',  // green
         'good': 'rgba(23, 162, 184, 0.7)',      // blue
         'average': 'rgba(255, 193, 7, 0.7)',    // yellow
-        'below_average': 'rgba(220, 53, 69, 0.7)'  // red
+        'below_average': 'rgba(220, 53, 69, 0.7)',  // red
+        'informational': 'rgba(108, 117, 125, 0.7)'  // gray for purely informational metrics
     };
     
     // Format labels, values and colors
@@ -19,17 +20,40 @@ function formatTraitDataForRadar(traits) {
         colors: []
     };
     
-    // Process each trait
-    for (const [trait, data] of Object.entries(traits)) {
-        // Skip non-numeric traits
-        if (['body_type', 'description'].includes(trait) || typeof data !== 'object') {
+    // Define which traits to include in the chart
+    // We'll prioritize certain traits and exclude purely informational ones
+    const priorityTraits = [
+        // Primary body structure traits
+        'shoulder_width', 'shoulder_hip_ratio', 'arm_length', 
+        'leg_length', 'arm_torso_ratio', 'torso_length', 'waist_hip_ratio',
+        // Body composition traits (if available)
+        'bmi', 'body_fat_percentage', 'muscle_potential'
+    ];
+    
+    // Process traits in the priority order
+    for (const trait of priorityTraits) {
+        if (!traits[trait] || typeof traits[trait] !== 'object') {
+            continue;
+        }
+        
+        const data = traits[trait];
+        
+        // Skip purely informational traits with no rating scale
+        if (data.rating === 'informational') {
             continue;
         }
         
         // Format trait name for display
-        const displayName = trait.split('_')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ');
+        let displayName;
+        if (trait === 'bmi') {
+            displayName = 'BMI';
+        } else if (trait === 'body_fat_percentage') {
+            displayName = 'Body Fat %';
+        } else {
+            displayName = trait.split('_')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+        }
         
         chartData.labels.push(displayName);
         

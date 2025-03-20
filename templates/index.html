@@ -37,16 +37,28 @@
                         <div class="form-text">Upload a clear, full-body photo in a neutral standing position.</div>
                     </div>
                     
+                    <div class="mb-3">
+                        <div class="alert alert-info">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-ruler-combined me-3 fs-4"></i>
+                                <div>
+                                    <strong>Advanced Body Metrics</strong><br>
+                                    Providing your height and weight enables advanced analysis including body composition estimates, lean mass calculation, and frame size assessment.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="height" class="form-label">Height (cm)</label>
-                            <input type="number" class="form-control" id="height" name="height" placeholder="Enter your height">
-                            <div class="form-text">Optional, but improves accuracy</div>
+                            <input type="number" class="form-control" id="height" name="height" placeholder="Enter your height" min="120" max="250">
+                            <div class="form-text">For accurate body fat calculation</div>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="weight" class="form-label">Weight (kg)</label>
-                            <input type="number" class="form-control" id="weight" name="weight" placeholder="Enter your weight">
-                            <div class="form-text">Optional, but improves accuracy</div>
+                            <input type="number" class="form-control" id="weight" name="weight" placeholder="Enter your weight" min="30" max="250">
+                            <div class="form-text">For BMI and lean mass estimation</div>
                         </div>
                     </div>
                     
@@ -94,6 +106,14 @@
                     <li class="mb-2">
                         <span class="badge bg-primary me-2">Body Type</span>
                         Your natural somatotype affects ideal training and nutrition approaches
+                    </li>
+                    <li class="mb-2">
+                        <span class="badge bg-success me-2">Body Composition</span>
+                        Estimated body fat percentage, lean mass, and ideal weight range
+                    </li>
+                    <li class="mb-2">
+                        <span class="badge bg-success me-2">Genetic Potential</span>
+                        Assessment of your muscle building capacity based on structural traits
                     </li>
                 </ul>
                 <div class="alert alert-info">
