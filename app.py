@@ -39,12 +39,21 @@ def index():
 @app.route('/analyze', methods=['POST'])
 def analyze():
     """Process uploaded image and analyze body traits"""
+    logger.debug("Received analyze request")
+    
+    # Ensure temp directory exists
+    os.makedirs(TEMP_UPLOAD_FOLDER, exist_ok=True)
+    
     if 'file' not in request.files:
+        logger.error("No file in request.files")
         flash('No file selected', 'danger')
         return redirect(url_for('index'))
     
     file = request.files['file']
+    logger.debug(f"File object: {file}, filename: {file.filename}")
+    
     if file.filename == '':
+        logger.error("Empty filename")
         flash('No file selected', 'danger')
         return redirect(url_for('index'))
     
@@ -52,10 +61,12 @@ def analyze():
         try:
             # Create a unique ID for this analysis
             analysis_id = str(uuid.uuid4())
+            logger.debug(f"Created analysis ID: {analysis_id}")
             
             # Save file temporarily
             filename = secure_filename(file.filename)
             filepath = os.path.join(TEMP_UPLOAD_FOLDER, filename)
+            logger.debug(f"Saving file to: {filepath}")
             file.save(filepath)
             
             # Process image to get landmarks
