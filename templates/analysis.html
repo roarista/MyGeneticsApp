@@ -483,6 +483,259 @@
                     </div>
                 </div>
                 
+                <!-- Calorie Recommendations Section -->
+                {% if recommendations.calorie_recommendations %}
+                <div class="card mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-fire-alt me-2"></i>Personalized Calorie Recommendations</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card mb-3">
+                                    <div class="card-header bg-light">
+                                        <h6 class="mb-0">Daily Calories</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span>Maintenance:</span>
+                                            <span class="badge bg-secondary fs-6">{{ recommendations.calorie_recommendations.maintenance }}</span>
+                                        </div>
+                                        
+                                        {% if 'target' in recommendations.calorie_recommendations %}
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span>Target:</span>
+                                            <span class="badge bg-primary fs-6">{{ recommendations.calorie_recommendations.target }}</span>
+                                        </div>
+                                        {% endif %}
+                                        
+                                        {% if 'training_day' in recommendations.calorie_recommendations %}
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span>Training Days:</span>
+                                            <span class="badge bg-success fs-6">{{ recommendations.calorie_recommendations.training_day }}</span>
+                                        </div>
+                                        {% endif %}
+                                        
+                                        {% if 'rest_day' in recommendations.calorie_recommendations %}
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span>Rest Days:</span>
+                                            <span class="badge bg-warning fs-6">{{ recommendations.calorie_recommendations.rest_day }}</span>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header bg-light">
+                                        <h6 class="mb-0">Macronutrients (grams)</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span>Protein:</span>
+                                            <span class="badge bg-danger fs-6">{{ recommendations.calorie_recommendations.protein_g }}g</span>
+                                        </div>
+                                        
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span>Carbs:</span>
+                                            <span class="badge bg-warning fs-6">{{ recommendations.calorie_recommendations.carbs_g }}g</span>
+                                        </div>
+                                        
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span>Fat:</span>
+                                            <span class="badge bg-info fs-6">{{ recommendations.calorie_recommendations.fat_g }}g</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Detailed Workout Plan Section -->
+                {% if recommendations.workout_plan %}
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-dumbbell me-2"></i>Detailed Workout Plan</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <h6>Training Focus: <span class="badge bg-primary">{{ recommendations.workout_plan.training_focus }}</span></h6>
+                                <h6>Recommended Split: <span class="badge bg-secondary">{{ recommendations.workout_plan.split_type }}</span></h6>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Rep Ranges: <span class="badge bg-info">{{ recommendations.workout_plan.rep_ranges }}</span></h6>
+                                <h6>Rest Periods: <span class="badge bg-warning">{{ recommendations.workout_plan.rest_periods }}</span></h6>
+                            </div>
+                        </div>
+                        
+                        <!-- Specific Workout Cards -->
+                        <div class="row">
+                            {% if 'workout_a' in recommendations.workout_plan %}
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-header bg-dark">
+                                        <h6 class="mb-0">{{ recommendations.workout_plan.workout_a.name }}</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="small text-muted">{{ recommendations.workout_plan.workout_a.focus }}</p>
+                                        <ul class="list-group list-group-flush">
+                                            {% for exercise in recommendations.workout_plan.workout_a.exercises %}
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <span class="fw-bold">{{ exercise.name }}</span><br>
+                                                    <small class="text-muted">{{ exercise.target }}</small>
+                                                </div>
+                                                <span class="badge bg-primary">{{ exercise.sets }} x {{ exercise.reps }}</span>
+                                            </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if 'workout_b' in recommendations.workout_plan %}
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-header bg-dark">
+                                        <h6 class="mb-0">{{ recommendations.workout_plan.workout_b.name }}</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="small text-muted">{{ recommendations.workout_plan.workout_b.focus }}</p>
+                                        <ul class="list-group list-group-flush">
+                                            {% for exercise in recommendations.workout_plan.workout_b.exercises %}
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <span class="fw-bold">{{ exercise.name }}</span><br>
+                                                    <small class="text-muted">{{ exercise.target }}</small>
+                                                </div>
+                                                <span class="badge bg-primary">{{ exercise.sets }} x {{ exercise.reps }}</span>
+                                            </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if 'push_day' in recommendations.workout_plan %}
+                            <div class="col-md-4 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-header bg-danger">
+                                        <h6 class="mb-0 text-white">{{ recommendations.workout_plan.push_day.name }}</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="small text-muted">{{ recommendations.workout_plan.push_day.focus }}</p>
+                                        <ul class="list-group list-group-flush">
+                                            {% for exercise in recommendations.workout_plan.push_day.exercises %}
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <span class="fw-bold">{{ exercise.name }}</span><br>
+                                                    <small class="text-muted">{{ exercise.target }}</small>
+                                                </div>
+                                                <span class="badge bg-primary">{{ exercise.sets }} x {{ exercise.reps }}</span>
+                                            </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if 'pull_day' in recommendations.workout_plan %}
+                            <div class="col-md-4 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-header bg-info">
+                                        <h6 class="mb-0 text-white">{{ recommendations.workout_plan.pull_day.name }}</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="small text-muted">{{ recommendations.workout_plan.pull_day.focus }}</p>
+                                        <ul class="list-group list-group-flush">
+                                            {% for exercise in recommendations.workout_plan.pull_day.exercises %}
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <span class="fw-bold">{{ exercise.name }}</span><br>
+                                                    <small class="text-muted">{{ exercise.target }}</small>
+                                                </div>
+                                                <span class="badge bg-primary">{{ exercise.sets }} x {{ exercise.reps }}</span>
+                                            </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if 'legs_day' in recommendations.workout_plan %}
+                            <div class="col-md-4 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-header bg-success">
+                                        <h6 class="mb-0 text-white">{{ recommendations.workout_plan.legs_day.name }}</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="small text-muted">{{ recommendations.workout_plan.legs_day.focus }}</p>
+                                        <ul class="list-group list-group-flush">
+                                            {% for exercise in recommendations.workout_plan.legs_day.exercises %}
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <span class="fw-bold">{{ exercise.name }}</span><br>
+                                                    <small class="text-muted">{{ exercise.target }}</small>
+                                                </div>
+                                                <span class="badge bg-primary">{{ exercise.sets }} x {{ exercise.reps }}</span>
+                                            </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Weak Area Focus -->
+                        {% if recommendations.workout_plan.weak_area_focus %}
+                        <div class="card mt-3">
+                            <div class="card-header bg-warning">
+                                <h5 class="mb-0 text-dark"><i class="fas fa-exclamation-triangle me-2"></i>Weak Area Focus</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    {% for area, details in recommendations.workout_plan.weak_area_focus.items() %}
+                                    <div class="col-md-6 mb-3">
+                                        <div class="card">
+                                            <div class="card-header bg-light">
+                                                <h6 class="mb-0">{{ area|title }} <span class="badge bg-danger ms-2">Priority: {{ details.priority }}</span></h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <p><strong>Volume:</strong> {{ details.volume }}</p>
+                                                <p><strong>Frequency:</strong> {{ details.frequency }}</p>
+                                                <p><strong>Key Exercises:</strong></p>
+                                                <ul class="list-group">
+                                                    {% for exercise in details.key_exercises %}
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <span class="fw-bold">{{ exercise.name }}</span><br>
+                                                            <small class="text-muted">{{ exercise.target }}</small>
+                                                        </div>
+                                                        <span class="badge bg-primary">{{ exercise.sets }} x {{ exercise.reps }}</span>
+                                                    </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+                
                 <div class="text-center mt-4">
                     <a href="/" class="btn btn-primary btn-lg">
                         <i class="fas fa-arrow-left me-2"></i>Back to Home
