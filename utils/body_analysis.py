@@ -39,6 +39,9 @@ def analyze_body_traits(landmarks, height_cm=0.0, weight_kg=0.0):
         # Initialize traits dictionary
         traits = {}
         
+        # Track whether we have enough data for advanced calculations
+        has_height_weight = height_cm > 0 and weight_kg > 0
+        
         # Extract key landmark indices for readability
         # Shoulders
         LEFT_SHOULDER = 11
@@ -108,7 +111,106 @@ def analyze_body_traits(landmarks, height_cm=0.0, weight_kg=0.0):
         # 10. Calculate leg-to-torso ratio
         leg_torso_ratio = leg_length / torso_length if torso_length > 0 else 0
         
-        # Store measured values
+        # Define points for additional measures
+        NOSE = 0
+        LEFT_EYE = 1
+        RIGHT_EYE = 2
+        LEFT_EAR = 3
+        RIGHT_EAR = 4
+        LEFT_MOUTH = 9
+        RIGHT_MOUTH = 10
+        
+        # 11. Calculate waist (approximated)
+        waist_points = [landmarks[LEFT_HIP], landmarks[RIGHT_HIP]]
+        # Calculate points slightly above hips for waist approximation
+        waist_y = (landmarks[LEFT_HIP]['y'] + landmarks[RIGHT_HIP]['y']) / 2 - 0.05  # Slightly above hips
+        waist_left = {'x': landmarks[LEFT_HIP]['x'] - 0.02, 'y': waist_y, 'z': landmarks[LEFT_HIP]['z']}
+        waist_right = {'x': landmarks[RIGHT_HIP]['x'] + 0.02, 'y': waist_y, 'z': landmarks[RIGHT_HIP]['z']}
+        waist_width = calculate_distance(waist_left, waist_right)
+        
+        # 12. Calculate chest width (using shoulders)
+        chest_width = shoulder_width * 0.9  # Approximate chest width
+        
+        # 13. Calculate neck (using ears and shoulders)
+        neck_width = calculate_distance(landmarks[LEFT_EAR], landmarks[RIGHT_EAR]) * 0.7
+        
+        # 14. Calculate ankle width for frame size assessment
+        ankle_width = (calculate_distance(landmarks[LEFT_ANKLE], {'x': landmarks[LEFT_ANKLE]['x'] + 0.02, 
+                                        'y': landmarks[LEFT_ANKLE]['y'], 
+                                        'z': landmarks[LEFT_ANKLE]['z']}) +
+                      calculate_distance(landmarks[RIGHT_ANKLE], {'x': landmarks[RIGHT_ANKLE]['x'] - 0.02, 
+                                         'y': landmarks[RIGHT_ANKLE]['y'], 
+                                         'z': landmarks[RIGHT_ANKLE]['z']})) / 2
+        
+        # 15. Calculate wrist width for frame size assessment
+        wrist_width = (calculate_distance(landmarks[LEFT_WRIST], {'x': landmarks[LEFT_WRIST]['x'] + 0.02, 
+                                         'y': landmarks[LEFT_WRIST]['y'], 
+                                         'z': landmarks[LEFT_WRIST]['z']}) +
+                      calculate_distance(landmarks[RIGHT_WRIST], {'x': landmarks[RIGHT_WRIST]['x'] - 0.02, 
+                                        'y': landmarks[RIGHT_WRIST]['y'], 
+                                        'z': landmarks[RIGHT_WRIST]['z']})) / 2
+        
+        # Advanced calculations using height and weight if available
+        if has_height_weight:
+            # 16. Calculate BMI
+            bmi = weight_kg / ((height_cm / 100) ** 2)
+            
+            # 17. Estimate body fat percentage using the BMI method
+            # Different formulas for biological males vs females, using a neutral approach
+            body_fat_bmi = (1.39 * bmi) + (0.16 * 30) - 19.34  # Average adult formula
+            
+            # 18. Estimate body fat using waist-to-height ratio
+            waist_to_height = waist_width / height_cm
+            body_fat_wth = (waist_to_height * 100) - 10  # Simple approximation
+            
+            # 19. Average the two body fat estimates for a more balanced result
+            body_fat_percentage = (body_fat_bmi + body_fat_wth) / 2
+            
+            # 20. Estimate lean body mass
+            lean_body_mass = weight_kg * (1 - (body_fat_percentage / 100))
+            
+            # 21. Estimate frame size based on wrist circumference and height
+            wrist_height_ratio = wrist_width / height_cm
+            
+            # 22. Calculate ideal weight range based on frame size
+            lower_ideal_weight = (height_cm - 100) - ((height_cm - 150) / 4)
+            upper_ideal_weight = lower_ideal_weight + (lower_ideal_weight * 0.1)
+            
+            # 23. Calculate muscle potential (based on frame size, height, and genetic factors)
+            muscle_potential = ((shoulder_width * wrist_width * ankle_width) / height_cm) * 50
+            
+            # Add the advanced metrics to traits
+            traits['bmi'] = {
+                'value': round(bmi, 1),
+                'rating': classify_bmi(bmi)
+            }
+            
+            traits['body_fat_percentage'] = {
+                'value': round(body_fat_percentage, 1),
+                'rating': classify_body_fat(body_fat_percentage)
+            }
+            
+            traits['lean_body_mass'] = {
+                'value': round(lean_body_mass, 1),
+                'rating': 'informational'  # This is just informational, no classification
+            }
+            
+            traits['frame_size'] = {
+                'value': classify_frame_size(wrist_height_ratio),
+                'rating': 'informational'  # Categorical value
+            }
+            
+            traits['ideal_weight_range'] = {
+                'value': f"{round(lower_ideal_weight, 1)} - {round(upper_ideal_weight, 1)} kg",
+                'rating': 'informational'  # This is just informational
+            }
+            
+            traits['muscle_potential'] = {
+                'value': round(muscle_potential, 1),
+                'rating': classify_muscle_potential(muscle_potential)
+            }
+        
+        # Store the basic measured values
         traits['shoulder_width'] = {
             'value': shoulder_width,
             'rating': classify_shoulder_width(shoulder_width, height_cm)
@@ -137,6 +239,12 @@ def analyze_body_traits(landmarks, height_cm=0.0, weight_kg=0.0):
         traits['torso_length'] = {
             'value': torso_length,
             'rating': classify_torso_length(torso_length, height_cm)
+        }
+        
+        # Add waist-to-hip ratio, important for fitness assessment
+        traits['waist_hip_ratio'] = {
+            'value': round(waist_width / hip_width, 2) if hip_width > 0 else 0,
+            'rating': classify_waist_hip_ratio(waist_width / hip_width if hip_width > 0 else 0)
         }
         
         # Determine body type based on proportions
@@ -294,6 +402,62 @@ def determine_body_type(shoulder_hip_ratio, arm_torso_ratio, leg_torso_ratio):
         return "Ectomorph"  # Long, lean build
     else:
         return "Hybrid"  # Mix of body types
+
+def classify_bmi(bmi):
+    """Classify BMI according to standard categories"""
+    if bmi < 18.5:
+        return 'below_average'  # Underweight
+    elif bmi < 25:
+        return 'excellent'  # Normal weight
+    elif bmi < 30:
+        return 'average'  # Overweight
+    else:
+        return 'below_average'  # Obese
+
+def classify_body_fat(percentage):
+    """Classify body fat percentage"""
+    # Using a general scale that works for most adults
+    if percentage < 8:
+        return 'below_average'  # Too low
+    elif percentage < 15:
+        return 'excellent'  # Athletic
+    elif percentage < 20:
+        return 'good'  # Fit
+    elif percentage < 25:
+        return 'average'  # Acceptable
+    else:
+        return 'below_average'  # High
+
+def classify_frame_size(wrist_height_ratio):
+    """Classify frame size based on wrist-to-height ratio"""
+    if wrist_height_ratio < 0.1:
+        return 'Small'
+    elif wrist_height_ratio < 0.11:
+        return 'Medium'
+    else:
+        return 'Large'
+
+def classify_muscle_potential(potential):
+    """Classify muscle building potential"""
+    if potential > 80:
+        return 'excellent'
+    elif potential > 60:
+        return 'good'
+    elif potential > 40:
+        return 'average'
+    else:
+        return 'below_average'
+
+def classify_waist_hip_ratio(ratio):
+    """Classify waist-to-hip ratio"""
+    if ratio < 0.85:
+        return 'excellent'  # Very good ratio
+    elif ratio < 0.9:
+        return 'good'
+    elif ratio < 0.95:
+        return 'average'
+    else:
+        return 'below_average'  # Higher health risk
 
 def get_trait_descriptions(body_type):
     """Get detailed descriptions of what body type means for fitness"""

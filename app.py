@@ -171,33 +171,72 @@ def get_traits_data(analysis_id):
         'excellent': 'rgba(40, 167, 69, 0.7)',  # green
         'good': 'rgba(23, 162, 184, 0.7)',      # blue
         'average': 'rgba(255, 193, 7, 0.7)',    # yellow
-        'below_average': 'rgba(220, 53, 69, 0.7)'  # red
+        'below_average': 'rgba(220, 53, 69, 0.7)',  # red
+        'informational': 'rgba(108, 117, 125, 0.7)'  # gray
     }
     
-    for trait, value in result['traits'].items():
-        # Skip non-numeric traits
-        if trait in ['body_type', 'description']:
-            continue
+    # Define traits for the main radar chart (genetic structure)
+    primary_traits = [
+        'shoulder_width', 'shoulder_hip_ratio', 'arm_length', 
+        'leg_length', 'arm_torso_ratio', 'torso_length', 'waist_hip_ratio'
+    ]
+    
+    # Define body composition traits for the optional second chart
+    body_comp_traits = [
+        'bmi', 'body_fat_percentage', 'muscle_potential'
+    ]
+    
+    # First, add the primary genetic structure traits
+    for trait in primary_traits:
+        if trait in result['traits'] and isinstance(result['traits'][trait], dict) and 'rating' in result['traits'][trait]:
+            # Format trait name for display
+            display_name = ' '.join(word.capitalize() for word in trait.split('_'))
+            chart_data['labels'].append(display_name)
             
-        # Format trait name for display
-        display_name = ' '.join(word.capitalize() for word in trait.split('_'))
-        chart_data['labels'].append(display_name)
-        
-        # Determine numerical value and color
-        if isinstance(value, dict) and 'rating' in value:
+            # Determine numerical value and color
+            trait_data = result['traits'][trait]
             numeric_value = {
                 'excellent': 90,
                 'good': 75,
                 'average': 50,
-                'below_average': 25
-            }.get(value['rating'], 50)
+                'below_average': 25,
+                'informational': 50  # default for informational ratings
+            }.get(trait_data['rating'], 50)
             
             chart_data['values'].append(numeric_value)
-            chart_data['colors'].append(color_map.get(value['rating'], 'rgba(108, 117, 125, 0.7)'))
-        else:
-            # For direct numerical values
-            chart_data['values'].append(value)
-            chart_data['colors'].append('rgba(23, 162, 184, 0.7)')
+            chart_data['colors'].append(color_map.get(trait_data['rating'], 'rgba(108, 117, 125, 0.7)'))
+    
+    # Then, add body composition metrics if they exist
+    for trait in body_comp_traits:
+        if trait in result['traits'] and isinstance(result['traits'][trait], dict) and 'rating' in result['traits'][trait]:
+            # Format trait name for display
+            if trait == 'bmi':
+                display_name = 'BMI'
+            elif trait == 'body_fat_percentage':
+                display_name = 'Body Fat %'
+            elif trait == 'muscle_potential':
+                display_name = 'Muscle Potential'
+            else:
+                display_name = ' '.join(word.capitalize() for word in trait.split('_'))
+            
+            chart_data['labels'].append(display_name)
+            
+            # Determine numerical value and color
+            trait_data = result['traits'][trait]
+            if trait_data['rating'] != 'informational':
+                numeric_value = {
+                    'excellent': 90,
+                    'good': 75,
+                    'average': 50,
+                    'below_average': 25
+                }.get(trait_data['rating'], 50)
+                
+                chart_data['values'].append(numeric_value)
+                chart_data['colors'].append(color_map.get(trait_data['rating'], 'rgba(108, 117, 125, 0.7)'))
+            else:
+                # For informational values, use a neutral value
+                chart_data['values'].append(50)
+                chart_data['colors'].append('rgba(108, 117, 125, 0.7)')
     
     return jsonify(chart_data)
 

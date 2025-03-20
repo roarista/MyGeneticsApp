@@ -62,6 +62,58 @@ def generate_recommendations(traits, experience_level='beginner'):
         # Generate nutrition tips
         recommendations['nutrition_tips'] = get_nutrition_tips(body_type)
         
+        # Add body composition-specific recommendations if available
+        if 'body_fat_percentage' in traits and isinstance(traits['body_fat_percentage'], dict):
+            body_fat = traits['body_fat_percentage']['value']
+            body_fat_rating = traits['body_fat_percentage']['rating']
+            
+            # Add body fat specific recommendations
+            if body_fat_rating == 'excellent':
+                recommendations['strengths'].append(f"Body fat percentage of {body_fat}% is ideal for muscle definition and performance")
+            elif body_fat_rating == 'good':
+                recommendations['strengths'].append(f"Body fat percentage of {body_fat}% is good for overall health and aesthetics")
+            elif body_fat_rating == 'average':
+                recommendations['focus_areas'].append(f"Consider a slight caloric deficit to reduce body fat percentage from {body_fat}%")
+            elif body_fat_rating == 'below_average':
+                if body_fat < 10:  # Too low
+                    recommendations['focus_areas'].append(f"Body fat at {body_fat}% may be too low; consider increasing calories for health")
+                else:  # Too high
+                    recommendations['focus_areas'].append(f"Focus on reducing body fat from {body_fat}% through diet and cardio")
+        
+        # Add BMI recommendations if available
+        if 'bmi' in traits and isinstance(traits['bmi'], dict):
+            bmi = traits['bmi']['value']
+            bmi_rating = traits['bmi']['rating']
+            
+            if bmi_rating == 'excellent':
+                recommendations['strengths'].append(f"BMI of {bmi} is in the optimal range for health and performance")
+            elif bmi_rating == 'below_average' and bmi < 18.5:
+                recommendations['focus_areas'].append(f"BMI of {bmi} is underweight; focus on increasing caloric intake and muscle building")
+            elif bmi_rating == 'below_average' and bmi > 30:
+                recommendations['focus_areas'].append(f"BMI of {bmi} indicates higher body fat; prioritize fat loss for health improvement")
+        
+        # Add muscle potential recommendations if available
+        if 'muscle_potential' in traits and isinstance(traits['muscle_potential'], dict):
+            potential = traits['muscle_potential']['value']
+            potential_rating = traits['muscle_potential']['rating']
+            
+            if potential_rating in ['excellent', 'good']:
+                recommendations['strengths'].append(f"High genetic potential for muscle gain; focus on progressive overload")
+            elif potential_rating in ['average', 'below_average']:
+                recommendations['focus_areas'].append(f"Focus on technique optimization to maximize your genetic muscle building potential")
+        
+        # Add body composition-specific nutrition tips
+        if 'body_fat_percentage' in traits and 'bmi' in traits:
+            body_fat = traits['body_fat_percentage']['value']
+            bmi = traits['bmi']['value']
+            
+            if body_fat > 20 and bmi > 25:
+                recommendations['nutrition_tips'].append("Focus on a moderate caloric deficit of 300-500 calories per day for sustainable fat loss")
+                recommendations['nutrition_tips'].append("Prioritize protein intake (1.6-2.0g per kg of body weight) to preserve muscle during fat loss")
+            elif body_fat < 12 and bmi < 22:
+                recommendations['nutrition_tips'].append("Maintain a caloric surplus of 300-500 calories per day to support muscle growth")
+                recommendations['nutrition_tips'].append("Increase carbohydrate intake around workouts to fuel performance and recovery")
+        
         return recommendations
         
     except Exception as e:

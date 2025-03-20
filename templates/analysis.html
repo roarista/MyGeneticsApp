@@ -91,21 +91,35 @@
                     <canvas id="traitsChart" width="400" height="250"></canvas>
                 </div>
                 
-                <div class="table-responsive">
+                <!-- Primary Genetic Traits Table -->
+                <h5 class="mb-3">Genetic Structure Traits</h5>
+                <div class="table-responsive mb-4">
                     <table class="table table-hover">
                         <thead>
                             <tr>
                                 <th>Trait</th>
+                                <th>Value</th>
                                 <th>Rating</th>
                                 <th>Training Impact</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for trait, data in traits.items() %}
-                                {% if trait not in ['body_type', 'description'] and data is mapping %}
+                                {% if trait in ['shoulder_width', 'shoulder_hip_ratio', 'arm_length', 'leg_length', 'arm_torso_ratio', 'torso_length', 'waist_hip_ratio'] and data is mapping %}
                                     <tr>
                                         <td>
                                             {{ ' '.join(trait.split('_')).title() }}
+                                        </td>
+                                        <td>
+                                            {% if 'value' in data %}
+                                                {% if trait in ['shoulder_hip_ratio', 'waist_hip_ratio'] %}
+                                                    {{ "%.2f"|format(data.value) }}
+                                                {% elif trait in ['shoulder_width', 'arm_length', 'leg_length', 'torso_length'] %}
+                                                    {{ "%.1f"|format(data.value) }} units
+                                                {% else %}
+                                                    {{ data.value }}
+                                                {% endif %}
+                                            {% endif %}
                                         </td>
                                         <td>
                                             {% if data.rating == 'excellent' %}
@@ -116,6 +130,8 @@
                                                 <span class="badge bg-warning">Average</span>
                                             {% elif data.rating == 'below_average' %}
                                                 <span class="badge bg-danger">Below Average</span>
+                                            {% elif data.rating == 'informational' %}
+                                                <span class="badge bg-secondary">Info</span>
                                             {% endif %}
                                         </td>
                                         <td>
@@ -131,6 +147,8 @@
                                                 Influences deadlift mechanics and reach
                                             {% elif trait == 'torso_length' %}
                                                 Affects core stability and exercise selection
+                                            {% elif trait == 'waist_hip_ratio' %}
+                                                Impacts core strength and metabolic health
                                             {% endif %}
                                         </td>
                                     </tr>
@@ -139,6 +157,114 @@
                         </tbody>
                     </table>
                 </div>
+                
+                <!-- Advanced Body Composition Metrics -->
+                {% if 'bmi' in traits or 'body_fat_percentage' in traits or 'lean_body_mass' in traits %}
+                <h5 class="mb-3">Body Composition Metrics</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Metric</th>
+                                <th>Value</th>
+                                <th>Rating</th>
+                                <th>Training Impact</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if 'bmi' in traits %}
+                            <tr>
+                                <td>Body Mass Index (BMI)</td>
+                                <td>{{ traits.bmi.value }}</td>
+                                <td>
+                                    {% if traits.bmi.rating == 'excellent' %}
+                                        <span class="badge bg-success">Excellent</span>
+                                    {% elif traits.bmi.rating == 'good' %}
+                                        <span class="badge bg-info">Good</span>
+                                    {% elif traits.bmi.rating == 'average' %}
+                                        <span class="badge bg-warning">Average</span>
+                                    {% elif traits.bmi.rating == 'below_average' %}
+                                        <span class="badge bg-danger">Below Average</span>
+                                    {% endif %}
+                                </td>
+                                <td>Basic health indicator; may impact training approach</td>
+                            </tr>
+                            {% endif %}
+                            
+                            {% if 'body_fat_percentage' in traits %}
+                            <tr>
+                                <td>Body Fat Percentage</td>
+                                <td>{{ traits.body_fat_percentage.value }}%</td>
+                                <td>
+                                    {% if traits.body_fat_percentage.rating == 'excellent' %}
+                                        <span class="badge bg-success">Excellent</span>
+                                    {% elif traits.body_fat_percentage.rating == 'good' %}
+                                        <span class="badge bg-info">Good</span>
+                                    {% elif traits.body_fat_percentage.rating == 'average' %}
+                                        <span class="badge bg-warning">Average</span>
+                                    {% elif traits.body_fat_percentage.rating == 'below_average' %}
+                                        <span class="badge bg-danger">Below Average</span>
+                                    {% endif %}
+                                </td>
+                                <td>Affects metabolic rate, recovery, and nutrition needs</td>
+                            </tr>
+                            {% endif %}
+                            
+                            {% if 'lean_body_mass' in traits %}
+                            <tr>
+                                <td>Lean Body Mass</td>
+                                <td>{{ traits.lean_body_mass.value }} kg</td>
+                                <td>
+                                    <span class="badge bg-secondary">Info</span>
+                                </td>
+                                <td>Total non-fat tissue; affects calorie and protein needs</td>
+                            </tr>
+                            {% endif %}
+                            
+                            {% if 'frame_size' in traits %}
+                            <tr>
+                                <td>Frame Size</td>
+                                <td>{{ traits.frame_size.value }}</td>
+                                <td>
+                                    <span class="badge bg-secondary">Info</span>
+                                </td>
+                                <td>Bone structure influences muscle building potential</td>
+                            </tr>
+                            {% endif %}
+                            
+                            {% if 'muscle_potential' in traits %}
+                            <tr>
+                                <td>Muscle Building Potential</td>
+                                <td>{{ traits.muscle_potential.value }}</td>
+                                <td>
+                                    {% if traits.muscle_potential.rating == 'excellent' %}
+                                        <span class="badge bg-success">Excellent</span>
+                                    {% elif traits.muscle_potential.rating == 'good' %}
+                                        <span class="badge bg-info">Good</span>
+                                    {% elif traits.muscle_potential.rating == 'average' %}
+                                        <span class="badge bg-warning">Average</span>
+                                    {% elif traits.muscle_potential.rating == 'below_average' %}
+                                        <span class="badge bg-danger">Below Average</span>
+                                    {% endif %}
+                                </td>
+                                <td>Genetic capacity for muscle growth and strength</td>
+                            </tr>
+                            {% endif %}
+                            
+                            {% if 'ideal_weight_range' in traits %}
+                            <tr>
+                                <td>Ideal Weight Range</td>
+                                <td>{{ traits.ideal_weight_range.value }}</td>
+                                <td>
+                                    <span class="badge bg-secondary">Info</span>
+                                </td>
+                                <td>Healthy weight range based on frame and height</td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
