@@ -376,36 +376,39 @@ def get_training_split(body_type, experience_level):
         }
 
 def get_default_training_split(experience_level):
-    """Get default training split based on experience level"""
+    """Get default training split based on experience level - Always Push/Pull/Legs"""
     if experience_level == 'beginner':
-        return {
-            'Monday': 'Full Body',
-            'Tuesday': 'Rest/Light Cardio',
-            'Wednesday': 'Full Body',
-            'Thursday': 'Rest/Light Cardio',
-            'Friday': 'Full Body',
-            'Saturday': 'Active Recovery',
-            'Sunday': 'Rest'
-        }
-    elif experience_level == 'intermediate':
-        return {
-            'Monday': 'Upper Body',
-            'Tuesday': 'Lower Body',
-            'Wednesday': 'Rest/Light Activity',
-            'Thursday': 'Upper Body',
-            'Friday': 'Lower Body',
-            'Saturday': 'Active Recovery',
-            'Sunday': 'Rest'
-        }
-    else:  # advanced
+        # For beginners, use a simplified Push/Pull/Legs with fewer days
         return {
             'Monday': 'Push (Chest, Shoulders, Triceps)',
             'Tuesday': 'Pull (Back, Biceps)',
-            'Wednesday': 'Legs',
-            'Thursday': 'Rest',
+            'Wednesday': 'Legs (Quads, Hamstrings, Calves)',
+            'Thursday': 'Rest/Light Cardio',
             'Friday': 'Push (Chest, Shoulders, Triceps)',
             'Saturday': 'Pull (Back, Biceps)',
-            'Sunday': 'Legs'
+            'Sunday': 'Rest'
+        }
+    elif experience_level == 'intermediate':
+        # Standard Push/Pull/Legs for intermediate lifters
+        return {
+            'Monday': 'Push (Chest, Shoulders, Triceps)',
+            'Tuesday': 'Pull (Back, Biceps)',
+            'Wednesday': 'Legs (Quads, Hamstrings, Calves)',
+            'Thursday': 'Rest/Light Cardio',
+            'Friday': 'Push (Chest, Shoulders, Triceps)',
+            'Saturday': 'Pull (Back, Biceps)',
+            'Sunday': 'Legs (Quads, Hamstrings, Calves)'
+        }
+    else:  # advanced
+        # More intense Push/Pull/Legs with specialization for advanced lifters
+        return {
+            'Monday': 'Push (Chest, Shoulders, Triceps) - Strength',
+            'Tuesday': 'Pull (Back, Biceps) - Strength',
+            'Wednesday': 'Legs (Quads, Hamstrings, Calves) - Strength',
+            'Thursday': 'Rest',
+            'Friday': 'Push (Chest, Shoulders, Triceps) - Hypertrophy',
+            'Saturday': 'Pull (Back, Biceps) - Hypertrophy',
+            'Sunday': 'Legs (Quads, Hamstrings, Calves) - Hypertrophy'
         }
 
 def get_nutrition_tips(body_type):
@@ -519,19 +522,58 @@ def generate_detailed_workout_plan(body_type, experience_level, traits, goal):
         rest_time = '60-90 seconds'
         workout_structure = 'balanced approach with varied intensity'
     
-    # Identify weak areas from traits
+    # Identify weak areas from traits and create a more detailed weakness dictionary
     weak_areas = []
+    weakness_details = {}
+    
     for trait, data in traits.items():
         if not isinstance(data, dict):
             continue
             
-        if data.get('rating') == 'below_average':
+        rating = data.get('rating')
+        if rating == 'below_average' or rating == 'poor':
             if 'shoulder' in trait:
                 weak_areas.append('shoulders')
+                weakness_details['shoulders'] = {
+                    'severity': 2 if rating == 'poor' else 1,
+                    'trait': trait,
+                    'description': data.get('description', 'Underdeveloped shoulder area')
+                }
             elif 'arm' in trait:
                 weak_areas.append('arms')
+                weakness_details['arms'] = {
+                    'severity': 2 if rating == 'poor' else 1,
+                    'trait': trait,
+                    'description': data.get('description', 'Underdeveloped arm area')
+                }
             elif 'leg' in trait:
                 weak_areas.append('legs')
+                weakness_details['legs'] = {
+                    'severity': 2 if rating == 'poor' else 1,
+                    'trait': trait,
+                    'description': data.get('description', 'Underdeveloped leg area')
+                }
+            elif 'torso' in trait or 'chest' in trait:
+                weak_areas.append('chest')
+                weakness_details['chest'] = {
+                    'severity': 2 if rating == 'poor' else 1,
+                    'trait': trait,
+                    'description': data.get('description', 'Underdeveloped chest/torso area')
+                }
+            elif 'back' in trait:
+                weak_areas.append('back')
+                weakness_details['back'] = {
+                    'severity': 2 if rating == 'poor' else 1,
+                    'trait': trait,
+                    'description': data.get('description', 'Underdeveloped back area')
+                }
+            elif 'core' in trait or 'waist' in trait:
+                weak_areas.append('core')
+                weakness_details['core'] = {
+                    'severity': 2 if rating == 'poor' else 1,
+                    'trait': trait,
+                    'description': data.get('description', 'Underdeveloped core area')
+                }
                 
     # Create specific training focus based on body type
     if body_type == "Ectomorph":
@@ -567,30 +609,61 @@ def generate_detailed_workout_plan(body_type, experience_level, traits, goal):
     
     # Create the split based on experience level
     if experience_level == "beginner":
-        # Create full body workouts for beginners
-        workout_plan['split_type'] = "Full Body"
-        workout_plan['workout_a'] = {
-            'name': 'Full Body A',
-            'focus': 'Overall development with emphasis on form',
+        # Create Push/Pull/Legs for beginners but with simplified exercises and form focus
+        workout_plan['split_type'] = "Push/Pull/Legs for Beginners"
+        
+        # Push day for beginners
+        workout_plan['push_day'] = {
+            'name': 'Push (Chest, Shoulders, Triceps)',
+            'focus': 'Upper body pushing muscles with emphasis on form',
             'exercises': [
-                base_exercises['chest'][0],  # Bench Press
-                base_exercises['back'][0],   # Pull-ups/Lat Pulldowns
-                base_exercises['legs'][0],   # Squats
-                base_exercises['shoulders'][1],  # Lateral Raises
-                base_exercises['arms'][0],   # Barbell Curls
-                base_exercises['core'][0]    # Planks
+                {'name': 'Push-ups', 'target': 'chest and triceps', 'sets': 3, 'reps': '8-12'},
+                {'name': 'Dumbbell Bench Press', 'target': 'chest and stability', 'sets': 3, 'reps': '8-10'},
+                {'name': 'Seated Dumbbell Shoulder Press', 'target': 'shoulders', 'sets': 3, 'reps': '8-10'},
+                {'name': 'Lateral Raises', 'target': 'side deltoids', 'sets': 2, 'reps': '10-12'},
+                {'name': 'Tricep Dumbbell Extensions', 'target': 'triceps', 'sets': 2, 'reps': '10-12'}
+            ],
+            'beginner_tips': [
+                'Focus on proper form rather than weight',
+                'Ensure full range of motion on all exercises',
+                'Rest 90-120 seconds between sets'
             ]
         }
-        workout_plan['workout_b'] = {
-            'name': 'Full Body B',
-            'focus': 'Alternative movement patterns',
+        
+        # Pull day for beginners
+        workout_plan['pull_day'] = {
+            'name': 'Pull (Back, Biceps)',
+            'focus': 'Upper body pulling muscles with emphasis on mind-muscle connection',
             'exercises': [
-                base_exercises['chest'][1],  # Incline Dumbbell Press
-                base_exercises['back'][1],   # Bent-over Rows
-                base_exercises['legs'][1],   # Romanian Deadlifts
-                base_exercises['shoulders'][0],  # Overhead Press
-                base_exercises['arms'][1],   # Tricep Dips
-                base_exercises['core'][2]    # Hanging Leg Raises
+                {'name': 'Assisted Pull-ups or Lat Pulldowns', 'target': 'back width', 'sets': 3, 'reps': '8-10'},
+                {'name': 'Seated Cable Rows', 'target': 'back thickness', 'sets': 3, 'reps': '10-12'},
+                {'name': 'Single-Arm Dumbbell Rows', 'target': 'lats and mid-back', 'sets': 3, 'reps': '10-12 per arm'},
+                {'name': 'Face Pulls', 'target': 'rear deltoids and posture', 'sets': 2, 'reps': '12-15'},
+                {'name': 'Dumbbell Bicep Curls', 'target': 'biceps', 'sets': 2, 'reps': '10-12'}
+            ],
+            'beginner_tips': [
+                'Focus on squeezing your back muscles, not just pulling with arms',
+                'Keep your shoulders down and back',
+                'Avoid momentum and swinging'
+            ]
+        }
+        
+        # Legs day for beginners
+        workout_plan['legs_day'] = {
+            'name': 'Legs (Quads, Hamstrings, Calves)',
+            'focus': 'Lower body development with focus on balance and stability',
+            'exercises': [
+                {'name': 'Goblet Squats', 'target': 'quads and core stability', 'sets': 3, 'reps': '10-12'},
+                {'name': 'Dumbbell Romanian Deadlifts', 'target': 'hamstrings and glutes', 'sets': 3, 'reps': '10-12'},
+                {'name': 'Walking Lunges', 'target': 'quads, glutes, and balance', 'sets': 2, 'reps': '10 steps each leg'},
+                {'name': 'Leg Press (Light Weight)', 'target': 'overall leg development', 'sets': 3, 'reps': '12-15'},
+                {'name': 'Standing Calf Raises', 'target': 'calves', 'sets': 3, 'reps': '15-20'},
+                {'name': 'Planks', 'target': 'core stability', 'sets': 3, 'reps': '30-45 seconds'}
+            ],
+            'beginner_tips': [
+                'Start with bodyweight or light weight to master form',
+                'Focus on control during both concentric and eccentric phases',
+                'Keep your knees in line with your toes during squats and lunges'
             ]
         }
         
