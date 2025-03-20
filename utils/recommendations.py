@@ -23,7 +23,9 @@ def generate_recommendations(traits, experience_level='beginner'):
             'focus_areas': [],
             'exercise_recommendations': [],
             'training_split': {},
-            'nutrition_tips': []
+            'nutrition_tips': [],
+            'calorie_recommendations': {},
+            'workout_plan': {}
         }
         
         # Add strengths based on traits
@@ -62,7 +64,21 @@ def generate_recommendations(traits, experience_level='beginner'):
         # Generate nutrition tips
         recommendations['nutrition_tips'] = get_nutrition_tips(body_type)
         
-        # Add body composition-specific recommendations if available
+        # Determine appropriate goal based on body composition
+        goal = 'maintain'  # Default goal
+        activity_level = 'moderate'  # Default activity level
+        
+        # Extract height, weight and body fat if available
+        height_cm = 0
+        weight_kg = 0
+        body_fat = 0
+        
+        if 'height_cm' in traits:
+            height_cm = traits['height_cm']
+        
+        if 'weight_kg' in traits:
+            weight_kg = traits['weight_kg']
+        
         if 'body_fat_percentage' in traits and isinstance(traits['body_fat_percentage'], dict):
             body_fat = traits['body_fat_percentage']['value']
             body_fat_rating = traits['body_fat_percentage']['rating']
@@ -74,11 +90,14 @@ def generate_recommendations(traits, experience_level='beginner'):
                 recommendations['strengths'].append(f"Body fat percentage of {body_fat}% is good for overall health and aesthetics")
             elif body_fat_rating == 'average':
                 recommendations['focus_areas'].append(f"Consider a slight caloric deficit to reduce body fat percentage from {body_fat}%")
+                goal = 'lose_fat'  # Set goal based on body fat
             elif body_fat_rating == 'below_average':
                 if body_fat < 10:  # Too low
                     recommendations['focus_areas'].append(f"Body fat at {body_fat}% may be too low; consider increasing calories for health")
+                    goal = 'gain_muscle'
                 else:  # Too high
                     recommendations['focus_areas'].append(f"Focus on reducing body fat from {body_fat}% through diet and cardio")
+                    goal = 'lose_fat'
         
         # Add BMI recommendations if available
         if 'bmi' in traits and isinstance(traits['bmi'], dict):
@@ -89,8 +108,10 @@ def generate_recommendations(traits, experience_level='beginner'):
                 recommendations['strengths'].append(f"BMI of {bmi} is in the optimal range for health and performance")
             elif bmi_rating == 'below_average' and bmi < 18.5:
                 recommendations['focus_areas'].append(f"BMI of {bmi} is underweight; focus on increasing caloric intake and muscle building")
+                goal = 'gain_muscle'
             elif bmi_rating == 'below_average' and bmi > 30:
                 recommendations['focus_areas'].append(f"BMI of {bmi} indicates higher body fat; prioritize fat loss for health improvement")
+                goal = 'lose_fat'
         
         # Add muscle potential recommendations if available
         if 'muscle_potential' in traits and isinstance(traits['muscle_potential'], dict):
@@ -102,17 +123,51 @@ def generate_recommendations(traits, experience_level='beginner'):
             elif potential_rating in ['average', 'below_average']:
                 recommendations['focus_areas'].append(f"Focus on technique optimization to maximize your genetic muscle building potential")
         
-        # Add body composition-specific nutrition tips
-        if 'body_fat_percentage' in traits and 'bmi' in traits:
-            body_fat = traits['body_fat_percentage']['value']
-            bmi = traits['bmi']['value']
+        # Generate specific workout plans based on body traits and identified weaknesses
+        recommendations['workout_plan'] = generate_detailed_workout_plan(
+            body_type,
+            experience_level,
+            traits,
+            goal
+        )
+        
+        # Calculate calorie recommendations if we have the required metrics
+        if height_cm > 0 and weight_kg > 0 and body_fat > 0:
+            # Based on training frequency, estimate activity level
+            if experience_level == 'beginner':
+                activity_level = 'light'
+            elif experience_level == 'intermediate':
+                activity_level = 'moderate'
+            else:
+                activity_level = 'very_active'
+                
+            # Calculate calorie recommendations
+            recommendations['calorie_recommendations'] = calculate_calorie_recommendations(
+                weight_kg,
+                height_cm,
+                body_fat,
+                activity_level,
+                goal
+            )
             
-            if body_fat > 20 and bmi > 25:
-                recommendations['nutrition_tips'].append("Focus on a moderate caloric deficit of 300-500 calories per day for sustainable fat loss")
-                recommendations['nutrition_tips'].append("Prioritize protein intake (1.6-2.0g per kg of body weight) to preserve muscle during fat loss")
-            elif body_fat < 12 and bmi < 22:
-                recommendations['nutrition_tips'].append("Maintain a caloric surplus of 300-500 calories per day to support muscle growth")
-                recommendations['nutrition_tips'].append("Increase carbohydrate intake around workouts to fuel performance and recovery")
+            # Add specific nutrition advice based on calorie calculations
+            if goal == 'lose_fat':
+                calories = recommendations['calorie_recommendations']['target']
+                protein = recommendations['calorie_recommendations']['protein_g']
+                recommendations['nutrition_tips'].append(f"Aim for {calories} calories per day with at least {protein}g of protein to preserve muscle")
+                recommendations['nutrition_tips'].append("Focus on high-volume, low-calorie foods like vegetables and lean proteins to stay full")
+            elif goal == 'gain_muscle':
+                calories = recommendations['calorie_recommendations']['target']
+                protein = recommendations['calorie_recommendations']['protein_g']
+                carbs = recommendations['calorie_recommendations']['carbs_g']
+                recommendations['nutrition_tips'].append(f"Consume {calories} calories daily with {protein}g protein and {carbs}g carbs to support growth")
+                recommendations['nutrition_tips'].append("Prioritize post-workout nutrition with protein and fast-digesting carbs")
+            elif goal == 'recomp':
+                train_cals = recommendations['calorie_recommendations']['training_day']
+                rest_cals = recommendations['calorie_recommendations']['rest_day']
+                protein = recommendations['calorie_recommendations']['protein_g']
+                recommendations['nutrition_tips'].append(f"Training days: {train_cals} calories; Rest days: {rest_cals} calories; Protein: {protein}g daily")
+                recommendations['nutrition_tips'].append("Time your carbohydrate intake around training for optimal performance and recovery")
         
         return recommendations
         
@@ -422,3 +477,378 @@ def get_nutrition_tips(body_type):
     
     tips = general_tips + specific_tips.get(body_type, specific_tips["Hybrid"])
     return tips
+    
+def generate_detailed_workout_plan(body_type, experience_level, traits, goal):
+    """
+    Generate detailed workout plans with specific exercises based on 
+    body type, experience, traits, and goals
+    
+    Args:
+        body_type: Body type classification
+        experience_level: User's fitness experience level
+        traits: Dictionary of body traits from analysis
+        goal: Training goal (lose_fat, gain_muscle, maintain, recomp)
+        
+    Returns:
+        Dictionary with detailed workout plan
+    """
+    workout_plan = {}
+    
+    # Base exercises for each body part
+    base_exercises = {
+        'chest': [
+            {'name': 'Bench Press', 'target': 'overall chest development', 'sets': 3, 'reps': '8-10'},
+            {'name': 'Incline Dumbbell Press', 'target': 'upper chest', 'sets': 3, 'reps': '8-10'},
+            {'name': 'Chest Flyes', 'target': 'chest stretching and isolation', 'sets': 3, 'reps': '10-12'},
+            {'name': 'Push-ups', 'target': 'overall chest and core stability', 'sets': 3, 'reps': '10-15'}
+        ],
+        'back': [
+            {'name': 'Pull-ups/Lat Pulldowns', 'target': 'latissimus dorsi', 'sets': 3, 'reps': '8-10'},
+            {'name': 'Bent-over Rows', 'target': 'middle back', 'sets': 3, 'reps': '8-10'},
+            {'name': 'Seated Cable Rows', 'target': 'overall back development', 'sets': 3, 'reps': '10-12'},
+            {'name': 'Face Pulls', 'target': 'rear deltoids and upper back', 'sets': 3, 'reps': '12-15'}
+        ],
+        'shoulders': [
+            {'name': 'Overhead Press', 'target': 'overall shoulder development', 'sets': 3, 'reps': '8-10'},
+            {'name': 'Lateral Raises', 'target': 'lateral deltoids', 'sets': 3, 'reps': '10-15'},
+            {'name': 'Front Raises', 'target': 'anterior deltoids', 'sets': 3, 'reps': '10-12'},
+            {'name': 'Reverse Flyes', 'target': 'posterior deltoids', 'sets': 3, 'reps': '10-15'}
+        ],
+        'arms': [
+            {'name': 'Barbell Curls', 'target': 'biceps', 'sets': 3, 'reps': '8-12'},
+            {'name': 'Tricep Dips', 'target': 'triceps', 'sets': 3, 'reps': '8-12'},
+            {'name': 'Hammer Curls', 'target': 'brachialis and forearms', 'sets': 3, 'reps': '10-12'},
+            {'name': 'Tricep Pushdowns', 'target': 'triceps', 'sets': 3, 'reps': '10-12'}
+        ],
+        'legs': [
+            {'name': 'Squats', 'target': 'quadriceps and overall leg development', 'sets': 3, 'reps': '8-10'},
+            {'name': 'Romanian Deadlifts', 'target': 'hamstrings and glutes', 'sets': 3, 'reps': '8-10'},
+            {'name': 'Leg Press', 'target': 'quadriceps', 'sets': 3, 'reps': '10-12'},
+            {'name': 'Calf Raises', 'target': 'calf muscles', 'sets': 3, 'reps': '12-15'}
+        ],
+        'core': [
+            {'name': 'Planks', 'target': 'core stability', 'sets': 3, 'reps': '30-60 seconds'},
+            {'name': 'Russian Twists', 'target': 'obliques', 'sets': 3, 'reps': '10-15 per side'},
+            {'name': 'Hanging Leg Raises', 'target': 'lower abs', 'sets': 3, 'reps': '10-15'},
+            {'name': 'Ab Wheel Rollouts', 'target': 'entire core', 'sets': 3, 'reps': '8-12'}
+        ]
+    }
+    
+    # Adjust training parameters based on goal
+    if goal == 'lose_fat':
+        rep_range = '12-15'
+        rest_time = '30-45 seconds'
+        workout_structure = 'circuit-style with supersets'
+    elif goal == 'gain_muscle':
+        rep_range = '6-10'
+        rest_time = '90-120 seconds'
+        workout_structure = 'traditional sets with progressive overload'
+    else:  # maintain or recomp
+        rep_range = '8-12'
+        rest_time = '60-90 seconds'
+        workout_structure = 'balanced approach with varied intensity'
+    
+    # Identify weak areas from traits
+    weak_areas = []
+    for trait, data in traits.items():
+        if not isinstance(data, dict):
+            continue
+            
+        if data.get('rating') == 'below_average':
+            if 'shoulder' in trait:
+                weak_areas.append('shoulders')
+            elif 'arm' in trait:
+                weak_areas.append('arms')
+            elif 'leg' in trait:
+                weak_areas.append('legs')
+                
+    # Create specific training focus based on body type
+    if body_type == "Ectomorph":
+        # Focus on muscle building with compound movements
+        workout_plan['training_focus'] = "Muscle building with compound lifts and higher calories"
+        workout_plan['rep_ranges'] = "Lower rep ranges (6-8) with heavier weights"
+        workout_plan['rest_periods'] = "Longer rest periods (2-3 minutes)"
+        workout_plan['frequency'] = "3-4 workouts per week"
+        workout_plan['cardio'] = "Minimal cardio (1-2 sessions of 20-30 min LISS)"
+        
+    elif body_type == "Endomorph":
+        # Focus on fat loss with higher volume
+        workout_plan['training_focus'] = "Fat loss with higher volume and metabolic conditioning"
+        workout_plan['rep_ranges'] = "Higher rep ranges (12-15) with moderate weights"
+        workout_plan['rest_periods'] = "Shorter rest periods (30-60 seconds)"
+        workout_plan['frequency'] = "4-5 workouts per week"
+        workout_plan['cardio'] = "Regular cardio (3-4 sessions with mix of HIIT and LISS)"
+        
+    elif body_type in ["Mesomorph", "Mesomorph-Ectomorph"]:
+        # Balanced approach
+        workout_plan['training_focus'] = "Balanced muscle development with strength training"
+        workout_plan['rep_ranges'] = "Mixed rep ranges (6-12)"
+        workout_plan['rest_periods'] = "Moderate rest periods (60-90 seconds)"
+        workout_plan['frequency'] = "4-5 workouts per week"
+        workout_plan['cardio'] = "Moderate cardio (2-3 sessions, mix of HIIT and LISS)"
+    
+    else:  # Hybrid or unknown
+        workout_plan['training_focus'] = "Balanced development with focus on consistency"
+        workout_plan['rep_ranges'] = "Standard rep ranges (8-12)"
+        workout_plan['rest_periods'] = "60-90 seconds between sets"
+        workout_plan['frequency'] = "3-4 workouts per week"
+        workout_plan['cardio'] = "2-3 sessions of cardio (mix of intensities)"
+    
+    # Create the split based on experience level
+    if experience_level == "beginner":
+        # Create full body workouts for beginners
+        workout_plan['split_type'] = "Full Body"
+        workout_plan['workout_a'] = {
+            'name': 'Full Body A',
+            'focus': 'Overall development with emphasis on form',
+            'exercises': [
+                base_exercises['chest'][0],  # Bench Press
+                base_exercises['back'][0],   # Pull-ups/Lat Pulldowns
+                base_exercises['legs'][0],   # Squats
+                base_exercises['shoulders'][1],  # Lateral Raises
+                base_exercises['arms'][0],   # Barbell Curls
+                base_exercises['core'][0]    # Planks
+            ]
+        }
+        workout_plan['workout_b'] = {
+            'name': 'Full Body B',
+            'focus': 'Alternative movement patterns',
+            'exercises': [
+                base_exercises['chest'][1],  # Incline Dumbbell Press
+                base_exercises['back'][1],   # Bent-over Rows
+                base_exercises['legs'][1],   # Romanian Deadlifts
+                base_exercises['shoulders'][0],  # Overhead Press
+                base_exercises['arms'][1],   # Tricep Dips
+                base_exercises['core'][2]    # Hanging Leg Raises
+            ]
+        }
+        
+    elif experience_level == "intermediate":
+        # Create upper/lower or push/pull/legs split
+        workout_plan['split_type'] = "Push/Pull/Legs"
+        
+        # Push day
+        workout_plan['push_day'] = {
+            'name': 'Push (Chest, Shoulders, Triceps)',
+            'focus': 'Upper body pushing muscles',
+            'exercises': [
+                base_exercises['chest'][0],  # Bench Press
+                base_exercises['chest'][1],  # Incline Dumbbell Press
+                base_exercises['shoulders'][0],  # Overhead Press
+                base_exercises['shoulders'][1],  # Lateral Raises
+                base_exercises['arms'][3]    # Tricep Pushdowns
+            ]
+        }
+        
+        # Pull day
+        workout_plan['pull_day'] = {
+            'name': 'Pull (Back, Biceps)',
+            'focus': 'Upper body pulling muscles',
+            'exercises': [
+                base_exercises['back'][0],   # Pull-ups/Lat Pulldowns
+                base_exercises['back'][1],   # Bent-over Rows
+                base_exercises['back'][3],   # Face Pulls
+                base_exercises['arms'][0],   # Barbell Curls
+                base_exercises['arms'][2]    # Hammer Curls
+            ]
+        }
+        
+        # Legs day
+        workout_plan['legs_day'] = {
+            'name': 'Legs & Core',
+            'focus': 'Lower body development',
+            'exercises': [
+                base_exercises['legs'][0],   # Squats
+                base_exercises['legs'][1],   # Romanian Deadlifts
+                base_exercises['legs'][2],   # Leg Press
+                base_exercises['legs'][3],   # Calf Raises
+                base_exercises['core'][0],   # Planks
+                base_exercises['core'][1]    # Russian Twists
+            ]
+        }
+        
+    else:  # advanced
+        # Create more specialized split
+        workout_plan['split_type'] = "Advanced Push/Pull/Legs with specialization"
+        
+        # Add more advanced exercises and techniques
+        # Push day
+        workout_plan['push_day'] = {
+            'name': 'Push (Chest, Shoulders, Triceps)',
+            'focus': 'Upper body pushing muscles with intensity techniques',
+            'exercises': [
+                base_exercises['chest'][0],  # Bench Press
+                {'name': 'Incline Bench Press', 'target': 'upper chest', 'sets': '4', 'reps': '6-8'},
+                {'name': 'Dumbbell Flyes', 'target': 'chest stretching', 'sets': '3', 'reps': '10-12'},
+                {'name': 'Arnold Press', 'target': 'shoulders with rotation', 'sets': '3', 'reps': '8-10'},
+                base_exercises['shoulders'][1],  # Lateral Raises
+                {'name': 'Skull Crushers', 'target': 'triceps long head', 'sets': '3', 'reps': '8-10'},
+                base_exercises['arms'][3]    # Tricep Pushdowns
+            ],
+            'advanced_techniques': [
+                'Drop sets on final set of lateral raises',
+                'Rest-pause on bench press',
+                'Superset tricep exercises'
+            ]
+        }
+        
+        # Pull day
+        workout_plan['pull_day'] = {
+            'name': 'Pull (Back, Biceps)',
+            'focus': 'Upper body pulling muscles with mind-muscle connection',
+            'exercises': [
+                {'name': 'Deadlifts', 'target': 'overall back and posterior chain', 'sets': '4', 'reps': '5-6'},
+                base_exercises['back'][0],   # Pull-ups/Lat Pulldowns
+                {'name': 'Meadows Rows', 'target': 'lats and mid-back', 'sets': '3', 'reps': '8-10'},
+                base_exercises['back'][3],   # Face Pulls
+                {'name': 'Incline Dumbbell Curls', 'target': 'biceps peak', 'sets': '3', 'reps': '8-10'},
+                base_exercises['arms'][2],   # Hammer Curls
+                {'name': 'Cable Curls', 'target': 'continuous tension on biceps', 'sets': '3', 'reps': '12-15'}
+            ],
+            'advanced_techniques': [
+                'Eccentric emphasis on pull-ups',
+                'Heavy/light supersets for biceps',
+                'Mechanical drop sets on rows'
+            ]
+        }
+        
+        # Legs day
+        workout_plan['legs_day'] = {
+            'name': 'Legs & Core',
+            'focus': 'Complete lower body development with progressive overload',
+            'exercises': [
+                {'name': 'Back Squats', 'target': 'quadriceps and overall development', 'sets': '4', 'reps': '6-8'},
+                {'name': 'Bulgarian Split Squats', 'target': 'unilateral leg development', 'sets': '3', 'reps': '8-10 per leg'},
+                base_exercises['legs'][1],   # Romanian Deadlifts
+                {'name': 'Leg Extensions', 'target': 'quadriceps isolation', 'sets': '3', 'reps': '12-15'},
+                {'name': 'Seated Leg Curl', 'target': 'hamstrings isolation', 'sets': '3', 'reps': '12-15'},
+                {'name': 'Standing Calf Raises', 'target': 'gastrocnemius', 'sets': '4', 'reps': '12-15'},
+                {'name': 'Seated Calf Raises', 'target': 'soleus', 'sets': '3', 'reps': '15-20'},
+                {'name': 'Cable Crunches', 'target': 'rectus abdominis', 'sets': '3', 'reps': '12-15'}
+            ],
+            'advanced_techniques': [
+                'Tempo squats (3-1-1 cadence)',
+                'Supersets for opposing muscle groups',
+                'Giant sets for calves'
+            ]
+        }
+    
+    # Add weak area specialization
+    workout_plan['weak_area_focus'] = {}
+    for area in weak_areas:
+        if area == 'shoulders':
+            workout_plan['weak_area_focus']['shoulders'] = {
+                'priority': 'High',
+                'volume': 'Increase sets by 50% for shoulder exercises',
+                'frequency': 'Train shoulders 2-3 times per week',
+                'key_exercises': [
+                    {'name': 'Lateral Raises', 'target': 'side deltoid width', 'sets': '4', 'reps': '12-15'},
+                    {'name': 'Face Pulls', 'target': 'rear deltoids and posture', 'sets': '3', 'reps': '15-20'},
+                    {'name': 'Upright Rows', 'target': 'trap and deltoid development', 'sets': '3', 'reps': '10-12'}
+                ]
+            }
+        elif area == 'arms':
+            workout_plan['weak_area_focus']['arms'] = {
+                'priority': 'High',
+                'volume': 'Add dedicated arm day or increase arm volume by 30-50%',
+                'frequency': 'Train arms 2-3 times per week',
+                'key_exercises': [
+                    {'name': 'EZ Bar Curls', 'target': 'overall biceps development', 'sets': '4', 'reps': '8-12'},
+                    {'name': 'Incline Dumbbell Curls', 'target': 'biceps stretch', 'sets': '3', 'reps': '10-12'},
+                    {'name': 'Close-Grip Bench Press', 'target': 'triceps with compound movement', 'sets': '4', 'reps': '8-10'},
+                    {'name': 'Overhead Tricep Extension', 'target': 'long head of triceps', 'sets': '3', 'reps': '10-12'}
+                ]
+            }
+        elif area == 'legs':
+            workout_plan['weak_area_focus']['legs'] = {
+                'priority': 'High',
+                'volume': 'Increase leg volume by 30-50%, split between quad and hamstring focus',
+                'frequency': 'Train legs 2 times per week with different focus each day',
+                'key_exercises': [
+                    {'name': 'Front Squats', 'target': 'quadriceps and core', 'sets': '4', 'reps': '8-10'},
+                    {'name': 'Walking Lunges', 'target': 'overall leg development', 'sets': '3', 'reps': '10-12 per leg'},
+                    {'name': 'Leg Press (Feet High)', 'target': 'hamstring and glute emphasis', 'sets': '4', 'reps': '10-12'},
+                    {'name': 'Glute-Ham Raises', 'target': 'hamstring and glute tie-in', 'sets': '3', 'reps': '8-12'}
+                ]
+            }
+    
+    # Add calorie and nutrition info based on goal
+    if goal == 'lose_fat':
+        workout_plan['nutrition_emphasis'] = 'Caloric deficit with high protein'
+    elif goal == 'gain_muscle':
+        workout_plan['nutrition_emphasis'] = 'Caloric surplus with emphasis on protein and carbs around workouts'
+    else:
+        workout_plan['nutrition_emphasis'] = 'Maintenance calories with balanced macros'
+    
+    return workout_plan
+
+def calculate_calorie_recommendations(weight_kg, height_cm, body_fat, activity_level, goal):
+    """
+    Calculate calorie recommendations based on body metrics and goals
+    
+    Args:
+        weight_kg: Weight in kilograms
+        height_cm: Height in centimeters
+        body_fat: Body fat percentage
+        activity_level: String describing activity level (sedentary, light, moderate, very_active, extra_active)
+        goal: String describing goal (maintain, lose_fat, gain_muscle, recomp)
+        
+    Returns:
+        Dictionary with calorie and macronutrient recommendations
+    """
+    # Calculate Basal Metabolic Rate (BMR) using Katch-McArdle Formula (uses lean body mass)
+    lean_mass = weight_kg * (1 - (body_fat / 100))
+    bmr = 370 + (21.6 * lean_mass)
+    
+    # Apply activity multiplier
+    activity_multipliers = {
+        'sedentary': 1.2,      # Desk job, little or no exercise
+        'light': 1.375,        # Light exercise 1-3 days/week
+        'moderate': 1.55,      # Moderate exercise 3-5 days/week
+        'very_active': 1.725,  # Heavy exercise 6-7 days/week
+        'extra_active': 1.9    # Very heavy exercise, physical job or twice daily training
+    }
+    
+    multiplier = activity_multipliers.get(activity_level, 1.55)  # Default to moderate
+    maintenance_calories = bmr * multiplier
+    
+    # Adjust based on goal
+    if goal == 'lose_fat':
+        target_calories = maintenance_calories * 0.8  # 20% deficit
+        protein_ratio = 0.35  # Higher protein during cutting
+        carb_ratio = 0.3
+        fat_ratio = 0.35
+    elif goal == 'gain_muscle':
+        target_calories = maintenance_calories * 1.1  # 10% surplus
+        protein_ratio = 0.25
+        carb_ratio = 0.5  # Higher carbs for muscle gain
+        fat_ratio = 0.25
+    elif goal == 'recomp':
+        # Body recomposition - training days in slight surplus, rest days in slight deficit
+        training_day_calories = maintenance_calories * 1.05
+        rest_day_calories = maintenance_calories * 0.9
+        target_calories = maintenance_calories  # Average
+        protein_ratio = 0.3
+        carb_ratio = 0.4
+        fat_ratio = 0.3
+        return {
+            'maintenance': round(maintenance_calories),
+            'training_day': round(training_day_calories),
+            'rest_day': round(rest_day_calories),
+            'protein_g': round(target_calories * protein_ratio / 4),  # 4 calories per gram
+            'carbs_g': round(target_calories * carb_ratio / 4),       # 4 calories per gram
+            'fat_g': round(target_calories * fat_ratio / 9)           # 9 calories per gram
+        }
+    else:  # maintain
+        target_calories = maintenance_calories
+        protein_ratio = 0.3
+        carb_ratio = 0.4
+        fat_ratio = 0.3
+    
+    return {
+        'maintenance': round(maintenance_calories),
+        'target': round(target_calories),
+        'protein_g': round(target_calories * protein_ratio / 4),  # 4 calories per gram
+        'carbs_g': round(target_calories * carb_ratio / 4),       # 4 calories per gram
+        'fat_g': round(target_calories * fat_ratio / 9)           # 9 calories per gram
+    }
