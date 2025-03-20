@@ -178,47 +178,67 @@ def analyze_body_traits(landmarks, height_cm=0.0, weight_kg=0.0):
             # 22. Calculate BMI
             bmi = weight_kg / ((height_cm / 100) ** 2)
             
-            # 23. Estimate body fat percentage using multiple methods
-            # We'll use more accurate formulas and combine them for better results
+            # 23. Estimate body fat percentage using improved anthropometric measurements
+            # Use more precise algorithms for body composition assessment
             
-            # Method 1: Navy Body Fat Formula (using waist, neck, and height)
-            # Estimate neck circumference from head landmarks
-            neck_circumference = neck_width * 3.14  # Approximate neck as a circle
+            # Calculate waist to hip ratio as a key indicator
+            waist_to_hip = waist_width / hip_width
             
-            # Apply Navy method formula (simplified unisex version)
-            # log10(waist - neck) - log10(height) + constant
-            navy_log_term = np.log10((waist_width * 100) - neck_circumference)
-            height_log_term = np.log10(height_cm)
-            body_fat_navy = 495 / (1.0324 - 0.19077 * navy_log_term + 0.15456 * height_log_term) - 450
+            # Calculate upper body ratios
+            shoulder_to_waist = shoulder_width / waist_width
+            chest_to_waist = chest_width / waist_width
             
-            # Method 2: BMI-based formula (more accurate with adjustments)
-            body_fat_bmi = (1.39 * bmi) + (0.16 * 30) - 19.34
+            # Calculate body surface area estimation
+            bsa = 0.007184 * (height_cm ** 0.725) * (weight_kg ** 0.425) if height_cm > 0 and weight_kg > 0 else 1.5
             
-            # Method 3: Waist-to-height ratio (with improved constants)
+            # Method 1: Enhanced YMCA formula using skeletal ratios
+            # Adjusts for muscle mass based on shoulder and chest proportions
+            skeletal_adjustment = 0
+            if shoulder_to_waist > 1.5:  # Indicates significant muscle development
+                skeletal_adjustment = -4.0  # Reduce body fat estimate (more muscle)
+            elif shoulder_to_waist < 1.2:  # Indicates less muscle development
+                skeletal_adjustment = 2.0  # Increase body fat estimate (less muscle)
+                
+            ymca_bf = ((4.15 * waist_width * 100) - (0.082 * weight_kg) - 94.42) / weight_kg * 100
+            ymca_adjusted = ymca_bf + skeletal_adjustment
+            
+            # Method 2: Modified BMI-based formula with anthropometric corrections
+            # Account for muscle mass using shoulder-to-waist ratio
+            bmi_correction = (shoulder_to_waist - 1.3) * 10  # Adjusts for muscularity
+            bmi_bf = (1.2 * bmi) + (0.23 * 30) - bmi_correction - 16.2
+            
+            # Method 3: Advanced waist-to-height ratio with body shape adjustment
             waist_to_height = waist_width / (height_cm / 100)
-            body_fat_wth = (waist_to_height * 64) - 50  # Improved formula
+            body_shape_factor = chest_to_waist / waist_to_hip  # Accounts for upper vs lower body composition
+            wth_bf = (waist_to_height * 50) - (5 * body_shape_factor) - 15
             
-            # Method 4: Jackson-Pollock approach using estimated body measurements
-            # We adapt this by using relative proportions from our landmarks
-            estimated_chest_ratio = chest_width / height_cm
-            estimated_abdominal_ratio = waist_width / height_cm
-            estimated_thigh_ratio = (left_upper_leg + right_upper_leg) / (2 * height_cm)
+            # Method 4: Sophisticated visual analysis using proportions
+            # Use relative proportions across major body segments
+            upper_body_width = (shoulder_width + chest_width) / 2
+            lower_body_width = (hip_width + waist_width) / 2
+            upper_lower_ratio = upper_body_width / lower_body_width
             
-            # Simplified adaptation of Jackson-Pollock formula
-            sum_of_ratios = estimated_chest_ratio + estimated_abdominal_ratio + estimated_thigh_ratio
-            body_fat_jp = (sum_of_ratios * 27) - 18
+            # Adjust based on typical fat distribution patterns
+            visual_bf_base = 18 + (waist_to_hip * 20) - (upper_lower_ratio * 10)
+            visual_bf = max(8, min(visual_bf_base, 35))  # Reasonable constraints
             
-            # Weighted average of the methods, giving more weight to more accurate ones
-            # Navy method is typically most accurate, so it gets highest weight
+            # Weighted average with greater emphasis on methods most reliable from image analysis
+            # Visual and waist-to-height are more reliable from images than weight-based formulas
             body_fat_percentage = (
-                (0.4 * body_fat_navy) + 
-                (0.2 * body_fat_bmi) + 
-                (0.2 * body_fat_wth) + 
-                (0.2 * body_fat_jp)
+                (0.15 * ymca_adjusted) + 
+                (0.15 * bmi_bf) + 
+                (0.35 * wth_bf) + 
+                (0.35 * visual_bf)
             )
             
-            # Ensure result is in reasonable range
-            body_fat_percentage = max(3, min(body_fat_percentage, 45))
+            # Apply gender-specific adjustments if height and weight suggest a pattern
+            # (This is a rough estimate since we don't have explicit gender input)
+            height_weight_ratio = height_cm / weight_kg
+            if height_weight_ratio > 2.8:  # Suggests female proportions
+                body_fat_percentage += 3  # Females typically have 3-5% higher essential fat
+            
+            # Ensure result is in reasonable range and avoid extreme values
+            body_fat_percentage = max(5, min(body_fat_percentage, 35))
             
             # 26. Estimate lean body mass
             lean_body_mass = weight_kg * (1 - (body_fat_percentage / 100))

@@ -304,105 +304,76 @@ def get_exercises_by_body_type(body_type, traits, experience_level):
     return exercises
 
 def get_training_split(body_type, experience_level):
-    """Get recommended training split based on body type and experience"""
-    if experience_level == 'beginner':
-        return {
-            'Monday': 'Full Body',
-            'Tuesday': 'Rest/Light Cardio',
-            'Wednesday': 'Full Body',
-            'Thursday': 'Rest/Light Cardio',
-            'Friday': 'Full Body',
-            'Saturday': 'Active Recovery',
-            'Sunday': 'Rest'
-        }
+    """Get recommended training split based on body type and experience - Always Push/Pull/Legs"""
+    # Always use a Push/Pull/Legs split, but customize based on body type and experience
     
-    if experience_level == 'intermediate':
-        if body_type in ["Mesomorph", "Mesomorph-Ectomorph"]:
+    # Base template for all users is Push/Pull/Legs
+    if body_type == "Endomorph":
+        # Higher frequency and more metabolic work for endomorphs
+        return {
+            'Monday': 'Push (Chest, Shoulders, Triceps) + HIIT',
+            'Tuesday': 'Pull (Back, Biceps) + HIIT',
+            'Wednesday': 'Legs (Quads, Hamstrings, Calves) + HIIT',
+            'Thursday': 'Rest/Light Cardio',
+            'Friday': 'Push (Chest, Shoulders, Triceps) + HIIT',
+            'Saturday': 'Pull (Back, Biceps) + HIIT',
+            'Sunday': 'Legs (Quads, Hamstrings, Calves) + HIIT'
+        }
+    elif body_type == "Ectomorph":
+        # Lower training frequency with more recovery for ectomorphs
+        if experience_level == 'beginner':
             return {
                 'Monday': 'Push (Chest, Shoulders, Triceps)',
                 'Tuesday': 'Pull (Back, Biceps)',
-                'Wednesday': 'Legs & Core',
+                'Wednesday': 'Legs (Quads, Hamstrings, Calves)',
+                'Thursday': 'Rest',
+                'Friday': 'Push (Chest, Shoulders, Triceps)',
+                'Saturday': 'Pull (Back, Biceps)',
+                'Sunday': 'Rest'
+            }
+        else:
+            return {
+                'Monday': 'Push (Chest, Shoulders, Triceps) - Heavy',
+                'Tuesday': 'Pull (Back, Biceps) - Heavy',
+                'Wednesday': 'Legs (Quads, Hamstrings, Calves) - Heavy',
+                'Thursday': 'Rest',
+                'Friday': 'Push (Chest, Shoulders, Triceps) - Volume',
+                'Saturday': 'Pull (Back, Biceps) - Volume',
+                'Sunday': 'Legs (Quads, Hamstrings, Calves) - Volume'
+            }
+    elif body_type in ["Mesomorph", "Mesomorph-Ectomorph"]:
+        # Balanced approach with intensity techniques for mesomorphs
+        if experience_level == 'beginner':
+            return {
+                'Monday': 'Push (Chest, Shoulders, Triceps)',
+                'Tuesday': 'Pull (Back, Biceps)',
+                'Wednesday': 'Legs (Quads, Hamstrings, Calves)',
                 'Thursday': 'Rest/Light Cardio',
                 'Friday': 'Push (Chest, Shoulders, Triceps)',
                 'Saturday': 'Pull (Back, Biceps)',
                 'Sunday': 'Rest'
             }
-        elif body_type == "Endomorph":
-            return {
-                'Monday': 'Upper Body + HIIT',
-                'Tuesday': 'Lower Body + Steady Cardio',
-                'Wednesday': 'Rest/Light Activity',
-                'Thursday': 'Full Body Circuit',
-                'Friday': 'Upper Body + HIIT',
-                'Saturday': 'Lower Body + Steady Cardio',
-                'Sunday': 'Rest'
-            }
-        elif body_type == "Ectomorph":
-            return {
-                'Monday': 'Upper Body (Heavy)',
-                'Tuesday': 'Lower Body (Heavy)',
-                'Wednesday': 'Rest',
-                'Thursday': 'Push (Moderate Volume)',
-                'Friday': 'Pull (Moderate Volume)',
-                'Saturday': 'Legs (Moderate Volume)',
-                'Sunday': 'Rest'
-            }
         else:
             return {
-                'Monday': 'Upper Body',
-                'Tuesday': 'Lower Body',
-                'Wednesday': 'Rest/Light Activity',
-                'Thursday': 'Upper Body',
-                'Friday': 'Lower Body',
-                'Saturday': 'Active Recovery',
-                'Sunday': 'Rest'
+                'Monday': 'Push (Chest, Shoulders, Triceps) - Strength',
+                'Tuesday': 'Pull (Back, Biceps) - Strength',
+                'Wednesday': 'Legs (Quads, Hamstrings, Calves) - Strength',
+                'Thursday': 'Rest/Light Cardio',
+                'Friday': 'Push (Chest, Shoulders, Triceps) - Hypertrophy',
+                'Saturday': 'Pull (Back, Biceps) - Hypertrophy',
+                'Sunday': 'Legs (Quads, Hamstrings, Calves) - Hypertrophy'
             }
-    
-    if experience_level == 'advanced':
-        if body_type in ["Mesomorph", "Mesomorph-Ectomorph"]:
-            return {
-                'Monday': 'Chest & Triceps',
-                'Tuesday': 'Back & Biceps',
-                'Wednesday': 'Legs',
-                'Thursday': 'Shoulders & Abs',
-                'Friday': 'Arms & Weakpoints',
-                'Saturday': 'Active Recovery',
-                'Sunday': 'Rest'
-            }
-        elif body_type == "Endomorph":
-            return {
-                'Monday AM': 'Push + Cardio',
-                'Monday PM': 'Cardio',
-                'Tuesday': 'Pull + HIIT',
-                'Wednesday': 'Legs + Steady Cardio',
-                'Thursday': 'Rest/Light Activity',
-                'Friday': 'Full Body Circuit',
-                'Saturday': 'Weakpoints + HIIT',
-                'Sunday': 'Rest'
-            }
-        elif body_type == "Ectomorph":
-            return {
-                'Monday': 'Chest & Back (Heavy)',
-                'Tuesday': 'Legs & Abs (Heavy)',
-                'Wednesday': 'Shoulders & Arms (Moderate)',
-                'Thursday': 'Rest',
-                'Friday': 'Upper Body (Volume)',
-                'Saturday': 'Lower Body (Volume)',
-                'Sunday': 'Rest'
-            }
-        else:
-            return {
-                'Monday': 'Push',
-                'Tuesday': 'Pull',
-                'Wednesday': 'Legs',
-                'Thursday': 'Rest',
-                'Friday': 'Upper Body',
-                'Saturday': 'Lower Body',
-                'Sunday': 'Rest'
-            }
-    
-    # Default fallback
-    return get_default_training_split(experience_level)
+    else:  # Hybrid or unknown
+        # Standard Push/Pull/Legs for hybrid body types
+        return {
+            'Monday': 'Push (Chest, Shoulders, Triceps)',
+            'Tuesday': 'Pull (Back, Biceps)',
+            'Wednesday': 'Legs (Quads, Hamstrings, Calves)',
+            'Thursday': 'Rest',
+            'Friday': 'Push (Chest, Shoulders, Triceps)',
+            'Saturday': 'Pull (Back, Biceps)',
+            'Sunday': 'Legs (Quads, Hamstrings, Calves)'
+        }
 
 def get_default_training_split(experience_level):
     """Get default training split based on experience level"""
