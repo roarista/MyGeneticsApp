@@ -383,7 +383,7 @@ def analyze_body_traits(landmarks, original_image=None, height_cm=0.0, weight_kg
             
             traits['body_fat_percentage'] = {
                 'value': round(body_fat_percentage, 1),
-                'rating': classify_body_fat(body_fat_percentage)
+                'rating': classify_body_fat(body_fat_percentage, gender)
             }
             
             traits['lean_body_mass'] = {
@@ -471,7 +471,7 @@ def analyze_body_traits(landmarks, original_image=None, height_cm=0.0, weight_kg
         # Add waist-to-hip ratio, important for fitness assessment
         traits['waist_hip_ratio'] = {
             'value': round(waist_width / hip_width, 2) if hip_width > 0 else 0,
-            'rating': classify_waist_hip_ratio(waist_width / hip_width if hip_width > 0 else 0)
+            'rating': classify_waist_hip_ratio(waist_width / hip_width if hip_width > 0 else 0, gender)
         }
         
         # Determine body type based on proportions
@@ -655,27 +655,57 @@ def classify_bmi(bmi):
     else:
         return 'below_average'  # Obese
 
-def classify_body_fat(percentage):
-    """Classify body fat percentage"""
-    # Using a more detailed scale that works for most adults
-    if percentage < 4.5:
-        return 'below_average'  # Essential fat only, potentially unhealthy
-    elif percentage < 6:
-        return 'elite'  # Professional bodybuilder/physique athlete level
-    elif percentage < 9:
-        return 'excellent'  # Competition-ready, exceptional definition
-    elif percentage < 13:
-        return 'very_good'  # Very athletic, visible abs
-    elif percentage < 17:
-        return 'good'  # Athletic, some visible definition
-    elif percentage < 22:
-        return 'average'  # Acceptable, healthy range
-    elif percentage < 27:
-        return 'below_average'  # Above average body fat
-    elif percentage < 35:
-        return 'poor'  # High body fat, health risks increasing
+def classify_body_fat(percentage, gender='male'):
+    """
+    Classify body fat percentage based on gender
+    
+    Args:
+        percentage: The body fat percentage value
+        gender: 'male' or 'female'
+        
+    Returns:
+        Rating string for the given body fat percentage
+    """
+    if gender == 'male':
+        # Male body fat classification
+        if percentage < 3:
+            return 'below_average'  # Essential fat only, unhealthy/unsustainable
+        elif percentage < 6:
+            return 'elite'  # Professional bodybuilder/physique athlete level
+        elif percentage < 9:
+            return 'excellent'  # Competition-ready, exceptional definition
+        elif percentage < 13:
+            return 'very_good'  # Very athletic, visible abs
+        elif percentage < 17:
+            return 'good'  # Athletic, some visible definition
+        elif percentage < 22:
+            return 'average'  # Acceptable, healthy range for men
+        elif percentage < 27:
+            return 'below_average'  # Above average body fat for men
+        elif percentage < 35:
+            return 'poor'  # High body fat, health risks increasing
+        else:
+            return 'very_poor'  # Very high health risk
     else:
-        return 'very_poor'  # Very high health risk
+        # Female body fat classification (higher essential fat)
+        if percentage < 10:
+            return 'below_average'  # Too low, potentially unhealthy for women
+        elif percentage < 14:
+            return 'elite'  # Professional athlete/fitness competitor
+        elif percentage < 18:
+            return 'excellent'  # Very athletic, excellent definition
+        elif percentage < 22:
+            return 'very_good'  # Athletic, good muscle definition
+        elif percentage < 26:
+            return 'good'  # Fit, healthy range for women
+        elif percentage < 32:
+            return 'average'  # Acceptable, normal range for women
+        elif percentage < 38:
+            return 'below_average'  # Above average body fat for women
+        elif percentage < 45:
+            return 'poor'  # High body fat, health risks increasing
+        else:
+            return 'very_poor'  # Very high health risk
 
 def classify_frame_size(wrist_height_ratio):
     """Classify frame size based on wrist-to-height ratio"""
@@ -697,16 +727,37 @@ def classify_muscle_potential(potential):
     else:
         return 'below_average'
 
-def classify_waist_hip_ratio(ratio):
-    """Classify waist-to-hip ratio"""
-    if ratio < 0.85:
-        return 'excellent'  # Very good ratio
-    elif ratio < 0.9:
-        return 'good'
-    elif ratio < 0.95:
-        return 'average'
+def classify_waist_hip_ratio(ratio, gender='male'):
+    """
+    Classify waist-to-hip ratio based on gender
+    
+    Args:
+        ratio: Waist-to-hip ratio value
+        gender: 'male' or 'female'
+        
+    Returns:
+        Rating string for the given waist-to-hip ratio
+    """
+    if gender == 'male':
+        # Male waist-to-hip ratio classification
+        if ratio < 0.85:
+            return 'excellent'  # Very good ratio for men
+        elif ratio < 0.9:
+            return 'good'  # Healthy ratio for men
+        elif ratio < 0.95:
+            return 'average'  # Average ratio for men
+        else:
+            return 'below_average'  # Higher health risk for men
     else:
-        return 'below_average'  # Higher health risk
+        # Female waist-to-hip ratio classification
+        if ratio < 0.75:
+            return 'excellent'  # Very good ratio for women
+        elif ratio < 0.8:
+            return 'good'  # Healthy ratio for women
+        elif ratio < 0.85:
+            return 'average'  # Average ratio for women
+        else:
+            return 'below_average'  # Higher health risk for women
         
 def classify_ffmi(ffmi):
     """Classify Fat-Free Mass Index"""
