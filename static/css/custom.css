@@ -20,10 +20,10 @@
     --black-bg: #111111;  /* For contrast sections */
     --gradient-bg: linear-gradient(135deg, #f8f9fb 0%, #ffffff 100%);  /* Subtle light gradient */
     
-    /* Text colors - Clean elegance */
-    --text-light: #f5f5f7;  /* Light text (for dark backgrounds) */
-    --text-medium: #86868b;  /* Medium contrast text */
-    --text-muted: #aeaeb2;  /* Subtle low contrast text */
+    /* Text colors - High Contrast */
+    --text-light: #ffffff;  /* Pure white text (for dark backgrounds) */
+    --text-medium: #6c6c70;  /* Darker gray for better contrast */
+    --text-muted: #8e8e93;  /* Improved muted color for better readability */
     --text-dark: #1d1d1f;   /* Main text color */
     
     /* Fitness-specific colors - Modern aesthetic */
@@ -184,28 +184,33 @@ body {
 }
 
 .trait-badge-excellent {
-    background-color: rgba(52, 199, 89, 0.15); /* Apple green background */
-    color: var(--neon-green);
+    background-color: rgba(52, 199, 89, 0.2); /* Apple green background - increased opacity */
+    color: #2a6d31; /* Darker green for better contrast */
+    font-weight: 600;
 }
 
 .trait-badge-good {
-    background-color: rgba(0, 113, 227, 0.15); /* Apple blue background */
-    color: var(--neon-blue);
+    background-color: rgba(0, 113, 227, 0.2); /* Apple blue background - increased opacity */
+    color: #0050a4; /* Darker blue for better contrast */
+    font-weight: 600;
 }
 
 .trait-badge-average {
-    background-color: rgba(255, 195, 0, 0.15); /* Apple yellow background */
-    color: var(--energy-yellow);
+    background-color: rgba(255, 195, 0, 0.2); /* Apple yellow background - increased opacity */
+    color: #996900; /* Darker yellow for better contrast */
+    font-weight: 600;
 }
 
 .trait-badge-below-average {
-    background-color: rgba(255, 159, 10, 0.15); /* Apple orange background */
-    color: var(--power-orange);
+    background-color: rgba(255, 159, 10, 0.2); /* Apple orange background - increased opacity */
+    color: #b24d00; /* Darker orange for better contrast */
+    font-weight: 600;
 }
 
 .trait-badge-poor {
-    background-color: rgba(255, 59, 48, 0.15); /* Apple red background */
-    color: var(--neon-red);
+    background-color: rgba(255, 59, 48, 0.2); /* Apple red background - increased opacity */
+    color: #b71c1c; /* Darker red for better contrast */
+    font-weight: 600;
 }
 
 /* Apple-style trait pills - alternative style for condensed views */
@@ -305,23 +310,23 @@ body {
 }
 
 .muscle-badge-excellent .muscle-icon {
-    color: var(--neon-green);
+    color: #2a6d31; /* Darker green for better contrast */
 }
 
 .muscle-badge-good .muscle-icon {
-    color: var(--neon-blue);
+    color: #0050a4; /* Darker blue for better contrast */
 }
 
 .muscle-badge-average .muscle-icon {
-    color: var(--energy-yellow);
+    color: #996900; /* Darker yellow for better contrast */
 }
 
 .muscle-badge-below-average .muscle-icon {
-    color: var(--power-orange);
+    color: #b24d00; /* Darker orange for better contrast */
 }
 
 .muscle-badge-poor .muscle-icon {
-    color: var(--neon-red);
+    color: #b71c1c; /* Darker red for better contrast */
 }
 
 .muscle-name {
