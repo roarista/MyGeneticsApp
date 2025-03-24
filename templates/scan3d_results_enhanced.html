@@ -47,6 +47,22 @@
                     <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Advanced Measurements</h6>
                     <p class="mb-0 small">These measurements are extracted directly from your 3D body scan for maximum accuracy.</p>
                 </div>
+
+                <!-- 3D Body Model Visualization -->
+                <div class="model-visualization">
+                    <div class="body-model-container position-relative">
+                        <!-- Body silhouette background -->
+                        <svg viewBox="0 0 100 200" width="100%" height="350" class="body-silhouette">
+                            <path d="M50,10 C60,10 65,15 65,20 C65,25 60,30 60,35 C80,35 85,50 85,70 C85,85 75,100 75,120 C75,140 65,180 60,190 C55,195 45,195 40,190 C35,180 25,140 25,120 C25,100 15,85 15,70 C15,50 20,35 40,35 C40,30 35,25 35,20 C35,15 40,10 50,10 Z" 
+                                  fill="#f8f9fa" stroke="#dee2e6" stroke-width="1"></path>
+                        </svg>
+                        
+                        <!-- Measurement points and lines will be added by JavaScript -->
+                    </div>
+                    <div class="text-center mt-3">
+                        <p class="text-muted small mb-0">Click on measurement points to see details</p>
+                    </div>
+                </div>
             </div>
         </div>
         
@@ -364,6 +380,9 @@
 {% endblock %}
 
 {% block scripts %}
+<!-- 3D visualization script -->
+<script src="{{ url_for('static', filename='js/3d_visualization.js') }}"></script>
+
 <script>
     // Add measurement-badge class to all badge elements in the table
     document.addEventListener('DOMContentLoaded', function() {
