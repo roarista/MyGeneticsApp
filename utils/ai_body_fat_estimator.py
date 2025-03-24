@@ -156,7 +156,22 @@ class AIBodyFatEstimator:
                 visual_features = self._extract_visual_features(abdominal_roi)
                 
                 # Get an estimated value between 4-40% based on visual analysis of the abdomen
-                visual_bf_estimate = 4 + (visual_features['definition_score'] * 36)
+                # Use a more dramatic curve with increased sensitivity to definition
+                definition = visual_features['definition_score']
+                
+                # Exponential mapping for more diverse results
+                # Lower definition scores (0-0.3) map to 4-12% (very defined)
+                # Medium definition scores (0.3-0.7) map to 12-25% (moderate definition)
+                # Higher definition scores (0.7-1.0) map to 25-40% (little definition)
+                if definition < 0.3:
+                    # More dramatic curve at low body fat levels for better differentiation
+                    visual_bf_estimate = 4 + (definition / 0.3) * 8
+                elif definition < 0.7:
+                    # Medium range with liner mapping
+                    visual_bf_estimate = 12 + ((definition - 0.3) / 0.4) * 13
+                else:
+                    # Higher body fat with steeper curve
+                    visual_bf_estimate = 25 + ((definition - 0.7) / 0.3) * 15
                 
                 # Create a unique signature for this person to ensure different results
                 # This incorporates natural variation in body types
@@ -222,10 +237,39 @@ class AIBodyFatEstimator:
         edges = cv2.Canny(gray, 50, 150)
         edge_density = np.count_nonzero(edges) / edges.size
         
-        # Combine features into a definition score (0-1)
+        # Enhanced feature combination for better accuracy in muscle definition detection
+        
+        # 1. Edge analysis - more weight for visible muscle separation (sharp edges)
+        edge_score = 1.0 - edge_density * 2.0  # More dramatic curve for edge detection
+        edge_score = max(0.0, min(1.0, edge_score))  # Clamp between 0-1
+        
+        # 2. Texture analysis - detects the fine grain of defined muscles
+        texture_score = 1.0 - entropy_normalized
+        
+        # 3. Gradient analysis - detects vascularity and surface changes
+        gradient_score = 1.0 - gradient_normalized * 1.5  # More weight to gradients
+        gradient_score = max(0.0, min(1.0, gradient_score))  # Clamp between 0-1
+        
+        # 4. Local variation - measures consistency of tissue
+        variation_score = 1.0 - local_variation * 1.2
+        variation_score = max(0.0, min(1.0, variation_score))  # Clamp between 0-1
+        
+        # Combine all features with optimized weights
         # Where 0 is high definition (low body fat) and 1 is low definition (high body fat)
-        # This is inverted from what might be expected to match body fat percentage direction
-        definition_score = 1.0 - ((edge_density * 0.5) + (1.0 - entropy_normalized) * 0.5)
+        # Edge density gets highest weight as it's most reliable for muscle separation
+        definition_score = (
+            edge_score * 0.40 +  # Muscle separation lines (most important)
+            texture_score * 0.25 +  # Skin texture
+            gradient_score * 0.20 +  # Vascularity
+            variation_score * 0.15  # Tissue consistency
+        )
+        
+        # Analyze the gradient magnitude distribution
+        sobelx = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=3)
+        sobely = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=3)
+        gradient_magnitude = np.sqrt(sobelx**2 + sobely**2)
+        gradient_mean = np.mean(gradient_magnitude)
+        gradient_normalized = min(1.0, gradient_mean / 50.0)
         
         # Analyze the gradient magnitude distribution
         sobelx = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=3)

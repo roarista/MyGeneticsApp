@@ -13,7 +13,7 @@ mp_drawing_styles = mp.solutions.drawing_styles
 
 def process_image(image):
     """
-    Pre-process the image for body analysis
+    Pre-process the image for body analysis with enhanced feature extraction
     
     Args:
         image: OpenCV image (numpy array)
@@ -21,18 +21,37 @@ def process_image(image):
     Returns:
         Processed image (numpy array)
     """
+    # Make a copy to avoid modifying the original
+    processed = image.copy()
+    
     # Resize image to a standard size if needed
     max_dimension = 1024
-    height, width = image.shape[:2]
+    height, width = processed.shape[:2]
     
     if max(height, width) > max_dimension:
         scale = max_dimension / max(height, width)
         new_width = int(width * scale)
         new_height = int(height * scale)
-        image = cv2.resize(image, (new_width, new_height))
+        processed = cv2.resize(processed, (new_width, new_height))
+    
+    # Apply slight Gaussian blur to reduce noise (helps with edge detection)
+    processed = cv2.GaussianBlur(processed, (3, 3), 0)
+    
+    # Enhance contrast using CLAHE (Contrast Limited Adaptive Histogram Equalization)
+    # This improves details in areas with different lighting conditions
+    lab = cv2.cvtColor(processed, cv2.COLOR_BGR2LAB)
+    l_channel, a_channel, b_channel = cv2.split(lab)
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+    cl = clahe.apply(l_channel)
+    merged = cv2.merge((cl, a_channel, b_channel))
+    processed = cv2.cvtColor(merged, cv2.COLOR_LAB2BGR)
+    
+    # Sharpening to enhance edges (helps with muscle definition detection)
+    kernel = np.array([[-1,-1,-1], [-1,9,-1], [-1,-1,-1]])
+    processed = cv2.filter2D(processed, -1, kernel)
     
     # Convert to RGB (MediaPipe uses RGB)
-    image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    image_rgb = cv2.cvtColor(processed, cv2.COLOR_BGR2RGB)
     
     return image_rgb
 
