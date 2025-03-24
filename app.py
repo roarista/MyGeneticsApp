@@ -12,6 +12,7 @@ from utils.image_processing import process_image, extract_body_landmarks
 from utils.body_analysis import analyze_body_traits
 from utils.recommendations import generate_recommendations
 from utils.units import format_trait_value, get_unit
+from utils.body_scan_3d import process_3d_scan, is_valid_3d_scan_file
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -23,6 +24,7 @@ app.secret_key = os.environ.get("SESSION_SECRET", "dev_secret_key")
 
 # Configure upload settings
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+ALLOWED_3D_EXTENSIONS = {'obj', 'stl', 'ply'}
 TEMP_UPLOAD_FOLDER = tempfile.gettempdir()
 
 # In-memory storage for analysis results (in a production app, use a database)
@@ -31,6 +33,10 @@ analysis_results = {}
 def allowed_file(filename):
     """Check if uploaded file has an allowed extension"""
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def allowed_3d_file(filename):
+    """Check if uploaded file has an allowed 3D model extension"""
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_3D_EXTENSIONS
 
 @app.route('/')
 def index():
@@ -179,6 +185,151 @@ def results(analysis_id):
 def education():
     """Display educational content about genetic traits in fitness"""
     return render_template('education.html')
+
+@app.route('/scan3d')
+def scan3d_page():
+    """Display the 3D body scan upload page"""
+    return render_template('scan3d.html')
+
+@app.route('/scan3d/upload', methods=['POST'])
+def scan3d_upload():
+    """Process uploaded 3D scan file and analyze body measurements"""
+    logger.debug("Received 3D scan upload request")
+    
+    # Ensure temp directory exists
+    os.makedirs(TEMP_UPLOAD_FOLDER, exist_ok=True)
+    
+    if 'scan_file' not in request.files:
+        logger.error("No scan file in request.files")
+        flash('No file selected', 'danger')
+        return redirect(url_for('scan3d_page'))
+    
+    file = request.files['scan_file']
+    logger.debug(f"File object: {file}, filename: {file.filename}")
+    
+    if file.filename == '':
+        logger.error("Empty filename")
+        flash('No file selected', 'danger')
+        return redirect(url_for('scan3d_page'))
+    
+    if file and allowed_3d_file(file.filename):
+        try:
+            # Create a unique ID for this analysis
+            analysis_id = str(uuid.uuid4())
+            logger.debug(f"Created analysis ID: {analysis_id}")
+            
+            # Save file temporarily
+            filename = secure_filename(file.filename)
+            filepath = os.path.join(TEMP_UPLOAD_FOLDER, filename)
+            logger.debug(f"Saving file to: {filepath}")
+            file.save(filepath)
+            
+            # Get user-provided information
+            height = request.form.get('height', 0)
+            weight = request.form.get('weight', 0)
+            gender = request.form.get('gender', 'male')  # Default to male if not specified
+            experience = request.form.get('experience', 'beginner')
+            
+            logger.debug(f"User inputs - Height: {height}, Weight: {weight}, Gender: {gender}, Experience: {experience}")
+            
+            # Process the 3D scan
+            scan_results = process_3d_scan(
+                file_path=filepath,
+                height_cm=float(height) if height else 0,
+                weight_kg=float(weight) if weight else 0
+            )
+            
+            if not scan_results:
+                flash('Failed to process 3D scan. Please try again with a different file.', 'warning')
+                return redirect(url_for('scan3d_page'))
+            
+            # Extra processing for measurements
+            measurements = scan_results.get('measurements', {})
+            
+            # Combine measurements with body composition data
+            traits = measurements.copy()
+            traits.update(scan_results.get('body_composition', {}))
+            
+            # Generate recommendations based on the 3D scan traits
+            recommendations = generate_recommendations(traits, experience)
+            
+            # Store results
+            # For demo purposes, we'll use a placeholder image path
+            image_path = os.path.join(TEMP_UPLOAD_FOLDER, f"3d_model_{analysis_id}.jpg")
+            
+            analysis_results[analysis_id] = {
+                'image_path': image_path,
+                'traits': traits,
+                'recommendations': recommendations,
+                'user_info': {
+                    'height': height,
+                    'weight': weight,
+                    'gender': gender,
+                    'experience': experience
+                },
+                'scan_data': {
+                    'file_path': filepath,
+                    'file_format': os.path.splitext(filepath)[1]
+                },
+                'analysis_type': '3d_scan'  # Flag to indicate this is a 3D scan analysis
+            }
+            
+            # For the prototype, we won't clean up the original 3D scan file
+            # in case we need to access it again
+            
+            return redirect(url_for('scan3d_results', analysis_id=analysis_id))
+            
+        except Exception as e:
+            logger.error(f"Error during 3D scan analysis: {str(e)}")
+            flash(f'Error during analysis: {str(e)}', 'danger')
+            return redirect(url_for('scan3d_page'))
+    else:
+        flash('Invalid file type. Please upload OBJ, STL, or PLY 3D model files.', 'warning')
+        return redirect(url_for('scan3d_page'))
+
+@app.route('/scan3d/results/<analysis_id>')
+def scan3d_results(analysis_id):
+    """Display 3D scan analysis results"""
+    if analysis_id not in analysis_results:
+        flash('Analysis not found', 'danger')
+        return redirect(url_for('scan3d_page'))
+    
+    result = analysis_results[analysis_id]
+    
+    # Check if this is a 3D scan analysis
+    if result.get('analysis_type') != '3d_scan':
+        flash('Invalid analysis type', 'danger')
+        return redirect(url_for('scan3d_page'))
+    
+    # For this prototype version, we'll use a placeholder image
+    # In a real implementation, we would generate a visualization of the 3D model
+    img_b64 = None
+    
+    # Process traits to include their units
+    formatted_traits = {}
+    for trait_name, trait_data in result['traits'].items():
+        # For traits that are dictionaries with value keys
+        if isinstance(trait_data, dict) and 'value' in trait_data:
+            # Copy the trait data
+            formatted_trait = trait_data.copy()
+            # Format the value with units
+            formatted_trait['display_value'] = format_trait_value(trait_name, trait_data['value'])
+            formatted_trait['unit'] = get_unit(trait_name)
+            formatted_traits[trait_name] = formatted_trait
+        else:
+            # For other types of traits
+            formatted_traits[trait_name] = trait_data
+    
+    return render_template(
+        'scan3d_results.html',
+        analysis_id=analysis_id,
+        traits=formatted_traits,
+        recommendations=result['recommendations'],
+        user_info=result['user_info'],
+        image_data=img_b64,
+        scan_data=result.get('scan_data', {}),
+        format_value=format_trait_value  # Pass the formatter to the template
+    )
 
 @app.route('/api/traits/<analysis_id>')
 def get_traits_data(analysis_id):

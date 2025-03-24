@@ -1,0 +1,118 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-7">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h1 class="card-title fw-bold">
+                    <i class="fas fa-cube me-2 text-primary"></i>3D Body Scanning
+                </h1>
+                <p class="lead">
+                    Upload a 3D body scan for enhanced precision in analyzing your body structure and composition. 
+                    Get detailed measurements and personalized recommendations based on your exact body geometry.
+                </p>
+                <hr>
+                <h5><i class="fas fa-info-circle text-info me-2"></i>How It Works</h5>
+                <ol class="mb-4">
+                    <li>Generate a 3D scan using a mobile app (iPhone LiDAR, Android depth camera, etc.)</li>
+                    <li>Export the scan as an OBJ, STL, or PLY file</li>
+                    <li>Upload your scan below along with your basic measurements</li>
+                    <li>Our system analyzes your body's precise structural traits</li>
+                    <li>Get enhanced measurements and customized training recommendations</li>
+                </ol>
+
+                <div class="alert alert-info">
+                    <h5><i class="fas fa-lightbulb me-2"></i>Scanning Tips</h5>
+                    <ul>
+                        <li>Wear form-fitting clothing for the most accurate results</li>
+                        <li>Stand in a neutral pose with arms slightly away from your sides</li>
+                        <li>Ensure good lighting and a clean background</li>
+                        <li>Follow your scanning app's instructions carefully</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-upload me-2"></i>Upload Your 3D Scan</h4>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('scan3d_upload') }}" method="post" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="scan_file" class="form-label">3D Scan File (OBJ, STL, PLY)</label>
+                        <input class="form-control" type="file" id="scan_file" name="scan_file" accept=".obj,.stl,.ply" required>
+                        <div class="form-text">Upload a 3D scan file created with a scanner app or device.</div>
+                    </div>
+                    
+                    <hr>
+                    <h5>Your Information</h5>
+                    
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label for="height" class="form-label">Height (cm)</label>
+                            <input type="number" class="form-control" id="height" name="height" placeholder="e.g., 175" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="weight" class="form-label">Weight (kg)</label>
+                            <input type="number" class="form-control" id="weight" name="weight" placeholder="e.g., 70" required>
+                        </div>
+                    </div>
+                    
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label for="gender" class="form-label">Gender</label>
+                            <select class="form-select" id="gender" name="gender" required>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="experience" class="form-label">Fitness Experience</label>
+                            <select class="form-select" id="experience" name="experience" required>
+                                <option value="beginner">Beginner (0-1 years)</option>
+                                <option value="intermediate">Intermediate (1-3 years)</option>
+                                <option value="advanced">Advanced (3+ years)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-primary" type="submit">
+                            <i class="fas fa-cube me-2"></i>Analyze 3D Scan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="fas fa-mobile-alt me-2"></i>Recommended Scanning Apps</h5>
+            </div>
+            <div class="card-body">
+                <h6>iOS (iPhone/iPad)</h6>
+                <ul>
+                    <li>3D Scanner App (requires LiDAR)</li>
+                    <li>Polycam</li>
+                    <li>Scandy Pro</li>
+                </ul>
+                
+                <h6>Android</h6>
+                <ul>
+                    <li>Trnio</li>
+                    <li>SCANN3D</li>
+                    <li>Qlone</li>
+                </ul>
+                
+                <div class="alert alert-light mt-3 mb-0">
+                    <small>Our system works best with scans from LiDAR-equipped devices or professional 3D scanners, but smartphone photogrammetry can also provide good results.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
