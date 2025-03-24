@@ -1472,7 +1472,7 @@ body {
 
 .card-body {
     padding: 1.2rem 1.8rem 1.5rem;
-    color: var(--text-light);
+    color: var(--text-dark); /* Changed from text-light to text-dark for better contrast on white backgrounds */
 }
 
 .card-footer {
