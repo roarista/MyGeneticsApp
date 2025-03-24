@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="300" height="600" viewBox="0 0 300 600" xmlns="http://www.w3.org/2000/svg">
+  <title>Human Body Side View Outline</title>
+  <style>
+    .body-outline {
+      fill: none;
+      stroke: rgba(41, 182, 246, 0.5);
+      stroke-width: 2;
+    }
+    .muscle-group {
+      fill: rgba(41, 182, 246, 0.1);
+      stroke: rgba(41, 182, 246, 0.3);
+      stroke-width: 1;
+    }
+  </style>
+  
+  <!-- Head outline -->
+  <circle cx="150" cy="50" r="30" class="body-outline" />
+  
+  <!-- Neck -->
+  <line x1="150" y1="80" x2="150" y2="100" class="body-outline" />
+  
+  <!-- Back and spine -->
+  <path d="M150,100 C130,120 130,180 130,270" class="body-outline" />
+  
+  <!-- Chest and abdomen -->
+  <path d="M150,100 C180,120 180,180 170,270" class="body-outline" />
+  
+  <!-- Glutes and hips -->
+  <path d="M130,270 C120,290 130,310 140,320" class="body-outline" />
+  <path d="M170,270 C180,290 170,310 160,320" class="body-outline" />
+  
+  <!-- Leg outline -->
+  <path d="M140,320 C130,380 130,450 140,470" class="body-outline" />
+  <path d="M160,320 C170,380 170,450 160,470" class="body-outline" />
+  
+  <!-- Calf -->
+  <path d="M140,470 C130,510 130,550 140,580" class="body-outline" />
+  <path d="M160,470 C170,510 170,550 160,580" class="body-outline" />
+  
+  <!-- Foot -->
+  <path d="M140,580 C130,590 100,590 90,580 C90,570 100,570 140,570" class="body-outline" />
+  
+  <!-- Shoulder -->
+  <path d="M150,100 C170,95 190,100 200,110" class="body-outline" />
+  
+  <!-- Arm -->
+  <path d="M200,110 C210,150 210,180 200,230" class="body-outline" />
+  
+  <!-- Forearm -->
+  <path d="M200,230 C190,260 190,280 200,310" class="body-outline" />
+  
+  <!-- Hand -->
+  <path d="M200,310 C210,320 220,320 230,310" class="body-outline" />
+  
+  <!-- Major muscle groups - side view -->
+  
+  <!-- Pectoral -->
+  <path d="M150,100 C160,110 170,130 170,150 C160,160 150,160 150,150 C150,130 150,110 150,100" class="muscle-group" />
+  
+  <!-- Shoulder (deltoid) -->
+  <path d="M150,100 C160,90 180,90 200,110 C190,120 180,120 170,110 C160,100 150,100 150,100" class="muscle-group" />
+  
+  <!-- Biceps -->
+  <path d="M200,110 C210,130 210,160 200,180 C190,170 190,140 200,110" class="muscle-group" />
+  
+  <!-- Triceps -->
+  <path d="M200,180 C210,190 210,210 200,230 C190,210 190,190 200,180" class="muscle-group" />
+  
+  <!-- Abdominals -->
+  <path d="M150,150 C160,170 170,200 170,230 C160,240 150,240 150,230 C150,200 150,170 150,150" class="muscle-group" />
+  
+  <!-- Back muscles -->
+  <path d="M150,100 C140,120 130,150 130,170 C140,180 150,180 150,170 C150,150 150,120 150,100" class="muscle-group" />
+  
+  <!-- Glutes -->
+  <path d="M130,270 C120,290 120,320 140,320 C150,310 150,280 130,270" class="muscle-group" />
+  
+  <!-- Quadriceps -->
+  <path d="M160,320 C170,350 170,400 160,430 C150,400 150,350 160,320" class="muscle-group" />
+  
+  <!-- Hamstrings -->
+  <path d="M140,320 C130,350 130,400 140,430 C150,400 150,350 140,320" class="muscle-group" />
+  
+  <!-- Calves -->
+  <path d="M140,470 C130,500 130,530 140,560 C150,530 150,500 140,470" class="muscle-group" />
+</svg>

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="300" height="600" viewBox="0 0 300 600" xmlns="http://www.w3.org/2000/svg">
+  <title>Human Body Outline</title>
+  <style>
+    .body-outline {
+      fill: none;
+      stroke: rgba(41, 182, 246, 0.5);
+      stroke-width: 2;
+    }
+    .muscle-group {
+      fill: rgba(41, 182, 246, 0.1);
+      stroke: rgba(41, 182, 246, 0.3);
+      stroke-width: 1;
+    }
+  </style>
+  
+  <!-- Head outline -->
+  <circle cx="150" cy="50" r="30" class="body-outline" />
+  
+  <!-- Neck -->
+  <line x1="150" y1="80" x2="150" y2="100" class="body-outline" />
+  
+  <!-- Shoulders -->
+  <path d="M150,100 C130,95 110,110 95,115" class="body-outline" />
+  <path d="M150,100 C170,95 190,110 205,115" class="body-outline" />
+  
+  <!-- Arms -->
+  <path d="M95,115 C85,150 75,200 85,230" class="body-outline" />
+  <path d="M205,115 C215,150 225,200 215,230" class="body-outline" />
+  
+  <!-- Forearms -->
+  <path d="M85,230 C80,260 75,280 80,310" class="body-outline" />
+  <path d="M215,230 C220,260 225,280 220,310" class="body-outline" />
+  
+  <!-- Hands -->
+  <ellipse cx="82" cy="315" rx="8" ry="15" class="body-outline" />
+  <ellipse cx="218" cy="315" rx="8" ry="15" class="body-outline" />
+  
+  <!-- Torso -->
+  <path d="M95,115 C110,180 125,230 125,270" class="body-outline" />
+  <path d="M205,115 C190,180 175,230 175,270" class="body-outline" />
+  <path d="M125,270 C130,290 145,300 150,300" class="body-outline" />
+  <path d="M175,270 C170,290 155,300 150,300" class="body-outline" />
+  
+  <!-- Upper chest (pectoral) muscle groups -->
+  <path d="M150,100 C140,110 130,125 125,140 C135,150 145,155 150,155 C155,155 165,150 175,140 C170,125 160,110 150,100" class="muscle-group" />
+  
+  <!-- Shoulders (deltoid) muscle groups -->
+  <path d="M95,115 C105,105 115,100 125,105 C125,115 120,125 110,130 C100,125 95,120 95,115" class="muscle-group" />
+  <path d="M205,115 C195,105 185,100 175,105 C175,115 180,125 190,130 C200,125 205,120 205,115" class="muscle-group" />
+  
+  <!-- Biceps muscle groups -->
+  <path d="M95,115 C90,140 85,170 85,195 C95,200 105,195 105,185 C105,160 100,130 95,115" class="muscle-group" />
+  <path d="M205,115 C210,140 215,170 215,195 C205,200 195,195 195,185 C195,160 200,130 205,115" class="muscle-group" />
+  
+  <!-- Abdominals muscle group -->
+  <path d="M130,155 C140,180 145,210 145,240 C155,240 160,210 170,155 C160,170 140,170 130,155" class="muscle-group" />
+  <ellipse cx="150" cy="170" rx="10" ry="5" class="muscle-group" />
+  <ellipse cx="150" cy="190" rx="10" ry="5" class="muscle-group" />
+  <ellipse cx="150" cy="210" rx="10" ry="5" class="muscle-group" />
+  
+  <!-- Legs -->
+  <path d="M125,270 C115,340 110,390 120,470" class="body-outline" />
+  <path d="M175,270 C185,340 190,390 180,470" class="body-outline" />
+  
+  <!-- Calves -->
+  <path d="M120,470 C115,510 115,550 120,580" class="body-outline" />
+  <path d="M180,470 C185,510 185,550 180,580" class="body-outline" />
+  
+  <!-- Feet -->
+  <path d="M120,580 C110,590 95,590 90,585 C90,575 95,565 120,565" class="body-outline" />
+  <path d="M180,580 C190,590 205,590 210,585 C210,575 205,565 180,565" class="body-outline" />
+  
+  <!-- Quadriceps muscle groups -->
+  <path d="M125,280 C120,320 118,360 120,400 C130,405 140,405 150,400 C145,360 135,320 125,280" class="muscle-group" />
+  <path d="M175,280 C180,320 182,360 180,400 C170,405 160,405 150,400 C155,360 165,320 175,280" class="muscle-group" />
+  
+  <!-- Calf muscle groups -->
+  <path d="M120,470 C110,500 110,530 120,560 C130,530 130,500 120,470" class="muscle-group" />
+  <path d="M180,470 C190,500 190,530 180,560 C170,530 170,500 180,470" class="muscle-group" />
+</svg>
