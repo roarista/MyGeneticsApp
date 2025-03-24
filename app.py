@@ -321,7 +321,7 @@ def scan3d_results(analysis_id):
             formatted_traits[trait_name] = trait_data
     
     return render_template(
-        'scan3d_results.html',
+        'scan3d_results_enhanced.html',
         analysis_id=analysis_id,
         traits=formatted_traits,
         recommendations=result['recommendations'],

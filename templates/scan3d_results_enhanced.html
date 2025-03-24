@@ -1,0 +1,376 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-5 mb-4">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-cube me-2"></i>3D Body Scan Analysis</h4>
+            </div>
+            <div class="card-body">
+                <div class="stats-container mb-4">
+                    <div class="stat-box">
+                        <div class="stat-value">{{ user_info.height }}</div>
+                        <div class="stat-label">Height (cm)</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">{{ user_info.weight }}</div>
+                        <div class="stat-label">Weight (kg)</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">{{ (user_info.weight / ((user_info.height / 100) ** 2))|round(1) }}</div>
+                        <div class="stat-label">BMI</div>
+                    </div>
+                </div>
+                
+                <h5 class="mb-3"><i class="fas fa-info-circle me-2 text-primary"></i>Your 3D Scan Details</h5>
+                <ul class="list-group mb-4">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-file-alt me-2"></i>Scan Format</span>
+                        <span class="badge bg-secondary">{{ scan_data.file_format|upper }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-calendar-alt me-2"></i>Scan Date</span>
+                        <span>{{ user_info.date if user_info.date else "Today" }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-venus-mars me-2"></i>Gender</span>
+                        <span class="badge bg-info measurement-badge">{{ user_info.gender|title }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-dumbbell me-2"></i>Training Experience</span>
+                        <span class="badge {% if user_info.experience == 'beginner' %}bg-success{% elif user_info.experience == 'intermediate' %}bg-primary{% else %}bg-warning{% endif %} measurement-badge">{{ user_info.experience|title }}</span>
+                    </li>
+                </ul>
+                
+                <div class="alert alert-info">
+                    <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Advanced Measurements</h6>
+                    <p class="mb-0 small">These measurements are extracted directly from your 3D body scan for maximum accuracy.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Body Composition Stats from 3D Analysis -->
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>3D Body Composition</h5>
+            </div>
+            <div class="card-body">
+                <div class="stats-container mb-4">
+                    {% if 'body_fat_percentage' in traits %}
+                    <div class="stat-box">
+                        {% set bf = traits.body_fat_percentage.value|float %}
+                        {% if bf < 10 %}
+                            {% set color = "primary" %}
+                        {% elif bf < 15 %}
+                            {% set color = "success" %}
+                        {% elif bf < 20 %}
+                            {% set color = "info" %}
+                        {% elif bf < 25 %}
+                            {% set color = "warning" %}
+                        {% else %}
+                            {% set color = "danger" %}
+                        {% endif %}
+                        <div class="stat-value text-{{ color }}">{{ bf|round(1) }}%</div>
+                        <div class="stat-label">Body Fat</div>
+                        <div class="progress mt-2" style="height: 5px;">
+                            <div class="progress-bar bg-{{ color }}" role="progressbar" style="width: {{ bf*2 }}%" aria-valuenow="{{ bf }}" aria-valuemin="0" aria-valuemax="50"></div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if 'muscle_mass_percentage' in traits %}
+                    <div class="stat-box">
+                        <div class="stat-value text-success">{{ traits.muscle_mass_percentage.value|round(1) }}%</div>
+                        <div class="stat-label">Muscle Mass</div>
+                        <div class="progress mt-2" style="height: 5px;">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: {{ traits.muscle_mass_percentage.value|float }}%" aria-valuenow="{{ traits.muscle_mass_percentage.value|float }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if 'bone_mass_percentage' in traits %}
+                    <div class="stat-box">
+                        <div class="stat-value text-info">{{ traits.bone_mass_percentage.value|round(1) }}%</div>
+                        <div class="stat-label">Bone Mass</div>
+                        <div class="progress mt-2" style="height: 5px;">
+                            <div class="progress-bar bg-info" role="progressbar" style="width: {{ traits.bone_mass_percentage.value|float * 5 }}%" aria-valuenow="{{ traits.bone_mass_percentage.value|float }}" aria-valuemin="0" aria-valuemax="20"></div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if 'lean_mass_percentage' in traits %}
+                    <div class="stat-box">
+                        <div class="stat-value text-primary">{{ traits.lean_mass_percentage.value|round(1) }}%</div>
+                        <div class="stat-label">Lean Mass</div>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <h5 class="mb-3"><i class="fas fa-balance-scale me-2 text-info"></i>Body Composition</h5>
+                {% if 'total_body_volume' in traits and 'lean_mass_volume' in traits and 'fat_mass_volume' in traits %}
+                <div class="stats-container mb-4">
+                    <div class="stat-box">
+                        <div class="stat-value">{{ traits.total_body_volume.value|round(1) }}</div>
+                        <div class="stat-label">{{ traits.total_body_volume.unit }}</div>
+                        <div class="small text-muted">Total Volume</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">{{ traits.lean_mass_volume.value|round(1) }}</div>
+                        <div class="stat-label">{{ traits.lean_mass_volume.unit }}</div>
+                        <div class="small text-muted">Lean Mass</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">{{ traits.fat_mass_volume.value|round(1) }}</div>
+                        <div class="stat-label">{{ traits.fat_mass_volume.unit }}</div>
+                        <div class="small text-muted">Fat Mass</div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-7">
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="fas fa-ruler me-2"></i>3D Precise Measurements</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Measurement</th>
+                                <th>Value</th>
+                                <th>Rating</th>
+                                <th>Impact</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Circumference Measurements -->
+                            {% for measurement in ['chest_circumference', 'waist_circumference', 'hip_circumference', 'thigh_circumference', 'calf_circumference', 'arm_circumference', 'wrist_circumference', 'neck_circumference'] %}
+                                {% if measurement in traits %}
+                                    <tr>
+                                        <td>{{ ' '.join(measurement.split('_')).title() }}</td>
+                                        <td>
+                                            {{ traits[measurement].display_value }}
+                                        </td>
+                                        <td>
+                                            <div class="rating-badge-container">
+                                                {% if 'rating' in traits[measurement] %}
+                                                    {% if traits[measurement].rating == 'excellent' %}
+                                                        <span class="badge bg-success rating-badge">Excellent</span>
+                                                        <div class="rating-progress">
+                                                            <div class="progress-bar bg-success" role="progressbar" style="width: 90%" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100"></div>
+                                                        </div>
+                                                    {% elif traits[measurement].rating == 'good' %}
+                                                        <span class="badge bg-info rating-badge">Good</span>
+                                                        <div class="rating-progress">
+                                                            <div class="progress-bar bg-info" role="progressbar" style="width: 75%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+                                                        </div>
+                                                    {% elif traits[measurement].rating == 'average' %}
+                                                        <span class="badge bg-warning rating-badge">Average</span>
+                                                        <div class="rating-progress">
+                                                            <div class="progress-bar bg-warning" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+                                                        </div>
+                                                    {% elif traits[measurement].rating == 'below_average' %}
+                                                        <span class="badge bg-danger rating-badge">Below Average</span>
+                                                        <div class="rating-progress">
+                                                            <div class="progress-bar bg-danger" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                                                        </div>
+                                                    {% else %}
+                                                        <span class="badge bg-secondary rating-badge">Info</span>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <span class="badge bg-secondary rating-badge">Info</span>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            {% if measurement == 'chest_circumference' %}
+                                                Impacts upper body development and breathing capacity
+                                            {% elif measurement == 'waist_circumference' %}
+                                                Key indicator of metabolic health and core development
+                                            {% elif measurement == 'hip_circumference' %}
+                                                Influences lower body power generation and stability
+                                            {% elif measurement == 'thigh_circumference' %}
+                                                Related to lower body strength and power
+                                            {% elif measurement == 'calf_circumference' %}
+                                                Affects running performance and ankle stability
+                                            {% elif measurement == 'arm_circumference' %}
+                                                Indicator of upper body strength
+                                            {% elif measurement == 'wrist_circumference' %}
+                                                Helps determine natural frame size
+                                            {% elif measurement == 'neck_circumference' %}
+                                                Related to upper back development and posture
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            <!-- Structural Measurements -->
+                            {% for measurement in ['shoulder_width', 'arm_length', 'leg_length', 'torso_length', 'shoulder_hip_ratio', 'waist_hip_ratio', 'arm_torso_ratio'] %}
+                                {% if measurement in traits %}
+                                    <tr>
+                                        <td>{{ ' '.join(measurement.split('_')).title() }}</td>
+                                        <td>
+                                            {{ traits[measurement].display_value }}
+                                        </td>
+                                        <td>
+                                            <div class="rating-badge-container">
+                                                {% if 'rating' in traits[measurement] %}
+                                                    {% if traits[measurement].rating == 'excellent' %}
+                                                        <span class="badge bg-success rating-badge">Excellent</span>
+                                                        <div class="rating-progress">
+                                                            <div class="progress-bar bg-success" role="progressbar" style="width: 90%" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100"></div>
+                                                        </div>
+                                                    {% elif traits[measurement].rating == 'good' %}
+                                                        <span class="badge bg-info rating-badge">Good</span>
+                                                        <div class="rating-progress">
+                                                            <div class="progress-bar bg-info" role="progressbar" style="width: 75%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+                                                        </div>
+                                                    {% elif traits[measurement].rating == 'average' %}
+                                                        <span class="badge bg-warning rating-badge">Average</span>
+                                                        <div class="rating-progress">
+                                                            <div class="progress-bar bg-warning" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+                                                        </div>
+                                                    {% elif traits[measurement].rating == 'below_average' %}
+                                                        <span class="badge bg-danger rating-badge">Below Average</span>
+                                                        <div class="rating-progress">
+                                                            <div class="progress-bar bg-danger" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                                                        </div>
+                                                    {% else %}
+                                                        <span class="badge bg-secondary rating-badge">Info</span>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <span class="badge bg-secondary rating-badge">Info</span>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            {% if measurement == 'shoulder_width' %}
+                                                Determines upper body frame and V-taper potential
+                                            {% elif measurement == 'arm_length' %}
+                                                Affects leverage in pulling movements
+                                            {% elif measurement == 'leg_length' %}
+                                                Influences squatting mechanics and running stride
+                                            {% elif measurement == 'torso_length' %}
+                                                Impacts deadlift performance and core stability
+                                            {% elif measurement == 'shoulder_hip_ratio' %}
+                                                Key indicator of classic V-taper proportions
+                                            {% elif measurement == 'waist_hip_ratio' %}
+                                                Important health metric and aesthetic indicator
+                                            {% elif measurement == 'arm_torso_ratio' %}
+                                                Affects optimal exercise selection for your proportions
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            <!-- Volume Measurements -->
+                            {% for measurement in ['total_body_volume', 'lean_mass_volume', 'fat_mass_volume'] %}
+                                {% if measurement in traits %}
+                                    <tr>
+                                        <td>{{ ' '.join(measurement.split('_')).title() }}</td>
+                                        <td>
+                                            {{ traits[measurement].display_value }}
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary rating-badge">Info</span>
+                                        </td>
+                                        <td>
+                                            {% if measurement == 'total_body_volume' %}
+                                                Overall body size indicator
+                                            {% elif measurement == 'lean_mass_volume' %}
+                                                Metabolically active tissue volume
+                                            {% elif measurement == 'fat_mass_volume' %}
+                                                Energy storage indicator
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recommendations from 3D Analysis -->
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-lightbulb me-2"></i>Personalized Recommendations</h5>
+            </div>
+            <div class="card-body">
+                <h5 class="mb-3">Your Body Type: {{ recommendations.body_type|title }}</h5>
+                
+                {% if recommendations.traits_description %}
+                <div class="body-description mb-4">
+                    {{ recommendations.traits_description|safe }}
+                </div>
+                {% endif %}
+                
+                <h5 class="mt-4 mb-3">Recommended Focus Areas</h5>
+                <ul class="feature-list">
+                    {% for focus in recommendations.focus_areas %}
+                    <li>
+                        <div class="d-flex">
+                            <div class="feature-icon rounded bg-light me-3">
+                                <i class="fas fa-bullseye text-primary"></i>
+                            </div>
+                            <div>
+                                <h6>{{ focus.area }}</h6>
+                                <p class="text-muted mb-0">{{ focus.description }}</p>
+                            </div>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                
+                <h5 class="mt-4 mb-3">Recommended Exercise Plan</h5>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Day</th>
+                                <th>Focus</th>
+                                <th>Exercises</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for day in recommendations.workout_plan %}
+                                <tr>
+                                    <td>{{ day.day }}</td>
+                                    <td>{{ day.focus }}</td>
+                                    <td>
+                                        <ul class="mb-0 ps-3">
+                                            {% for exercise in day.exercises %}
+                                            <li>{{ exercise }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Add measurement-badge class to all badge elements in the table
+    document.addEventListener('DOMContentLoaded', function() {
+        const badges = document.querySelectorAll('.table .badge');
+        badges.forEach(badge => {
+            badge.classList.add('measurement-badge');
+        });
+    });
+</script>
+{% endblock %}
