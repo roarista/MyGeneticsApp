@@ -52,6 +52,14 @@
                         </button>
                         <div id="selected_file" class="mt-3"></div>
                         
+                        <!-- Upload progress indicator -->
+                        <div id="upload_progress_container" class="upload-progress-container mt-3">
+                            <div class="upload-progress">
+                                <div id="upload_progress_bar" class="upload-progress-bar"></div>
+                            </div>
+                            <div id="upload_status" class="small text-muted">Processing file...</div>
+                        </div>
+                        
                         <div class="mt-3">
                             <span class="scan-format-badge">
                                 <i class="fas fa-check-circle me-1"></i>OBJ
@@ -142,7 +150,11 @@
         const fileInput = document.getElementById('scan_file');
         const browseButton = document.getElementById('browse_button');
         const selectedFileDiv = document.getElementById('selected_file');
-
+        const uploadForm = document.querySelector('form');
+        const uploadProgressContainer = document.getElementById('upload_progress_container');
+        const uploadProgressBar = document.getElementById('upload_progress_bar');
+        const uploadStatus = document.getElementById('upload_status');
+        
         // Click the file input when the browse button is clicked
         browseButton.addEventListener('click', function() {
             fileInput.click();
@@ -160,6 +172,22 @@
         fileInput.addEventListener('change', function() {
             if (fileInput.files.length > 0) {
                 const file = fileInput.files[0];
+                // Validate file type
+                const fileExtension = file.name.split('.').pop().toLowerCase();
+                const validExtensions = ['obj', 'stl', 'ply'];
+                
+                if (!validExtensions.includes(fileExtension)) {
+                    // Show error for invalid file type
+                    selectedFileDiv.innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Invalid file type. Please upload .obj, .stl, or .ply files.
+                        </div>
+                    `;
+                    dropzone.classList.remove('border-success');
+                    return;
+                }
+                
                 // Show selected file info
                 selectedFileDiv.innerHTML = `
                     <div class="alert alert-success">
@@ -221,6 +249,42 @@
             else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
             else return (bytes / 1048576).toFixed(1) + ' MB';
         }
+        
+        // Handle form submission with progress simulation
+        uploadForm.addEventListener('submit', function(e) {
+            // Only proceed if a file is selected
+            if (fileInput.files.length === 0) {
+                return;
+            }
+            
+            // Show progress container
+            uploadProgressContainer.classList.add('active');
+            
+            // Simulate progress (in a real app, this would use actual upload progress)
+            let progress = 0;
+            const submitButton = uploadForm.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<i class="fas fa-spin fa-spinner me-2"></i>Processing...';
+            
+            const interval = setInterval(function() {
+                progress += 5;
+                uploadProgressBar.style.width = `${progress}%`;
+                
+                if (progress < 30) {
+                    uploadStatus.textContent = 'Uploading scan file...';
+                } else if (progress < 70) {
+                    uploadStatus.textContent = 'Processing 3D model...';
+                } else if (progress < 95) {
+                    uploadStatus.textContent = 'Analyzing body measurements...';
+                } else {
+                    uploadStatus.textContent = 'Finalizing results...';
+                    clearInterval(interval);
+                }
+            }, 150);
+            
+            // Allow form submission to continue normally
+            // The server will handle the actual processing
+        });
     });
 </script>
 {% endblock %}
