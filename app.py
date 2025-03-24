@@ -50,6 +50,10 @@ from utils.recommendations import generate_recommendations
 from utils.units import format_trait_value, get_unit
 from utils.body_scan_3d import process_3d_scan, is_valid_3d_scan_file
 
+# Import and register blueprints
+from admin import admin_bp
+app.register_blueprint(admin_bp)
+
 # Configure upload settings
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 ALLOWED_3D_EXTENSIONS = {'obj', 'stl', 'ply'}
@@ -451,105 +455,179 @@ def get_traits_data(analysis_id):
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     """Display login page and process login form submissions"""
+    # Redirect if user is already logged in
+    if current_user.is_authenticated:
+        return redirect(url_for('profile'))
+        
     if request.method == 'POST':
-        # In a real implementation, this would validate against a database
         email = request.form.get('email')
         password = request.form.get('password')
         remember = 'remember' in request.form
         
-        # For demo purposes, accept any login
-        flash('Login successful!', 'success')
-        session['logged_in'] = True
-        session['user_email'] = email
-        session['user_name'] = email.split('@')[0]  # Simple name extraction from email
-        return redirect(url_for('profile'))
+        # Query the database for the user
+        from models import User
+        user = User.query.filter_by(email=email).first()
+        
+        if user and user.check_password(password):
+            # Login the user with Flask-Login
+            login_user(user, remember=remember)
+            flash('Login successful!', 'success')
+            
+            # Redirect to the page the user was trying to access
+            next_page = request.args.get('next')
+            if not next_page or not next_page.startswith('/'):
+                next_page = url_for('profile')
+            return redirect(next_page)
+        else:
+            flash('Invalid email or password. Please try again.', 'danger')
     
     return render_template('login.html')
 
+# Placeholder for Google OAuth implementation
 @app.route('/google_login')
 def google_login():
     """Start Google OAuth login process"""
     # In a real implementation, this would redirect to Google OAuth
     flash('Google login would be implemented with OAuth in production.', 'info')
-    session['logged_in'] = True
-    session['user_email'] = 'user@example.com'
-    session['user_name'] = 'Google User'
+    
+    # For demo purposes, create a demo user if not exists
+    from models import User
+    demo_email = 'googleuser@example.com'
+    demo_user = User.query.filter_by(email=demo_email).first()
+    
+    if not demo_user:
+        demo_user = User(username='Google User', email=demo_email)
+        demo_user.set_password('demo_password')  # In real OAuth, we wouldn't set a password
+        db.session.add(demo_user)
+        db.session.commit()
+    
+    login_user(demo_user)
     return redirect(url_for('profile'))
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     """Display signup page and process signup form submissions"""
+    # Redirect if user is already logged in
+    if current_user.is_authenticated:
+        return redirect(url_for('profile'))
+        
     if request.method == 'POST':
-        # In a real implementation, this would create a user in the database
         fullname = request.form.get('fullname')
         email = request.form.get('email')
         password = request.form.get('password')
         
-        # For demo purposes, accept any signup
+        # Check if user already exists
+        from models import User
+        existing_user = User.query.filter_by(email=email).first()
+        
+        if existing_user:
+            flash('Email already registered. Please log in.', 'warning')
+            return redirect(url_for('login'))
+        
+        # Create new user
+        new_user = User(username=fullname, email=email)
+        new_user.set_password(password)
+        
+        # Add to database
+        db.session.add(new_user)
+        db.session.commit()
+        
+        # Log in the new user
+        login_user(new_user)
         flash('Account created successfully!', 'success')
-        session['logged_in'] = True
-        session['user_email'] = email
-        session['user_name'] = fullname
         return redirect(url_for('profile'))
     
     return render_template('signup.html')
 
 @app.route('/logout')
+@login_required
 def logout():
     """Process user logout"""
-    session.clear()
+    logout_user()
     flash('You have been logged out.', 'info')
     return redirect(url_for('index'))
 
 @app.route('/profile')
+@login_required
 def profile():
     """Display user profile page"""
-    # Check if user is logged in
-    if not session.get('logged_in'):
-        flash('Please log in to view your profile.', 'warning')
-        return redirect(url_for('login'))
+    # Get the current user and their analyses from the database
+    from models import Analysis
     
-    # Create a mock user for demo purposes
-    user = {
-        'fullname': session.get('user_name', 'John Doe'),
-        'email': session.get('user_email', 'john.doe@example.com'),
-        'joined': 'March 2025',
-        'height': 178,
-        'weight': 75,
-        'gender': 'male',
-        'age': 30,
-        'experience': 'intermediate',
-        'goal': 'gain_muscle',
-        'analyses': [
-            {'id': 'abc123', 'date': 'Mar 24, 2025', 'type': 'photo'},
-            {'id': 'def456', 'date': 'Mar 22, 2025', 'type': '3d_scan'},
-            {'id': 'ghi789', 'date': 'Mar 15, 2025', 'type': 'photo'}
-        ]
+    # Get user's analyses
+    analyses = Analysis.query.filter_by(user_id=current_user.id).order_by(Analysis.analysis_date.desc()).all()
+    
+    # Format analyses for the template
+    formatted_analyses = []
+    for analysis in analyses:
+        formatted_analyses.append({
+            'id': analysis.id,
+            'date': analysis.analysis_date.strftime("%b %d, %Y"),
+            'type': analysis.analysis_type
+        })
+    
+    # Construct user data for the template
+    user_data = {
+        'fullname': current_user.username,
+        'email': current_user.email,
+        'joined': current_user.created_at.strftime("%B %Y"),
+        'height': current_user.height_cm or 0,
+        'weight': current_user.weight_kg or 0,
+        'gender': current_user.gender or 'male',
+        'experience': current_user.experience_level or 'beginner',
+        'analyses': formatted_analyses
     }
     
-    return render_template('profile.html', user=user)
+    return render_template('profile.html', user=user_data)
 
 @app.route('/update_body_info', methods=['POST'])
+@login_required
 def update_body_info():
     """Update user body information"""
-    # Check if user is logged in
-    if not session.get('logged_in'):
-        return jsonify({'status': 'error', 'message': 'Not logged in'}), 401
+    # Get form data
+    height = request.form.get('height', 0)
+    weight = request.form.get('weight', 0)
+    gender = request.form.get('gender', 'male')
+    experience = request.form.get('experience', 'beginner')
     
-    # In a real implementation, this would update the user in the database
-    # For demo purposes, just return success
+    # Update user in database
+    current_user.height_cm = float(height) if height else None
+    current_user.weight_kg = float(weight) if weight else None
+    current_user.gender = gender
+    current_user.experience_level = experience
+    
+    db.session.commit()
+    
+    flash('Body information updated successfully!', 'success')
     return redirect(url_for('profile'))
 
 @app.route('/account_settings')
+@login_required
 def account_settings():
     """Display account settings page"""
-    # Check if user is logged in
-    if not session.get('logged_in'):
-        flash('Please log in to view your account settings.', 'warning')
-        return redirect(url_for('login'))
+    # Get any notification or privacy settings
+    from models import NotificationSetting, PrivacySetting
     
-    # In a real implementation, this would retrieve the user from the database
-    return render_template('account_settings.html')
+    # Get or create notification settings
+    notification_settings = NotificationSetting.query.filter_by(user_id=current_user.id).first()
+    if not notification_settings:
+        notification_settings = NotificationSetting(user_id=current_user.id)
+        db.session.add(notification_settings)
+        db.session.commit()
+    
+    # Get or create privacy settings
+    privacy_settings = PrivacySetting.query.filter_by(user_id=current_user.id).first()
+    if not privacy_settings:
+        privacy_settings = PrivacySetting(user_id=current_user.id)
+        db.session.add(privacy_settings)
+        db.session.commit()
+    
+    return render_template(
+        'account_settings.html',
+        user=current_user,
+        notification_settings=notification_settings,
+        privacy_settings=privacy_settings
+    )
 
 @app.route('/recommendations/<analysis_id>')
 def recommendations(analysis_id):
