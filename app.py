@@ -523,7 +523,7 @@ def account_settings():
         return redirect(url_for('login'))
     
     # In a real implementation, this would retrieve the user from the database
-    return render_template('profile.html')  # Reuse profile template for now
+    return render_template('account_settings.html')
 
 @app.route('/recommendations/<analysis_id>')
 def recommendations(analysis_id):
