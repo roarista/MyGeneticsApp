@@ -3,41 +3,48 @@
 /* Overall styling */
 :root {
     /* Primary colors */
-    --primary-blue: #007aff;
-    --primary-teal: #5ac8fa;
-    --primary-green: #34c759;
-    --primary-yellow: #ffcc00;
-    --primary-orange: #ff9500;
-    --primary-red: #ff3b30;
-    --primary-purple: #af52de;
+    --primary-blue: #0066cc;  /* Darker blue for better contrast */
+    --primary-teal: #008080;  /* Darker teal for better contrast */
+    --primary-green: #2d9d4e;  /* Darker green for better contrast */
+    --primary-yellow: #cc9900;  /* Darker yellow for better contrast */
+    --primary-orange: #dd7500;  /* Darker orange for better contrast */
+    --primary-red: #d9291c;  /* Darker red for better contrast */
+    --primary-purple: #8a2be2;  /* Adjusted purple for better contrast */
     
     /* Background colors */
     --white-bg: #ffffff;
-    --light-bg: #f5f5f7;
+    --light-bg: #f0f0f4;
     --card-bg: #ffffff;
     --panel-bg: rgba(255, 255, 255, 0.95);
     --overlay-bg: rgba(245, 245, 247, 0.9);
     
     /* Text colors */
-    --text-dark: #1d1d1f;
-    --text-medium: #515154;
-    --text-light: #86868b;
-    --text-muted: #aeaeb2;
+    --text-dark: #000000;  /* Full black for maximum contrast */
+    --text-medium: #333333;  /* Darker for better contrast */
+    --text-light: #555555;  /* Darker for better contrast */
+    --text-muted: #777777;  /* Darker for better contrast */
     
     /* Fitness-specific colors */
-    --muscle-color: #ff3b30;
-    --protein-color: #007aff;
-    --energy-color: #ffcc00;
-    --recovery-color: #34c759;
-    --progress-color: #af52de;
+    --muscle-color: #d9291c;  /* Darker red for better contrast */
+    --protein-color: #0066cc;  /* Darker blue for better contrast */
+    --energy-color: #cc9900;  /* Darker yellow for better contrast */
+    --recovery-color: #2d9d4e;  /* Darker green for better contrast */
+    --progress-color: #8a2be2;  /* Adjusted purple for better contrast */
+    
+    /* Trait badge colors (neon colors adjusted for white background) */
+    --neon-green: #2d9d4e;  /* Darker green for better contrast */
+    --neon-blue: #0066cc;   /* Darker blue for better contrast */
+    --energy-yellow: #cc9900;  /* Darker yellow for better contrast */
+    --power-orange: #dd7500;  /* Darker orange for better contrast */
+    --neon-red: #d9291c;    /* Darker red for better contrast */
     
     /* Gradients */
-    --accent-gradient: linear-gradient(135deg, #007aff, #5ac8fa);
-    --accent-gradient-alt: linear-gradient(135deg, #34c759, #5ac8fa);
-    --accent-gradient-warm: linear-gradient(135deg, #ff9500, #ff3b30);
-    --progress-gradient: linear-gradient(135deg, #34c759, #5ac8fa);
-    --strength-gradient: linear-gradient(135deg, #ff9500, #ff3b30);
-    --fitness-gradient: linear-gradient(45deg, #34c759, #007aff);
+    --accent-gradient: linear-gradient(135deg, #0066cc, #0099cc);  /* Darker blue gradient */
+    --accent-gradient-alt: linear-gradient(135deg, #2d9d4e, #0099cc);  /* Darker green-blue gradient */
+    --accent-gradient-warm: linear-gradient(135deg, #dd7500, #d9291c);  /* Darker orange-red gradient */
+    --progress-gradient: linear-gradient(135deg, #2d9d4e, #0099cc);  /* Darker green-blue gradient */
+    --strength-gradient: linear-gradient(135deg, #dd7500, #d9291c);  /* Darker orange-red gradient */
+    --fitness-gradient: linear-gradient(45deg, #2d9d4e, #0066cc);  /* Darker green-blue gradient */
     
     /* Effects */
     --soft-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
@@ -154,33 +161,33 @@ body {
 }
 
 .trait-badge-excellent {
-    background-color: rgba(57, 255, 20, 0.15);
+    background-color: rgba(45, 157, 78, 0.15);  /* Green background with better contrast */
     color: var(--neon-green);
-    border-color: rgba(57, 255, 20, 0.3);
+    border-color: rgba(45, 157, 78, 0.3);
 }
 
 .trait-badge-good {
-    background-color: rgba(0, 229, 255, 0.15);
+    background-color: rgba(0, 102, 204, 0.15);  /* Blue background with better contrast */
     color: var(--neon-blue);
-    border-color: rgba(0, 229, 255, 0.3);
+    border-color: rgba(0, 102, 204, 0.3);
 }
 
 .trait-badge-average {
-    background-color: rgba(255, 201, 60, 0.15);
+    background-color: rgba(204, 153, 0, 0.15);  /* Yellow background with better contrast */
     color: var(--energy-yellow);
-    border-color: rgba(255, 201, 60, 0.3);
+    border-color: rgba(204, 153, 0, 0.3);
 }
 
 .trait-badge-below-average {
-    background-color: rgba(255, 140, 0, 0.15);
+    background-color: rgba(221, 117, 0, 0.15);  /* Orange background with better contrast */
     color: var(--power-orange);
-    border-color: rgba(255, 140, 0, 0.3);
+    border-color: rgba(221, 117, 0, 0.3);
 }
 
 .trait-badge-poor {
-    background-color: rgba(255, 8, 68, 0.15);
+    background-color: rgba(217, 41, 28, 0.15);  /* Red background with better contrast */
     color: var(--neon-red);
-    border-color: rgba(255, 8, 68, 0.3);
+    border-color: rgba(217, 41, 28, 0.3);
 }
 
 /* Muscle group badges */
