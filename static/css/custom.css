@@ -1857,7 +1857,7 @@ tr.highlight {
 
 .file-upload-text {
     margin-bottom: 1.8rem;
-    color: var(--text-medium);
+    color: var(--text-light); /* Changed from text-medium to text-light for better contrast */
     font-size: 1rem;
     max-width: 500px;
     margin-left: auto;
@@ -1865,6 +1865,7 @@ tr.highlight {
     line-height: 1.6;
     position: relative;
     z-index: 1;
+    font-weight: 500;
 }
 
 .file-upload-container input[type="file"],
@@ -2306,10 +2307,11 @@ tr.highlight {
 
 .meal-description {
     flex: 0 0 100%;
-    color: var(--text-medium);
+    color: var(--text-light); /* Changed from text-medium to text-light for better contrast */
     margin-bottom: 1.2rem;
     line-height: 1.6;
     font-size: 0.95rem;
+    font-weight: 500;
 }
 
 .meal-macros {
@@ -2334,9 +2336,10 @@ tr.highlight {
 .food-list li {
     margin-bottom: 0.8rem;
     line-height: 1.5;
-    color: var(--text-medium);
+    color: var(--text-light); /* Changed from text-medium to text-light for better contrast */
     position: relative;
     padding-left: 1.2rem;
+    font-weight: 500;
 }
 
 .food-list li::before {
@@ -2416,11 +2419,12 @@ tr.highlight {
 .supplement-benefit {
     font-size: 0.9rem;
     font-style: italic;
-    color: var(--text-medium);
+    color: var(--text-light); /* Changed from text-medium to text-light for better contrast */
     line-height: 1.6;
     margin-top: 0.8rem;
     padding-top: 0.8rem;
     border-top: 1px solid rgba(41, 182, 246, 0.1);
+    font-weight: 500;
 }
 
 /* Nutrition stats - Futuristic Dark Theme */
@@ -2454,10 +2458,11 @@ tr.highlight {
 .nutrition-label {
     display: block;
     font-size: 0.8rem;
-    color: var(--text-medium);
+    color: var(--text-light); /* Changed from text-medium to text-light for better contrast */
     margin-bottom: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 1px;
+    font-weight: 600;
 }
 
 .nutrition-value {
@@ -2523,7 +2528,8 @@ tr.highlight {
 }
 
 .macro-value {
-    color: var(--text-medium);
+    color: var(--text-light); /* Changed from text-medium to text-light for better contrast */
+    font-weight: 500;
 }
 
 .macro-progress-bg {
