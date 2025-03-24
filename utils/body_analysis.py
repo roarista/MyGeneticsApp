@@ -198,90 +198,138 @@ def analyze_body_traits(landmarks, height_cm=0.0, weight_kg=0.0):
             # Calculate body surface area estimation
             bsa = 0.007184 * (height_cm ** 0.725) * (weight_kg ** 0.425) if height_cm > 0 and weight_kg > 0 else 1.5
             
-            # Method 1: Enhanced body composition analysis using multiple anthropometric measures
-            # This method uses a comprehensive approach with visual cues and proportions
+            # Method: Enhanced body composition analysis with direct abdominal assessment
+            # This approach prioritizes abdominal definition and focuses on accurate assessment
             
-            # Key visual indicators of body fat levels
-            # 1. Waist-to-hip ratio (higher = more visceral fat)
-            # 2. Shoulder-to-waist ratio (higher = more muscle, less fat)
-            # 3. Muscle definition visibility (estimated from body proportions)
-            # 4. Chest-to-waist ratio (higher = less fat)
+            # First, analyze the abdominal region using our detailed function
+            ab_analysis = analyze_abdominal_insertion(landmarks)
+            definition_level = ab_analysis.get('definition', 'undefined')
+            definition_score = ab_analysis.get('definition_score', 0)
             
-            # Base body fat estimate from BMI
-            # The relationship between BMI and body fat is non-linear
-            if bmi < 18.5:  # Underweight
-                base_bf = 10 + (bmi - 15) * 1.2
-            elif bmi < 25:  # Normal weight
-                base_bf = 15 + (bmi - 18.5) * 1.5
-            elif bmi < 30:  # Overweight
-                base_bf = 25 + (bmi - 25) * 1.8
-            else:  # Obese
-                base_bf = 33 + (bmi - 30) * 1.2
-                
-            # Adjustments based on body proportions indicating muscle mass
-            muscle_indicator = shoulder_to_waist * 0.7 + chest_to_waist * 0.3
-            
-            # Progressive muscle adjustment: more significant correction for more muscular builds
-            if muscle_indicator > 1.6:  # Very muscular
-                muscle_adjustment = -12.0
-            elif muscle_indicator > 1.4:  # Athletic
-                muscle_adjustment = -8.0
-            elif muscle_indicator > 1.3:  # Above average muscle
-                muscle_adjustment = -5.0
-            elif muscle_indicator > 1.2:  # Slightly more muscular
-                muscle_adjustment = -3.0
-            elif muscle_indicator < 1.05:  # Below average muscle
-                muscle_adjustment = 3.0
-            else:  # Average
-                muscle_adjustment = 0.0
-                
-            # Fat distribution pattern analysis
-            # Calculate upper-to-lower body ratio (higher = more upper body focused)
-            upper_body_width = (shoulder_width + chest_width) / 2
-            lower_body_width = (hip_width + waist_width) / 2
-            upper_lower_ratio = upper_body_width / lower_body_width
-            
-            # Calculate torso fat estimate using waist-to-height ratio
-            # (Research shows this is one of the best predictors of body fat)
+            # 1. Calculate waist-to-height ratio (key clinical indicator of visceral fat)
             waist_to_height = waist_width / (height_cm / 100)
-            torso_fat_estimate = (waist_to_height * 100 - 35) * 0.7
             
-            # Calculate visual definition adjustment based on body proportions
-            # Higher ratios suggest more visible muscle definition (lower body fat)
-            visual_definition = ((shoulder_to_waist + chest_to_waist) / 2) * 5
-            visual_adjustment = -1 * (visual_definition - 5)
+            # 2. Calculate abdominal-to-hip ratio (lower = less abdominal fat)
+            abdominal_hip_ratio = waist_width / hip_width if hip_width > 0 else 1.0
             
-            # Limb-to-torso ratio (higher = more limb dominant, typically leaner)
-            limb_torso_ratio = (arm_length + leg_length) / (2 * torso_length)
-            limb_adjustment = -3 * (limb_torso_ratio - 1.2)
+            # 3. Calculate abdominal-to-shoulder ratio (lower = better V-taper, typically less fat)
+            abdominal_shoulder_ratio = waist_width / shoulder_width if shoulder_width > 0 else 1.0
             
-            # Combine all factors with appropriate weighting
-            # Base from BMI (40%) + Visual indicators (60%)
+            # 4. Estimate body fat directly from abdominal definition score
+            # This is now our primary method using our detailed abdominal analysis
+            
+            # Body fat estimate based on abdominal definition
+            # Higher definition score = lower body fat
+            # Scale: 0-14 points maps to approximately 35%-5% body fat
+            if definition_score >= 12:  # Highly defined abs (12-14 points)
+                # Range: 5-10% body fat (visible six-pack)
+                ab_definition_bf = 10 - ((definition_score - 12) * 1.7)
+            elif definition_score >= 9:  # Moderately defined abs (9-11 points)
+                # Range: 11-15% body fat (partial ab definition)
+                ab_definition_bf = 15 - ((definition_score - 9) * 1.3)
+            elif definition_score >= 6:  # Slightly defined abs (6-8 points)
+                # Range: 16-22% body fat (beginning ab outlines)
+                ab_definition_bf = 22 - ((definition_score - 6) * 2.0)
+            elif definition_score >= 3:  # Minimal definition (3-5 points)
+                # Range: 23-28% body fat
+                ab_definition_bf = 28 - ((definition_score - 3) * 1.7)
+            else:  # No definition (0-2 points)
+                # Range: 29-35% body fat
+                ab_definition_bf = 35 - (definition_score * 3)
+            
+            # Secondary method: Use body proportions for validation
+            # Start with moderate estimate and adjust based on proportions
+            if shoulder_to_waist > 1.5:  # V-shaped torso, likely visible abs
+                proportion_bf = 12
+            elif shoulder_to_waist > 1.3:  # Athletic build
+                proportion_bf = 16
+            elif shoulder_to_waist > 1.15:  # Average athletic build
+                proportion_bf = 20
+            elif shoulder_to_waist > 1.0:  # Average build
+                proportion_bf = 24
+            else:  # Below average shoulder-to-waist ratio
+                proportion_bf = 28
+            
+            # Apply clinical waist-to-height adjustment
+            if waist_to_height < 0.4:  # Extremely lean
+                waist_adjustment = -7
+            elif waist_to_height < 0.45:  # Very lean
+                waist_adjustment = -5
+            elif waist_to_height < 0.5:  # Lean/athletic
+                waist_adjustment = -2
+            elif waist_to_height > 0.6:  # High visceral fat
+                waist_adjustment = 8
+            elif waist_to_height > 0.55:  # Above average fat
+                waist_adjustment = 5
+            elif waist_to_height > 0.52:  # Slightly above average
+                waist_adjustment = 2
+            else:  # Average
+                waist_adjustment = 0
+            
+            proportion_bf += waist_adjustment
+            
+            # Muscle mass indicator based on body proportions
+            muscle_indicator = (chest_to_waist * 0.3) + (shoulder_to_waist * 0.7)
+            
+            # Adjust for muscle mass based on proportions
+            if muscle_indicator > 1.6:  # Bodybuilder physique
+                muscle_adjustment = -6  # Very muscular with visible definition
+            elif muscle_indicator > 1.4:  # Very athletic
+                muscle_adjustment = -4
+            elif muscle_indicator > 1.3:  # Athletic
+                muscle_adjustment = -2
+            elif muscle_indicator > 1.2:  # Above average
+                muscle_adjustment = -1
+            elif muscle_indicator < 1.05:  # Below average muscle
+                muscle_adjustment = 2
+            else:  # Average
+                muscle_adjustment = 0
+            
+            proportion_bf += muscle_adjustment
+            
+            # Additional validation from BMI
+            if bmi < 18.5:  # Underweight
+                bmi_bf = 15  # Likely lean
+            elif bmi < 25:  # Normal weight
+                bmi_bf = 22  # Average body fat
+            elif bmi < 30:  # Overweight
+                bmi_bf = 28  # Above average body fat
+            else:  # Obese
+                bmi_bf = 35  # High body fat
+            
+            # Combine methods with emphasis on abdominal definition (60%)
+            # Secondary validation from proportion analysis (30%) and BMI (10%)
             body_fat_percentage = (
-                base_bf * 0.4 + 
-                torso_fat_estimate * 0.3 + 
-                visual_adjustment * 0.15 + 
-                limb_adjustment * 0.15
+                ab_definition_bf * 0.6 + 
+                proportion_bf * 0.3 +
+                bmi_bf * 0.1
             )
             
-            # Apply the muscle mass adjustment
-            body_fat_percentage += muscle_adjustment
-            
-            # Apply gender tendency adjustment based on skeletal proportions
-            # Higher shoulder-to-hip ratios typically indicate male characteristics
+            # Apply gender-specific adjustments based on skeletal proportions
             if shoulder_hip_ratio > 1.4:  # Likely male proportions
                 gender_adjustment = -2  # Males have lower essential fat
             elif shoulder_hip_ratio < 1.2:  # Likely female proportions
                 gender_adjustment = 3  # Females have higher essential fat
-            else:
+            else:  # Moderate proportions
                 gender_adjustment = 0
                 
             body_fat_percentage += gender_adjustment
             
-            # Ensure result is in reasonable physiological range (3% to 45%)
-            # The lower limit accounts for essential fat (3-5% males, 10-12% females)
-            # Upper limit allows for accurate assessment of higher body fat percentages
-            body_fat_percentage = max(3, min(body_fat_percentage, 45))
+            # Final refinement to ensure realistic physiological range
+            # Allow for competitive bodybuilder levels at the low end (4%)
+            # and clinically obese levels at the high end (40%)
+            if definition_level == "highly_defined":
+                # Visible six-pack - allow for very low body fat
+                body_fat_percentage = max(4, min(body_fat_percentage, 15))
+            elif definition_level == "moderately_defined":
+                # Some visible definition
+                body_fat_percentage = max(10, min(body_fat_percentage, 20))
+            elif definition_level == "slightly_defined":
+                # Beginning definition
+                body_fat_percentage = max(15, min(body_fat_percentage, 28))
+            else:
+                # No visible definition
+                body_fat_percentage = max(18, min(body_fat_percentage, 40))
             
             # 26. Estimate lean body mass
             lean_body_mass = weight_kg * (1 - (body_fat_percentage / 100))
@@ -418,9 +466,18 @@ def analyze_body_traits(landmarks, height_cm=0.0, weight_kg=0.0):
         traits['description'] = get_trait_descriptions(traits['body_type'])
         
         # Analyze muscle insertions
+        # We've already analyzed abdominals earlier, so reuse that result
         traits['muscle_insertions']['lats'] = analyze_lat_insertion(landmarks)
         traits['muscle_insertions']['biceps'] = analyze_bicep_insertion(landmarks)
-        traits['muscle_insertions']['abdominals'] = analyze_abdominal_insertion(landmarks)
+        
+        # Store full abdominal analysis for reference
+        ab_definition_traits = {
+            'value': ab_analysis.get('value', 'medium'),
+            'definition': ab_analysis.get('definition', 'undefined'),
+            'definition_score': ab_analysis.get('definition_score', 0),
+            'description': ab_analysis.get('description', '')
+        }
+        traits['muscle_insertions']['abdominals'] = ab_definition_traits
         
         return traits
         
@@ -742,7 +799,7 @@ def analyze_bicep_insertion(landmarks):
 
 def analyze_abdominal_insertion(landmarks):
     """
-    Analyze abdominal muscle insertion and genetics
+    Analyze abdominal muscle insertion, genetics and definition level
     
     Args:
         landmarks: Dictionary of body landmarks from MediaPipe
@@ -771,33 +828,124 @@ def analyze_abdominal_insertion(landmarks):
     mid_right = {'x': landmarks[RIGHT_SHOULDER]['x'], 'y': mid_y, 'z': landmarks[RIGHT_SHOULDER]['z']}
     mid_width = calculate_distance(mid_left, mid_right)
     
-    # Calculate waist-to-hip ratio
+    # Calculate upper abdominal area (between mid-torso and ribcage)
+    upper_ab_y = mid_y - (mid_y - landmarks[LEFT_SHOULDER]['y']) * 0.4
+    upper_ab_left = {'x': landmarks[LEFT_SHOULDER]['x'], 'y': upper_ab_y, 'z': landmarks[LEFT_SHOULDER]['z']}
+    upper_ab_right = {'x': landmarks[RIGHT_SHOULDER]['x'], 'y': upper_ab_y, 'z': landmarks[RIGHT_SHOULDER]['z']}
+    upper_ab_width = calculate_distance(upper_ab_left, upper_ab_right)
+    
+    # Calculate lower abdominal area (between mid-torso and hip)
+    lower_ab_y = mid_y + (landmarks[LEFT_HIP]['y'] - mid_y) * 0.3
+    lower_ab_left = {'x': landmarks[LEFT_HIP]['x'], 'y': lower_ab_y, 'z': landmarks[LEFT_HIP]['z']}
+    lower_ab_right = {'x': landmarks[RIGHT_HIP]['x'], 'y': lower_ab_y, 'z': landmarks[RIGHT_HIP]['z']}
+    lower_ab_width = calculate_distance(lower_ab_left, lower_ab_right)
+    
+    # Calculate waist (narrowest part of torso)
     waist_y = (landmarks[LEFT_HIP]['y'] + landmarks[RIGHT_HIP]['y']) / 2 - 0.05
     waist_left = {'x': landmarks[LEFT_HIP]['x'] - 0.02, 'y': waist_y, 'z': landmarks[LEFT_HIP]['z']}
     waist_right = {'x': landmarks[RIGHT_HIP]['x'] + 0.02, 'y': waist_y, 'z': landmarks[RIGHT_HIP]['z']}
     waist_width = calculate_distance(waist_left, waist_right)
-    waist_hip_ratio = waist_width / hip_width if hip_width > 0 else 0
     
-    # Calculate torso shape metrics
+    # Calculate key ratios for ab definition
+    waist_hip_ratio = waist_width / hip_width if hip_width > 0 else 0
+    waist_shoulder_ratio = waist_width / shoulder_width if shoulder_width > 0 else 0
     torso_ratio = torso_length / mid_width
     
-    # Determine ab genetics based on torso shape
+    # Calculate abdominal taper (indicates ab definition)
+    # Higher values indicate more pronounced V-taper in the abdomen
+    upper_lower_ab_ratio = upper_ab_width / lower_ab_width if lower_ab_width > 0 else 1.0
+    
+    # Calculate lateral ab wall angle (indicates definition of obliques)
+    # This estimates the angle of the side abdominal wall
+    left_oblique_angle = calculate_angle(
+        {'x': landmarks[LEFT_SHOULDER]['x'], 'y': landmarks[LEFT_SHOULDER]['y'], 'z': 0},
+        {'x': mid_left['x'], 'y': mid_left['y'], 'z': 0},
+        {'x': waist_left['x'], 'y': waist_left['y'], 'z': 0}
+    )
+    right_oblique_angle = calculate_angle(
+        {'x': landmarks[RIGHT_SHOULDER]['x'], 'y': landmarks[RIGHT_SHOULDER]['y'], 'z': 0},
+        {'x': mid_right['x'], 'y': mid_right['y'], 'z': 0},
+        {'x': waist_right['x'], 'y': waist_right['y'], 'z': 0}
+    )
+    
+    oblique_angle = (left_oblique_angle + right_oblique_angle) / 2
+    
+    # Determine ab genetics based on torso shape and proportions
     if torso_ratio > 2.2:
         structure = "long"
-        description = "Long abdominal structure: Potential for 8-pack development, but may need to work harder on width."
+        genetics_description = "Long abdominal structure: Potential for 8-pack development, but may need to work harder on width."
     elif torso_ratio > 1.8:
         structure = "medium"
-        description = "Medium abdominal structure: Balanced development potential with typical 6-pack formation."
+        genetics_description = "Medium abdominal structure: Balanced development potential with typical 6-pack formation."
     else:
         structure = "compact"
-        description = "Compact abdominal structure: Potentially wider abs with good 4-6 pack development."
+        genetics_description = "Compact abdominal structure: Potentially wider abs with good 4-6 pack development."
     
-    # Factor in waist-hip ratio for additional info
-    if waist_hip_ratio < 0.85:
-        description += " Favorable fat distribution pattern for abdominal definition."
+    # Estimate abdominal definition based on multiple indicators
+    # 1. Waist-to-hip ratio
+    # 2. Waist-to-shoulder ratio
+    # 3. Oblique angle
+    # 4. Upper-to-lower ab taper
+    
+    definition_score = 0
+    
+    # Waist-to-hip ratio component (lower is better)
+    if waist_hip_ratio < 0.75:
+        definition_score += 4  # Excellent waist-hip ratio
+    elif waist_hip_ratio < 0.8:
+        definition_score += 3  # Very good
+    elif waist_hip_ratio < 0.85:
+        definition_score += 2  # Good
+    elif waist_hip_ratio < 0.9:
+        definition_score += 1  # Average
+    
+    # Waist-to-shoulder ratio component (lower is better)
+    if waist_shoulder_ratio < 0.65:
+        definition_score += 4  # Excellent taper
+    elif waist_shoulder_ratio < 0.75:
+        definition_score += 3  # Very good
+    elif waist_shoulder_ratio < 0.85:
+        definition_score += 2  # Good
+    elif waist_shoulder_ratio < 0.95:
+        definition_score += 1  # Average
+    
+    # Oblique angle component (lower indicates more straight sides, higher indicates more taper)
+    if oblique_angle > 170:
+        definition_score += 1  # Minimal oblique definition
+    elif oblique_angle > 165:
+        definition_score += 2  # Some oblique definition
+    else:
+        definition_score += 3  # Good oblique definition
+    
+    # Upper-to-lower ab taper
+    if upper_lower_ab_ratio > 1.2:
+        definition_score += 3  # Significant taper
+    elif upper_lower_ab_ratio > 1.1:
+        definition_score += 2  # Moderate taper
+    else:
+        definition_score += 1  # Minimal taper
+    
+    # Determine definition level (maximum score: 14)
+    if definition_score >= 12:
+        definition = "highly_defined"
+        definition_description = "Highly defined abdominals: Visible six-pack definition with clear separation."
+    elif definition_score >= 9:
+        definition = "moderately_defined"
+        definition_description = "Moderately defined abdominals: Some visible muscle definition with partial separation."
+    elif definition_score >= 6:
+        definition = "slightly_defined"
+        definition_description = "Slightly defined abdominals: Beginning to show definition with outlines visible."
+    else:
+        definition = "undefined"
+        definition_description = "Currently undefined abdominals: Focusing on reducing body fat will help reveal muscle definition."
+    
+    # Combine genetics and definition descriptions
+    description = f"{genetics_description} {definition_description}"
     
     return {
         'value': structure,
+        'definition': definition,
+        'definition_score': definition_score,
         'description': description
     }
 
