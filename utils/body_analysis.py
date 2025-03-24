@@ -198,54 +198,90 @@ def analyze_body_traits(landmarks, height_cm=0.0, weight_kg=0.0):
             # Calculate body surface area estimation
             bsa = 0.007184 * (height_cm ** 0.725) * (weight_kg ** 0.425) if height_cm > 0 and weight_kg > 0 else 1.5
             
-            # Method 1: Enhanced YMCA formula using skeletal ratios
-            # Adjusts for muscle mass based on shoulder and chest proportions
-            skeletal_adjustment = 0
-            if shoulder_to_waist > 1.5:  # Indicates significant muscle development
-                skeletal_adjustment = -4.0  # Reduce body fat estimate (more muscle)
-            elif shoulder_to_waist < 1.2:  # Indicates less muscle development
-                skeletal_adjustment = 2.0  # Increase body fat estimate (less muscle)
+            # Method 1: Enhanced body composition analysis using multiple anthropometric measures
+            # This method uses a comprehensive approach with visual cues and proportions
+            
+            # Key visual indicators of body fat levels
+            # 1. Waist-to-hip ratio (higher = more visceral fat)
+            # 2. Shoulder-to-waist ratio (higher = more muscle, less fat)
+            # 3. Muscle definition visibility (estimated from body proportions)
+            # 4. Chest-to-waist ratio (higher = less fat)
+            
+            # Base body fat estimate from BMI
+            # The relationship between BMI and body fat is non-linear
+            if bmi < 18.5:  # Underweight
+                base_bf = 10 + (bmi - 15) * 1.2
+            elif bmi < 25:  # Normal weight
+                base_bf = 15 + (bmi - 18.5) * 1.5
+            elif bmi < 30:  # Overweight
+                base_bf = 25 + (bmi - 25) * 1.8
+            else:  # Obese
+                base_bf = 33 + (bmi - 30) * 1.2
                 
-            ymca_bf = ((4.15 * waist_width * 100) - (0.082 * weight_kg) - 94.42) / weight_kg * 100
-            ymca_adjusted = ymca_bf + skeletal_adjustment
+            # Adjustments based on body proportions indicating muscle mass
+            muscle_indicator = shoulder_to_waist * 0.7 + chest_to_waist * 0.3
             
-            # Method 2: Modified BMI-based formula with anthropometric corrections
-            # Account for muscle mass using shoulder-to-waist ratio
-            bmi_correction = (shoulder_to_waist - 1.3) * 10  # Adjusts for muscularity
-            bmi_bf = (1.2 * bmi) + (0.23 * 30) - bmi_correction - 16.2
-            
-            # Method 3: Advanced waist-to-height ratio with body shape adjustment
-            waist_to_height = waist_width / (height_cm / 100)
-            body_shape_factor = chest_to_waist / waist_to_hip  # Accounts for upper vs lower body composition
-            wth_bf = (waist_to_height * 50) - (5 * body_shape_factor) - 15
-            
-            # Method 4: Sophisticated visual analysis using proportions
-            # Use relative proportions across major body segments
+            # Progressive muscle adjustment: more significant correction for more muscular builds
+            if muscle_indicator > 1.6:  # Very muscular
+                muscle_adjustment = -12.0
+            elif muscle_indicator > 1.4:  # Athletic
+                muscle_adjustment = -8.0
+            elif muscle_indicator > 1.3:  # Above average muscle
+                muscle_adjustment = -5.0
+            elif muscle_indicator > 1.2:  # Slightly more muscular
+                muscle_adjustment = -3.0
+            elif muscle_indicator < 1.05:  # Below average muscle
+                muscle_adjustment = 3.0
+            else:  # Average
+                muscle_adjustment = 0.0
+                
+            # Fat distribution pattern analysis
+            # Calculate upper-to-lower body ratio (higher = more upper body focused)
             upper_body_width = (shoulder_width + chest_width) / 2
             lower_body_width = (hip_width + waist_width) / 2
             upper_lower_ratio = upper_body_width / lower_body_width
             
-            # Adjust based on typical fat distribution patterns
-            visual_bf_base = 18 + (waist_to_hip * 20) - (upper_lower_ratio * 10)
-            visual_bf = max(8, min(visual_bf_base, 35))  # Reasonable constraints
+            # Calculate torso fat estimate using waist-to-height ratio
+            # (Research shows this is one of the best predictors of body fat)
+            waist_to_height = waist_width / (height_cm / 100)
+            torso_fat_estimate = (waist_to_height * 100 - 35) * 0.7
             
-            # Weighted average with greater emphasis on methods most reliable from image analysis
-            # Visual and waist-to-height are more reliable from images than weight-based formulas
+            # Calculate visual definition adjustment based on body proportions
+            # Higher ratios suggest more visible muscle definition (lower body fat)
+            visual_definition = ((shoulder_to_waist + chest_to_waist) / 2) * 5
+            visual_adjustment = -1 * (visual_definition - 5)
+            
+            # Limb-to-torso ratio (higher = more limb dominant, typically leaner)
+            limb_torso_ratio = (arm_length + leg_length) / (2 * torso_length)
+            limb_adjustment = -3 * (limb_torso_ratio - 1.2)
+            
+            # Combine all factors with appropriate weighting
+            # Base from BMI (40%) + Visual indicators (60%)
             body_fat_percentage = (
-                (0.15 * ymca_adjusted) + 
-                (0.15 * bmi_bf) + 
-                (0.35 * wth_bf) + 
-                (0.35 * visual_bf)
+                base_bf * 0.4 + 
+                torso_fat_estimate * 0.3 + 
+                visual_adjustment * 0.15 + 
+                limb_adjustment * 0.15
             )
             
-            # Apply gender-specific adjustments if height and weight suggest a pattern
-            # (This is a rough estimate since we don't have explicit gender input)
-            height_weight_ratio = height_cm / weight_kg
-            if height_weight_ratio > 2.8:  # Suggests female proportions
-                body_fat_percentage += 3  # Females typically have 3-5% higher essential fat
+            # Apply the muscle mass adjustment
+            body_fat_percentage += muscle_adjustment
             
-            # Ensure result is in reasonable range and avoid extreme values
-            body_fat_percentage = max(5, min(body_fat_percentage, 35))
+            # Apply gender tendency adjustment based on skeletal proportions
+            # Higher shoulder-to-hip ratios typically indicate male characteristics
+            if shoulder_hip_ratio > 1.4:  # Likely male proportions
+                gender_adjustment = -2  # Males have lower essential fat
+            elif shoulder_hip_ratio < 1.2:  # Likely female proportions
+                gender_adjustment = 3  # Females have higher essential fat
+            else:
+                gender_adjustment = 0
+                
+            body_fat_percentage += gender_adjustment
+            
+            # Ensure result is in reasonable physiological range (3% to 45%)
+            # The lower limit accounts for essential fat (3-5% males, 10-12% females)
+            # Upper limit allows for accurate assessment of higher body fat percentages
+            body_fat_percentage = max(3, min(body_fat_percentage, 45))
             
             # 26. Estimate lean body mass
             lean_body_mass = weight_kg * (1 - (body_fat_percentage / 100))
@@ -545,17 +581,21 @@ def classify_bmi(bmi):
 
 def classify_body_fat(percentage):
     """Classify body fat percentage"""
-    # Using a general scale that works for most adults
-    if percentage < 8:
-        return 'below_average'  # Too low
+    # Using a more nuanced scale that works for most adults
+    if percentage < 5:
+        return 'below_average'  # Essential fat only, potentially unhealthy
+    elif percentage < 8:
+        return 'good'  # Competition-ready (very lean)
     elif percentage < 15:
         return 'excellent'  # Athletic
     elif percentage < 20:
         return 'good'  # Fit
     elif percentage < 25:
         return 'average'  # Acceptable
-    else:
+    elif percentage < 35:
         return 'below_average'  # High
+    else:
+        return 'poor'  # Very high health risk
 
 def classify_frame_size(wrist_height_ratio):
     """Classify frame size based on wrist-to-height ratio"""
