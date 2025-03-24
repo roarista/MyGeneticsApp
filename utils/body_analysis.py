@@ -453,11 +453,14 @@ def analyze_body_traits(landmarks, original_image=None, height_cm=0.0, weight_kg
                 'rating': 'informational'  # This is just informational
             }
             
+            # Calculate how much per year
+            yearly_potential = muscle_potential / 2  # Estimated per year over 2 years
+            
             traits['muscle_potential'] = {
                 'value': round(muscle_potential, 1),
-                'rating': classify_muscle_potential(frame_potential_score),
+                'rating': classify_muscle_potential(yearly_potential),
                 'years_training': years_training,
-                'description': f"Estimated {muscle_potential:.1f} kg of muscle can still be built naturally."
+                'description': f"Estimated {muscle_potential:.1f} kg of muscle can still be built naturally, with up to {yearly_potential:.1f} kg possible in the next year with optimal training and nutrition."
             }
             
             traits['arm_span_height_ratio'] = {
@@ -762,22 +765,23 @@ def classify_frame_size(wrist_height_ratio):
 
 def classify_muscle_potential(potential):
     """
-    Classify muscle building potential based on the remaining potential muscle gain in kg
+    Classify muscle building potential based on the estimated muscle gain possible in 1 year
     
     Args:
-        potential: Float representing potential muscle gain in kg
+        potential: Float representing potential muscle gain in kg over 1 year
         
     Returns:
         String rating ('excellent', 'good', 'average', 'below_average')
     """
+    # These thresholds are based on annual potential muscle gain (kg per year)
     if potential >= 10:
-        return 'excellent'
+        return 'excellent'   # Exceptional potential (10+ kg in a year)
     elif 5 <= potential < 10:
-        return 'good'
+        return 'good'        # Good potential (5-10 kg in a year)
     elif 1 <= potential < 5:
-        return 'average'
+        return 'average'     # Average potential (1-5 kg in a year)
     else:
-        return 'below_average'
+        return 'below_average'  # Below average potential (less than 1 kg in a year)
 
 def classify_waist_hip_ratio(ratio, gender='male'):
     """
