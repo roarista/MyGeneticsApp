@@ -78,7 +78,10 @@ def analyze():
             # Get user-provided information
             height = request.form.get('height', 0)
             weight = request.form.get('weight', 0)
+            gender = request.form.get('gender', 'male')  # Default to male if not specified
             experience = request.form.get('experience', 'beginner')
+            
+            logger.debug(f"User inputs - Height: {height}, Weight: {weight}, Gender: {gender}, Experience: {experience}")
             
             # Extract landmarks from image
             processed_image, landmarks = extract_body_landmarks(image)
@@ -92,7 +95,8 @@ def analyze():
                 landmarks=landmarks, 
                 original_image=image,
                 height_cm=float(height) if height else 0, 
-                weight_kg=float(weight) if weight else 0
+                weight_kg=float(weight) if weight else 0,
+                gender=gender  # Pass gender to the analysis function
             )
             
             # Generate recommendations
@@ -109,6 +113,7 @@ def analyze():
                 'user_info': {
                     'height': height,
                     'weight': weight,
+                    'gender': gender,
                     'experience': experience
                 }
             }
