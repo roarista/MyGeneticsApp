@@ -128,138 +128,181 @@ body {
     box-shadow: var(--glow-shadow);
 }
 
-/* Fitness and genetics badges */
+/* Fitness and genetics badges - Apple style */
 .trait-badge {
     display: inline-flex;
     align-items: center;
-    padding: 0.35rem 0.6rem;
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    border-radius: 0.25rem;
-    margin-right: 0.5rem;
-    margin-bottom: 0.5rem;
-    border: 1px solid transparent;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    border-radius: 2rem; /* Apple uses pill-shaped badges */
+    margin-right: 0.8rem;
+    margin-bottom: 0.8rem;
+    border: none;
     position: relative;
     overflow: hidden;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-.trait-badge::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(45deg, rgba(255, 255, 255, 0.1), transparent);
-    z-index: 1;
+.trait-badge:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .trait-badge .trait-icon {
-    margin-right: 0.3rem;
-    font-size: 0.9rem;
+    margin-right: 0.4rem;
+    font-size: 0.95rem;
 }
 
 .trait-badge-excellent {
-    background-color: rgba(45, 157, 78, 0.15);  /* Green background with better contrast */
+    background-color: rgba(52, 199, 89, 0.15); /* Apple green background */
     color: var(--neon-green);
-    border-color: rgba(45, 157, 78, 0.3);
 }
 
 .trait-badge-good {
-    background-color: rgba(0, 102, 204, 0.15);  /* Blue background with better contrast */
+    background-color: rgba(0, 113, 227, 0.15); /* Apple blue background */
     color: var(--neon-blue);
-    border-color: rgba(0, 102, 204, 0.3);
 }
 
 .trait-badge-average {
-    background-color: rgba(204, 153, 0, 0.15);  /* Yellow background with better contrast */
+    background-color: rgba(255, 195, 0, 0.15); /* Apple yellow background */
     color: var(--energy-yellow);
-    border-color: rgba(204, 153, 0, 0.3);
 }
 
 .trait-badge-below-average {
-    background-color: rgba(221, 117, 0, 0.15);  /* Orange background with better contrast */
+    background-color: rgba(255, 159, 10, 0.15); /* Apple orange background */
     color: var(--power-orange);
-    border-color: rgba(221, 117, 0, 0.3);
 }
 
 .trait-badge-poor {
-    background-color: rgba(217, 41, 28, 0.15);  /* Red background with better contrast */
+    background-color: rgba(255, 59, 48, 0.15); /* Apple red background */
     color: var(--neon-red);
-    border-color: rgba(217, 41, 28, 0.3);
 }
 
-/* Muscle group badges */
+/* Apple-style trait pills - alternative style for condensed views */
+.trait-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 20px;
+    min-width: 20px;
+    padding: 0 8px;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: white;
+    margin-right: 0.5rem;
+}
+
+.trait-pill-excellent {
+    background-color: var(--neon-green);
+}
+
+.trait-pill-good {
+    background-color: var(--neon-blue);
+}
+
+.trait-pill-average {
+    background-color: var(--energy-yellow);
+}
+
+.trait-pill-below-average {
+    background-color: var(--power-orange);
+}
+
+.trait-pill-poor {
+    background-color: var(--neon-red);
+}
+
+/* Muscle group badges - Apple style */
 .muscle-badge {
     display: inline-flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 55px;
-    height: 65px;
-    border-radius: 0.25rem;
-    margin-right: 0.5rem;
-    margin-bottom: 0.5rem;
-    padding: 0.25rem;
-    background-color: var(--card-bg);
-    border: var(--tech-border);
+    width: 90px;
+    height: 90px;
+    border-radius: 20px; /* Apple uses rounded squares */
+    margin-right: 1rem;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    background-color: var(--white-bg);
+    border: none;
     position: relative;
     overflow: hidden;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
 
 .muscle-badge:hover {
     transform: translateY(-3px);
-    box-shadow: var(--glow-shadow);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
 }
 
-.muscle-badge::after {
+.muscle-badge::before {
     content: '';
     position: absolute;
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 3px;
+    height: 4px;
+    border-radius: 0 0 20px 20px;
 }
 
-.muscle-badge-excellent::after {
+.muscle-badge-excellent::before {
     background: var(--neon-green);
-    box-shadow: 0 0 10px var(--neon-green);
 }
 
-.muscle-badge-good::after {
+.muscle-badge-good::before {
     background: var(--neon-blue);
-    box-shadow: 0 0 10px var(--neon-blue);
 }
 
-.muscle-badge-average::after {
+.muscle-badge-average::before {
     background: var(--energy-yellow);
-    box-shadow: 0 0 10px var(--energy-yellow);
 }
 
-.muscle-badge-below-average::after {
+.muscle-badge-below-average::before {
     background: var(--power-orange);
-    box-shadow: 0 0 10px var(--power-orange);
 }
 
-.muscle-badge-poor::after {
+.muscle-badge-poor::before {
     background: var(--neon-red);
-    box-shadow: 0 0 10px var(--neon-red);
 }
 
 .muscle-icon {
-    font-size: 1.5rem;
-    margin-bottom: 0.25rem;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-dark);
+}
+
+.muscle-badge-excellent .muscle-icon {
+    color: var(--neon-green);
+}
+
+.muscle-badge-good .muscle-icon {
+    color: var(--neon-blue);
+}
+
+.muscle-badge-average .muscle-icon {
+    color: var(--energy-yellow);
+}
+
+.muscle-badge-below-average .muscle-icon {
+    color: var(--power-orange);
+}
+
+.muscle-badge-poor .muscle-icon {
+    color: var(--neon-red);
 }
 
 .muscle-name {
-    font-size: 0.6rem;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: -0.01em;
     text-align: center;
-    font-weight: 600;
+    font-weight: 500;
+    color: var(--text-medium);
 }
 
 /* Navigation - Clean Minimal Style */
@@ -869,60 +912,108 @@ body {
     justify-content: space-between;
 }
 
-/* Stats and metrics styling - Clean Minimal */
+/* Stats and metrics styling - Apple Style */
 .stat-box {
-    flex: 1 0 120px;
-    max-width: 150px;
-    padding: 1.2rem;
-    border-radius: var(--standard-radius);
+    flex: 1 0 140px; /* Slightly larger */
+    max-width: 180px;
+    padding: 1.5rem;
+    border-radius: 20px; /* Apple uses more rounded corners */
     background-color: var(--white-bg);
-    border: var(--light-border);
-    box-shadow: var(--card-shadow);
+    border: none;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
     text-align: center;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     position: relative;
     overflow: hidden;
+    margin-bottom: 1rem;
 }
 
 .stat-box:hover {
     transform: translateY(-3px);
-    box-shadow: var(--soft-shadow);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
 }
 
 .stat-value {
-    font-size: 24px;
-    font-weight: 700;
-    margin-bottom: 0.4rem;
+    font-size: 32px; /* Apple uses larger numbers */
+    font-weight: 600; /* Apple uses semi-bold */
+    margin-bottom: 0.5rem;
     color: var(--text-dark);
+    line-height: 1.1;
+    letter-spacing: -0.01em;
 }
 
 .stat-label {
-    font-size: 0.75rem;
+    font-size: 0.85rem;
     color: var(--text-medium);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    font-weight: 500;
+    font-weight: 400; /* Apple uses regular weight for labels */
 }
 
-/* Colored stat boxes */
+/* Apple-style colored stat boxes - more subtle */
 .stat-box-primary {
-    border-top: 3px solid var(--primary-blue);
+    position: relative;
 }
 
-.stat-box-success {
-    border-top: 3px solid var(--primary-green);
+.stat-box-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 4px;
+    width: 40%;
+    background-color: var(--primary-blue);
+    border-radius: 2px;
 }
 
-.stat-box-warning {
-    border-top: 3px solid var(--primary-orange);
+.stat-box-success::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 4px;
+    width: 40%;
+    background-color: var(--primary-green);
+    border-radius: 2px;
 }
 
-.stat-box-danger {
-    border-top: 3px solid var(--primary-red);
+.stat-box-warning::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 4px;
+    width: 40%;
+    background-color: var(--primary-orange);
+    border-radius: 2px;
 }
 
-.stat-box-info {
-    border-top: 3px solid var(--primary-teal);
+.stat-box-danger::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 4px;
+    width: 40%;
+    background-color: var(--primary-red);
+    border-radius: 2px;
+}
+
+.stat-box-info::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 4px;
+    width: 40%;
+    background-color: var(--primary-teal);
+    border-radius: 2px;
+}
+
+/* Apple-style stats grid */
+.apple-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
 }
 
 /* Data visualizations - Clean Minimal */
