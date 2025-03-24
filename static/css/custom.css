@@ -1,52 +1,69 @@
-/* Custom styling for MyGenetics app - Futuristic Dark Theme */
+/* Custom styling for MyGenetics app - Modern Aesthetic Light Theme */
 
 /* Overall styling */
 :root {
-    /* Primary colors - Neon accents */
-    --primary-blue: #29b6f6;  /* Neon blue */
-    --primary-teal: #00e5ff;  /* Neon teal */
-    --primary-green: #00ff9d;  /* Neon green */
-    --primary-yellow: #fbff00;  /* Neon yellow */ 
-    --primary-orange: #ff9100;  /* Neon orange */
-    --primary-red: #ff005d;    /* Neon red */
-    --primary-purple: #8e44ad;  /* Neon purple */
+    /* Primary colors - Modern aesthetic */
+    --primary-blue: #0070f3;  /* Vibrant blue */
+    --primary-teal: #00bcd4;  /* Gentle teal */
+    --primary-green: #34c759;  /* Apple green */
+    --primary-yellow: #ffd60a;  /* Soft yellow */ 
+    --primary-orange: #ff9500;  /* Warm orange */
+    --primary-red: #ff3b30;    /* Bright red */
+    --primary-purple: #5856d6;  /* Rich purple */
     
-    /* Background colors - Dark futuristic */
-    --white-bg: #ffffff;  /* Kept for contrast areas */
-    --dark-bg: #0d0d0d;  /* Main dark background */
-    --card-bg: #181818;  /* Slightly lighter dark for cards */
-    --panel-bg: rgba(24, 24, 24, 0.92);  /* Semi-transparent panels */
-    --overlay-bg: rgba(13, 13, 13, 0.95);  /* Dark overlays */
-    --black-bg: #000000;  /* Pure black for sections */
-    --gradient-bg: linear-gradient(135deg, #121212 0%, #1a1a1a 100%);  /* Subtle gradient */
+    /* Background colors - Soft light aesthetic */
+    --white-bg: #ffffff;  /* Clean white */
+    --light-bg: #f5f7fa;  /* Soft light background */
+    --card-bg: #ffffff;  /* White card background */
+    --panel-bg: rgba(255, 255, 255, 0.95);  /* Semi-transparent white */
+    --overlay-bg: rgba(245, 247, 250, 0.98);  /* Light overlays */
+    --black-bg: #111111;  /* For contrast sections */
+    --gradient-bg: linear-gradient(135deg, #f8f9fb 0%, #ffffff 100%);  /* Subtle light gradient */
     
-    /* Text colors - High contrast */
-    --text-light: #ffffff;  /* Primary text */
-    --text-medium: #b0b0b0;  /* Secondary text */
-    --text-muted: #808080;  /* Tertiary text */
-    --text-dark: #505050;   /* Quaternary text */
+    /* Text colors - Clean elegance */
+    --text-light: #f5f5f7;  /* Light text (for dark backgrounds) */
+    --text-medium: #86868b;  /* Medium contrast text */
+    --text-muted: #aeaeb2;  /* Subtle low contrast text */
+    --text-dark: #1d1d1f;   /* Main text color */
     
-    /* Fitness-specific colors - Neon futuristic */
-    --muscle-color: #ff005d;    /* Neon red */
-    --protein-color: #29b6f6;  /* Neon blue */
-    --energy-color: #fbff00;  /* Neon yellow */
-    --recovery-color: #00ff9d;  /* Neon green */
-    --progress-color: #8e44ad;  /* Neon purple */
+    /* Fitness-specific colors - Modern aesthetic */
+    --muscle-color: #ff3b30;    /* Bright red */
+    --protein-color: #0070f3;  /* Vibrant blue */
+    --energy-color: #ffd60a;  /* Soft yellow */
+    --recovery-color: #34c759;  /* Apple green */
+    --progress-color: #5856d6;  /* Rich purple */
     
-    /* Trait badge colors - Neon futuristic */
-    --neon-green: #00ff9d;   /* Neon green */
-    --neon-blue: #29b6f6;    /* Neon blue */
-    --energy-yellow: #fbff00; /* Neon yellow */
-    --power-orange: #ff9100;  /* Neon orange */
-    --neon-red: #ff005d;      /* Neon red */
+    /* Trait badge colors - Elegant aesthetic */
+    --badge-green: #34c759;   /* Apple green */
+    --badge-blue: #0070f3;    /* Vibrant blue */
+    --badge-yellow: #ffd60a;  /* Soft yellow */
+    --badge-orange: #ff9500;  /* Warm orange */
+    --badge-red: #ff3b30;     /* Bright red */
     
-    /* Gradients - Futuristic neon */
-    --accent-gradient: linear-gradient(135deg, #29b6f6, #00e5ff);  /* Blue gradient */
-    --accent-gradient-alt: linear-gradient(135deg, #00ff9d, #00e5ff);  /* Green-blue gradient */
-    --accent-gradient-warm: linear-gradient(135deg, #ff9100, #ff005d);  /* Orange-red gradient */
-    --progress-gradient: linear-gradient(135deg, #00ff9d, #00e5ff);  /* Green-blue gradient */
-    --strength-gradient: linear-gradient(135deg, #ff9100, #ff005d);  /* Orange-red gradient */
-    --fitness-gradient: linear-gradient(45deg, #00ff9d, #29b6f6);  /* Green-blue gradient */
+    /* Gradients - 3D aesthetic */
+    --accent-gradient: linear-gradient(135deg, #0070f3, #00bcd4);  /* Blue gradient */
+    --accent-gradient-alt: linear-gradient(135deg, #34c759, #00bcd4);  /* Green-blue gradient */
+    --accent-gradient-warm: linear-gradient(135deg, #ff9500, #ff3b30);  /* Orange-red gradient */
+    --progress-gradient: linear-gradient(135deg, #34c759, #00bcd4);  /* Green-blue gradient */
+    --strength-gradient: linear-gradient(135deg, #ff9500, #ff3b30);  /* Orange-red gradient */
+    --fitness-gradient: linear-gradient(45deg, #34c759, #0070f3);  /* Green-blue gradient */
+    
+    /* Shadow and 3D effects */
+    --card-shadow: 0 8px 30px rgba(0, 0, 0, 0.07);
+    --soft-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+    --hover-shadow: 0 16px 50px rgba(0, 0, 0, 0.15);
+    --inset-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.05);
+    --button-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --floating-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+    
+    /* 3D design properties */
+    --standard-radius: 12px;
+    --button-radius: 10px;
+    --pill-radius: 9999px;
+    --light-border: 1px solid rgba(0, 0, 0, 0.05);
+    --depth-1: 1px;
+    --depth-2: 2px;
+    --depth-3: 4px;
     
     /* Glowing effects */
     --glow-blue: 0 0 15px rgba(41, 182, 246, 0.7);
@@ -69,13 +86,16 @@
 
 body {
     font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    background-color: var(--dark-bg);
-    color: var(--text-light);
+    background-color: var(--light-bg);
+    color: var(--text-dark);
     position: relative;
     overflow-x: hidden;
     min-height: 100vh;
     background-attachment: fixed;
     line-height: 1.5;
+    background-image: 
+        linear-gradient(0deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.9) 100%),
+        url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2393deff' fill-opacity='0.15'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
 }
 
 /* Dark futuristic background with grid pattern */
@@ -312,46 +332,44 @@ body {
     color: var(--text-medium);
 }
 
-/* Navigation - Futuristic Dark Style */
+/* Navigation - Modern Light Style */
 .navbar {
-    background-color: rgba(13, 13, 13, 0.9);
-    border-bottom: 1px solid rgba(41, 182, 246, 0.1);
+    background-color: rgba(255, 255, 255, 0.97);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
     padding: 1rem 1.5rem;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
 }
 
 .navbar-brand {
-    font-family: 'Orbitron', sans-serif;
-    font-weight: 600;
-    color: var(--text-light);
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    color: var(--text-dark);
     font-size: 1.3rem;
-    letter-spacing: 1px;
-    text-transform: uppercase;
+    letter-spacing: -0.5px;
 }
 
-.navbar-dark .navbar-brand {
-    color: var(--text-light);
-    text-shadow: 0 0 10px rgba(41, 182, 246, 0.7);
+.navbar-light .navbar-brand {
+    color: var(--text-dark);
 }
 
-.navbar-dark .navbar-nav .nav-link {
-    color: var(--text-medium);
+.navbar-light .navbar-nav .nav-link {
+    color: var(--text-dark);
     font-weight: 500;
     padding: 0.5rem 1rem;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     position: relative;
+    font-size: 0.95rem;
 }
 
-.navbar-dark .navbar-nav .nav-link:hover,
-.navbar-dark .navbar-nav .nav-link:focus,
-.navbar-dark .navbar-nav .nav-link.active {
+.navbar-light .navbar-nav .nav-link:hover,
+.navbar-light .navbar-nav .nav-link:focus,
+.navbar-light .navbar-nav .nav-link.active {
     color: var(--primary-blue);
-    text-shadow: 0 0 8px rgba(41, 182, 246, 0.5);
 }
 
-.navbar-dark .navbar-toggler {
+.navbar-light .navbar-toggler {
     border-color: transparent;
     padding: 0.5rem;
 }
@@ -361,53 +379,50 @@ body {
 }
 
 .navbar-toggler-icon {
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 0.8)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(0, 0, 0, 0.55)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
 }
 
-/* Nav Link with futuristic glowing indicator */
-.nav-neon {
+/* Nav Link with 3D indicator */
+.nav-3d {
     position: relative;
-    transition: all 0.3s ease;
-    overflow: hidden;
+    transition: all 0.2s ease;
 }
 
-.nav-neon::after {
+.nav-3d::after {
     content: '';
     position: absolute;
-    bottom: -2px;
-    left: 0;
+    bottom: 0;
+    left: 50%;
     width: 0;
-    height: 2px;
+    height: 3px;
     background-color: var(--primary-blue);
-    box-shadow: 0 0 8px var(--primary-blue);
-    transition: all 0.3s ease;
+    transform: translateX(-50%);
+    transition: all 0.2s ease;
     opacity: 0;
+    border-radius: 3px;
 }
 
-.nav-neon:hover::after,
-.nav-neon.active::after {
-    width: 100%;
+.nav-3d:hover::after,
+.nav-3d.active::after {
+    width: 70%;
     opacity: 1;
 }
 
-/* Glowing nav item for highlighted sections */
-.nav-glow {
+/* Premium nav item for highlighted sections */
+.nav-premium {
     position: relative;
-    border: 1px solid rgba(41, 182, 246, 0.4);
+    border: 1px solid var(--primary-blue);
     border-radius: 50px;
     padding: 0.4rem 1.2rem !important;
-    overflow: hidden;
+    color: var(--primary-blue) !important;
+    transition: all 0.3s ease;
+    background: linear-gradient(to right, rgba(0, 112, 243, 0.05), rgba(0, 188, 212, 0.05));
 }
 
-.nav-glow::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(45deg, rgba(41, 182, 246, 0.1), rgba(0, 229, 255, 0.1));
-    z-index: -1;
+.nav-premium:hover {
+    background: linear-gradient(to right, rgba(0, 112, 243, 0.1), rgba(0, 188, 212, 0.1));
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
 /* App Logo/Brand */
@@ -641,51 +656,46 @@ body {
     transform: scaleX(1);
 }
 
-/* Form elements - Futuristic Dark Style */
+/* Form elements - Modern Light Style with 3D elements */
 .form-control, .form-select {
-    background-color: rgba(24, 24, 24, 0.6);
-    border: 1px solid rgba(41, 182, 246, 0.3);
-    border-radius: 8px;
-    color: var(--text-light);
-    padding: 0.8rem 1rem;
-    transition: all 0.3s ease;
+    background-color: var(--white-bg);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    color: var(--text-dark);
+    padding: 0.9rem 1rem;
+    transition: all 0.2s ease;
     font-size: 0.95rem;
     font-weight: 400;
     line-height: 1.5;
     -webkit-appearance: none;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
+    box-shadow: var(--inset-shadow);
 }
 
 .form-control:focus, .form-select:focus {
-    background-color: rgba(24, 24, 24, 0.7);
+    background-color: var(--white-bg);
     border-color: var(--primary-blue);
-    box-shadow: 0 0 15px rgba(41, 182, 246, 0.4);
-    color: white;
+    box-shadow: 0 0 0 4px rgba(0, 112, 243, 0.15);
+    color: var(--text-dark);
     outline: none;
 }
 
 .form-control::placeholder {
-    color: rgba(176, 176, 176, 0.6);
+    color: var(--text-muted);
     font-size: 0.95rem;
     font-weight: 400;
 }
 
 .form-control:disabled {
-    background-color: rgba(24, 24, 24, 0.3);
+    background-color: rgba(0, 0, 0, 0.03);
     color: var(--text-muted);
     opacity: 0.7;
-    border-color: rgba(41, 182, 246, 0.1);
 }
 
 .form-label {
-    font-weight: 500;
+    font-weight: 600;
     margin-bottom: 0.75rem;
-    color: var(--text-light);
-    font-size: 0.95rem;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
+    color: var(--text-dark);
+    font-size: 0.9rem;
 }
 
 .form-text {
@@ -696,55 +706,56 @@ body {
 }
 
 .input-group {
-    border-radius: 8px;
+    border-radius: 12px;
     overflow: hidden;
 }
 
 .input-group-text {
-    background-color: rgba(24, 24, 24, 0.8);
-    border: 1px solid rgba(41, 182, 246, 0.3);
+    background-color: var(--light-bg);
+    border: 1px solid rgba(0, 0, 0, 0.1);
     color: var(--text-medium);
-    padding: 0.8rem 1rem;
+    padding: 0.9rem 1rem;
 }
 
-/* Futuristic checkbox/radio */
+/* 3D Checkbox/Radio */
 .form-check-input {
     width: 20px;
     height: 20px;
     margin-top: 0.15em;
-    background-color: rgba(24, 24, 24, 0.6);
-    border: 1px solid rgba(41, 182, 246, 0.3);
+    background-color: var(--white-bg);
+    border: 1px solid rgba(0, 0, 0, 0.2);
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
+    box-shadow: var(--inset-shadow);
 }
 
 .form-check-input:checked {
     background-color: var(--primary-blue);
     border-color: var(--primary-blue);
-    box-shadow: 0 0 8px rgba(41, 182, 246, 0.6);
+    box-shadow: none;
 }
 
 .form-check-input:focus {
-    box-shadow: 0 0 10px rgba(41, 182, 246, 0.5);
+    box-shadow: 0 0 0 4px rgba(0, 112, 243, 0.15);
     border-color: var(--primary-blue);
 }
 
 .form-check-label {
     font-weight: 400;
-    color: var(--text-light);
+    color: var(--text-dark);
     cursor: pointer;
     padding-left: 0.5rem;
 }
 
-/* Futuristic select */
+/* 3D Select */
 .form-select {
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23b0b0b0' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
     background-repeat: no-repeat;
     background-position: right 1rem center;
     background-size: 16px 12px;
 }
 
-/* Futuristic range slider */
+/* 3D Range slider */
 .form-range {
     height: 1.5rem;
     padding: 0;
@@ -760,13 +771,13 @@ body {
     background: var(--primary-blue);
     border: none;
     margin-top: -8px;
-    box-shadow: 0 0 8px rgba(41, 182, 246, 0.6);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .form-range::-webkit-slider-runnable-track {
     width: 100%;
     height: 4px;
-    background: rgba(41, 182, 246, 0.2);
+    background: rgba(0, 0, 0, 0.1);
     border-radius: 2px;
 }
 
@@ -775,7 +786,7 @@ body {
 }
 
 .form-range:focus::-webkit-slider-thumb {
-    box-shadow: 0 0 15px rgba(41, 182, 246, 0.8);
+    box-shadow: 0 0 0 4px rgba(0, 112, 243, 0.15), 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 /* Form validation states */
