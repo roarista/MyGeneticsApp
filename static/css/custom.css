@@ -1428,6 +1428,20 @@ body {
     font-weight: 500; /* Make text more readable */
 }
 
+.alert-warning {
+    color: #664d00; /* Dark text for warning alerts */
+    background-color: #fff3cd; /* Slightly darker yellow background */
+    border-color: #ffeeba;
+    font-weight: 500; /* Make text more readable */
+}
+
+.alert-danger {
+    color: #721c24; /* Dark text for danger alerts */
+    background-color: #f8d7da; /* Slightly darker red background */
+    border-color: #f5c6cb;
+    font-weight: 500; /* Make text more readable */
+}
+
 /* Override Bootstrap's bg-info for better text contrast */
 .bg-info {
     background-color: #0070d7 !important; /* Darker blue for better contrast with white text */
@@ -1736,6 +1750,25 @@ body {
     background-color: var(--bs-warning);
     box-shadow: 0 0 5px rgba(255, 193, 7, 0.5);
     z-index: 2;
+}
+
+/* Table styling for better contrast */
+.table {
+    color: var(--text-dark); /* Ensure dark text on white table backgrounds */
+}
+
+.table thead th {
+    font-weight: 600;
+    color: var(--text-dark);
+    border-bottom-width: 2px;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.05);
 }
 
 /* Table row highlighting */
