@@ -494,6 +494,12 @@ def analyze_body_traits(landmarks, original_image=None, height_cm=0.0, weight_kg
             'rating': classify_arm_torso_ratio(arm_torso_ratio)
         }
         
+        # Add leg to torso ratio
+        traits['leg_torso_ratio'] = {
+            'value': leg_torso_ratio,
+            'rating': 'informational'
+        }
+        
         traits['torso_length'] = {
             'value': torso_length,
             'rating': classify_torso_length(torso_length, height_cm)
