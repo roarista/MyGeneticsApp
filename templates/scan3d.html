@@ -42,10 +42,27 @@
             </div>
             <div class="card-body">
                 <form action="{{ url_for('scan3d_upload') }}" method="post" enctype="multipart/form-data">
-                    <div class="mb-3">
-                        <label for="scan_file" class="form-label">3D Scan File (OBJ, STL, PLY)</label>
-                        <input class="form-control" type="file" id="scan_file" name="scan_file" accept=".obj,.stl,.ply" required>
-                        <div class="form-text">Upload a 3D scan file created with a scanner app or device.</div>
+                    <div class="scan-dropzone mb-3">
+                        <i class="fas fa-cube scan-upload-icon"></i>
+                        <h5>Drop Your 3D Scan File Here</h5>
+                        <p class="text-muted mb-3">or click to browse files</p>
+                        <input class="form-control" type="file" id="scan_file" name="scan_file" accept=".obj,.stl,.ply" required style="display: none;">
+                        <button type="button" class="btn btn-outline-primary" id="browse_button">
+                            <i class="fas fa-folder-open me-2"></i>Browse Files
+                        </button>
+                        <div id="selected_file" class="mt-3"></div>
+                        
+                        <div class="mt-3">
+                            <span class="scan-format-badge">
+                                <i class="fas fa-check-circle me-1"></i>OBJ
+                            </span>
+                            <span class="scan-format-badge">
+                                <i class="fas fa-check-circle me-1"></i>STL
+                            </span>
+                            <span class="scan-format-badge">
+                                <i class="fas fa-check-circle me-1"></i>PLY
+                            </span>
+                        </div>
                     </div>
                     
                     <hr>
@@ -115,4 +132,95 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // File upload dropzone functionality
+        const dropzone = document.querySelector('.scan-dropzone');
+        const fileInput = document.getElementById('scan_file');
+        const browseButton = document.getElementById('browse_button');
+        const selectedFileDiv = document.getElementById('selected_file');
+
+        // Click the file input when the browse button is clicked
+        browseButton.addEventListener('click', function() {
+            fileInput.click();
+        });
+
+        // Also click when the whole dropzone is clicked
+        dropzone.addEventListener('click', function(e) {
+            // Only trigger if the click wasn't on the button (already has a handler)
+            if (e.target !== browseButton && !browseButton.contains(e.target)) {
+                fileInput.click();
+            }
+        });
+
+        // File selection display
+        fileInput.addEventListener('change', function() {
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                // Show selected file info
+                selectedFileDiv.innerHTML = `
+                    <div class="alert alert-success">
+                        <i class="fas fa-file-alt me-2"></i>
+                        <strong>${file.name}</strong> (${formatFileSize(file.size)})
+                    </div>
+                `;
+                
+                // Add visual feedback
+                dropzone.classList.add('border-success');
+            } else {
+                selectedFileDiv.innerHTML = '';
+                dropzone.classList.remove('border-success');
+            }
+        });
+
+        // Drag and drop support
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropzone.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight() {
+            dropzone.classList.add('dragover');
+        }
+
+        function unhighlight() {
+            dropzone.classList.remove('dragover');
+        }
+
+        // Handle file drop
+        dropzone.addEventListener('drop', function(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            
+            if (files.length > 0) {
+                fileInput.files = files;
+                // Trigger change event
+                const event = new Event('change');
+                fileInput.dispatchEvent(event);
+            }
+        });
+
+        // Format file size
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' bytes';
+            else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+            else return (bytes / 1048576).toFixed(1) + ' MB';
+        }
+    });
+</script>
 {% endblock %}

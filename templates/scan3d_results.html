@@ -8,31 +8,38 @@
                 <h4 class="mb-0"><i class="fas fa-cube me-2"></i>3D Body Scan Analysis</h4>
             </div>
             <div class="card-body">
-                <h5 class="mb-3">Your 3D Scan Details</h5>
+                <div class="stats-container mb-4">
+                    <div class="stat-box">
+                        <div class="stat-value">{{ user_info.height }}</div>
+                        <div class="stat-label">Height (cm)</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">{{ user_info.weight }}</div>
+                        <div class="stat-label">Weight (kg)</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">{{ (user_info.weight / ((user_info.height / 100) ** 2))|round(1) }}</div>
+                        <div class="stat-label">BMI</div>
+                    </div>
+                </div>
+                
+                <h5 class="mb-3"><i class="fas fa-info-circle me-2 text-primary"></i>Your 3D Scan Details</h5>
                 <ul class="list-group mb-4">
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <span>Scan Format</span>
-                        <span class="badge bg-secondary">{{ scan_data.file_format }}</span>
+                        <span><i class="fas fa-file-alt me-2"></i>Scan Format</span>
+                        <span class="badge bg-secondary">{{ scan_data.file_format|upper }}</span>
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <span>Scan Date</span>
+                        <span><i class="fas fa-calendar-alt me-2"></i>Scan Date</span>
                         <span>{{ user_info.date if user_info.date else "Today" }}</span>
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <span>Height</span>
-                        <span>{{ user_info.height }} cm</span>
+                        <span><i class="fas fa-venus-mars me-2"></i>Gender</span>
+                        <span class="badge bg-info measurement-badge">{{ user_info.gender|title }}</span>
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <span>Weight</span>
-                        <span>{{ user_info.weight }} kg</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <span>Gender</span>
-                        <span>{{ user_info.gender|title }}</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <span>Training Experience</span>
-                        <span>{{ user_info.experience|title }}</span>
+                        <span><i class="fas fa-dumbbell me-2"></i>Training Experience</span>
+                        <span class="badge {% if user_info.experience == 'beginner' %}bg-success{% elif user_info.experience == 'intermediate' %}bg-primary{% else %}bg-warning{% endif %} measurement-badge">{{ user_info.experience|title }}</span>
                     </li>
                 </ul>
                 
@@ -61,65 +68,68 @@
                 <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>3D Body Composition</h5>
             </div>
             <div class="card-body">
-                {% if 'body_fat_percentage' in traits %}
-                <div class="row align-items-center mb-3">
-                    <div class="col-6">
-                        <h6>Body Fat</h6>
-                    </div>
-                    <div class="col-6">
-                        <div class="progress">
-                            {% set bf = traits.body_fat_percentage.value|float %}
-                            {% if bf < 10 %}
-                                {% set color = "primary" %}
-                            {% elif bf < 15 %}
-                                {% set color = "success" %}
-                            {% elif bf < 20 %}
-                                {% set color = "info" %}
-                            {% elif bf < 25 %}
-                                {% set color = "warning" %}
-                            {% else %}
-                                {% set color = "danger" %}
-                            {% endif %}
-                            <div class="progress-bar bg-{{ color }}" role="progressbar" style="width: {{ bf*2 }}%" aria-valuenow="{{ bf }}" aria-valuemin="0" aria-valuemax="50">
-                                {{ traits.body_fat_percentage.display_value }}
-                            </div>
+                <div class="stats-container mb-4">
+                    {% if 'body_fat_percentage' in traits %}
+                    <div class="stat-box">
+                        {% set bf = traits.body_fat_percentage.value|float %}
+                        {% if bf < 10 %}
+                            {% set color = "primary" %}
+                        {% elif bf < 15 %}
+                            {% set color = "success" %}
+                        {% elif bf < 20 %}
+                            {% set color = "info" %}
+                        {% elif bf < 25 %}
+                            {% set color = "warning" %}
+                        {% else %}
+                            {% set color = "danger" %}
+                        {% endif %}
+                        <div class="stat-value text-{{ color }}">{{ bf|round(1) }}%</div>
+                        <div class="stat-label">Body Fat</div>
+                        <div class="progress mt-2" style="height: 5px;">
+                            <div class="progress-bar bg-{{ color }}" role="progressbar" style="width: {{ bf*2 }}%" aria-valuenow="{{ bf }}" aria-valuemin="0" aria-valuemax="50"></div>
                         </div>
-                        <small class="text-muted">{{ traits.body_fat_percentage.description if 'description' in traits.body_fat_percentage else "Estimated from 3D volumetric analysis" }}</small>
                     </div>
+                    {% endif %}
+                    
+                    {% if 'muscle_mass_percentage' in traits %}
+                    <div class="stat-box">
+                        <div class="stat-value text-success">{{ traits.muscle_mass_percentage.value|round(1) }}%</div>
+                        <div class="stat-label">Muscle Mass</div>
+                        <div class="progress mt-2" style="height: 5px;">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: {{ traits.muscle_mass_percentage.value|float }}%" aria-valuenow="{{ traits.muscle_mass_percentage.value|float }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if 'bone_mass_percentage' in traits %}
+                    <div class="stat-box">
+                        <div class="stat-value text-info">{{ traits.bone_mass_percentage.value|round(1) }}%</div>
+                        <div class="stat-label">Bone Mass</div>
+                        <div class="progress mt-2" style="height: 5px;">
+                            <div class="progress-bar bg-info" role="progressbar" style="width: {{ traits.bone_mass_percentage.value|float * 5 }}%" aria-valuenow="{{ traits.bone_mass_percentage.value|float }}" aria-valuemin="0" aria-valuemax="20"></div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if 'lean_mass_percentage' in traits %}
+                    <div class="stat-box">
+                        <div class="stat-value text-primary">{{ traits.lean_mass_percentage.value|round(1) }}%</div>
+                        <div class="stat-label">Lean Mass</div>
+                    </div>
+                    {% endif %}
                 </div>
-                {% endif %}
                 
-                {% if 'muscle_mass_percentage' in traits %}
-                <div class="row align-items-center mb-3">
-                    <div class="col-6">
-                        <h6>Muscle Mass</h6>
-                    </div>
-                    <div class="col-6">
-                        <div class="progress">
-                            {% set mm = traits.muscle_mass_percentage.value|float %}
-                            <div class="progress-bar bg-success" role="progressbar" style="width: {{ mm }}%" aria-valuenow="{{ mm }}" aria-valuemin="0" aria-valuemax="100">
-                                {{ traits.muscle_mass_percentage.display_value }}
-                            </div>
-                        </div>
-                    </div>
+                <div class="alert alert-info mb-0">
+                    <h6 class="mb-1"><i class="fas fa-info-circle me-2"></i>About Your Body Composition</h6>
+                    <p class="mb-0 small">
+                        {% if 'body_fat_percentage' in traits and 'description' in traits.body_fat_percentage %}
+                            {{ traits.body_fat_percentage.description }}
+                        {% else %}
+                            This composition analysis is based on 3D volumetric calculations with Navy Method formulas.
+                            Body composition metrics provide insight into your overall fitness level and metabolic health.
+                        {% endif %}
+                    </p>
                 </div>
-                {% endif %}
-                
-                {% if 'bone_mass_percentage' in traits %}
-                <div class="row align-items-center mb-3">
-                    <div class="col-6">
-                        <h6>Bone Mass</h6>
-                    </div>
-                    <div class="col-6">
-                        <div class="progress">
-                            {% set bm = traits.bone_mass_percentage.value|float %}
-                            <div class="progress-bar bg-info" role="progressbar" style="width: {{ bm*5 }}%" aria-valuenow="{{ bm }}" aria-valuemin="0" aria-valuemax="20">
-                                {{ traits.bone_mass_percentage.display_value }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
             </div>
         </div>
     </div>
