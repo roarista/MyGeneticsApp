@@ -1,16 +1,236 @@
-/* Custom styling for MyGenetics app */
+/* Custom styling for MyGenetics app - Futuristic Gym Theme */
 
 /* Overall styling */
+:root {
+    --neon-blue: #00e5ff;
+    --neon-purple: #bf00ff;
+    --neon-green: #39ff14;
+    --cyber-yellow: #ffdd00;
+    --neon-red: #ff0844;
+    --energy-red: #ff3366;
+    --power-orange: #ff8c00;
+    --dark-bg: #0a0e17;
+    --card-bg: #131c2e;
+    --panel-bg: rgba(19, 28, 46, 0.85);
+    --accent-gradient: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+    --accent-gradient-alt: linear-gradient(135deg, var(--neon-green), var(--neon-blue));
+    --accent-gradient-warm: linear-gradient(135deg, var(--power-orange), var(--energy-red));
+    --glow-shadow: 0 0 10px rgba(0, 229, 255, 0.5), 0 0 20px rgba(0, 229, 255, 0.3);
+    --intense-glow: 0 0 15px rgba(0, 229, 255, 0.7), 0 0 30px rgba(0, 229, 255, 0.5);
+    --neo-shadow: 0 4px 20px rgba(0, 0, 0, 0.25), 0 2px 5px rgba(0, 0, 0, 0.15);
+    --muscle-gradient: linear-gradient(45deg, #ff416c, #ff4b2b);
+    --tech-border: 1px solid rgba(0, 229, 255, 0.3);
+    --cyber-border-radius: 0.25rem 1rem 0.25rem 0.25rem;
+}
+
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    font-family: 'Exo 2', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    background-color: var(--dark-bg);
+    color: #ffffff;
+    position: relative;
+    overflow-x: hidden;
+    min-height: 100vh;
+    background-attachment: fixed;
+}
+
+/* Futuristic background with high-tech grid and gradient effect */
+.futuristic-bg {
+    background-color: var(--dark-bg);
+    background-image: 
+        radial-gradient(circle at 15% 50%, rgba(0, 229, 255, 0.08) 0%, transparent 25%),
+        radial-gradient(circle at 85% 30%, rgba(191, 0, 255, 0.08) 0%, transparent 30%),
+        linear-gradient(rgba(0, 229, 255, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 229, 255, 0.08) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 20px 20px, 20px 20px;
+    background-position: center center;
+    position: relative;
+}
+
+.futuristic-bg::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(0, 229, 255, 0.05) 0%, transparent 50%, rgba(191, 0, 255, 0.05) 100%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* Tech overlay for cards */
+.tech-overlay {
+    position: relative;
+    overflow: hidden;
+}
+
+.tech-overlay::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        linear-gradient(45deg, transparent 48%, rgba(0, 229, 255, 0.1) 49%, rgba(0, 229, 255, 0.1) 51%, transparent 52%),
+        linear-gradient(-45deg, transparent 48%, rgba(0, 229, 255, 0.1) 49%, rgba(0, 229, 255, 0.1) 51%, transparent 52%);
+    background-size: 30px 30px;
+    opacity: 0.3;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Futuristic elements */
+.brand-logo {
+    font-family: 'Orbitron', sans-serif;
+    letter-spacing: 1px;
+    position: relative;
+}
+
+.neo-badge {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.6rem;
+    letter-spacing: 1px;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    background: var(--accent-gradient);
+    color: white;
+    box-shadow: var(--glow-shadow);
+}
+
+.gradient-nav {
+    background: linear-gradient(180deg, #0c1119 0%, var(--dark-bg) 100%);
+    border-bottom: 1px solid var(--neon-blue);
+}
+
+.icon-pulse {
+    animation: pulse 2s infinite;
+    color: var(--neon-blue);
+}
+
+@keyframes pulse {
+    0% {
+        filter: drop-shadow(0 0 1px var(--neon-blue));
+    }
+    50% {
+        filter: drop-shadow(0 0 5px var(--neon-blue)) drop-shadow(0 0 8px var(--neon-blue));
+    }
+    100% {
+        filter: drop-shadow(0 0 1px var(--neon-blue));
+    }
+}
+
+.nav-glow {
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.nav-glow:hover {
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+}
+
+.nav-glow::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 0;
+    left: 50%;
+    background: var(--accent-gradient);
+    transition: all 0.3s ease;
+    box-shadow: var(--glow-shadow);
+    transform: translateX(-50%);
+}
+
+.nav-glow:hover::after {
+    width: 80%;
+}
+
+.btn-glow {
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--glow-shadow);
+    transition: all 0.3s ease;
+}
+
+.btn-glow:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.6), 0 0 30px rgba(0, 229, 255, 0.4);
+}
+
+.btn-glow::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: rgba(255, 255, 255, 0.1);
+    transform: rotate(45deg);
+    animation: btn-shimmer 3s infinite linear;
+    z-index: 1;
+}
+
+@keyframes btn-shimmer {
+    0% {
+        transform: translateX(-50%) translateY(-50%) rotate(45deg);
+    }
+    100% {
+        transform: translateX(150%) translateY(150%) rotate(45deg);
+    }
+}
+
+.user-profile-link {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.user-status-indicator {
+    width: 8px;
+    height: 8px;
+    background-color: var(--neon-green);
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: -10px;
+    transform: translateY(-50%);
+    box-shadow: 0 0 5px var(--neon-green);
+    animation: pulse 2s infinite;
+}
+
+.neo-dropdown {
+    background-color: var(--card-bg);
+    border: 1px solid var(--neon-blue);
+    box-shadow: var(--glow-shadow);
+}
+
+.neo-alert {
+    border-left: 4px solid;
+    box-shadow: var(--neo-shadow);
 }
 
 /* Home page styling */
 .hero-section {
     padding: 80px 0;
-    background: linear-gradient(135deg, #0d6efd08 0%, #0dcaf008 100%);
+    background: linear-gradient(135deg, rgba(13, 110, 253, 0.05) 0%, rgba(13, 202, 240, 0.05) 100%);
     border-radius: 12px;
     margin-bottom: 40px;
+    border: 1px solid rgba(0, 229, 255, 0.3);
+    box-shadow: var(--neo-shadow);
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='rgba(255,255,255,0.03)' fill-rule='evenodd'/%3E%3C/svg%3E");
+    opacity: 0.3;
 }
 
 .feature-icon {
@@ -20,6 +240,9 @@ body {
     width: 60px;
     height: 60px;
     border-radius: 50%;
+    background: var(--accent-gradient);
+    box-shadow: var(--glow-shadow);
+    transition: all 0.3s ease;
 }
 
 .feature-list li {
