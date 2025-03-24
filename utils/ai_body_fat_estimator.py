@@ -237,6 +237,16 @@ class AIBodyFatEstimator:
         edges = cv2.Canny(gray, 50, 150)
         edge_density = np.count_nonzero(edges) / edges.size
         
+        # Analyze the gradient magnitude distribution for vascularity detection
+        sobelx = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=3)
+        sobely = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=3)
+        gradient_magnitude = np.sqrt(sobelx**2 + sobely**2)
+        gradient_mean = np.mean(gradient_magnitude)
+        gradient_normalized = min(1.0, gradient_mean / 50.0)
+        
+        # Calculate local variation as a measure of texture/definition
+        local_variation = np.std(gray) / 128.0  # Normalize by half the grayscale range
+        
         # Enhanced feature combination for better accuracy in muscle definition detection
         
         # 1. Edge analysis - more weight for visible muscle separation (sharp edges)
@@ -263,23 +273,6 @@ class AIBodyFatEstimator:
             gradient_score * 0.20 +  # Vascularity
             variation_score * 0.15  # Tissue consistency
         )
-        
-        # Analyze the gradient magnitude distribution
-        sobelx = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=3)
-        sobely = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=3)
-        gradient_magnitude = np.sqrt(sobelx**2 + sobely**2)
-        gradient_mean = np.mean(gradient_magnitude)
-        gradient_normalized = min(1.0, gradient_mean / 50.0)
-        
-        # Analyze the gradient magnitude distribution
-        sobelx = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=3)
-        sobely = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=3)
-        gradient_magnitude = np.sqrt(sobelx**2 + sobely**2)
-        gradient_mean = np.mean(gradient_magnitude)
-        gradient_normalized = min(1.0, gradient_mean / 50.0)
-        
-        # Calculate local variation as a measure of texture/definition
-        local_variation = np.std(gray) / 128.0  # Normalize by half the grayscale range
         
         # Combine all features
         return {
