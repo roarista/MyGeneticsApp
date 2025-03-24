@@ -6,6 +6,8 @@ import tempfile
 import numpy as np
 import cv2
 from werkzeug.utils import secure_filename
+from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
 
 # Import custom utility modules
 from utils.image_processing import process_image, extract_body_landmarks
@@ -418,6 +420,135 @@ def get_traits_data(analysis_id):
                 chart_data['colors'].append('rgba(108, 117, 125, 0.7)')
     
     return jsonify(chart_data)
+
+# User authentication and profile routes
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    """Display login page and process login form submissions"""
+    if request.method == 'POST':
+        # In a real implementation, this would validate against a database
+        email = request.form.get('email')
+        password = request.form.get('password')
+        remember = 'remember' in request.form
+        
+        # For demo purposes, accept any login
+        flash('Login successful!', 'success')
+        session['logged_in'] = True
+        session['user_email'] = email
+        session['user_name'] = email.split('@')[0]  # Simple name extraction from email
+        return redirect(url_for('profile'))
+    
+    return render_template('login.html')
+
+@app.route('/google_login')
+def google_login():
+    """Start Google OAuth login process"""
+    # In a real implementation, this would redirect to Google OAuth
+    flash('Google login would be implemented with OAuth in production.', 'info')
+    session['logged_in'] = True
+    session['user_email'] = 'user@example.com'
+    session['user_name'] = 'Google User'
+    return redirect(url_for('profile'))
+
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    """Display signup page and process signup form submissions"""
+    if request.method == 'POST':
+        # In a real implementation, this would create a user in the database
+        fullname = request.form.get('fullname')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        
+        # For demo purposes, accept any signup
+        flash('Account created successfully!', 'success')
+        session['logged_in'] = True
+        session['user_email'] = email
+        session['user_name'] = fullname
+        return redirect(url_for('profile'))
+    
+    return render_template('signup.html')
+
+@app.route('/logout')
+def logout():
+    """Process user logout"""
+    session.clear()
+    flash('You have been logged out.', 'info')
+    return redirect(url_for('index'))
+
+@app.route('/profile')
+def profile():
+    """Display user profile page"""
+    # Check if user is logged in
+    if not session.get('logged_in'):
+        flash('Please log in to view your profile.', 'warning')
+        return redirect(url_for('login'))
+    
+    # Create a mock user for demo purposes
+    user = {
+        'fullname': session.get('user_name', 'John Doe'),
+        'email': session.get('user_email', 'john.doe@example.com'),
+        'joined': 'March 2025',
+        'height': 178,
+        'weight': 75,
+        'gender': 'male',
+        'age': 30,
+        'experience': 'intermediate',
+        'goal': 'gain_muscle',
+        'analyses': [
+            {'id': 'abc123', 'date': 'Mar 24, 2025', 'type': 'photo'},
+            {'id': 'def456', 'date': 'Mar 22, 2025', 'type': '3d_scan'},
+            {'id': 'ghi789', 'date': 'Mar 15, 2025', 'type': 'photo'}
+        ]
+    }
+    
+    return render_template('profile.html', user=user)
+
+@app.route('/update_body_info', methods=['POST'])
+def update_body_info():
+    """Update user body information"""
+    # Check if user is logged in
+    if not session.get('logged_in'):
+        return jsonify({'status': 'error', 'message': 'Not logged in'}), 401
+    
+    # In a real implementation, this would update the user in the database
+    # For demo purposes, just return success
+    return redirect(url_for('profile'))
+
+@app.route('/account_settings')
+def account_settings():
+    """Display account settings page"""
+    # Check if user is logged in
+    if not session.get('logged_in'):
+        flash('Please log in to view your account settings.', 'warning')
+        return redirect(url_for('login'))
+    
+    # In a real implementation, this would retrieve the user from the database
+    return render_template('profile.html')  # Reuse profile template for now
+
+@app.route('/recommendations/<analysis_id>')
+def recommendations(analysis_id):
+    """Display personalized recommendations based on analysis results"""
+    # Check if analysis exists
+    if analysis_id not in analysis_results:
+        flash('Analysis not found', 'danger')
+        return redirect(url_for('profile'))
+    
+    result = analysis_results[analysis_id]
+    
+    return render_template(
+        'recommendations.html',
+        analysis_id=analysis_id,
+        traits=result['traits'],
+        recommendations=result['recommendations'],
+        user_info=result['user_info']
+    )
+
+@app.route('/schedule_analysis')
+def schedule_analysis():
+    """Schedule next analysis"""
+    # In a real implementation, this would schedule an analysis
+    flash('Feature coming soon: Schedule your next analysis.', 'info')
+    return redirect(url_for('profile'))
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

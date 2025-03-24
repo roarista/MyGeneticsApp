@@ -57,6 +57,18 @@
                                 </div>
                             </div>
                         </div>
+                        
+                        {% if not session.get('logged_in') %}
+                        <div class="alert alert-success mt-3">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-user-plus me-3 fs-4"></i>
+                                <div>
+                                    <strong>Create an Account</strong><br>
+                                    <a href="{{ url_for('signup') }}" class="alert-link">Sign up</a> to save your analysis results, track your progress over time, and access personalized workout plans.
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
                     </div>
                     
                     <div class="row">
