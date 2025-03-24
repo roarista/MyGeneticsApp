@@ -184,32 +184,32 @@ body {
 }
 
 .trait-badge-excellent {
-    background-color: rgba(52, 199, 89, 0.2); /* Apple green background - increased opacity */
-    color: #2a6d31; /* Darker green for better contrast */
+    background-color: #34c759; /* Solid green background */
+    color: white; /* White text for best contrast */
     font-weight: 600;
 }
 
 .trait-badge-good {
-    background-color: rgba(0, 113, 227, 0.2); /* Apple blue background - increased opacity */
-    color: #0050a4; /* Darker blue for better contrast */
+    background-color: #0070f3; /* Solid blue background */
+    color: white; /* White text for best contrast */
     font-weight: 600;
 }
 
 .trait-badge-average {
-    background-color: rgba(255, 195, 0, 0.2); /* Apple yellow background - increased opacity */
-    color: #996900; /* Darker yellow for better contrast */
+    background-color: #ffc107; /* Solid yellow background */
+    color: #212121; /* Dark text for best contrast on yellow */
     font-weight: 600;
 }
 
 .trait-badge-below-average {
-    background-color: rgba(255, 159, 10, 0.2); /* Apple orange background - increased opacity */
-    color: #b24d00; /* Darker orange for better contrast */
+    background-color: #fd7e14; /* Solid orange background */
+    color: white; /* White text for best contrast */
     font-weight: 600;
 }
 
 .trait-badge-poor {
-    background-color: rgba(255, 59, 48, 0.2); /* Apple red background - increased opacity */
-    color: #b71c1c; /* Darker red for better contrast */
+    background-color: #dc3545; /* Solid red background */
+    color: white; /* White text for best contrast */
     font-weight: 600;
 }
 
@@ -229,23 +229,23 @@ body {
 }
 
 .trait-pill-excellent {
-    background-color: var(--neon-green);
+    background-color: #34c759; /* Solid green background */
 }
 
 .trait-pill-good {
-    background-color: var(--neon-blue);
+    background-color: #0070f3; /* Solid blue background */
 }
 
 .trait-pill-average {
-    background-color: var(--energy-yellow);
+    background-color: #ffc107; /* Solid yellow background */
 }
 
 .trait-pill-below-average {
-    background-color: var(--power-orange);
+    background-color: #fd7e14; /* Solid orange background */
 }
 
 .trait-pill-poor {
-    background-color: var(--neon-red);
+    background-color: #dc3545; /* Solid red background */
 }
 
 /* Muscle group badges - Apple style */
@@ -487,14 +487,16 @@ body {
 }
 
 .btn-primary {
-    background-color: var(--primary-blue);
+    background-color: #0055cc; /* Darker blue for better contrast */
     color: white;
-    box-shadow: 0 0 15px rgba(41, 182, 246, 0.3);
-    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    font-weight: 600;
+    border: none;
 }
 
 .btn-primary:hover {
-    box-shadow: 0 0 20px rgba(41, 182, 246, 0.6);
+    background-color: #003d99; /* Even darker on hover */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
 .btn-success {
@@ -585,43 +587,17 @@ body {
 
 /* Glowing animated button */
 .btn-glow {
-    overflow: hidden;
     position: relative;
     z-index: 1;
-    border: 1px solid rgba(41, 182, 246, 0.4);
+    border: none;
+    background-color: #0055cc; /* Darker blue for better contrast */
+    color: white !important;
+    font-weight: 600;
 }
 
-.btn-glow::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, rgba(41, 182, 246, 0.8), rgba(0, 229, 255, 0.8));
-    opacity: 0;
-    z-index: -1;
-    transition: opacity 0.3s ease;
-}
-
-.btn-glow:hover::before {
-    opacity: 1;
-}
-
-.btn-glow::after {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 60%);
-    transform: rotate(30deg);
-    transition: transform 0.5s ease;
-}
-
-.btn-glow:hover::after {
-    transform: rotate(0deg);
+.btn-glow:hover {
+    background-color: #003d99; /* Even darker on hover */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
 /* Cyberpunk button with electric border */
@@ -907,7 +883,7 @@ body {
     padding: 0.8rem 2rem;
     font-size: 1.1rem;
     border-radius: 2rem; /* Apple uses pill-shaped buttons */
-    background-color: var(--primary-blue);
+    background-color: #0055cc; /* Darker blue for better contrast */
     color: white;
     text-decoration: none;
     display: inline-flex;
@@ -915,6 +891,7 @@ body {
     justify-content: center;
     min-width: 12rem;
     transition: all 0.2s ease;
+    font-weight: 600;
 }
 
 .hero-cta-secondary {
