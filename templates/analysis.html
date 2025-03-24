@@ -243,7 +243,7 @@
                             {% if 'normalized_ffmi' in traits %}
                             <tr>
                                 <td>Normalized FFMI</td>
-                                <td>{{ traits.normalized_ffmi.value }}</td>
+                                <td>{{ traits.normalized_ffmi.display_value }}</td>
                                 <td>
                                     <span class="badge bg-secondary">Info</span>
                                 </td>
@@ -254,7 +254,7 @@
                             {% if 'frame_size' in traits %}
                             <tr>
                                 <td>Frame Size</td>
-                                <td>{{ traits.frame_size.value }}</td>
+                                <td>{{ traits.frame_size.display_value }}</td>
                                 <td>
                                     <span class="badge bg-secondary">Info</span>
                                 </td>
@@ -266,7 +266,7 @@
                             <tr>
                                 <td>Muscle Building Potential</td>
                                 <td>
-                                    {{ traits.muscle_potential.value }} kg
+                                    {{ traits.muscle_potential.display_value }}
                                     {% if 'description' in traits.muscle_potential %}
                                     <div class="small text-muted mt-1">
                                         {{ traits.muscle_potential.description }}
@@ -293,7 +293,7 @@
                             {% if 'ideal_weight_range' in traits %}
                             <tr>
                                 <td>Ideal Weight Range</td>
-                                <td>{{ traits.ideal_weight_range.value }}</td>
+                                <td>{{ traits.ideal_weight_range.display_value }}</td>
                                 <td>
                                     <span class="badge bg-secondary">Info</span>
                                 </td>
@@ -321,7 +321,7 @@
                             {% if 'arm_span_height_ratio' in traits %}
                             <tr>
                                 <td>Arm Span to Height Ratio</td>
-                                <td>{{ traits.arm_span_height_ratio.value }}</td>
+                                <td>{{ traits.arm_span_height_ratio.display_value }}</td>
                                 <td>
                                     {% if traits.arm_span_height_ratio.rating == 'excellent' %}
                                         <span class="badge bg-success">Excellent</span>
@@ -349,7 +349,7 @@
                             {% if 'femur_tibia_ratio' in traits %}
                             <tr>
                                 <td>Femur to Tibia Ratio</td>
-                                <td>{{ traits.femur_tibia_ratio.value }}</td>
+                                <td>{{ traits.femur_tibia_ratio.display_value }}</td>
                                 <td>
                                     <span class="badge bg-secondary">Info</span>
                                 </td>
@@ -360,7 +360,7 @@
                             {% if 'humerus_length' in traits %}
                             <tr>
                                 <td>Humerus Length</td>
-                                <td>{{ traits.humerus_length.value }}</td>
+                                <td>{{ traits.humerus_length.display_value }}</td>
                                 <td>
                                     <span class="badge bg-secondary">Info</span>
                                 </td>
@@ -371,7 +371,7 @@
                             {% if 'clavicle_width' in traits %}
                             <tr>
                                 <td>Clavicle Width</td>
-                                <td>{{ traits.clavicle_width.value }}</td>
+                                <td>{{ traits.clavicle_width.display_value }}</td>
                                 <td>
                                     <span class="badge bg-secondary">Info</span>
                                 </td>
