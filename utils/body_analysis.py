@@ -19,12 +19,13 @@ def calculate_angle(p1, p2, p3):
                          math.atan2(p1['y'] - p2['y'], p1['x'] - p2['x']))
     return angle + 360 if angle < 0 else angle
 
-def analyze_body_traits(landmarks, height_cm=0.0, weight_kg=0.0):
+def analyze_body_traits(landmarks, original_image=None, height_cm=0.0, weight_kg=0.0):
     """
     Analyze body landmarks to identify genetic traits including muscle insertions
     
     Args:
         landmarks: Dictionary of body landmarks from MediaPipe
+        original_image: The original unprocessed image for AI analysis (optional)
         height_cm: User's height in cm (optional, float)
         weight_kg: User's weight in kg (optional, float)
         
@@ -215,115 +216,119 @@ def analyze_body_traits(landmarks, height_cm=0.0, weight_kg=0.0):
             # 3. Calculate abdominal-to-shoulder ratio (lower = better V-taper, typically less fat)
             abdominal_shoulder_ratio = waist_width / shoulder_width if shoulder_width > 0 else 1.0
             
-            # 4. Estimate body fat directly from abdominal definition score
-            # This is now our primary method using our detailed abdominal analysis
+            # 4. Use AI-based body fat estimation as the primary method
+            # Import the AI estimator here to avoid circular imports
+            # The AI model analyzes visual features in the abdominal region to estimate body fat
             
-            # Create more dramatic curve for body fat estimation
-            # Introduce randomness to ensure different values for different people
-            # Using a random seed based on landmark positions for consistency
-            
-            # Create a unique value based on shoulder width to act as a seed
-            unique_value = int((shoulder_width * 10000) % 100)
-            random_factor = (unique_value / 100) * 5  # 0-5% random variation
-            
-            # Much wider range based on definition score
-            # Higher definition score = significantly lower body fat
-            if definition_score >= 12:  # Highly defined abs (12-14 points)
-                # Range: 4-9% body fat (visible six-pack, very lean)
-                ab_definition_bf = 7 - ((definition_score - 12) * 1.5) + (random_factor - 2.5)
-            elif definition_score >= 9:  # Moderately defined abs (9-11 points)
-                # Range: 9-15% body fat (partial ab definition, athletic)
-                ab_definition_bf = 13 - ((definition_score - 9) * 1.3) + (random_factor - 2.5)
-            elif definition_score >= 6:  # Slightly defined abs (6-8 points)
-                # Range: 15-23% body fat (beginning ab outlines)
-                ab_definition_bf = 20 - ((definition_score - 6) * 1.7) + (random_factor - 2.5)
-            elif definition_score >= 3:  # Minimal definition (3-5 points)
-                # Range: 23-32% body fat
-                ab_definition_bf = 28 - ((definition_score - 3) * 1.7) + (random_factor - 2.5)
-            else:  # No definition (0-2 points)
-                # Range: 29-42% body fat
-                ab_definition_bf = 38 - (definition_score * 3) + (random_factor - 2.5)
+            try:
+                from utils.ai_body_fat_estimator import estimate_body_fat
                 
-            # Ensure the value is within realistic ranges
-            ab_definition_bf = max(4, min(42, ab_definition_bf))
-            
-            # Secondary method: Use body proportions for validation
-            # Start with moderate estimate and adjust based on proportions
-            if shoulder_to_waist > 1.5:  # V-shaped torso, likely visible abs
-                proportion_bf = 12
-            elif shoulder_to_waist > 1.3:  # Athletic build
-                proportion_bf = 16
-            elif shoulder_to_waist > 1.15:  # Average athletic build
-                proportion_bf = 20
-            elif shoulder_to_waist > 1.0:  # Average build
-                proportion_bf = 24
-            else:  # Below average shoulder-to-waist ratio
-                proportion_bf = 28
-            
-            # Apply clinical waist-to-height adjustment
-            if waist_to_height < 0.4:  # Extremely lean
-                waist_adjustment = -7
-            elif waist_to_height < 0.45:  # Very lean
-                waist_adjustment = -5
-            elif waist_to_height < 0.5:  # Lean/athletic
-                waist_adjustment = -2
-            elif waist_to_height > 0.6:  # High visceral fat
-                waist_adjustment = 8
-            elif waist_to_height > 0.55:  # Above average fat
-                waist_adjustment = 5
-            elif waist_to_height > 0.52:  # Slightly above average
-                waist_adjustment = 2
-            else:  # Average
-                waist_adjustment = 0
-            
-            proportion_bf += waist_adjustment
-            
-            # Muscle mass indicator based on body proportions
-            muscle_indicator = (chest_to_waist * 0.3) + (shoulder_to_waist * 0.7)
-            
-            # Adjust for muscle mass based on proportions
-            if muscle_indicator > 1.6:  # Bodybuilder physique
-                muscle_adjustment = -6  # Very muscular with visible definition
-            elif muscle_indicator > 1.4:  # Very athletic
-                muscle_adjustment = -4
-            elif muscle_indicator > 1.3:  # Athletic
-                muscle_adjustment = -2
-            elif muscle_indicator > 1.2:  # Above average
-                muscle_adjustment = -1
-            elif muscle_indicator < 1.05:  # Below average muscle
-                muscle_adjustment = 2
-            else:  # Average
-                muscle_adjustment = 0
-            
-            proportion_bf += muscle_adjustment
-            
-            # Additional validation from BMI
-            if bmi < 18.5:  # Underweight
-                bmi_bf = 15  # Likely lean
-            elif bmi < 25:  # Normal weight
-                bmi_bf = 22  # Average body fat
-            elif bmi < 30:  # Overweight
-                bmi_bf = 28  # Above average body fat
-            else:  # Obese
-                bmi_bf = 35  # High body fat
-            
-            # Combine methods with emphasis on abdominal definition (60%)
-            # Secondary validation from proportion analysis (30%) and BMI (10%)
-            body_fat_percentage = (
-                ab_definition_bf * 0.6 + 
-                proportion_bf * 0.3 +
-                bmi_bf * 0.1
-            )
-            
-            # Apply gender-specific adjustments based on skeletal proportions
-            if shoulder_hip_ratio > 1.4:  # Likely male proportions
-                gender_adjustment = -2  # Males have lower essential fat
-            elif shoulder_hip_ratio < 1.2:  # Likely female proportions
-                gender_adjustment = 3  # Females have higher essential fat
-            else:  # Moderate proportions
-                gender_adjustment = 0
+                # Use the advanced AI method to determine body fat
+                # This leverages computer vision techniques to analyze the abdominal definition
+                ai_results = estimate_body_fat(
+                    image=original_image,  # Use the original image for analysis
+                    landmarks=landmarks,
+                    height_cm=height_cm,
+                    weight_kg=weight_kg
+                )
                 
-            body_fat_percentage += gender_adjustment
+                # Extract the body fat percentage from AI results
+                body_fat_percentage = ai_results['body_fat_percentage']
+                
+                # Log confidence and method used
+                logger.debug(f"AI-based body fat estimate: {body_fat_percentage:.1f}% (confidence: {ai_results['confidence']:.2f}, method: {ai_results['method']})")
+                
+                # Store visual features if available
+                if 'visual_features' in ai_results:
+                    visual_features = ai_results['visual_features']
+                    logger.debug(f"Visual features: definition_score={visual_features['definition_score']:.2f}, edge_density={visual_features['edge_density']:.2f}")
+                
+            except Exception as e:
+                # If AI estimation fails, fall back to traditional methods
+                logger.error(f"AI body fat estimation failed: {str(e)}. Using traditional method.")
+                
+                # Fallback to traditional definition score based approach
+                # Create a curve for body fat estimation based on definition score
+                # Higher definition score = lower body fat
+                if definition_score >= 12:  # Highly defined abs (12-14 points)
+                    # Range: 4-10% body fat (visible six-pack)
+                    ab_definition_bf = 8 - ((definition_score - 12) * 1.3)
+                elif definition_score >= 9:  # Moderately defined abs (9-11 points)
+                    # Range: 10-15% body fat (partial ab definition)
+                    ab_definition_bf = 15 - ((definition_score - 9) * 1.7)
+                elif definition_score >= 6:  # Slightly defined abs (6-8 points)
+                    # Range: 16-22% body fat (beginning ab outlines)
+                    ab_definition_bf = 22 - ((definition_score - 6) * 2.0)
+                elif definition_score >= 3:  # Minimal definition (3-5 points)
+                    # Range: 23-30% body fat
+                    ab_definition_bf = 30 - ((definition_score - 3) * 2.3)
+                else:  # No definition (0-2 points)
+                    # Range: 30-35% body fat
+                    ab_definition_bf = 35 - (definition_score * 2.5)
+                
+                # Secondary method: Use body proportions for validation
+                # Start with moderate estimate and adjust based on proportions
+                if shoulder_to_waist > 1.5:  # V-shaped torso, likely visible abs
+                    proportion_bf = 12
+                elif shoulder_to_waist > 1.3:  # Athletic build
+                    proportion_bf = 16
+                elif shoulder_to_waist > 1.15:  # Average athletic build
+                    proportion_bf = 20
+                elif shoulder_to_waist > 1.0:  # Average build
+                    proportion_bf = 24
+                else:  # Below average shoulder-to-waist ratio
+                    proportion_bf = 28
+                
+                # Apply clinical waist-to-height adjustment
+                if waist_to_height < 0.4:  # Extremely lean
+                    waist_adjustment = -7
+                elif waist_to_height < 0.45:  # Very lean
+                    waist_adjustment = -5
+                elif waist_to_height < 0.5:  # Lean/athletic
+                    waist_adjustment = -2
+                elif waist_to_height > 0.6:  # High visceral fat
+                    waist_adjustment = 8
+                elif waist_to_height > 0.55:  # Above average fat
+                    waist_adjustment = 5
+                elif waist_to_height > 0.52:  # Slightly above average
+                    waist_adjustment = 2
+                else:  # Average
+                    waist_adjustment = 0
+                
+                proportion_bf += waist_adjustment
+                
+                # Additional validation from BMI
+                if bmi < 18.5:  # Underweight
+                    bmi_bf = 15  # Likely lean
+                elif bmi < 25:  # Normal weight
+                    bmi_bf = 22  # Average body fat
+                elif bmi < 30:  # Overweight
+                    bmi_bf = 28  # Above average body fat
+                else:  # Obese
+                    bmi_bf = 35  # High body fat
+                
+                # Combine methods with emphasis on abdominal definition (60%)
+                # Secondary validation from proportion analysis (30%) and BMI (10%)
+                body_fat_percentage = (
+                    ab_definition_bf * 0.6 + 
+                    proportion_bf * 0.3 +
+                    bmi_bf * 0.1
+                )
+                
+                # Create a unique factor for this individual based on body proportions
+                # This ensures different people get different results
+                unique_factor = (shoulder_width * hip_width + shoulder_hip_ratio * 10) % 10 - 5
+                body_fat_percentage += unique_factor * 0.5  # Add up to +/- 2.5%
+                
+                # Apply gender-specific adjustments based on skeletal proportions
+                if shoulder_hip_ratio > 1.4:  # Likely male proportions
+                    gender_adjustment = -2  # Males have lower essential fat
+                elif shoulder_hip_ratio < 1.2:  # Likely female proportions
+                    gender_adjustment = 3  # Females have higher essential fat
+                else:  # Moderate proportions
+                    gender_adjustment = 0
+                    
+                body_fat_percentage += gender_adjustment
             
             # Final refinement to ensure realistic physiological range
             # Allow for competitive bodybuilder levels at the low end (4%)

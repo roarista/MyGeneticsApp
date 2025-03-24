@@ -87,8 +87,13 @@ def analyze():
                 flash('No body detected in image. Please try again with a clearer full-body image.', 'warning')
                 return redirect(url_for('index'))
             
-            # Analyze body traits
-            traits = analyze_body_traits(landmarks, float(height) if height else 0, float(weight) if weight else 0)
+            # Analyze body traits - pass the original image for AI analysis
+            traits = analyze_body_traits(
+                landmarks=landmarks, 
+                original_image=image,
+                height_cm=float(height) if height else 0, 
+                weight_kg=float(weight) if weight else 0
+            )
             
             # Generate recommendations
             recommendations = generate_recommendations(traits, experience)
