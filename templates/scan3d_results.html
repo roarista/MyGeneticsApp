@@ -364,3 +364,15 @@
     </div>
 </div>
 {% endblock %}
+
+{% block scripts %}
+<script>
+    // Add measurement-badge class to all badge elements in the table
+    document.addEventListener('DOMContentLoaded', function() {
+        const badges = document.querySelectorAll('.table .badge');
+        badges.forEach(badge => {
+            badge.classList.add('measurement-badge');
+        });
+    });
+</script>
+{% endblock %}
