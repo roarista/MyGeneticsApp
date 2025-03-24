@@ -111,14 +111,10 @@
                                             {{ ' '.join(trait.split('_')).title() }}
                                         </td>
                                         <td>
-                                            {% if 'value' in data %}
-                                                {% if trait in ['shoulder_hip_ratio', 'waist_hip_ratio'] %}
-                                                    {{ "%.2f"|format(data.value) }}
-                                                {% elif trait in ['shoulder_width', 'arm_length', 'leg_length', 'torso_length'] %}
-                                                    {{ "%.1f"|format(data.value) }} units
-                                                {% else %}
-                                                    {{ data.value }}
-                                                {% endif %}
+                                            {% if 'display_value' in data %}
+                                                {{ data.display_value }}
+                                            {% elif 'value' in data %}
+                                                {{ data.value }}
                                             {% endif %}
                                         </td>
                                         <td>
