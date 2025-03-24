@@ -390,7 +390,7 @@ class AIBodyFatEstimator:
                 
         return 0  # No adjustment if we can't determine proportions
     
-    def _estimate_body_fat_basic(self, landmarks=None, height_cm=0, weight_kg=0):
+    def _estimate_body_fat_basic(self, landmarks=None, height_cm=0.0, weight_kg=0.0):
         """
         Basic rules-based body fat estimation when advanced techniques can't be applied
         
