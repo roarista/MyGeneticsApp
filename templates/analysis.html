@@ -339,7 +339,7 @@
                             
                             <tr>
                                 <td>Leg to Torso Ratio</td>
-                                <td>{{ "%.2f"|format(traits.leg_length.value / traits.torso_length.value) if 'leg_length' in traits and 'torso_length' in traits else 'N/A' }}</td>
+                                <td>{{ traits.leg_torso_ratio.display_value if 'leg_torso_ratio' in traits else 'N/A' }}</td>
                                 <td>
                                     <span class="badge bg-secondary">Info</span>
                                 </td>

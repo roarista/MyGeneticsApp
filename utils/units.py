@@ -29,6 +29,7 @@ UNITS = {
     # Ratios (unitless)
     "shoulder_hip_ratio": "",
     "arm_torso_ratio": "",
+    "leg_torso_ratio": "",
     "waist_hip_ratio": "",
     "arm_span_height_ratio": "",
     "femur_tibia_ratio": "",
