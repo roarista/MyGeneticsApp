@@ -175,7 +175,7 @@
                             {% if 'bmi' in traits %}
                             <tr>
                                 <td>Body Mass Index (BMI)</td>
-                                <td>{{ traits.bmi.value }}</td>
+                                <td>{{ traits.bmi.display_value }}</td>
                                 <td>
                                     {% if traits.bmi.rating == 'excellent' %}
                                         <span class="badge bg-success">Excellent</span>
@@ -194,7 +194,7 @@
                             {% if 'body_fat_percentage' in traits %}
                             <tr>
                                 <td>Body Fat Percentage</td>
-                                <td>{{ traits.body_fat_percentage.value }}%</td>
+                                <td>{{ traits.body_fat_percentage.display_value }}</td>
                                 <td>
                                     {% if traits.body_fat_percentage.rating == 'excellent' %}
                                         <span class="badge bg-success">Excellent</span>
@@ -213,7 +213,7 @@
                             {% if 'lean_body_mass' in traits %}
                             <tr>
                                 <td>Lean Body Mass</td>
-                                <td>{{ traits.lean_body_mass.value }} kg</td>
+                                <td>{{ traits.lean_body_mass.display_value }}</td>
                                 <td>
                                     <span class="badge bg-secondary">Info</span>
                                 </td>
@@ -224,7 +224,7 @@
                             {% if 'ffmi' in traits %}
                             <tr>
                                 <td>Fat-Free Mass Index (FFMI)</td>
-                                <td>{{ traits.ffmi.value }}</td>
+                                <td>{{ traits.ffmi.display_value }}</td>
                                 <td>
                                     {% if traits.ffmi.rating == 'excellent' %}
                                         <span class="badge bg-success">Excellent</span>

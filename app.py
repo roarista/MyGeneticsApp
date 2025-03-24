@@ -11,6 +11,7 @@ from werkzeug.utils import secure_filename
 from utils.image_processing import process_image, extract_body_landmarks
 from utils.body_analysis import analyze_body_traits
 from utils.recommendations import generate_recommendations
+from utils.units import format_trait_value, get_unit
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -149,13 +150,29 @@ def results(analysis_id):
     import base64
     img_b64 = base64.b64encode(img_data).decode('utf-8')
     
+    # Process traits to include their units
+    formatted_traits = {}
+    for trait_name, trait_data in result['traits'].items():
+        # For traits that are dictionaries with value keys
+        if isinstance(trait_data, dict) and 'value' in trait_data:
+            # Copy the trait data
+            formatted_trait = trait_data.copy()
+            # Format the value with units
+            formatted_trait['display_value'] = format_trait_value(trait_name, trait_data['value'])
+            formatted_trait['unit'] = get_unit(trait_name)
+            formatted_traits[trait_name] = formatted_trait
+        else:
+            # For other types of traits
+            formatted_traits[trait_name] = trait_data
+    
     return render_template(
         'analysis.html',
         analysis_id=analysis_id,
-        traits=result['traits'],
+        traits=formatted_traits,
         recommendations=result['recommendations'],
         user_info=result['user_info'],
-        image_data=img_b64
+        image_data=img_b64,
+        format_value=format_trait_value  # Pass the formatter to the template
     )
 
 @app.route('/education')
