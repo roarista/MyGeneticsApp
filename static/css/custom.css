@@ -799,8 +799,9 @@ body {
 }
 
 .form-floating > label {
-    color: var(--text-medium);
+    color: var(--text-dark); /* Changed from text-medium to text-dark for better contrast */
     padding: 1rem 0.75rem;
+    font-weight: 500;
 }
 
 .form-floating > .form-control:focus ~ label,
@@ -1106,8 +1107,8 @@ body {
 
 .stat-label {
     font-size: 0.8rem;
-    color: var(--text-medium);
-    font-weight: 500;
+    color: var(--text-light); /* Changed from text-medium to text-light for better contrast */
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 1px;
 }
@@ -1220,10 +1221,12 @@ body {
     display: flex;
     align-items: center;
     font-size: 0.8rem;
-    color: var(--text-medium);
+    color: var(--text-light); /* Changed from text-medium to text-light for better contrast */
     padding: 0.3rem 0.6rem;
     border-radius: 5rem;
-    background-color: rgba(24, 24, 24, 0.4);
+    background-color: rgba(24, 24, 24, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    font-weight: 500;
 }
 
 .viz-legend-color {
@@ -1326,11 +1329,13 @@ body {
     align-items: center;
     font-size: 0.9rem;
     margin-top: 1rem;
-    color: var(--text-medium);
+    color: var(--text-light); /* Changed from text-medium to text-light for better contrast */
     padding: 0.5rem 0.8rem;
-    background-color: rgba(24, 24, 24, 0.4);
+    background-color: rgba(24, 24, 24, 0.6);
     border-radius: 5rem;
     display: inline-flex;
+    font-weight: 500;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .metric-trend-up {
