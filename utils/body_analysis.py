@@ -381,6 +381,11 @@ def analyze_body_traits(landmarks, height_cm=0.0, weight_kg=0.0):
         # Add description of what these measurements mean
         traits['description'] = get_trait_descriptions(traits['body_type'])
         
+        # Analyze muscle insertions
+        traits['muscle_insertions']['lats'] = analyze_lat_insertion(landmarks)
+        traits['muscle_insertions']['biceps'] = analyze_bicep_insertion(landmarks)
+        traits['muscle_insertions']['abdominals'] = analyze_abdominal_insertion(landmarks)
+        
         return traits
         
     except Exception as e:
@@ -607,6 +612,154 @@ def classify_arm_span_ratio(ratio):
         return 'average'    # Average proportions
     else:
         return 'below_average'  # Shorter reach
+
+def analyze_lat_insertion(landmarks):
+    """
+    Analyze latissimus dorsi (lats) muscle insertion position
+    
+    Args:
+        landmarks: Dictionary of body landmarks from MediaPipe
+        
+    Returns:
+        Dictionary with insertion value and description
+    """
+    # MediaPipe doesn't provide direct lat insertions, but we can estimate from shoulder and hip positions
+    LEFT_SHOULDER = 11
+    RIGHT_SHOULDER = 12
+    LEFT_HIP = 23
+    RIGHT_HIP = 24
+    
+    # Calculate torso width at different levels
+    shoulder_width = calculate_distance(landmarks[LEFT_SHOULDER], landmarks[RIGHT_SHOULDER])
+    hip_width = calculate_distance(landmarks[LEFT_HIP], landmarks[RIGHT_HIP])
+    
+    # Calculate points at approximately 1/3 down from shoulders
+    mid_torso_y = (landmarks[LEFT_SHOULDER]['y'] + landmarks[LEFT_HIP]['y']) / 3
+    left_mid_torso = {'x': landmarks[LEFT_SHOULDER]['x'], 'y': mid_torso_y, 'z': landmarks[LEFT_SHOULDER]['z']}
+    right_mid_torso = {'x': landmarks[RIGHT_SHOULDER]['x'], 'y': mid_torso_y, 'z': landmarks[RIGHT_SHOULDER]['z']}
+    
+    # Estimate mid-torso width (where lats are most visible)
+    mid_torso_width = calculate_distance(left_mid_torso, right_mid_torso)
+    
+    # Calculate taper ratio (higher means more dramatic taper to waist)
+    taper_ratio = shoulder_width / mid_torso_width
+    
+    # Determine lat insertion position based on taper
+    if taper_ratio > 1.35:
+        insertion = "high"
+        description = "High lat insertion: Excellent V-taper potential, but may struggle with lat width development."
+    elif taper_ratio > 1.2:
+        insertion = "medium"
+        description = "Medium lat insertion: Good balance between V-taper and lat width development potential."
+    else:
+        insertion = "low"
+        description = "Low lat insertion: Great width potential but may have less dramatic V-taper. Excellent for rows and pulldowns."
+    
+    return {
+        'value': insertion,
+        'description': description
+    }
+
+def analyze_bicep_insertion(landmarks):
+    """
+    Analyze bicep muscle insertion position
+    
+    Args:
+        landmarks: Dictionary of body landmarks from MediaPipe
+        
+    Returns:
+        Dictionary with insertion value and description
+    """
+    # Use elbow and wrist landmarks to estimate insertion point
+    LEFT_SHOULDER = 11
+    LEFT_ELBOW = 13
+    LEFT_WRIST = 15
+    
+    # Calculate forearm length
+    forearm_length = calculate_distance(landmarks[LEFT_ELBOW], landmarks[LEFT_WRIST])
+    
+    # Calculate upper arm length
+    upper_arm_length = calculate_distance(landmarks[LEFT_SHOULDER], landmarks[LEFT_ELBOW])
+    
+    # Calculate bicep insertion ratio (forearm to upper arm)
+    insertion_ratio = forearm_length / upper_arm_length if upper_arm_length > 0 else 0
+    
+    # Estimate insertion position
+    if insertion_ratio > 0.9:
+        insertion = "long"
+        description = "Long bicep insertion: Less peak development but better endurance and functional strength."
+    elif insertion_ratio > 0.75:
+        insertion = "medium"
+        description = "Medium bicep insertion: Good balance between peak development and functional strength."
+    else:
+        insertion = "short"
+        description = "Short bicep insertion: Excellent peak development potential, may have more dramatic bicep appearance."
+    
+    return {
+        'value': insertion,
+        'description': description
+    }
+
+def analyze_abdominal_insertion(landmarks):
+    """
+    Analyze abdominal muscle insertion and genetics
+    
+    Args:
+        landmarks: Dictionary of body landmarks from MediaPipe
+        
+    Returns:
+        Dictionary with insertion value and description
+    """
+    # Use torso landmarks to estimate abdominal structure
+    LEFT_SHOULDER = 11
+    RIGHT_SHOULDER = 12
+    LEFT_HIP = 23
+    RIGHT_HIP = 24
+    
+    # Calculate torso length
+    left_torso = calculate_distance(landmarks[LEFT_SHOULDER], landmarks[LEFT_HIP])
+    right_torso = calculate_distance(landmarks[RIGHT_SHOULDER], landmarks[RIGHT_HIP])
+    torso_length = (left_torso + right_torso) / 2
+    
+    # Calculate torso width at different points
+    shoulder_width = calculate_distance(landmarks[LEFT_SHOULDER], landmarks[RIGHT_SHOULDER])
+    hip_width = calculate_distance(landmarks[LEFT_HIP], landmarks[RIGHT_HIP])
+    
+    # Calculate midpoint of torso
+    mid_y = (landmarks[LEFT_SHOULDER]['y'] + landmarks[LEFT_HIP]['y']) / 2
+    mid_left = {'x': landmarks[LEFT_SHOULDER]['x'], 'y': mid_y, 'z': landmarks[LEFT_SHOULDER]['z']}
+    mid_right = {'x': landmarks[RIGHT_SHOULDER]['x'], 'y': mid_y, 'z': landmarks[RIGHT_SHOULDER]['z']}
+    mid_width = calculate_distance(mid_left, mid_right)
+    
+    # Calculate waist-to-hip ratio
+    waist_y = (landmarks[LEFT_HIP]['y'] + landmarks[RIGHT_HIP]['y']) / 2 - 0.05
+    waist_left = {'x': landmarks[LEFT_HIP]['x'] - 0.02, 'y': waist_y, 'z': landmarks[LEFT_HIP]['z']}
+    waist_right = {'x': landmarks[RIGHT_HIP]['x'] + 0.02, 'y': waist_y, 'z': landmarks[RIGHT_HIP]['z']}
+    waist_width = calculate_distance(waist_left, waist_right)
+    waist_hip_ratio = waist_width / hip_width if hip_width > 0 else 0
+    
+    # Calculate torso shape metrics
+    torso_ratio = torso_length / mid_width
+    
+    # Determine ab genetics based on torso shape
+    if torso_ratio > 2.2:
+        structure = "long"
+        description = "Long abdominal structure: Potential for 8-pack development, but may need to work harder on width."
+    elif torso_ratio > 1.8:
+        structure = "medium"
+        description = "Medium abdominal structure: Balanced development potential with typical 6-pack formation."
+    else:
+        structure = "compact"
+        description = "Compact abdominal structure: Potentially wider abs with good 4-6 pack development."
+    
+    # Factor in waist-hip ratio for additional info
+    if waist_hip_ratio < 0.85:
+        description += " Favorable fat distribution pattern for abdominal definition."
+    
+    return {
+        'value': structure,
+        'description': description
+    }
 
 def get_trait_descriptions(body_type):
     """Get detailed descriptions of what body type means for fitness"""
