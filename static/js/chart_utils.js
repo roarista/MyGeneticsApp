@@ -87,6 +87,30 @@ function createTraitsRadarChart(canvasId, traitsData) {
     
     const chartData = formatTraitDataForRadar(traitsData);
     
+    // Limit the number of traits to display to prevent overlapping
+    // If there are more than 8 traits, only show the most important ones
+    if (chartData.labels.length > 8) {
+        const essentialTraits = [
+            'Shoulder Width', 'Shoulder Hip Ratio', 'Arm Length', 
+            'Leg Length', 'Muscle Potential', 'Body Fat %', 
+            'Torso Length', 'Arm Torso Ratio'
+        ];
+        
+        // Filter the chartData to only include essential traits
+        const filteredIndices = [];
+        chartData.labels.forEach((label, index) => {
+            if (essentialTraits.includes(label)) {
+                filteredIndices.push(index);
+            }
+        });
+        
+        if (filteredIndices.length > 0) {
+            chartData.labels = filteredIndices.map(i => chartData.labels[i]);
+            chartData.values = filteredIndices.map(i => chartData.values[i]);
+            chartData.colors = filteredIndices.map(i => chartData.colors[i]);
+        }
+    }
+    
     return new Chart(ctx, {
         type: 'radar',
         data: {
@@ -94,33 +118,64 @@ function createTraitsRadarChart(canvasId, traitsData) {
             datasets: [{
                 label: 'Your Genetic Traits',
                 data: chartData.values,
-                backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                borderColor: 'rgba(54, 162, 235, 1)',
+                backgroundColor: 'rgba(66, 133, 244, 0.2)',
+                borderColor: 'rgba(66, 133, 244, 1)',
                 borderWidth: 2,
                 pointBackgroundColor: chartData.colors,
                 pointBorderColor: '#fff',
                 pointHoverBackgroundColor: '#fff',
-                pointHoverBorderColor: 'rgba(54, 162, 235, 1)'
+                pointHoverBorderColor: 'rgba(66, 133, 244, 1)'
             }]
         },
         options: {
+            responsive: true,
+            maintainAspectRatio: false,
             scales: {
                 r: {
                     angleLines: {
-                        display: true
+                        display: true,
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
                     },
                     suggestedMin: 0,
                     suggestedMax: 100,
                     ticks: {
-                        stepSize: 25
+                        stepSize: 25,
+                        color: '#666',
+                        backdropColor: 'transparent'
+                    },
+                    pointLabels: {
+                        color: '#333',
+                        font: {
+                            size: 12,
+                            family: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+                            weight: 'bold'
+                        },
+                        padding: 15 // Add more padding to prevent overlap
                     }
                 }
             },
             plugins: {
                 legend: {
                     position: 'top',
+                    labels: {
+                        font: {
+                            family: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+                            size: 14
+                        },
+                        color: '#333'
+                    }
                 },
                 tooltip: {
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    titleColor: '#333',
+                    bodyColor: '#333',
+                    borderColor: 'rgba(0, 0, 0, 0.1)',
+                    borderWidth: 1,
+                    cornerRadius: 6,
+                    boxPadding: 6,
                     callbacks: {
                         label: function(context) {
                             const value = context.raw;

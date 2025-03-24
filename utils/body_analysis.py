@@ -21,7 +21,7 @@ def calculate_angle(p1, p2, p3):
 
 def analyze_body_traits(landmarks, height_cm=0.0, weight_kg=0.0):
     """
-    Analyze body landmarks to identify genetic traits
+    Analyze body landmarks to identify genetic traits including muscle insertions
     
     Args:
         landmarks: Dictionary of body landmarks from MediaPipe
@@ -37,7 +37,14 @@ def analyze_body_traits(landmarks, height_cm=0.0, weight_kg=0.0):
             return {}
         
         # Initialize traits dictionary
-        traits = {}
+        traits = {
+            # Initialize new muscle insertion analysis section
+            'muscle_insertions': {
+                'lats': {'value': None, 'description': None},
+                'biceps': {'value': None, 'description': None},
+                'abdominals': {'value': None, 'description': None}
+            }
+        }
         
         # Track whether we have enough data for advanced calculations
         has_height_weight = height_cm > 0 and weight_kg > 0

@@ -1,23 +1,62 @@
 /* General styling enhancements */
+:root {
+    --primary-color: #4285F4;
+    --secondary-color: #34A853;
+    --accent-color: #FBBC05;
+    --text-color: #202124;
+    --light-gray: #f8f9fa;
+    --border-radius: 10px;
+}
+
 body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    color: var(--text-color);
+    background-color: #ffffff;
+    font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
 main {
     flex: 1;
 }
 
-/* Card styling */
+/* Futuristic Card styling */
 .card {
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     border: none;
     margin-bottom: 1.5rem;
+    border-radius: var(--border-radius);
+    transition: transform 0.2s, box-shadow 0.2s;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
 }
 
 .card-header {
-    font-weight: 500;
+    font-weight: 600;
+    border-bottom: none;
+    padding: 1.25rem 1.25rem;
+}
+
+/* Futuristic color overrides */
+.bg-primary {
+    background-color: var(--primary-color) !important;
+}
+
+.bg-success {
+    background-color: var(--secondary-color) !important;
+}
+
+.bg-warning {
+    background-color: var(--accent-color) !important;
+}
+
+.text-primary {
+    color: var(--primary-color) !important;
 }
 
 /* Feature list icons */
@@ -40,15 +79,49 @@ main {
     margin-bottom: 1.5rem;
 }
 
-/* Chart container */
+/* Chart container - with improved spacing for labels */
 #traitsChart {
     max-height: 400px;
+    margin: 15px 0;
+    padding: 10px;
 }
 
-/* Table responsiveness enhancements */
+/* Radar chart specific styling */
+.chart-container {
+    position: relative;
+    margin: auto;
+    height: 350px;
+    width: 100%;
+}
+
+/* Table styling improvements */
 .table-responsive {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.table {
+    margin-bottom: 0;
+}
+
+.table thead th {
+    background-color: var(--light-gray);
+    border-bottom: 2px solid rgba(0, 0, 0, 0.05);
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.table tbody tr:hover {
+    background-color: rgba(66, 133, 244, 0.03);
+}
+
+/* Unit display styling */
+.unit-display {
+    font-size: 0.9rem;
+    color: #666;
+    margin-left: 4px;
 }
 
 /* Style adjustments for feature list */
