@@ -473,8 +473,8 @@ def generate_detailed_workout_plan(body_type, experience_level, traits, goal):
         'chest': [
             {'name': 'Bench Press', 'target': 'overall chest development', 'sets': 3, 'reps': '8-10'},
             {'name': 'Incline Dumbbell Press', 'target': 'upper chest', 'sets': 3, 'reps': '8-10'},
-            {'name': 'Chest Flyes', 'target': 'chest stretching and isolation', 'sets': 3, 'reps': '10-12'},
-            {'name': 'Push-ups', 'target': 'overall chest and core stability', 'sets': 3, 'reps': '10-15'}
+            {'name': 'Cable Flyes', 'target': 'chest stretching and isolation', 'sets': 3, 'reps': '10-12'},
+            {'name': 'Decline Press', 'target': 'lower chest development', 'sets': 3, 'reps': '10-12'}
         ],
         'back': [
             {'name': 'Pull-ups/Lat Pulldowns', 'target': 'latissimus dorsi', 'sets': 3, 'reps': '8-10'},
@@ -498,13 +498,14 @@ def generate_detailed_workout_plan(body_type, experience_level, traits, goal):
             {'name': 'Squats', 'target': 'quadriceps and overall leg development', 'sets': 3, 'reps': '8-10'},
             {'name': 'Romanian Deadlifts', 'target': 'hamstrings and glutes', 'sets': 3, 'reps': '8-10'},
             {'name': 'Leg Press', 'target': 'quadriceps', 'sets': 3, 'reps': '10-12'},
+            {'name': 'Bulgarian Split Squats', 'target': 'single-leg strength and balance', 'sets': 3, 'reps': '10-12 per leg'},
             {'name': 'Calf Raises', 'target': 'calf muscles', 'sets': 3, 'reps': '12-15'}
         ],
         'core': [
-            {'name': 'Planks', 'target': 'core stability', 'sets': 3, 'reps': '30-60 seconds'},
             {'name': 'Russian Twists', 'target': 'obliques', 'sets': 3, 'reps': '10-15 per side'},
             {'name': 'Hanging Leg Raises', 'target': 'lower abs', 'sets': 3, 'reps': '10-15'},
-            {'name': 'Ab Wheel Rollouts', 'target': 'entire core', 'sets': 3, 'reps': '8-12'}
+            {'name': 'Ab Wheel Rollouts', 'target': 'entire core', 'sets': 3, 'reps': '8-12'},
+            {'name': 'Cable Crunches', 'target': 'upper and middle abs', 'sets': 3, 'reps': '12-15'}
         ]
     }
     
@@ -617,7 +618,7 @@ def generate_detailed_workout_plan(body_type, experience_level, traits, goal):
             'name': 'Push (Chest, Shoulders, Triceps)',
             'focus': 'Upper body pushing muscles with emphasis on form',
             'exercises': [
-                {'name': 'Push-ups', 'target': 'chest and triceps', 'sets': 3, 'reps': '8-12'},
+                {'name': 'Cable Flyes', 'target': 'chest activation and form', 'sets': 3, 'reps': '10-12'},
                 {'name': 'Dumbbell Bench Press', 'target': 'chest and stability', 'sets': 3, 'reps': '8-10'},
                 {'name': 'Seated Dumbbell Shoulder Press', 'target': 'shoulders', 'sets': 3, 'reps': '8-10'},
                 {'name': 'Lateral Raises', 'target': 'side deltoids', 'sets': 2, 'reps': '10-12'},
