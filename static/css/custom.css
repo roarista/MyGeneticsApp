@@ -973,8 +973,8 @@ body {
     width: 80px;
     height: 80px;
     border-radius: 20px; /* Apple uses rounded squares */
-    background-color: rgba(0, 113, 227, 0.1);
-    color: var(--primary-blue);
+    background-color: rgba(0, 113, 227, 0.2); /* Increased opacity for better contrast */
+    color: #0052cc; /* Darker blue for better contrast */
     font-size: 2rem;
     margin-bottom: 1.5rem;
     transition: all 0.3s ease;
@@ -1411,6 +1411,21 @@ body {
 
 .metric-card-info::after {
     background: linear-gradient(to right, rgba(0, 229, 255, 0), rgba(0, 229, 255, 0.7), rgba(0, 229, 255, 0));
+}
+
+/* Alert styling overrides for better contrast */
+.alert-info {
+    color: #05366f; /* Darker blue text for alert-info */
+    background-color: #cfe5ff; /* Slightly darker background */
+    border-color: #b8daff;
+    font-weight: 500; /* Make text more readable */
+}
+
+.alert-primary {
+    color: #02295b; /* Even darker blue text for alert-primary */
+    background-color: #cce5ff; /* Slightly darker background */
+    border-color: #b8daff;
+    font-weight: 500; /* Make text more readable */
 }
 
 /* Card styling - Futuristic Dark Theme */
