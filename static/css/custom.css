@@ -334,7 +334,7 @@ body {
     letter-spacing: -0.01em;
     text-align: center;
     font-weight: 500;
-    color: var(--text-medium);
+    color: var(--text-dark); /* Changed from text-medium to text-dark for better contrast on white backgrounds */
 }
 
 /* Navigation - Modern Light Style */
@@ -1478,6 +1478,7 @@ body {
 .card-footer {
     border-top: 1px solid rgba(41, 182, 246, 0.1);
     background: rgba(24, 24, 24, 0.4);
+    color: var(--text-light); /* Ensuring light text on dark footer background */
     padding: 1.2rem 1.8rem;
 }
 
@@ -1573,7 +1574,7 @@ body {
 }
 
 .feature-card-text {
-    color: var(--text-medium);
+    color: var(--text-dark); /* Changed from text-medium to text-dark for better contrast on white backgrounds */
     font-size: 0.95rem;
     line-height: 1.5;
 }
