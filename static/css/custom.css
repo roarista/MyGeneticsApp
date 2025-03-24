@@ -1,50 +1,51 @@
-/* Custom styling for MyGenetics app - Clean Minimalist Theme */
+/* Custom styling for MyGenetics app - Apple-inspired Design */
 
 /* Overall styling */
 :root {
-    /* Primary colors */
-    --primary-blue: #0066cc;  /* Darker blue for better contrast */
-    --primary-teal: #008080;  /* Darker teal for better contrast */
-    --primary-green: #2d9d4e;  /* Darker green for better contrast */
-    --primary-yellow: #cc9900;  /* Darker yellow for better contrast */
-    --primary-orange: #dd7500;  /* Darker orange for better contrast */
-    --primary-red: #d9291c;  /* Darker red for better contrast */
-    --primary-purple: #8a2be2;  /* Adjusted purple for better contrast */
+    /* Primary colors - Apple style */
+    --primary-blue: #0071e3;  /* Apple blue */
+    --primary-teal: #00b2ca;  /* Teal accent */
+    --primary-green: #34c759;  /* Apple green */
+    --primary-yellow: #ffc300;  /* Apple yellow */ 
+    --primary-orange: #ff9f0a;  /* Apple orange */
+    --primary-red: #ff3b30;    /* Apple red */
+    --primary-purple: #af52de;  /* Apple purple */
     
-    /* Background colors */
+    /* Background colors - Apple style */
     --white-bg: #ffffff;
-    --light-bg: #f0f0f4;
+    --light-bg: #f5f5f7;  /* Apple light gray background */
     --card-bg: #ffffff;
-    --panel-bg: rgba(255, 255, 255, 0.95);
-    --overlay-bg: rgba(245, 245, 247, 0.9);
+    --panel-bg: rgba(255, 255, 255, 0.98);
+    --overlay-bg: rgba(245, 245, 247, 0.95);
+    --black-bg: #000000;  /* Apple black background for hero sections */
     
-    /* Text colors */
-    --text-dark: #000000;  /* Full black for maximum contrast */
-    --text-medium: #333333;  /* Darker for better contrast */
-    --text-light: #555555;  /* Darker for better contrast */
-    --text-muted: #777777;  /* Darker for better contrast */
+    /* Text colors - Apple style */
+    --text-dark: #1d1d1f;  /* Apple primary text */
+    --text-medium: #424245;  /* Apple secondary text */
+    --text-light: #6e6e73;  /* Apple tertiary text */
+    --text-muted: #86868b;  /* Apple quaternary text */
     
-    /* Fitness-specific colors */
-    --muscle-color: #d9291c;  /* Darker red for better contrast */
-    --protein-color: #0066cc;  /* Darker blue for better contrast */
-    --energy-color: #cc9900;  /* Darker yellow for better contrast */
-    --recovery-color: #2d9d4e;  /* Darker green for better contrast */
-    --progress-color: #8a2be2;  /* Adjusted purple for better contrast */
+    /* Fitness-specific colors - Apple style */
+    --muscle-color: #ff3b30;    /* Apple red */
+    --protein-color: #0071e3;  /* Apple blue */
+    --energy-color: #ffc300;  /* Apple yellow */
+    --recovery-color: #34c759;  /* Apple green */
+    --progress-color: #af52de;  /* Apple purple */
     
-    /* Trait badge colors (neon colors adjusted for white background) */
-    --neon-green: #2d9d4e;  /* Darker green for better contrast */
-    --neon-blue: #0066cc;   /* Darker blue for better contrast */
-    --energy-yellow: #cc9900;  /* Darker yellow for better contrast */
-    --power-orange: #dd7500;  /* Darker orange for better contrast */
-    --neon-red: #d9291c;    /* Darker red for better contrast */
+    /* Trait badge colors - Apple style */
+    --neon-green: #34c759;   /* Apple green */
+    --neon-blue: #0071e3;    /* Apple blue */
+    --energy-yellow: #ffc300; /* Apple yellow */
+    --power-orange: #ff9f0a;  /* Apple orange */
+    --neon-red: #ff3b30;      /* Apple red */
     
-    /* Gradients */
-    --accent-gradient: linear-gradient(135deg, #0066cc, #0099cc);  /* Darker blue gradient */
-    --accent-gradient-alt: linear-gradient(135deg, #2d9d4e, #0099cc);  /* Darker green-blue gradient */
-    --accent-gradient-warm: linear-gradient(135deg, #dd7500, #d9291c);  /* Darker orange-red gradient */
-    --progress-gradient: linear-gradient(135deg, #2d9d4e, #0099cc);  /* Darker green-blue gradient */
-    --strength-gradient: linear-gradient(135deg, #dd7500, #d9291c);  /* Darker orange-red gradient */
-    --fitness-gradient: linear-gradient(45deg, #2d9d4e, #0066cc);  /* Darker green-blue gradient */
+    /* Gradients - Apple style */
+    --accent-gradient: linear-gradient(135deg, #0071e3, #5ac8fa);  /* Apple blue gradient */
+    --accent-gradient-alt: linear-gradient(135deg, #34c759, #5ac8fa);  /* Apple green-blue gradient */
+    --accent-gradient-warm: linear-gradient(135deg, #ff9f0a, #ff3b30);  /* Apple orange-red gradient */
+    --progress-gradient: linear-gradient(135deg, #34c759, #5ac8fa);  /* Apple green-blue gradient */
+    --strength-gradient: linear-gradient(135deg, #ff9f0a, #ff3b30);  /* Apple orange-red gradient */
+    --fitness-gradient: linear-gradient(45deg, #34c759, #0071e3);  /* Apple green-blue gradient */
     
     /* Effects */
     --soft-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
@@ -357,22 +358,26 @@ body {
     letter-spacing: 0.5px;
 }
 
-/* Buttons - Clean Aesthetic */
+/* Buttons - Apple Style */
 .btn {
     position: relative;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     font-weight: 500;
-    letter-spacing: 0.3px;
-    box-shadow: var(--soft-shadow);
-    border-radius: var(--button-radius);
+    letter-spacing: -0.01em;
+    border-radius: 2rem; /* Apple uses more rounded buttons */
     border: none;
-    padding: 0.6rem 1.2rem;
+    padding: 0.6rem 1.5rem;
     z-index: 1;
+    text-align: center;
 }
 
 .btn:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--hover-shadow);
+    transform: scale(1.02);
+    opacity: 0.9;
+}
+
+.btn:active {
+    transform: scale(0.98);
 }
 
 .btn-primary {
@@ -400,14 +405,31 @@ body {
     color: white;
 }
 
+/* Apple-style secondary button - light transparent background */
 .btn-outline-primary {
-    background-color: transparent;
-    border: 1px solid var(--primary-blue);
+    background-color: rgba(0, 113, 227, 0.1);
     color: var(--primary-blue);
+    border: none;
 }
 
 .btn-outline-primary:hover {
-    background-color: rgba(0, 122, 255, 0.1);
+    background-color: rgba(0, 113, 227, 0.15);
+}
+
+/* Apple-style link button */
+.btn-link-apple {
+    color: var(--primary-blue);
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 1rem;
+    font-weight: 400;
+    text-decoration: none;
+}
+
+.btn-link-apple:hover {
+    text-decoration: underline;
+    transform: none;
 }
 
 .btn-lg {
@@ -442,57 +464,133 @@ body {
     transform: translateX(100%);
 }
 
-/* Form elements - Clean Apple Style */
+/* Form elements - Apple Style */
 .form-control, .form-select {
-    background-color: var(--white-bg);
-    border: var(--subtle-border);
-    border-radius: var(--standard-radius);
+    background-color: rgba(0,0,0,0.02); /* Apple uses very subtle gray backgrounds */
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 12px; /* Apple uses more rounded inputs */
     color: var(--text-dark);
-    padding: 0.7rem 1rem;
-    transition: all 0.2s ease;
-    font-size: 0.95rem;
+    padding: 0.8rem 1rem;
+    transition: all 0.15s ease-out;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    -webkit-appearance: none; /* Remove default styling on iOS */
 }
 
 .form-control:focus, .form-select:focus {
     background-color: var(--white-bg);
     border-color: var(--primary-blue);
-    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+    box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.15);
     color: var(--text-dark);
+    outline: none;
 }
 
 .form-control::placeholder {
-    color: var(--text-light);
-    font-size: 0.9rem;
+    color: var(--text-muted);
+    font-size: 1rem;
+    font-weight: 400;
 }
 
 .form-control:disabled {
-    background-color: var(--light-bg);
-    color: var(--text-light);
+    background-color: rgba(0,0,0,0.05);
+    color: var(--text-muted);
+    opacity: 0.7;
 }
 
 .form-label {
     font-weight: 500;
-    margin-bottom: 0.5rem;
-    color: var(--text-medium);
-    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+    color: var(--text-dark);
+    font-size: 0.95rem;
 }
 
 .form-text {
-    color: var(--text-light);
-    font-size: 0.8rem;
-    margin-top: 0.25rem;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+    font-weight: 400;
 }
 
 .input-group {
-    border-radius: var(--standard-radius);
+    border-radius: 12px;
     overflow: hidden;
 }
 
 .input-group-text {
-    background-color: var(--light-bg);
-    border: var(--subtle-border);
+    background-color: rgba(0,0,0,0.02);
+    border: 1px solid rgba(0,0,0,0.1);
     color: var(--text-medium);
-    padding: 0.7rem 1rem;
+    padding: 0.8rem 1rem;
+}
+
+/* Apple-style checkbox/radio */
+.form-check-input {
+    width: 20px;
+    height: 20px;
+    margin-top: 0.15em;
+    background-color: white;
+    border: 1px solid rgba(0,0,0,0.2);
+    cursor: pointer;
+}
+
+.form-check-input:checked {
+    background-color: var(--primary-blue);
+    border-color: var(--primary-blue);
+}
+
+.form-check-input:focus {
+    box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.15);
+    border-color: var(--primary-blue);
+}
+
+.form-check-label {
+    font-weight: 400;
+    color: var(--text-dark);
+    cursor: pointer;
+    padding-left: 0.5rem;
+}
+
+/* Apple-style select */
+.form-select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 16px 12px;
+}
+
+/* Range slider - Apple style */
+.form-range {
+    height: 1.5rem;
+    padding: 0;
+    background: transparent;
+    -webkit-appearance: none;
+}
+
+.form-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--primary-blue);
+    border: none;
+    margin-top: -8px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.form-range::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 4px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 2px;
+}
+
+.form-range:focus {
+    outline: none;
+}
+
+.form-range:focus::-webkit-slider-thumb {
+    box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.2);
 }
 
 /* Form validation states */
@@ -544,79 +642,186 @@ body {
     box-shadow: var(--neo-shadow);
 }
 
-/* Home page styling - Clean Minimal */
+/* Home page styling - Apple-inspired */
 .hero-section {
-    padding: 5rem 0;
-    background: linear-gradient(135deg, rgba(0, 122, 255, 0.03) 0%, rgba(52, 199, 89, 0.03) 100%);
-    border-radius: var(--standard-radius);
-    margin-bottom: 4rem;
+    padding: 7rem 0;
+    background-color: var(--black-bg); /* Apple-style black background */
+    color: #ffffff;
     position: relative;
     overflow: hidden;
+    text-align: center;
+    margin-bottom: 4rem;
 }
 
 .hero-headline {
-    font-size: 3rem;
-    font-weight: 700;
-    color: var(--text-dark);
-    margin-bottom: 1.5rem;
-    line-height: 1.2;
+    font-size: 4rem;
+    font-weight: 600; /* Apple uses 600 weight for headlines */
+    color: #ffffff;
+    margin-bottom: 0.5rem;
+    line-height: 1.1;
     letter-spacing: -0.02em;
 }
 
 .hero-subheadline {
-    font-size: 1.25rem;
-    color: var(--text-medium);
-    margin-bottom: 2.5rem;
-    max-width: 800px;
-    line-height: 1.5;
+    font-size: 1.7rem;
+    color: #86868b; /* Apple uses light gray for subheadlines on dark bg */
+    margin-bottom: 2rem;
+    max-width: 650px;
+    line-height: 1.3;
+    margin-left: auto;
+    margin-right: auto;
+    font-weight: 400;
+}
+
+.hero-cta-container {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
 }
 
 .hero-cta {
     padding: 0.8rem 2rem;
     font-size: 1.1rem;
-    border-radius: var(--button-radius);
+    border-radius: 2rem; /* Apple uses pill-shaped buttons */
+    background-color: var(--primary-blue);
+    color: white;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 12rem;
+    transition: all 0.2s ease;
+}
+
+.hero-cta-secondary {
+    background-color: rgba(255,255,255,0.1);
+    color: #2997ff; /* Apple blue link color */
+}
+
+.hero-cta:hover {
+    transform: scale(1.03);
+    box-shadow: none;
 }
 
 .hero-image {
-    max-width: 100%;
-    border-radius: var(--standard-radius);
-    box-shadow: var(--soft-shadow);
+    max-width: 80%;
+    margin: 2rem auto 0;
+    display: block;
 }
 
+/* Light hero variant */
+.hero-section-light {
+    background-color: var(--light-bg);
+    color: var(--text-dark);
+}
+
+.hero-section-light .hero-headline {
+    color: var(--text-dark);
+}
+
+.hero-section-light .hero-subheadline {
+    color: var(--text-medium);
+}
+
+/* Feature sections - Apple style */
 .feature-section {
-    padding: 5rem 0;
+    padding: 8rem 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.feature-section-dark {
+    background-color: var(--black-bg);
+    color: white;
 }
 
 .feature-title {
-    font-size: 2.25rem;
-    font-weight: 700;
+    font-size: 2.5rem;
+    font-weight: 600; /* Apple uses 600 weight */
     color: var(--text-dark);
     margin-bottom: 1rem;
     text-align: center;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+}
+
+.feature-section-dark .feature-title {
+    color: white;
 }
 
 .feature-description {
-    font-size: 1.1rem;
+    font-size: 1.3rem;
     color: var(--text-medium);
-    margin-bottom: 3rem;
+    margin-bottom: 3.5rem;
     text-align: center;
-    max-width: 800px;
+    max-width: 680px;
     margin-left: auto;
     margin-right: auto;
+    line-height: 1.3;
+    font-weight: 400;
+}
+
+.feature-section-dark .feature-description {
+    color: #86868b; /* Apple lighter gray for dark backgrounds */
 }
 
 .feature-icon {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
-    background-color: rgba(0, 122, 255, 0.1);
+    width: 80px;
+    height: 80px;
+    border-radius: 20px; /* Apple uses rounded squares */
+    background-color: rgba(0, 113, 227, 0.1);
     color: var(--primary-blue);
-    font-size: 1.5rem;
+    font-size: 2rem;
     margin-bottom: 1.5rem;
     transition: all 0.3s ease;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.feature-section-dark .feature-icon {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+/* Apple-style grid features */
+.apple-features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 3rem;
+    margin-top: 4rem;
+}
+
+.apple-feature-item {
+    text-align: center;
+    padding: 1rem;
+}
+
+.apple-feature-item-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 1rem 0 0.7rem;
+    color: var(--text-dark);
+}
+
+.feature-section-dark .apple-feature-item-title {
+    color: white;
+}
+
+.apple-feature-item-desc {
+    color: var(--text-medium);
+    font-size: 1rem;
+    line-height: 1.5;
+    max-width: 280px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.feature-section-dark .apple-feature-item-desc {
+    color: #86868b;
 }
 
 .feature-list {
@@ -855,38 +1060,69 @@ body {
     border-top: 3px solid var(--primary-teal);
 }
 
-/* Card styling - Clean Minimalist */
+/* Card styling - Apple Style */
 .card {
     background-color: var(--white-bg);
-    border: var(--light-border);
-    border-radius: var(--standard-radius);
-    box-shadow: var(--card-shadow);
+    border: none;
+    border-radius: 20px; /* Apple uses more rounded cards */
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05); /* Softer shadow */
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
+    margin-bottom: 1.5rem;
 }
 
 .card:hover {
-    box-shadow: var(--soft-shadow);
-    transform: translateY(-2px);
+    box-shadow: 0 6px 40px rgba(0, 0, 0, 0.08);
+    transform: translateY(-3px);
 }
 
 .card-header {
-    border-bottom: var(--light-border);
+    border-bottom: none;
     background: var(--white-bg);
     font-weight: 600;
-    padding: 1.2rem 1.5rem;
+    padding: 1.5rem 1.8rem 0.8rem;
     color: var(--text-dark);
+    font-size: 1.1rem;
 }
 
 .card-body {
-    padding: 1.5rem;
+    padding: 1.2rem 1.8rem 1.5rem;
 }
 
 .card-footer {
-    border-top: var(--light-border);
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
     background: var(--white-bg);
-    padding: 1.2rem 1.5rem;
+    padding: 1.2rem 1.8rem;
+}
+
+/* Apple-style divider */
+.apple-divider {
+    height: 1px;
+    background-color: rgba(0, 0, 0, 0.05);
+    margin: 1.5rem 0;
+}
+
+/* Apple-style cards with color accents */
+.card-accent-top {
+    border-top: 4px solid;
+    border-radius: 0 0 20px 20px;
+}
+
+.card-accent-top.card-primary {
+    border-top-color: var(--primary-blue);
+}
+
+.card-accent-top.card-success {
+    border-top-color: var(--primary-green);
+}
+
+.card-accent-top.card-warning {
+    border-top-color: var(--primary-orange);
+}
+
+.card-accent-top.card-danger {
+    border-top-color: var(--primary-red);
 }
 
 /* Feature cards */
