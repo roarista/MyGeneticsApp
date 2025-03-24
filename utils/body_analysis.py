@@ -6,8 +6,38 @@ from mediapipe import solutions
 # Configure logging
 logger = logging.getLogger(__name__)
 
+# Constants for muscle building potential calculation
+MAX_MUSCLE_GAIN_MALE = 16.0  # kg
+MAX_MUSCLE_GAIN_FEMALE = 8.0  # kg
+YEARS_TO_MAX_POTENTIAL = 4.0
+
 # MediaPipe pose landmark indices
 mp_pose = solutions.pose
+
+def calculate_muscle_potential(years_training, gender):
+    """
+    Calculate muscle building potential based on gender and training experience
+    
+    Args:
+        years_training: Float representing years of training experience
+        gender: String 'male' or 'female'
+        
+    Returns:
+        Float representing potential muscle gain in kg
+    """
+    if gender.lower() == 'male':
+        max_gain = MAX_MUSCLE_GAIN_MALE
+    else:  # Default to female values if not male
+        max_gain = MAX_MUSCLE_GAIN_FEMALE
+
+    # Cap years_training to YEARS_TO_MAX_POTENTIAL
+    years_training = min(float(years_training), YEARS_TO_MAX_POTENTIAL)
+    
+    # Calculate remaining potential (linear model)
+    potential = (1.0 - (years_training / YEARS_TO_MAX_POTENTIAL)) * max_gain
+    
+    # Ensure non-negative result
+    return max(0.0, potential)
 
 def calculate_distance(p1, p2):
     """Calculate Euclidean distance between two points"""
