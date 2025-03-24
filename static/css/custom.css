@@ -22,9 +22,9 @@
     
     /* Text colors - High Contrast */
     --text-light: #ffffff;  /* Pure white text (for dark backgrounds) */
-    --text-medium: #6c6c70;  /* Darker gray for better contrast */
-    --text-muted: #8e8e93;  /* Improved muted color for better readability */
-    --text-dark: #1d1d1f;   /* Main text color */
+    --text-medium: #444448;  /* Much darker gray for better contrast on white backgrounds */
+    --text-muted: #666670;  /* Darker muted color for better readability on white backgrounds */
+    --text-dark: #000000;   /* Black text for maximum contrast on white backgrounds */
     
     /* Fitness-specific colors - Modern aesthetic */
     --muscle-color: #ff3b30;    /* Bright red */
