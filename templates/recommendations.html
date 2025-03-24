@@ -1,0 +1,505 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="fas fa-dna me-2"></i>Your Personalized Recommendations</h4>
+                    <button class="btn btn-light btn-sm" onclick="window.print()">
+                        <i class="fas fa-print me-2"></i>Print
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <p class="mb-0"><i class="fas fa-info-circle me-2"></i>These recommendations are customized based on your body analysis results, genetic traits, and fitness goals.</p>
+                </div>
+                
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0"><i class="fas fa-star me-2"></i>Your Genetic Strengths</h5>
+                            </div>
+                            <div class="card-body">
+                                <ul class="trait-list">
+                                    {% if recommendations and recommendations.strengths %}
+                                        {% for strength in recommendations.strengths %}
+                                        <li>{{ strength }}</li>
+                                        {% endfor %}
+                                    {% else %}
+                                        <li>Wide shoulder-to-hip ratio - excellent for upper body development</li>
+                                        <li>Long bicep insertions - greater potential for arm growth</li>
+                                        <li>Low-set lat insertions - advantageous for creating a V-taper</li>
+                                        <li>Balanced frame - good for overall proportional development</li>
+                                        <li>Favorable muscle fiber composition for strength gains</li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header bg-warning text-dark">
+                                <h5 class="mb-0"><i class="fas fa-bullseye me-2"></i>Focus Areas</h5>
+                            </div>
+                            <div class="card-body">
+                                <ul class="trait-list">
+                                    {% if recommendations and recommendations.focus_areas %}
+                                        {% for focus in recommendations.focus_areas %}
+                                        <li>{{ focus }}</li>
+                                        {% endfor %}
+                                    {% else %}
+                                        <li>Lower body development - add focus on leg exercises</li>
+                                        <li>Core strength - incorporate more abdominal activation</li>
+                                        <li>Shoulder stability - prioritize rotator cuff work</li>
+                                        <li>Lower back mobility - add targeted stretching</li>
+                                        <li>Balance exercises for improved proprioception</li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0"><i class="fas fa-dumbbell me-2"></i>Personalized Workout Plan</h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-light border">
+                    <div class="d-flex">
+                        <div class="me-3">
+                            <i class="fas fa-info-circle text-info fa-2x"></i>
+                        </div>
+                        <div>
+                            <h5 class="alert-heading">Training Split: Push/Pull/Legs</h5>
+                            <p class="mb-0">This split is optimized for your body type and allows for sufficient recovery between muscle groups while training each muscle 2x per week.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <nav>
+                    <div class="nav nav-tabs" id="workout-tab" role="tablist">
+                        <button class="nav-link active" id="push-tab" data-bs-toggle="tab" data-bs-target="#push" type="button" role="tab" aria-controls="push" aria-selected="true">Push Day</button>
+                        <button class="nav-link" id="pull-tab" data-bs-toggle="tab" data-bs-target="#pull" type="button" role="tab" aria-controls="pull" aria-selected="false">Pull Day</button>
+                        <button class="nav-link" id="legs-tab" data-bs-toggle="tab" data-bs-target="#legs" type="button" role="tab" aria-controls="legs" aria-selected="false">Legs Day</button>
+                    </div>
+                </nav>
+                <div class="tab-content mt-3" id="workout-tabContent">
+                    <div class="tab-pane fade show active" id="push" role="tabpanel" aria-labelledby="push-tab">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Exercise</th>
+                                        <th>Sets</th>
+                                        <th>Reps</th>
+                                        <th>Notes</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Incline Bench Press</td>
+                                        <td>4</td>
+                                        <td>8-10</td>
+                                        <td>Focus on upper chest development</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Overhead Press</td>
+                                        <td>3</td>
+                                        <td>8-10</td>
+                                        <td>Emphasize full range of motion</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Cable Chest Flyes</td>
+                                        <td>3</td>
+                                        <td>12-15</td>
+                                        <td>Focus on contraction at the middle</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Lateral Raises</td>
+                                        <td>4</td>
+                                        <td>12-15</td>
+                                        <td>Slight bend in elbows</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tricep Pushdowns</td>
+                                        <td>3</td>
+                                        <td>12-15</td>
+                                        <td>Keep elbows close to body</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Overhead Tricep Extensions</td>
+                                        <td>3</td>
+                                        <td>10-12</td>
+                                        <td>Full stretch at bottom</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="pull" role="tabpanel" aria-labelledby="pull-tab">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Exercise</th>
+                                        <th>Sets</th>
+                                        <th>Reps</th>
+                                        <th>Notes</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Pull-Ups (weighted)</td>
+                                        <td>4</td>
+                                        <td>6-8</td>
+                                        <td>Full stretch at bottom</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Barbell Rows</td>
+                                        <td>4</td>
+                                        <td>8-10</td>
+                                        <td>Pull to lower chest</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Single-Arm Dumbbell Rows</td>
+                                        <td>3</td>
+                                        <td>10-12</td>
+                                        <td>Focus on lat contraction</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Face Pulls</td>
+                                        <td>3</td>
+                                        <td>15-20</td>
+                                        <td>For rear delts and external rotation</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Hammer Curls</td>
+                                        <td>3</td>
+                                        <td>10-12</td>
+                                        <td>Keep elbows stationary</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Incline Dumbbell Curls</td>
+                                        <td>3</td>
+                                        <td>10-12</td>
+                                        <td>For bicep peak development</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="legs" role="tabpanel" aria-labelledby="legs-tab">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Exercise</th>
+                                        <th>Sets</th>
+                                        <th>Reps</th>
+                                        <th>Notes</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Barbell Squats</td>
+                                        <td>4</td>
+                                        <td>8-10</td>
+                                        <td>Focus on depth and form</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Romanian Deadlifts</td>
+                                        <td>4</td>
+                                        <td>8-10</td>
+                                        <td>Feel the hamstring stretch</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Walking Lunges</td>
+                                        <td>3</td>
+                                        <td>10 per leg</td>
+                                        <td>Maintain upright posture</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Leg Extensions</td>
+                                        <td>3</td>
+                                        <td>12-15</td>
+                                        <td>Focus on quad contraction</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Lying Leg Curls</td>
+                                        <td>3</td>
+                                        <td>12-15</td>
+                                        <td>Full hamstring contraction</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Standing Calf Raises</td>
+                                        <td>4</td>
+                                        <td>15-20</td>
+                                        <td>Full stretch and contraction</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert alert-secondary mt-4">
+                    <h5 class="alert-heading">Workout Notes</h5>
+                    <ul class="mb-0">
+                        <li>Train each muscle group twice per week (e.g., Push/Pull/Legs/Rest/Push/Pull/Legs)</li>
+                        <li>Rest 60-90 seconds between sets for isolation exercises</li>
+                        <li>Rest 2-3 minutes between sets for compound exercises</li>
+                        <li>Focus on progressive overload by incrementally increasing weights</li>
+                        <li>Incorporate 5-10 minutes of dynamic stretching before workouts</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0"><i class="fas fa-utensils me-2"></i>Nutrition Plan</h4>
+            </div>
+            <div class="card-body">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header bg-info text-white">
+                                <h5 class="mb-0">Daily Calorie & Macronutrient Targets</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="nutrition-stat">
+                                            <span class="nutrition-label">Calories</span>
+                                            <span class="nutrition-value">2,450</span>
+                                            <span class="nutrition-unit">kcal/day</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="nutrition-stat">
+                                            <span class="nutrition-label">Protein</span>
+                                            <span class="nutrition-value">185</span>
+                                            <span class="nutrition-unit">g (30%)</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="nutrition-stat">
+                                            <span class="nutrition-label">Carbs</span>
+                                            <span class="nutrition-value">245</span>
+                                            <span class="nutrition-unit">g (40%)</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="nutrition-stat">
+                                            <span class="nutrition-label">Fats</span>
+                                            <span class="nutrition-value">82</span>
+                                            <span class="nutrition-unit">g (30%)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="alert alert-light mt-3">
+                                    <small>These targets are based on your body composition, goal (muscle gain), activity level, and metabolism type.</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0">Meal Timing Strategy</h5>
+                            </div>
+                            <div class="card-body">
+                                <ul class="meal-timing-list">
+                                    <li>
+                                        <span class="meal-time">7:00 AM</span>
+                                        <span class="meal-name">Breakfast</span>
+                                        <span class="meal-macros">600 kcal (40g P, 60g C, 20g F)</span>
+                                    </li>
+                                    <li>
+                                        <span class="meal-time">10:30 AM</span>
+                                        <span class="meal-name">Mid-Morning Snack</span>
+                                        <span class="meal-macros">250 kcal (20g P, 25g C, 8g F)</span>
+                                    </li>
+                                    <li>
+                                        <span class="meal-time">1:00 PM</span>
+                                        <span class="meal-name">Lunch</span>
+                                        <span class="meal-macros">650 kcal (45g P, 65g C, 20g F)</span>
+                                    </li>
+                                    <li>
+                                        <span class="meal-time">4:00 PM</span>
+                                        <span class="meal-name">Pre-Workout</span>
+                                        <span class="meal-macros">300 kcal (25g P, 35g C, 5g F)</span>
+                                    </li>
+                                    <li>
+                                        <span class="meal-time">6:30 PM</span>
+                                        <span class="meal-name">Post-Workout</span>
+                                        <span class="meal-macros">250 kcal (25g P, 35g C, 2g F)</span>
+                                    </li>
+                                    <li>
+                                        <span class="meal-time">7:30 PM</span>
+                                        <span class="meal-name">Dinner</span>
+                                        <span class="meal-macros">400 kcal (30g P, 25g C, 22g F)</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card mt-4">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0">Recommended Foods Based on Your Genetics</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4">
+                            <div class="col-md-4">
+                                <h6><i class="fas fa-drumstick-bite me-2 text-danger"></i>Protein Sources</h6>
+                                <ul class="food-list">
+                                    <li>Chicken breast</li>
+                                    <li>Turkey</li>
+                                    <li>Lean beef</li>
+                                    <li>Greek yogurt</li>
+                                    <li>Egg whites</li>
+                                    <li>Whey protein</li>
+                                    <li>Salmon</li>
+                                    <li>Tuna</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-4">
+                                <h6><i class="fas fa-bread-slice me-2 text-warning"></i>Carbohydrate Sources</h6>
+                                <ul class="food-list">
+                                    <li>Sweet potatoes</li>
+                                    <li>Brown rice</li>
+                                    <li>Quinoa</li>
+                                    <li>Oats</li>
+                                    <li>Whole grain bread</li>
+                                    <li>Fruits (berries, apples, bananas)</li>
+                                    <li>Beans and legumes</li>
+                                    <li>Vegetables</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-4">
+                                <h6><i class="fas fa-seedling me-2 text-success"></i>Healthy Fat Sources</h6>
+                                <ul class="food-list">
+                                    <li>Avocados</li>
+                                    <li>Olive oil</li>
+                                    <li>Nuts (almonds, walnuts)</li>
+                                    <li>Seeds (chia, flax)</li>
+                                    <li>Fatty fish</li>
+                                    <li>Nut butters</li>
+                                    <li>Coconut oil</li>
+                                    <li>Whole eggs</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert alert-info mt-4">
+                    <h5 class="alert-heading">Supplementation Recommendations</h5>
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <div class="supplement-card">
+                                <div class="supplement-name">Creatine Monohydrate</div>
+                                <div class="supplement-dosage">5g daily</div>
+                                <div class="supplement-timing">Any time</div>
+                                <div class="supplement-benefit">Strength & recovery</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="supplement-card">
+                                <div class="supplement-name">Whey Protein</div>
+                                <div class="supplement-dosage">25-30g per serving</div>
+                                <div class="supplement-timing">Post-workout</div>
+                                <div class="supplement-benefit">Muscle recovery</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="supplement-card">
+                                <div class="supplement-name">Vitamin D3</div>
+                                <div class="supplement-dosage">2000 IU daily</div>
+                                <div class="supplement-timing">With meals</div>
+                                <div class="supplement-benefit">Bone & immune health</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="supplement-card">
+                                <div class="supplement-name">Fish Oil</div>
+                                <div class="supplement-dosage">2-3g daily</div>
+                                <div class="supplement-timing">With meals</div>
+                                <div class="supplement-benefit">Joint & heart health</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark text-white">
+                <h4 class="mb-0"><i class="fas fa-chart-line me-2"></i>Progress Tracking</h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-success">
+                    <div class="d-flex">
+                        <div class="me-3">
+                            <i class="fas fa-check-circle fa-2x"></i>
+                        </div>
+                        <div>
+                            <h5 class="alert-heading">Schedule Your Next Analysis</h5>
+                            <p class="mb-0">For optimal tracking of your fitness progress, we recommend scheduling your next body analysis in 8-12 weeks. This will allow us to adjust your recommendations based on your progress and changes in body composition.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <a href="{{ url_for('profile') }}" class="btn btn-primary">
+                        <i class="fas fa-user-circle me-2"></i>Return to Profile
+                    </a>
+                    <a href="{{ url_for('schedule_analysis') }}" class="btn btn-success ms-3">
+                        <i class="fas fa-calendar-plus me-2"></i>Schedule Next Analysis
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Initialize Bootstrap tabs
+    document.addEventListener('DOMContentLoaded', function() {
+        const triggerTabList = [].slice.call(document.querySelectorAll('#workout-tab button'));
+        triggerTabList.forEach(function(triggerEl) {
+            const tabTrigger = new bootstrap.Tab(triggerEl);
+            triggerEl.addEventListener('click', function(event) {
+                event.preventDefault();
+                tabTrigger.show();
+            });
+        });
+    });
+</script>
+{% endblock %}

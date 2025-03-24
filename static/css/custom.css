@@ -328,6 +328,176 @@ tr.highlight {
     transition: width 0.3s ease;
 }
 
+/* Login and Signup Pages */
+.social-login-btn {
+    position: relative;
+    height: 44px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.social-login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Profile Page */
+.profile-image-container {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    margin: 0 auto;
+    background-color: var(--bs-gray-200);
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.profile-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-image-edit {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+}
+
+.analysis-icon {
+    font-size: 2.5rem;
+    color: var(--bs-primary);
+    display: block;
+    margin-bottom: 15px;
+}
+
+/* Recommendations Page */
+.trait-list {
+    padding-left: 20px;
+}
+
+.trait-list li {
+    margin-bottom: 12px;
+    position: relative;
+}
+
+.trait-list li:last-child {
+    margin-bottom: 0;
+}
+
+.meal-timing-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.meal-timing-list li {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px dashed var(--bs-border-color);
+}
+
+.meal-timing-list li:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.meal-time {
+    flex: 0 0 90px;
+    font-weight: 600;
+    color: var(--bs-primary);
+}
+
+.meal-name {
+    flex: 1;
+    font-weight: 500;
+}
+
+.meal-macros {
+    flex: 0 0 100%;
+    font-size: 0.875rem;
+    color: var(--bs-secondary);
+    margin-top: 4px;
+    margin-left: 90px;
+}
+
+.food-list {
+    padding-left: 20px;
+    margin-bottom: 0;
+}
+
+.food-list li {
+    margin-bottom: 6px;
+}
+
+.food-list li:last-child {
+    margin-bottom: 0;
+}
+
+.supplement-card {
+    background-color: var(--bs-light);
+    border-radius: 8px;
+    padding: 12px;
+    height: 100%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.supplement-name {
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: var(--bs-primary);
+}
+
+.supplement-dosage, 
+.supplement-timing {
+    font-size: 0.875rem;
+    margin-bottom: 4px;
+}
+
+.supplement-benefit {
+    font-size: 0.875rem;
+    font-style: italic;
+    color: var(--bs-secondary);
+}
+
+.nutrition-stat {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.nutrition-label {
+    display: block;
+    font-size: 0.875rem;
+    color: var(--bs-secondary);
+    margin-bottom: 5px;
+}
+
+.nutrition-value {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--bs-primary);
+    margin-bottom: 5px;
+}
+
+.nutrition-unit {
+    display: block;
+    font-size: 0.875rem;
+    color: var(--bs-secondary);
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .stats-container {
@@ -337,6 +507,14 @@ tr.highlight {
     .stat-box {
         flex: 0 0 calc(50% - 15px);
         max-width: calc(50% - 15px);
+    }
+    
+    .meal-time {
+        flex: 0 0 80px;
+    }
+    
+    .meal-macros {
+        margin-left: 80px;
     }
 }
 
@@ -348,5 +526,18 @@ tr.highlight {
     
     .model-visualization {
         padding: 10px;
+    }
+    
+    .meal-time {
+        flex: 0 0 100%;
+        margin-bottom: 5px;
+    }
+    
+    .meal-name {
+        flex: 0 0 100%;
+    }
+    
+    .meal-macros {
+        margin-left: 0;
     }
 }

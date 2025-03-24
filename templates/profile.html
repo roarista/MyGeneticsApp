@@ -1,0 +1,224 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-4 col-md-5 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-user-circle me-2"></i>Your Profile</h4>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <div class="profile-image-container mb-3">
+                        <img src="{{ url_for('static', filename='img/default-profile.svg') }}" alt="Profile Picture" class="profile-image">
+                        <button class="btn btn-sm btn-outline-primary profile-image-edit">
+                            <i class="fas fa-camera"></i>
+                        </button>
+                    </div>
+                    <h5 class="mb-0">{{ user.fullname if user else 'John Doe' }}</h5>
+                    <p class="text-muted">Member since {{ user.joined if user else 'March 2025' }}</p>
+                </div>
+                
+                <div class="mb-4">
+                    <h6 class="mb-2">Account Details</h6>
+                    <div class="mb-2 d-flex justify-content-between">
+                        <span class="text-muted">Email:</span>
+                        <span>{{ user.email if user else 'john.doe@example.com' }}</span>
+                    </div>
+                    <div class="mb-2 d-flex justify-content-between">
+                        <span class="text-muted">Member Type:</span>
+                        <span class="badge bg-success">Premium</span>
+                    </div>
+                    <div class="mb-0 d-flex justify-content-between">
+                        <span class="text-muted">Analyses:</span>
+                        <span>{{ user.analyses|length if user and user.analyses else '3' }}</span>
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('account_settings') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-cog me-2"></i>Account Settings
+                    </a>
+                    <a href="{{ url_for('logout') }}" class="btn btn-outline-danger">
+                        <i class="fas fa-sign-out-alt me-2"></i>Log Out
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-8 col-md-7">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-clipboard-list me-2"></i>Body Information</h4>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('update_body_info') }}" method="post" id="body-info-form">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="height" class="form-label">Height (cm)</label>
+                            <input type="number" class="form-control" id="height" name="height" value="{{ user.height if user else '' }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="weight" class="form-label">Weight (kg)</label>
+                            <input type="number" class="form-control" id="weight" name="weight" value="{{ user.weight if user else '' }}" required>
+                        </div>
+                    </div>
+                    
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-6">
+                            <label for="gender" class="form-label">Gender</label>
+                            <select class="form-select" id="gender" name="gender" required>
+                                <option value="male" {% if user and user.gender == 'male' %}selected{% endif %}>Male</option>
+                                <option value="female" {% if user and user.gender == 'female' %}selected{% endif %}>Female</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="age" class="form-label">Age</label>
+                            <input type="number" class="form-control" id="age" name="age" value="{{ user.age if user else '' }}" required>
+                        </div>
+                    </div>
+                    
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-6">
+                            <label for="experience" class="form-label">Fitness Experience</label>
+                            <select class="form-select" id="experience" name="experience" required>
+                                <option value="beginner" {% if user and user.experience == 'beginner' %}selected{% endif %}>Beginner (0-1 years)</option>
+                                <option value="intermediate" {% if user and user.experience == 'intermediate' %}selected{% endif %}>Intermediate (1-3 years)</option>
+                                <option value="advanced" {% if user and user.experience == 'advanced' %}selected{% endif %}>Advanced (3+ years)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="goal" class="form-label">Primary Goal</label>
+                            <select class="form-select" id="goal" name="goal" required>
+                                <option value="lose_fat" {% if user and user.goal == 'lose_fat' %}selected{% endif %}>Lose Fat</option>
+                                <option value="gain_muscle" {% if user and user.goal == 'gain_muscle' %}selected{% endif %}>Gain Muscle</option>
+                                <option value="maintain" {% if user and user.goal == 'maintain' %}selected{% endif %}>Maintain Current Physique</option>
+                                <option value="recomp" {% if user and user.goal == 'recomp' %}selected{% endif %}>Body Recomposition</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Save Information
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0"><i class="fas fa-camera me-2"></i>Body Analysis Options</h4>
+            </div>
+            <div class="card-body">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <div class="mb-3">
+                                    <i class="fas fa-camera analysis-icon"></i>
+                                </div>
+                                <h5>Photo Analysis</h5>
+                                <p class="text-muted">Upload photo for AI body analysis and genetic trait identification</p>
+                                <a href="{{ url_for('analyze') }}" class="btn btn-outline-primary">
+                                    <i class="fas fa-arrow-right me-2"></i>Start Photo Analysis
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <div class="mb-3">
+                                    <i class="fas fa-cube analysis-icon"></i>
+                                </div>
+                                <h5>3D Body Scan</h5>
+                                <p class="text-muted">Upload 3D scan for precise measurements and detailed body composition</p>
+                                <a href="{{ url_for('scan3d_page') }}" class="btn btn-outline-primary">
+                                    <i class="fas fa-arrow-right me-2"></i>Start 3D Analysis
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        {% if user and user.analyses %}
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0"><i class="fas fa-history me-2"></i>Analysis History</h4>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Mar 24, 2025</td>
+                                <td><span class="badge bg-primary">Photo</span></td>
+                                <td><span class="badge bg-success">Completed</span></td>
+                                <td>
+                                    <a href="{{ url_for('results', analysis_id='abc123') }}" class="btn btn-sm btn-outline-primary">View</a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Mar 22, 2025</td>
+                                <td><span class="badge bg-info">3D Scan</span></td>
+                                <td><span class="badge bg-success">Completed</span></td>
+                                <td>
+                                    <a href="{{ url_for('scan3d_results', analysis_id='def456') }}" class="btn btn-sm btn-outline-primary">View</a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Mar 15, 2025</td>
+                                <td><span class="badge bg-primary">Photo</span></td>
+                                <td><span class="badge bg-success">Completed</span></td>
+                                <td>
+                                    <a href="{{ url_for('results', analysis_id='ghi789') }}" class="btn btn-sm btn-outline-primary">View</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Save body information form
+        const bodyInfoForm = document.getElementById('body-info-form');
+        if (bodyInfoForm) {
+            bodyInfoForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // In a real implementation, this would send the data to the server
+                alert('Body information saved successfully!');
+            });
+        }
+        
+        // Profile image edit button
+        const profileImageEdit = document.querySelector('.profile-image-edit');
+        if (profileImageEdit) {
+            profileImageEdit.addEventListener('click', function() {
+                // In a real implementation, this would open a file dialog
+                alert('Profile image upload would be implemented here');
+            });
+        }
+    });
+</script>
+{% endblock %}
