@@ -42,9 +42,14 @@
                 </div>
                 
                 {% if image_data %}
-                <div class="text-center mt-4">
+                <div class="scan3d-visualization mt-4">
                     <img src="data:image/jpeg;base64,{{ image_data }}" class="img-fluid rounded" alt="3D Body Scan Visualization">
-                    <p class="text-muted small mt-2">3D Scan Visualization</p>
+                    <p class="text-muted small mt-2"><i class="fas fa-cube me-1"></i>3D Scan Visualization</p>
+                </div>
+                {% else %}
+                <div class="scan3d-visualization mt-4 py-4">
+                    <i class="fas fa-cube scan3d-icon" style="font-size: 3rem; opacity: 0.3;"></i>
+                    <p class="text-muted mt-3">3D model visualization will appear here with actual scan data</p>
                 </div>
                 {% endif %}
             </div>
