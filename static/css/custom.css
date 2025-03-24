@@ -2834,3 +2834,12 @@ tr.highlight {
     color: var(--primary-blue);
     border-color: rgba(41, 182, 246, 0.5);
 }
+/* Selection styling for better contrast */
+::selection {
+    background-color: #004080; /* Dark blue */
+    color: white; /* Ensure readability */
+}
+::-moz-selection {
+    background-color: #004080; /* Dark blue */
+    color: white; /* Ensure readability */
+}
