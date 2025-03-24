@@ -771,7 +771,7 @@ def classify_muscle_potential(potential):
         potential: Float representing potential muscle gain in kg over 1 year
         
     Returns:
-        String rating ('excellent', 'good', 'average', 'below_average')
+        String rating ('excellent', 'good', 'developing', 'advanced')
     """
     # These thresholds are based on annual potential muscle gain (kg per year)
     if potential >= 10:
@@ -779,9 +779,9 @@ def classify_muscle_potential(potential):
     elif 5 <= potential < 10:
         return 'good'        # Good potential (5-10 kg in a year)
     elif 1 <= potential < 5:
-        return 'average'     # Average potential (1-5 kg in a year)
+        return 'developing'  # Developing gains (1-5 kg in a year)
     else:
-        return 'below_average'  # Below average potential (less than 1 kg in a year)
+        return 'advanced'    # Advanced/experienced (approaching natural maximum)
 
 def classify_waist_hip_ratio(ratio, gender='male'):
     """

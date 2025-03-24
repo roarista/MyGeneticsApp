@@ -275,13 +275,13 @@
                                 </td>
                                 <td>
                                     {% if traits.muscle_potential.rating == 'excellent' %}
-                                        <span class="badge bg-success">Excellent</span>
+                                        <span class="badge bg-success">Excellent Potential</span>
                                     {% elif traits.muscle_potential.rating == 'good' %}
-                                        <span class="badge bg-info">Good</span>
-                                    {% elif traits.muscle_potential.rating == 'average' %}
-                                        <span class="badge bg-warning">Average</span>
-                                    {% elif traits.muscle_potential.rating == 'below_average' %}
-                                        <span class="badge bg-danger">Below Average</span>
+                                        <span class="badge bg-info">Good Potential</span>
+                                    {% elif traits.muscle_potential.rating == 'developing' %}
+                                        <span class="badge bg-warning">Developing Potential</span>
+                                    {% elif traits.muscle_potential.rating == 'advanced' %}
+                                        <span class="badge bg-primary">Advanced</span>
                                     {% endif %}
                                 </td>
                                 <td>
