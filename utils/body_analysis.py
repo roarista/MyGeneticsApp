@@ -49,7 +49,7 @@ def calculate_angle(p1, p2, p3):
                          math.atan2(p1['y'] - p2['y'], p1['x'] - p2['x']))
     return angle + 360 if angle < 0 else angle
 
-def analyze_body_traits(landmarks, original_image=None, height_cm=0.0, weight_kg=0.0, gender='male'):
+def analyze_body_traits(landmarks, original_image=None, height_cm=0.0, weight_kg=0.0, gender='male', experience='beginner'):
     """
     Analyze body landmarks to identify genetic traits including muscle insertions
     
@@ -59,6 +59,7 @@ def analyze_body_traits(landmarks, original_image=None, height_cm=0.0, weight_kg
         height_cm: User's height in cm (optional, float)
         weight_kg: User's weight in kg (optional, float)
         gender: User's gender ('male' or 'female', default is 'male')
+        experience: User's training experience level ('beginner', 'intermediate', 'advanced')
         
     Returns:
         Dictionary of body traits and measurements
@@ -400,7 +401,18 @@ def analyze_body_traits(landmarks, original_image=None, height_cm=0.0, weight_kg
             upper_ideal_weight = lower_ideal_weight + (lower_ideal_weight * 0.1)
             
             # 31. Calculate muscle potential (based on frame size, height, and genetic factors)
-            muscle_potential = ((shoulder_width * wrist_width * ankle_width) / height_cm) * 50
+            # Calculate frame-based potential score (0-100 scale) for rating classification
+            frame_potential_score = ((shoulder_width * wrist_width * ankle_width) / height_cm) * 50
+            
+            # 31b. Convert experience level to years of training
+            years_training = {
+                'beginner': 0.5,  # Average beginner (0-1 years)
+                'intermediate': 2.0,  # Average intermediate (1-3 years)
+                'advanced': 3.5  # Average advanced (3+ years)
+            }.get(experience, 0.5)  # Default to beginner if experience not specified
+            
+            # Calculate muscle building potential based on gender and training experience
+            muscle_potential = calculate_muscle_potential(years_training, gender)
             
             # 32. Calculate arm span to height ratio - important for athletic potential
             arm_span_height_ratio = arm_span / height_cm

@@ -96,7 +96,8 @@ def analyze():
                 original_image=image,
                 height_cm=float(height) if height else 0, 
                 weight_kg=float(weight) if weight else 0,
-                gender=gender  # Pass gender to the analysis function
+                gender=gender,  # Pass gender to the analysis function
+                experience=experience  # Pass training experience level
             )
             
             # Generate recommendations
