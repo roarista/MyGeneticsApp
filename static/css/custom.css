@@ -184,31 +184,31 @@ body {
 }
 
 .trait-badge-excellent {
-    background-color: #34c759; /* Solid green background */
+    background-color: #228B22; /* Darker forest green background */
     color: white; /* White text for best contrast */
     font-weight: 600;
 }
 
 .trait-badge-good {
-    background-color: #0070f3; /* Solid blue background */
+    background-color: #003399; /* Much darker blue background */
     color: white; /* White text for best contrast */
     font-weight: 600;
 }
 
 .trait-badge-average {
-    background-color: #ffc107; /* Solid yellow background */
-    color: #212121; /* Dark text for best contrast on yellow */
+    background-color: #E6B800; /* Darker yellow background */
+    color: #000000; /* Black text for best contrast on yellow */
     font-weight: 600;
 }
 
 .trait-badge-below-average {
-    background-color: #fd7e14; /* Solid orange background */
+    background-color: #D35400; /* Darker orange background */
     color: white; /* White text for best contrast */
     font-weight: 600;
 }
 
 .trait-badge-poor {
-    background-color: #dc3545; /* Solid red background */
+    background-color: #B71C1C; /* Darker red background */
     color: white; /* White text for best contrast */
     font-weight: 600;
 }
@@ -229,23 +229,23 @@ body {
 }
 
 .trait-pill-excellent {
-    background-color: #34c759; /* Solid green background */
+    background-color: #228B22; /* Darker forest green background */
 }
 
 .trait-pill-good {
-    background-color: #0070f3; /* Solid blue background */
+    background-color: #003399; /* Much darker blue background */
 }
 
 .trait-pill-average {
-    background-color: #ffc107; /* Solid yellow background */
+    background-color: #E6B800; /* Darker yellow background */
 }
 
 .trait-pill-below-average {
-    background-color: #fd7e14; /* Solid orange background */
+    background-color: #D35400; /* Darker orange background */
 }
 
 .trait-pill-poor {
-    background-color: #dc3545; /* Solid red background */
+    background-color: #B71C1C; /* Darker red background */
 }
 
 /* Muscle group badges - Apple style */
@@ -487,7 +487,7 @@ body {
 }
 
 .btn-primary {
-    background-color: #0055cc; /* Darker blue for better contrast */
+    background-color: #003399; /* Much darker blue for excellent contrast */
     color: white;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     font-weight: 600;
@@ -495,7 +495,7 @@ body {
 }
 
 .btn-primary:hover {
-    background-color: #003d99; /* Even darker on hover */
+    background-color: #002277; /* Even darker on hover */
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
@@ -590,13 +590,13 @@ body {
     position: relative;
     z-index: 1;
     border: none;
-    background-color: #0055cc; /* Darker blue for better contrast */
+    background-color: #003399; /* Much darker blue for excellent contrast */
     color: white !important;
     font-weight: 600;
 }
 
 .btn-glow:hover {
-    background-color: #003d99; /* Even darker on hover */
+    background-color: #002277; /* Even darker on hover */
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
@@ -883,7 +883,7 @@ body {
     padding: 0.8rem 2rem;
     font-size: 1.1rem;
     border-radius: 2rem; /* Apple uses pill-shaped buttons */
-    background-color: #0055cc; /* Darker blue for better contrast */
+    background-color: #003399; /* Much darker blue for excellent contrast */
     color: white;
     text-decoration: none;
     display: inline-flex;
