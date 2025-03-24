@@ -1428,6 +1428,17 @@ body {
     font-weight: 500; /* Make text more readable */
 }
 
+/* Override Bootstrap's bg-info for better text contrast */
+.bg-info {
+    background-color: #0070d7 !important; /* Darker blue for better contrast with white text */
+}
+
+/* Override for feature cards with blue backgrounds */
+.feature-icon.bg-info {
+    background-color: #0070d7 !important; 
+    color: white !important;
+}
+
 /* Card styling - Futuristic Dark Theme */
 .card {
     background-color: var(--card-bg);
