@@ -1,20 +1,16 @@
 import os
 import logging
 import uuid
-from flask import Flask, render_template, request, jsonify, redirect, url_for, session, flash
 import tempfile
+from datetime import datetime
+from flask import Flask, render_template, request, jsonify, redirect, url_for, session, flash
+from flask_login import LoginManager, current_user, login_user, logout_user, login_required
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import DeclarativeBase
 import numpy as np
 import cv2
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime
-
-# Import custom utility modules
-from utils.image_processing import process_image, extract_body_landmarks
-from utils.body_analysis import analyze_body_traits
-from utils.recommendations import generate_recommendations
-from utils.units import format_trait_value, get_unit
-from utils.body_scan_3d import process_3d_scan, is_valid_3d_scan_file
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -23,6 +19,36 @@ logger = logging.getLogger(__name__)
 # Initialize Flask app
 app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "dev_secret_key")
+
+# Database configuration
+class Base(DeclarativeBase):
+    pass
+
+db = SQLAlchemy(model_class=Base)
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
+app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+    "pool_recycle": 300,
+    "pool_pre_ping": True,
+}
+db.init_app(app)
+
+# Flask-Login configuration
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+login_manager.login_message_category = 'info'
+
+@login_manager.user_loader
+def load_user(user_id):
+    from models import User
+    return User.query.get(int(user_id))
+
+# Import custom utility modules
+from utils.image_processing import process_image, extract_body_landmarks
+from utils.body_analysis import analyze_body_traits
+from utils.recommendations import generate_recommendations
+from utils.units import format_trait_value, get_unit
+from utils.body_scan_3d import process_3d_scan, is_valid_3d_scan_file
 
 # Configure upload settings
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
