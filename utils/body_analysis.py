@@ -455,7 +455,9 @@ def analyze_body_traits(landmarks, original_image=None, height_cm=0.0, weight_kg
             
             traits['muscle_potential'] = {
                 'value': round(muscle_potential, 1),
-                'rating': classify_muscle_potential(muscle_potential)
+                'rating': classify_muscle_potential(frame_potential_score),
+                'years_training': years_training,
+                'description': f"Estimated {muscle_potential:.1f} kg of muscle can still be built naturally."
             }
             
             traits['arm_span_height_ratio'] = {

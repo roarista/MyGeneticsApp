@@ -265,7 +265,14 @@
                             {% if 'muscle_potential' in traits %}
                             <tr>
                                 <td>Muscle Building Potential</td>
-                                <td>{{ traits.muscle_potential.value }}</td>
+                                <td>
+                                    {{ traits.muscle_potential.value }} kg
+                                    {% if 'description' in traits.muscle_potential %}
+                                    <div class="small text-muted mt-1">
+                                        {{ traits.muscle_potential.description }}
+                                    </div>
+                                    {% endif %}
+                                </td>
                                 <td>
                                     {% if traits.muscle_potential.rating == 'excellent' %}
                                         <span class="badge bg-success">Excellent</span>
@@ -277,7 +284,9 @@
                                         <span class="badge bg-danger">Below Average</span>
                                     {% endif %}
                                 </td>
-                                <td>Genetic capacity for muscle growth and strength</td>
+                                <td>
+                                    Estimated muscle that can still be built based on your experience level ({{ user_info.experience }}) and genetic factors
+                                </td>
                             </tr>
                             {% endif %}
                             
