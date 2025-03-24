@@ -656,10 +656,10 @@ def generate_detailed_workout_plan(body_type, experience_level, traits, goal):
             'exercises': [
                 {'name': 'Goblet Squats', 'target': 'quads and core stability', 'sets': 3, 'reps': '10-12'},
                 {'name': 'Dumbbell Romanian Deadlifts', 'target': 'hamstrings and glutes', 'sets': 3, 'reps': '10-12'},
-                {'name': 'Walking Lunges', 'target': 'quads, glutes, and balance', 'sets': 2, 'reps': '10 steps each leg'},
+                {'name': 'Bulgarian Split Squats', 'target': 'single-leg strength and balance', 'sets': 2, 'reps': '10-12 per leg'},
                 {'name': 'Leg Press (Light Weight)', 'target': 'overall leg development', 'sets': 3, 'reps': '12-15'},
                 {'name': 'Standing Calf Raises', 'target': 'calves', 'sets': 3, 'reps': '15-20'},
-                {'name': 'Planks', 'target': 'core stability', 'sets': 3, 'reps': '30-45 seconds'}
+                {'name': 'Russian Twists', 'target': 'obliques and rotational core strength', 'sets': 3, 'reps': '12-15 per side'}
             ],
             'beginner_tips': [
                 'Start with bodyweight or light weight to master form',
@@ -706,9 +706,10 @@ def generate_detailed_workout_plan(body_type, experience_level, traits, goal):
                 base_exercises['legs'][0],   # Squats
                 base_exercises['legs'][1],   # Romanian Deadlifts
                 base_exercises['legs'][2],   # Leg Press
-                base_exercises['legs'][3],   # Calf Raises
-                base_exercises['core'][0],   # Planks
-                base_exercises['core'][1]    # Russian Twists
+                base_exercises['legs'][3],   # Bulgarian Split Squats
+                base_exercises['legs'][4],   # Calf Raises
+                base_exercises['core'][0],   # Russian Twists
+                base_exercises['core'][1]    # Hanging Leg Raises
             ]
         }
         
@@ -811,7 +812,7 @@ def generate_detailed_workout_plan(body_type, experience_level, traits, goal):
                 'frequency': 'Train legs 2 times per week with different focus each day',
                 'key_exercises': [
                     {'name': 'Front Squats', 'target': 'quadriceps and core', 'sets': '4', 'reps': '8-10'},
-                    {'name': 'Walking Lunges', 'target': 'overall leg development', 'sets': '3', 'reps': '10-12 per leg'},
+                    {'name': 'Bulgarian Split Squats', 'target': 'unilateral leg development', 'sets': '3', 'reps': '10-12 per leg'},
                     {'name': 'Leg Press (Feet High)', 'target': 'hamstring and glute emphasis', 'sets': '4', 'reps': '10-12'},
                     {'name': 'Glute-Ham Raises', 'target': 'hamstring and glute tie-in', 'sets': '3', 'reps': '8-12'}
                 ]
