@@ -761,12 +761,20 @@ def classify_frame_size(wrist_height_ratio):
         return 'Large'
 
 def classify_muscle_potential(potential):
-    """Classify muscle building potential"""
-    if potential > 80:
+    """
+    Classify muscle building potential based on the remaining potential muscle gain in kg
+    
+    Args:
+        potential: Float representing potential muscle gain in kg
+        
+    Returns:
+        String rating ('excellent', 'good', 'average', 'below_average')
+    """
+    if potential >= 10:
         return 'excellent'
-    elif potential > 60:
+    elif 5 <= potential < 10:
         return 'good'
-    elif potential > 40:
+    elif 1 <= potential < 5:
         return 'average'
     else:
         return 'below_average'
