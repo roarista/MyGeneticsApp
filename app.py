@@ -79,18 +79,23 @@ def allowed_3d_file(filename):
 
 @app.route('/')
 def index():
-    """Render the main page"""
-    return render_template('tailwind_index.html')
+    """Render the main page - redirect to analyze form"""
+    return redirect(url_for('analyze_form'))
     
 @app.route('/modern')
 def modern_index():
     """Render the modernized UI main page"""
-    return render_template('modern_index.html')
+    return render_template('tailwind_index.html')
 
 @app.route('/tailwind')
 def tailwind_index():
     """Render the Tailwind-inspired UI main page"""
     return render_template('tailwind_index.html')
+
+@app.route('/analyze', methods=['GET'])
+def analyze_form():
+    """Display the photo upload form for body analysis"""
+    return render_template('tailwind_analyze.html')
 
 @app.route('/analyze', methods=['POST'])
 def analyze():
@@ -103,7 +108,7 @@ def analyze():
     if 'file' not in request.files:
         logger.error("No file in request.files")
         flash('No file selected', 'danger')
-        return redirect(url_for('index'))
+        return redirect(url_for('analyze_form'))
     
     file = request.files['file']
     logger.debug(f"File object: {file}, filename: {file.filename}")
@@ -111,7 +116,7 @@ def analyze():
     if file.filename == '':
         logger.error("Empty filename")
         flash('No file selected', 'danger')
-        return redirect(url_for('index'))
+        return redirect(url_for('analyze_form'))
     
     if file and allowed_file(file.filename):
         try:
@@ -129,7 +134,7 @@ def analyze():
             image = cv2.imread(filepath)
             if image is None:
                 flash('Failed to process image', 'danger')
-                return redirect(url_for('index'))
+                return redirect(url_for('analyze_form'))
             
             # Get user-provided information
             height = request.form.get('height', 0)
@@ -144,7 +149,7 @@ def analyze():
             
             if landmarks is None:
                 flash('No body detected in image. Please try again with a clearer full-body image.', 'warning')
-                return redirect(url_for('index'))
+                return redirect(url_for('analyze_form'))
             
             # Analyze body traits - pass the original image for AI analysis
             traits = analyze_body_traits(
@@ -183,17 +188,17 @@ def analyze():
         except Exception as e:
             logger.error(f"Error during analysis: {str(e)}")
             flash(f'Error during analysis: {str(e)}', 'danger')
-            return redirect(url_for('index'))
+            return redirect(url_for('analyze_form'))
     else:
         flash('Invalid file type. Please upload PNG or JPG images.', 'warning')
-        return redirect(url_for('index'))
+        return redirect(url_for('analyze_form'))
 
 @app.route('/results/<analysis_id>')
 def results(analysis_id):
     """Display analysis results"""
     if analysis_id not in analysis_results:
         flash('Analysis not found', 'danger')
-        return redirect(url_for('index'))
+        return redirect(url_for('analyze_form'))
     
     result = analysis_results[analysis_id]
     
@@ -221,7 +226,7 @@ def results(analysis_id):
             formatted_traits[trait_name] = trait_data
     
     return render_template(
-        'analysis.html',
+        'tailwind_analysis.html',
         analysis_id=analysis_id,
         traits=formatted_traits,
         recommendations=result['recommendations'],
@@ -233,12 +238,12 @@ def results(analysis_id):
 @app.route('/education')
 def education():
     """Display educational content about genetic traits in fitness"""
-    return render_template('education.html')
+    return render_template('tailwind_education.html')
 
 @app.route('/scan3d')
 def scan3d_page():
     """Display the 3D body scan upload page"""
-    return render_template('scan3d.html')
+    return render_template('tailwind_scan3d.html')
 
 @app.route('/scan3d/upload', methods=['POST'])
 def scan3d_upload():
@@ -370,14 +375,15 @@ def scan3d_results(analysis_id):
             formatted_traits[trait_name] = trait_data
     
     return render_template(
-        'scan3d_results_enhanced.html',
+        'tailwind_analysis.html',
         analysis_id=analysis_id,
         traits=formatted_traits,
         recommendations=result['recommendations'],
         user_info=result['user_info'],
         image_data=img_b64,
         scan_data=result.get('scan_data', {}),
-        format_value=format_trait_value  # Pass the formatter to the template
+        format_value=format_trait_value,  # Pass the formatter to the template
+        is_3d_scan=True  # Flag to indicate this is a 3D scan analysis
     )
 
 @app.route('/api/traits/<analysis_id>')
@@ -554,7 +560,7 @@ def logout():
     """Process user logout"""
     logout_user()
     flash('You have been logged out.', 'info')
-    return redirect(url_for('index'))
+    return redirect(url_for('analyze_form'))
 
 @app.route('/profile')
 @login_required
@@ -650,12 +656,30 @@ def recommendations(analysis_id):
     
     result = analysis_results[analysis_id]
     
+    # Process traits to include their units for display
+    formatted_traits = {}
+    for trait_name, trait_data in result['traits'].items():
+        # For traits that are dictionaries with value keys
+        if isinstance(trait_data, dict) and 'value' in trait_data:
+            # Copy the trait data
+            formatted_trait = trait_data.copy()
+            # Format the value with units
+            formatted_trait['display_value'] = format_trait_value(trait_name, trait_data['value'])
+            formatted_trait['unit'] = get_unit(trait_name)
+            formatted_traits[trait_name] = formatted_trait
+        else:
+            # For other types of traits
+            formatted_traits[trait_name] = trait_data
+    
     return render_template(
-        'recommendations.html',
+        'tailwind_analysis.html',
         analysis_id=analysis_id,
-        traits=result['traits'],
+        traits=formatted_traits,
         recommendations=result['recommendations'],
-        user_info=result['user_info']
+        user_info=result['user_info'],
+        image_data=None,
+        format_value=format_trait_value,  # Pass the formatter to the template
+        recommendations_view=True  # Flag to indicate this is just recommendations view
     )
 
 @app.route('/schedule_analysis')

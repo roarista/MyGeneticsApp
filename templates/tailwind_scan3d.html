@@ -1,0 +1,231 @@
+{% extends "tailwind_layout.html" %}
+
+{% block content %}
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+    <div class="md:col-span-7">
+        <div class="fitness-card">
+            <div class="mb-6">
+                <div class="flex items-center gap-3 mb-4">
+                    <svg class="icon text-fitness-red">
+                        <use xlink:href="#icon-box"></use>
+                    </svg>
+                    <h1 class="text-3xl font-bold">3D Body Scanning</h1>
+                </div>
+                <p class="text-lg mb-6">
+                    Upload a 3D body scan for enhanced precision in analyzing your body structure and composition. 
+                    Get detailed measurements and personalized recommendations based on your exact body geometry.
+                </p>
+                <hr class="border-gray-800 my-6">
+                
+                <div class="flex items-center gap-3 mb-4">
+                    <svg class="icon text-fitness-accent">
+                        <use xlink:href="#icon-info"></use>
+                    </svg>
+                    <h3 class="text-xl font-bold">How It Works</h3>
+                </div>
+                
+                <ol class="list-decimal ml-6 mb-6 text-fitness-gray">
+                    <li class="mb-2">Generate a 3D scan using a mobile app (iPhone LiDAR, Android depth camera, etc.)</li>
+                    <li class="mb-2">Export the scan as an OBJ, STL, or PLY file</li>
+                    <li class="mb-2">Upload your scan below along with your basic measurements</li>
+                    <li class="mb-2">Our system analyzes your body's precise structural traits</li>
+                    <li>Get enhanced measurements and customized training recommendations</li>
+                </ol>
+
+                <div class="fitness-card bg-fitness-darkgray mb-6">
+                    <div class="flex items-center gap-2 mb-3">
+                        <svg class="icon text-fitness-accent">
+                            <use xlink:href="#icon-bulb"></use>
+                        </svg>
+                        <h4 class="text-lg font-bold">Scanning Tips</h4>
+                    </div>
+                    <ul class="list-disc ml-6 text-fitness-gray">
+                        <li class="mb-2">Wear form-fitting clothing for the most accurate results</li>
+                        <li class="mb-2">Stand in a neutral pose with arms slightly away from your sides</li>
+                        <li class="mb-2">Ensure good lighting and a clean background</li>
+                        <li>Scan your entire body from head to toe for complete analysis</li>
+                    </ul>
+                </div>
+                
+                <div class="fitness-card bg-fitness-darkgray">
+                    <div class="flex items-center gap-2 mb-3">
+                        <svg class="icon text-fitness-red">
+                            <use xlink:href="#icon-shield"></use>
+                        </svg>
+                        <h4 class="text-lg font-bold">Privacy Note</h4>
+                    </div>
+                    <p class="text-fitness-gray mb-3">Your 3D scan data is processed securely and confidentially:</p>
+                    <ul class="list-disc ml-6 text-fitness-gray">
+                        <li class="mb-2">Data is encrypted in transit and at rest</li>
+                        <li class="mb-2">Scans are not shared with third parties</li>
+                        <li>You control how long your data is stored (see privacy settings)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="md:col-span-5">
+        <div class="fitness-card">
+            <div class="flex items-center gap-3 mb-4">
+                <svg class="icon text-fitness-red">
+                    <use xlink:href="#icon-upload"></use>
+                </svg>
+                <h3 class="text-xl font-bold">Upload Your 3D Scan</h3>
+            </div>
+            
+            <form action="{{ url_for('scan3d_upload') }}" method="post" enctype="multipart/form-data" class="mb-4">
+                <div class="mb-4">
+                    <label for="scan_file" class="block text-fitness-gray mb-2">3D Model File (OBJ, STL, PLY)</label>
+                    <div class="fitness-card bg-fitness-darkgray p-8 text-center cursor-pointer" id="drop-area">
+                        <input type="file" name="scan_file" id="scan_file" class="hidden" accept=".obj,.stl,.ply">
+                        <svg class="icon icon-lg text-fitness-gray mx-auto mb-3">
+                            <use xlink:href="#icon-upload"></use>
+                        </svg>
+                        <p class="text-fitness-gray mb-2">Drag and drop your file here or</p>
+                        <button type="button" id="browse-button" class="btn btn-outline">
+                            Browse Files
+                        </button>
+                        <p class="text-sm text-fitness-gray mt-3" id="file-name">No file selected</p>
+                    </div>
+                </div>
+                
+                <div class="fitness-card bg-fitness-darkgray mb-6">
+                    <h4 class="text-lg font-bold mb-4">Your Basic Measurements</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="height" class="block text-fitness-gray mb-2">Height (cm)</label>
+                            <input type="number" name="height" id="height" class="fitness-input" required>
+                        </div>
+                        <div>
+                            <label for="weight" class="block text-fitness-gray mb-2">Weight (kg)</label>
+                            <input type="number" name="weight" id="weight" class="fitness-input" required>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <label for="gender" class="block text-fitness-gray mb-2">Gender</label>
+                            <select name="gender" id="gender" class="fitness-select" required>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="experience" class="block text-fitness-gray mb-2">Experience Level</label>
+                            <select name="experience" id="experience" class="fitness-select" required>
+                                <option value="beginner">Beginner (0-1 years)</option>
+                                <option value="intermediate">Intermediate (1-3 years)</option>
+                                <option value="advanced">Advanced (3+ years)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary w-full flex items-center justify-center gap-2">
+                    <svg class="icon icon-sm">
+                        <use xlink:href="#icon-zap"></use>
+                    </svg>
+                    <span>Analyze My 3D Body Scan</span>
+                </button>
+            </form>
+            
+            <div class="flex justify-center">
+                <a href="{{ url_for('analyze') }}" class="text-fitness-accent flex items-center gap-2">
+                    <svg class="icon icon-sm">
+                        <use xlink:href="#icon-camera"></use>
+                    </svg>
+                    <span>Or use photo analysis instead</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const fileInput = document.getElementById('scan_file');
+        const dropArea = document.getElementById('drop-area');
+        const browseButton = document.getElementById('browse-button');
+        const fileNameDisplay = document.getElementById('file-name');
+
+        // Trigger file input when browse button is clicked
+        browseButton.addEventListener('click', function() {
+            fileInput.click();
+        });
+
+        // Update filename display when file is selected
+        fileInput.addEventListener('change', function() {
+            if (fileInput.files.length > 0) {
+                fileNameDisplay.textContent = fileInput.files[0].name;
+                fileNameDisplay.classList.add('text-fitness-accent');
+                dropArea.classList.add('border', 'border-fitness-accent');
+            } else {
+                fileNameDisplay.textContent = 'No file selected';
+                fileNameDisplay.classList.remove('text-fitness-accent');
+                dropArea.classList.remove('border', 'border-fitness-accent');
+            }
+        });
+
+        // Handle drag and drop
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight() {
+            dropArea.classList.add('bg-fitness-card-bg', 'border', 'border-fitness-accent');
+        }
+
+        function unhighlight() {
+            dropArea.classList.remove('bg-fitness-card-bg', 'border', 'border-fitness-accent');
+        }
+
+        dropArea.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            fileInput.files = files;
+            
+            if (files.length > 0) {
+                fileNameDisplay.textContent = files[0].name;
+                fileNameDisplay.classList.add('text-fitness-accent');
+            }
+        }
+    });
+</script>
+{% endblock %}
+
+{% block styles %}
+<style>
+    .fitness-card {
+        background-color: var(--fitness-card-bg);
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        padding: 1.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    #drop-area {
+        transition: all 0.3s ease;
+    }
+    
+    #drop-area:hover {
+        background-color: var(--fitness-darkgray);
+    }
+</style>
+{% endblock %}
