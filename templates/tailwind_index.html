@@ -1,0 +1,172 @@
+{% extends "tailwind_layout.html" %}
+
+{% block title %}MyGenetics - Unlock Your Genetic Potential{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="py-4 md:py-8 px-4 text-center">
+    <div class="max-w-3xl mx-auto">
+        <h1 class="text-4xl md:text-5xl font-bold mb-4 text-sharp">Unlock Your <span class="text-fitness-red">Genetic Potential</span></h1>
+        <p class="text-xl mb-8">Personalized fitness recommendations based on your unique body structure and genetic traits</p>
+        
+        <div class="flex flex-col md:flex-row justify-center gap-4 mb-8">
+            <a href="{{ url_for('scan3d_page') }}" class="btn btn-primary button-glow">
+                <svg class="icon mr-2">
+                    <use xlink:href="#icon-camera"></use>
+                </svg>
+                3D Body Scan
+            </a>
+            <a href="#start-analysis" class="btn btn-outline">
+                Upload Photo
+            </a>
+        </div>
+        
+        <!-- Feature Badges -->
+        <div class="flex flex-wrap justify-center gap-3 mt-4">
+            <span class="py-1 px-3 bg-fitness-darkgray rounded-full text-sm">AI-Powered Analysis</span>
+            <span class="py-1 px-3 bg-fitness-darkgray rounded-full text-sm">Personalized Plans</span>
+            <span class="py-1 px-3 bg-fitness-darkgray rounded-full text-sm">Scientific Approach</span>
+        </div>
+    </div>
+</section>
+
+<!-- Benefits Section -->
+<section class="py-8 bg-fitness-darkgray mt-8 mb-8 rounded-lg p-6">
+    <div class="text-center mb-8">
+        <h2 class="text-3xl font-bold mb-2">How MyGenetics Works</h2>
+        <p class="text-lg text-gray">We analyze your body structure to create personalized fitness recommendations</p>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <!-- Benefit 1 -->
+        <div class="fitness-card text-center">
+            <div class="benefit-icon mx-auto mb-4">
+                <i class="fas fa-camera"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-2">Upload Your Photo</h3>
+            <p>Take a full body photo or use our 3D scanning technology to capture your body structure</p>
+        </div>
+        
+        <!-- Benefit 2 -->
+        <div class="fitness-card text-center">
+            <div class="benefit-icon mx-auto mb-4">
+                <i class="fas fa-dna"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-2">AI Analysis</h3>
+            <p>Our algorithm analyzes body proportions, muscle insertions, and genetic markers</p>
+        </div>
+        
+        <!-- Benefit 3 -->
+        <div class="fitness-card text-center">
+            <div class="benefit-icon mx-auto mb-4">
+                <i class="fas fa-dumbbell"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-2">Personalized Plan</h3>
+            <p>Receive tailored workout and nutrition recommendations based on your genetic potential</p>
+        </div>
+    </div>
+</section>
+
+<!-- Analysis Form Section -->
+<section id="start-analysis" class="py-8">
+    <div class="max-w-2xl mx-auto">
+        <div class="fitness-card">
+            <h2 class="text-2xl font-bold mb-4 text-center">Start Your Genetic Analysis</h2>
+            
+            <form action="{{ url_for('analyze') }}" method="POST" enctype="multipart/form-data" class="flex flex-col gap-4">
+                <!-- Image Upload -->
+                <div class="mb-4">
+                    <label for="file" class="block mb-2 font-medium">Upload a full body photo:</label>
+                    <input type="file" name="file" id="file" accept=".jpg,.jpeg,.png" class="fitness-input" required>
+                    <p class="text-sm text-gray mt-2">Please upload a clear, full-body photo in good lighting</p>
+                </div>
+                
+                <!-- Height and Weight -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="height" class="block mb-2 font-medium">Height (cm):</label>
+                        <input type="number" name="height" id="height" min="120" max="220" class="fitness-input" placeholder="170">
+                    </div>
+                    <div>
+                        <label for="weight" class="block mb-2 font-medium">Weight (kg):</label>
+                        <input type="number" name="weight" id="weight" min="40" max="180" class="fitness-input" placeholder="70">
+                    </div>
+                </div>
+                
+                <!-- Gender and Experience -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="gender" class="block mb-2 font-medium">Gender:</label>
+                        <select name="gender" id="gender" class="fitness-select">
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="experience" class="block mb-2 font-medium">Training Experience:</label>
+                        <select name="experience" id="experience" class="fitness-select">
+                            <option value="beginner">Beginner (0-1 years)</option>
+                            <option value="intermediate">Intermediate (1-3 years)</option>
+                            <option value="advanced">Advanced (3-5 years)</option>
+                            <option value="expert">Expert (5+ years)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-primary button-glow mt-4">
+                    <i class="fas fa-dna mr-2"></i>
+                    Start Analysis
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="py-8 mt-8">
+    <div class="text-center mb-8">
+        <h2 class="text-3xl font-bold mb-2">Success Stories</h2>
+        <p class="text-lg text-gray">See how MyGenetics has helped people achieve their fitness goals</p>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+        <!-- Testimonial 1 -->
+        <div class="fitness-card">
+            <div class="flex items-center mb-4">
+                <div class="w-12 h-12 rounded-full bg-fitness-darkgray overflow-hidden mr-4"></div>
+                <div>
+                    <h4 class="font-bold">Michael K.</h4>
+                    <p class="text-sm text-gray">Ectomorph Body Type</p>
+                </div>
+            </div>
+            <p class="text-gray">"After years of skinny-fat frustration, MyGenetics analysis showed I had great potential for shoulder development but needed a different approach for legs. Their personalized Push/Pull/Legs plan helped me gain 15lbs of muscle in 6 months!"</p>
+        </div>
+        
+        <!-- Testimonial 2 -->
+        <div class="fitness-card">
+            <div class="flex items-center mb-4">
+                <div class="w-12 h-12 rounded-full bg-fitness-darkgray overflow-hidden mr-4"></div>
+                <div>
+                    <h4 class="font-bold">Sarah T.</h4>
+                    <p class="text-sm text-gray">Mesomorph Body Type</p>
+                </div>
+            </div>
+            <p class="text-gray">"The genetic analysis revealed I had naturally strong glutes but my shoulder mechanics were limiting my upper body development. Following MyGenetics recommendations, I finally broke through my plateau and competed in my first fitness show!"</p>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="py-8 mt-8 text-center">
+    <div class="max-w-3xl mx-auto">
+        <h2 class="text-3xl font-bold mb-4">Ready to Unlock Your Potential?</h2>
+        <p class="text-xl mb-6">Join thousands of others who have optimized their fitness journey with MyGenetics</p>
+        
+        <div class="flex flex-col md:flex-row justify-center gap-4">
+            <a href="#start-analysis" class="btn btn-primary button-glow">Start Your Analysis</a>
+            <a href="{{ url_for('education') }}" class="btn btn-outline">Learn More</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

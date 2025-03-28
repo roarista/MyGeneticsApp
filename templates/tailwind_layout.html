@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MyGenetics - Fitness Genetics Analysis{% endblock %}</title>
+    
+    <!-- Bootstrap CSS for baseline functionality -->
+    <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
+    
+    <!-- Our custom Tailwind-inspired CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/fitness-tailwind.css') }}">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    {% block styles %}{% endblock %}
+</head>
+<body>
+    <!-- SVG Icons Sprite Sheet -->
+    {% include 'tailwind_icons.html' %}
+    
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="{{ url_for('index') }}" class="navbar-brand">
+                <svg class="icon icon-lg text-fitness-red">
+                    <use xlink:href="#icon-dna"></use>
+                </svg>
+                <div class="navbar-brand-text">
+                    <span class="navbar-brand-title">MyGenetics</span>
+                    <span class="navbar-brand-badge">ALPHA</span>
+                </div>
+            </a>
+            
+            <!-- Desktop Navigation -->
+            <div class="navbar-nav">
+                <a href="{{ url_for('index') }}" class="nav-link">
+                    <svg class="icon icon-sm">
+                        <use xlink:href="#icon-home"></use>
+                    </svg>
+                    <span>Home</span>
+                </a>
+                <a href="{{ url_for('scan3d_page') }}" class="nav-link">
+                    <svg class="icon icon-sm">
+                        <use xlink:href="#icon-camera"></use>
+                    </svg>
+                    <span>3D Scanning</span>
+                </a>
+                <a href="{{ url_for('education') }}" class="nav-link">
+                    <svg class="icon icon-sm">
+                        <use xlink:href="#icon-book-open"></use>
+                    </svg>
+                    <span>Learn</span>
+                </a>
+            </div>
+            
+            <!-- Desktop Authentication -->
+            <div class="navbar-auth">
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('profile') }}" class="nav-link">
+                        <svg class="icon icon-sm">
+                            <use xlink:href="#icon-user"></use>
+                        </svg>
+                        <span>{{ current_user.username }}</span>
+                    </a>
+                    <a href="{{ url_for('logout') }}" class="btn btn-outline">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="btn btn-outline">Log In</a>
+                    <a href="{{ url_for('signup') }}" class="btn btn-primary">Sign Up</a>
+                {% endif %}
+            </div>
+            
+            <!-- Mobile Menu Toggle -->
+            <button class="navbar-toggler" id="mobile-menu-toggle">
+                <svg class="icon">
+                    <use xlink:href="#icon-menu"></use>
+                </svg>
+            </button>
+        </div>
+        
+        <!-- Mobile Menu (Hidden by Default) -->
+        <div class="navbar-menu" id="mobile-menu">
+            <a href="{{ url_for('index') }}" class="mobile-nav-link">
+                <svg class="icon icon-sm">
+                    <use xlink:href="#icon-home"></use>
+                </svg>
+                <span>Home</span>
+            </a>
+            <a href="{{ url_for('scan3d_page') }}" class="mobile-nav-link">
+                <svg class="icon icon-sm">
+                    <use xlink:href="#icon-camera"></use>
+                </svg>
+                <span>3D Scanning</span>
+            </a>
+            <a href="{{ url_for('education') }}" class="mobile-nav-link">
+                <svg class="icon icon-sm">
+                    <use xlink:href="#icon-book-open"></use>
+                </svg>
+                <span>Learn</span>
+            </a>
+            
+            <!-- Mobile Authentication -->
+            <div class="mobile-menu-buttons">
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('profile') }}" class="btn btn-outline btn-full">My Profile</a>
+                    <a href="{{ url_for('logout') }}" class="btn btn-primary btn-full">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="btn btn-outline btn-full">Log In</a>
+                    <a href="{{ url_for('signup') }}" class="btn btn-primary btn-full">Sign Up</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Flash Messages -->
+    <div class="container mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    {% set alert_class = "success" if category == "success" else "danger" if category == "danger" else "warning" if category == "warning" else "info" %}
+                    <div class="fitness-card mb-4 {{ category }}-alert" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+    
+    <!-- Main Content -->
+    <main class="container py-4">
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Footer -->
+    <footer class="py-4 px-4 border-t border-gray-800 mt-8">
+        <div class="container mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="flex items-center gap-2 mb-4 md:mb-0">
+                    <svg class="icon icon-lg text-fitness-red">
+                        <use xlink:href="#icon-dna"></use>
+                    </svg>
+                    <div class="flex flex-col">
+                        <span class="text-xl font-bold text-white">MyGenetics</span>
+                        <span class="text-xs text-fitness-red uppercase tracking-widest">ALPHA</span>
+                    </div>
+                </div>
+                <div class="text-center md:text-right text-sm text-gray">
+                    <p>&copy; 2025 MyGenetics. All rights reserved.</p>
+                    <p class="mt-1">Unlock your genetic potential</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- jQuery and Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Mobile Menu Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const mobileMenuIcon = mobileMenuToggle.querySelector('use');
+            
+            mobileMenuToggle.addEventListener('click', function() {
+                if (mobileMenu.classList.contains('active')) {
+                    mobileMenu.classList.remove('active');
+                    mobileMenuIcon.setAttribute('xlink:href', '#icon-menu');
+                } else {
+                    mobileMenu.classList.add('active');
+                    mobileMenuIcon.setAttribute('xlink:href', '#icon-x');
+                }
+            });
+        });
+    </script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

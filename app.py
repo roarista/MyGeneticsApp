@@ -87,6 +87,11 @@ def modern_index():
     """Render the modernized UI main page"""
     return render_template('modern_index.html')
 
+@app.route('/tailwind')
+def tailwind_index():
+    """Render the Tailwind-inspired UI main page"""
+    return render_template('tailwind_index.html')
+
 @app.route('/analyze', methods=['POST'])
 def analyze():
     """Process uploaded image and analyze body traits"""
@@ -493,7 +498,11 @@ def login():
         else:
             flash('Invalid email or password. Please try again.', 'danger')
     
-    return render_template('login.html')
+    # Check if we should use the tailwind template
+    if request.args.get('ui') == 'tailwind':
+        return render_template('tailwind_login.html')
+    else:
+        return render_template('login.html')
 
 # Route to redirect to our Google auth blueprint
 @app.route('/google_login')
@@ -539,7 +548,11 @@ def signup():
         flash('Account created successfully!', 'success')
         return redirect(url_for('profile'))
     
-    return render_template('signup.html')
+    # Check if we should use the tailwind template
+    if request.args.get('ui') == 'tailwind':
+        return render_template('tailwind_signup.html')
+    else:
+        return render_template('signup.html')
 
 @app.route('/logout')
 @login_required
