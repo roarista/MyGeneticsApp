@@ -441,12 +441,24 @@
                 </div>
             </div>
             
-            <div class="flex justify-center mt-8">
-                <a href="{{ url_for('analyze_form') }}" class="btn btn-outline flex items-center gap-2">
+            <div class="flex justify-center gap-4 mt-8">
+                <a href="{{ url_for('analyze_form') }}" class="fitness-button-secondary flex items-center gap-2">
                     <svg class="icon icon-sm">
                         <use xlink:href="#icon-home"></use>
                     </svg>
                     <span>Back to Analysis</span>
+                </a>
+                <a href="{{ url_for('nutrition', analysis_id=analysis_id) }}" class="fitness-button-primary flex items-center gap-2">
+                    <span>Detailed Nutrition Plan</span>
+                    <svg class="icon icon-sm">
+                        <use xlink:href="#icon-utensils"></use>
+                    </svg>
+                </a>
+                <a href="{{ url_for('workout', analysis_id=analysis_id) }}" class="fitness-button-primary flex items-center gap-2">
+                    <span>Detailed Workout Plan</span>
+                    <svg class="icon icon-sm">
+                        <use xlink:href="#icon-dumbbell"></use>
+                    </svg>
                 </a>
             </div>
         </div>

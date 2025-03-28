@@ -682,6 +682,330 @@ def recommendations(analysis_id):
         recommendations_view=True  # Flag to indicate this is just recommendations view
     )
 
+@app.route('/nutrition/<analysis_id>')
+def nutrition(analysis_id):
+    """Display detailed nutrition plan based on analysis results"""
+    # Check if analysis exists
+    if analysis_id not in analysis_results:
+        flash('Analysis not found', 'danger')
+        return redirect(url_for('profile'))
+    
+    result = analysis_results[analysis_id]
+    
+    # Get user's body info for calorie calculations
+    height_cm = result['user_info'].get('height', 0)
+    weight_kg = result['user_info'].get('weight', 0)
+    gender = result['user_info'].get('gender', 'male')
+    experience = result['user_info'].get('experience', 'beginner')
+    
+    # Get body fat percentage if available
+    body_fat = 15  # Default value
+    if 'body_fat_percentage' in result['traits'] and isinstance(result['traits']['body_fat_percentage'], dict):
+        body_fat = result['traits']['body_fat_percentage'].get('value', 15)
+    
+    # Process traits to include their units for display
+    formatted_traits = {}
+    for trait_name, trait_data in result['traits'].items():
+        # For traits that are dictionaries with value keys
+        if isinstance(trait_data, dict) and 'value' in trait_data:
+            # Copy the trait data
+            formatted_trait = trait_data.copy()
+            # Format the value with units
+            formatted_trait['display_value'] = format_trait_value(trait_name, trait_data['value'])
+            formatted_trait['unit'] = get_unit(trait_name)
+            formatted_traits[trait_name] = formatted_trait
+        else:
+            # For other types of traits
+            formatted_traits[trait_name] = trait_data
+    
+    # Default recommendations for supplements based on goals
+    supplements = {
+        'essential': [
+            {'name': 'Protein Powder (Whey/Plant-based)', 'purpose': 'Muscle recovery and growth', 'timing': 'Post-workout or between meals', 'dosage': '20-30g per serving'},
+            {'name': 'Creatine Monohydrate', 'purpose': 'Strength and power output', 'timing': 'Daily, timing not critical', 'dosage': '5g daily'},
+            {'name': 'Multivitamin', 'purpose': 'Fill nutritional gaps', 'timing': 'With a meal', 'dosage': 'As directed on label'}
+        ],
+        'optional': [
+            {'name': 'Omega-3 Fatty Acids', 'purpose': 'Joint health and inflammation', 'timing': 'With meals', 'dosage': '1-3g daily'},
+            {'name': 'Vitamin D3', 'purpose': 'Immune function and bone health', 'timing': 'With a meal containing fat', 'dosage': '1000-5000 IU daily'},
+            {'name': 'Pre-Workout', 'purpose': 'Energy and performance', 'timing': '30 minutes before training', 'dosage': 'As directed on label'}
+        ]
+    }
+    
+    # Recommended foods based on body type and goals
+    body_type = result['traits'].get('body_type', {}).get('value', 'balanced')
+    
+    food_recommendations = {
+        'protein_sources': [
+            {'name': 'Chicken Breast', 'benefits': 'Lean protein with minimal fat', 'portion': '100-150g per meal'},
+            {'name': 'Lean Beef', 'benefits': 'Protein, iron, zinc, and B vitamins', 'portion': '100-150g per meal'},
+            {'name': 'Eggs', 'benefits': 'Complete protein with healthy fats', 'portion': '2-3 whole eggs'},
+            {'name': 'Greek Yogurt', 'benefits': 'Protein and probiotics', 'portion': '150-200g serving'},
+            {'name': 'Whey/Plant Protein', 'benefits': 'Convenient post-workout option', 'portion': '25-30g protein per shake'}
+        ],
+        'carb_sources': [
+            {'name': 'Brown Rice', 'benefits': 'Sustained energy and fiber', 'portion': '50-80g uncooked'},
+            {'name': 'Sweet Potatoes', 'benefits': 'Vitamins and slower-digesting carbs', 'portion': '150-200g'},
+            {'name': 'Oats', 'benefits': 'Fiber and sustained energy', 'portion': '40-60g uncooked'},
+            {'name': 'Fruits', 'benefits': 'Vitamins, minerals, and fiber', 'portion': '1-2 pieces or 100-150g'},
+            {'name': 'Vegetables', 'benefits': 'Micronutrients and fiber', 'portion': 'Unlimited green vegetables'}
+        ],
+        'fat_sources': [
+            {'name': 'Avocado', 'benefits': 'Healthy monounsaturated fats', 'portion': '½ - 1 medium'},
+            {'name': 'Nuts and Seeds', 'benefits': 'Healthy fats and protein', 'portion': '30g or small handful'},
+            {'name': 'Olive Oil', 'benefits': 'Heart-healthy monounsaturated fats', 'portion': '1-2 tablespoons'},
+            {'name': 'Fatty Fish', 'benefits': 'Omega-3 fatty acids', 'portion': '100-150g serving, 2-3x week'},
+            {'name': 'Nut Butters', 'benefits': 'Protein and healthy fats', 'portion': '1-2 tablespoons'}
+        ]
+    }
+    
+    # Adjust food recommendations based on body type
+    if body_type.lower() in ['endomorph', 'mesomorph-endomorph']:
+        # For endomorphs: More protein, less carbs
+        carb_strategy = "Limit high-glycemic carbs. Focus on fiber-rich sources and primarily around workouts."
+        timing_strategy = "Practice carb timing: higher amounts around workouts, minimal on rest days."
+    elif body_type.lower() in ['ectomorph', 'mesomorph-ectomorph']:
+        # For ectomorphs: Higher carbs, moderate protein
+        carb_strategy = "Prioritize regular carb intake throughout the day for consistent energy and muscle building."
+        timing_strategy = "Consume larger meals with balanced macros. Consider adding calorie-dense foods."
+    else:
+        # For mesomorphs or balanced types
+        carb_strategy = "Moderate carb intake with a focus on quality sources and timing around workouts."
+        timing_strategy = "Balance macros evenly throughout your meals with slight adjustments based on training schedule."
+    
+    return render_template(
+        'tailwind_nutrition.html',
+        analysis_id=analysis_id,
+        traits=formatted_traits,
+        recommendations=result['recommendations'],
+        user_info=result['user_info'],
+        supplements=supplements,
+        foods=food_recommendations,
+        carb_strategy=carb_strategy,
+        timing_strategy=timing_strategy,
+        body_type=body_type,
+        format_value=format_trait_value
+    )
+
+@app.route('/workout/<analysis_id>')
+def workout(analysis_id):
+    """Display detailed workout plan based on analysis results and user's weak points"""
+    # Check if analysis exists
+    if analysis_id not in analysis_results:
+        flash('Analysis not found', 'danger')
+        return redirect(url_for('profile'))
+    
+    result = analysis_results[analysis_id]
+    
+    # Get user info and training experience
+    experience = result['user_info'].get('experience', 'beginner')
+    
+    # Process traits to include their units for display
+    formatted_traits = {}
+    for trait_name, trait_data in result['traits'].items():
+        # For traits that are dictionaries with value keys
+        if isinstance(trait_data, dict) and 'value' in trait_data:
+            # Copy the trait data
+            formatted_trait = trait_data.copy()
+            # Format the value with units
+            formatted_trait['display_value'] = format_trait_value(trait_name, trait_data['value'])
+            formatted_trait['unit'] = get_unit(trait_name)
+            formatted_traits[trait_name] = formatted_trait
+        else:
+            # For other types of traits
+            formatted_traits[trait_name] = trait_data
+    
+    # Identify weak points from traits
+    weak_points = []
+    for trait_name, trait_data in result['traits'].items():
+        if isinstance(trait_data, dict) and 'rating' in trait_data:
+            if trait_data['rating'] in ['below_average', 'average']:
+                weak_points.append({
+                    'name': trait_name.replace('_', ' ').title(),
+                    'rating': trait_data['rating'],
+                    'value': trait_data.get('value', 0)
+                })
+    
+    # Get training split from recommendations
+    training_split = result['recommendations'].get('training_split', {})
+    
+    # Define detailed exercises for each body part with focus on weak points
+    exercise_library = {
+        'chest': [
+            {'name': 'Bench Press', 'sets': '3-4', 'reps': '8-12', 'focus': 'Overall chest development'},
+            {'name': 'Incline Dumbbell Press', 'sets': '3', 'reps': '10-12', 'focus': 'Upper chest development'},
+            {'name': 'Cable Flyes', 'sets': '3', 'reps': '12-15', 'focus': 'Chest isolation and stretch'},
+            {'name': 'Push-Ups', 'sets': '3', 'reps': '12-20', 'focus': 'Overall chest with core stability'},
+            {'name': 'Dips', 'sets': '3', 'reps': '8-12', 'focus': 'Lower chest with triceps'}
+        ],
+        'back': [
+            {'name': 'Pull-Ups/Lat Pulldowns', 'sets': '3-4', 'reps': '8-12', 'focus': 'Lat development and width'},
+            {'name': 'Bent Over Rows', 'sets': '3-4', 'reps': '8-12', 'focus': 'Back thickness and scapular retraction'},
+            {'name': 'Seated Cable Rows', 'sets': '3', 'reps': '10-12', 'focus': 'Mid-back development'},
+            {'name': 'Face Pulls', 'sets': '3', 'reps': '12-15', 'focus': 'Rear delts and upper back'},
+            {'name': 'Straight Arm Pulldowns', 'sets': '3', 'reps': '12-15', 'focus': 'Lat isolation'}
+        ],
+        'shoulders': [
+            {'name': 'Overhead Press', 'sets': '3-4', 'reps': '8-12', 'focus': 'Overall shoulder development'},
+            {'name': 'Lateral Raises', 'sets': '3-4', 'reps': '12-15', 'focus': 'Shoulder width'},
+            {'name': 'Rear Delt Flyes', 'sets': '3', 'reps': '12-15', 'focus': 'Posterior deltoid development'},
+            {'name': 'Front Raises', 'sets': '3', 'reps': '12-15', 'focus': 'Anterior deltoid isolation'},
+            {'name': 'Upright Rows', 'sets': '3', 'reps': '10-12', 'focus': 'Trapezius and lateral delts'}
+        ],
+        'legs': [
+            {'name': 'Squats', 'sets': '3-4', 'reps': '8-12', 'focus': 'Overall leg development'},
+            {'name': 'Romanian Deadlifts', 'sets': '3-4', 'reps': '8-12', 'focus': 'Hamstrings and glutes'},
+            {'name': 'Leg Press', 'sets': '3', 'reps': '10-12', 'focus': 'Quad development with lower back support'},
+            {'name': 'Walking Lunges', 'sets': '3', 'reps': '10-12 per leg', 'focus': 'Unilateral leg development'},
+            {'name': 'Calf Raises', 'sets': '4', 'reps': '15-20', 'focus': 'Calf development'}
+        ],
+        'arms': [
+            {'name': 'Barbell Curls', 'sets': '3', 'reps': '10-12', 'focus': 'Overall bicep development'},
+            {'name': 'Tricep Pushdowns', 'sets': '3', 'reps': '10-12', 'focus': 'Tricep isolation'},
+            {'name': 'Hammer Curls', 'sets': '3', 'reps': '10-12', 'focus': 'Brachialis and forearm development'},
+            {'name': 'Skull Crushers', 'sets': '3', 'reps': '10-12', 'focus': 'Long head of triceps'},
+            {'name': 'Preacher Curls', 'sets': '3', 'reps': '10-12', 'focus': 'Short head of biceps'}
+        ],
+        'core': [
+            {'name': 'Planks', 'sets': '3', 'reps': '30-60 seconds', 'focus': 'Core stability'},
+            {'name': 'Hanging Leg Raises', 'sets': '3', 'reps': '10-15', 'focus': 'Lower abs and hip flexors'},
+            {'name': 'Russian Twists', 'sets': '3', 'reps': '12-20 per side', 'focus': 'Obliques and rotational strength'},
+            {'name': 'Ab Rollouts', 'sets': '3', 'reps': '8-12', 'focus': 'Complete core strength'},
+            {'name': 'Cable Woodchoppers', 'sets': '3', 'reps': '10-12 per side', 'focus': 'Rotational power'}
+        ]
+    }
+    
+    # Specialized exercises for common weak points
+    specialized_exercises = {
+        'shoulder width': [
+            {'name': 'Wide-Grip Upright Rows', 'sets': '3-4', 'reps': '10-12', 'focus': 'Lateral deltoid isolation'},
+            {'name': 'Lateral Raises with Hold', 'sets': '3', 'reps': '12-15 with 2s hold', 'focus': 'Time under tension for shoulder width'},
+            {'name': 'Behind-the-Neck Press', 'sets': '3', 'reps': '10-12', 'focus': 'Posterior and lateral deltoid development'}
+        ],
+        'arm length': [
+            {'name': 'Close-Grip Bench Press', 'sets': '3-4', 'reps': '8-10', 'focus': 'Tricep development for arm girth'},
+            {'name': 'Concentration Curls', 'sets': '3', 'reps': '12-15', 'focus': 'Peak contraction for bicep shape'},
+            {'name': '21s Bicep Curls', 'sets': '3', 'reps': '21 (7-7-7)', 'focus': 'Full range development for arm aesthetics'}
+        ],
+        'chest development': [
+            {'name': 'Decline Push-Ups', 'sets': '3', 'reps': '12-15', 'focus': 'Upper chest emphasis'},
+            {'name': 'Cable Crossovers', 'sets': '3', 'reps': '12-15', 'focus': 'Peak contraction for chest definition'},
+            {'name': 'Svend Press', 'sets': '3', 'reps': '12-15', 'focus': 'Inner chest development and mind-muscle connection'}
+        ],
+        'back width': [
+            {'name': 'Wide-Grip Pull-Ups', 'sets': '3-4', 'reps': '8-12', 'focus': 'Lat width enhancement'},
+            {'name': 'Straight-Arm Pulldowns', 'sets': '3', 'reps': '12-15', 'focus': 'Isolated lat development'},
+            {'name': 'Meadows Rows', 'sets': '3', 'reps': '10-12', 'focus': 'One-sided lat development for width'}
+        ],
+        'leg development': [
+            {'name': 'Front Squats', 'sets': '3-4', 'reps': '8-10', 'focus': 'Quad emphasis with upright posture'},
+            {'name': 'Bulgarian Split Squats', 'sets': '3', 'reps': '10-12 per leg', 'focus': 'Unilateral leg development'},
+            {'name': 'Hack Squats', 'sets': '3', 'reps': '10-12', 'focus': 'Quad isolation with reduced lower back strain'}
+        ]
+    }
+    
+    # Map the weak points to specialized exercise categories
+    weak_point_exercises = []
+    for weak_point in weak_points:
+        name = weak_point['name'].lower()
+        if 'shoulder' in name or 'delt' in name:
+            weak_point_exercises.extend(specialized_exercises['shoulder width'])
+        elif 'arm' in name:
+            weak_point_exercises.extend(specialized_exercises['arm length'])
+        elif 'chest' in name or 'pec' in name:
+            weak_point_exercises.extend(specialized_exercises['chest development'])
+        elif 'back' in name or 'lat' in name:
+            weak_point_exercises.extend(specialized_exercises['back width'])
+        elif 'leg' in name or 'quad' in name or 'hamstring' in name:
+            weak_point_exercises.extend(specialized_exercises['leg development'])
+    
+    # Generate detailed workout plans for each day of the split
+    detailed_workouts = {}
+    for day, focus in training_split.items():
+        if 'Push' in focus:
+            workout = {
+                'focus': focus,
+                'exercises': exercise_library['chest'][:3] + exercise_library['shoulders'][:2] + exercise_library['arms'][1:3]
+            }
+            # Add specialized exercises if relevant weak points exist
+            if any('shoulder' in wp['name'].lower() for wp in weak_points):
+                workout['exercises'].extend(specialized_exercises['shoulder width'])
+            if any('chest' in wp['name'].lower() for wp in weak_points):
+                workout['exercises'].extend(specialized_exercises['chest development'])
+        elif 'Pull' in focus:
+            workout = {
+                'focus': focus,
+                'exercises': exercise_library['back'][:3] + exercise_library['arms'][:2]
+            }
+            # Add specialized exercises if relevant weak points exist
+            if any('back' in wp['name'].lower() for wp in weak_points):
+                workout['exercises'].extend(specialized_exercises['back width'])
+            if any('arm' in wp['name'].lower() for wp in weak_points):
+                workout['exercises'].extend(specialized_exercises['arm length'][:2])
+        elif 'Legs' in focus:
+            workout = {
+                'focus': focus,
+                'exercises': exercise_library['legs'][:4] + exercise_library['core'][:1]
+            }
+            # Add specialized exercises if relevant weak points exist
+            if any('leg' in wp['name'].lower() for wp in weak_points):
+                workout['exercises'].extend(specialized_exercises['leg development'])
+        elif 'Rest' in focus:
+            workout = {
+                'focus': focus,
+                'exercises': exercise_library['core'][:3] + [
+                    {'name': 'Light Cardio (Walking/Cycling)', 'sets': '1', 'reps': '20-30 minutes', 'focus': 'Recovery and cardiovascular health'},
+                    {'name': 'Mobility Work', 'sets': '1', 'reps': '10-15 minutes', 'focus': 'Joint health and flexibility'}
+                ]
+            }
+        else:
+            # Default case if the focus doesn't match expected patterns
+            workout = {
+                'focus': focus,
+                'exercises': []
+            }
+        
+        detailed_workouts[day] = workout
+    
+    # Generic training principles based on experience level
+    training_principles = {
+        'beginner': [
+            'Focus on learning proper form before adding significant weight',
+            'Start with 2-3 sets per exercise, gradually increasing to 3-4 sets as you adapt',
+            'Rest 60-90 seconds between sets to maintain proper form',
+            'Aim for progressive overload by adding small weight increments weekly',
+            'Stick to the basics - master compound movements before adding isolation work'
+        ],
+        'intermediate': [
+            'Incorporate periodization - alternate between strength and hypertrophy phases',
+            'Implement supersets for antagonistic muscle groups to increase workout density',
+            'Vary rep ranges between workouts (e.g., heavy day: 6-8 reps, volume day: 10-12 reps)',
+            'Rest 45-75 seconds for isolation exercises, 2-3 minutes for heavy compound lifts',
+            'Track your workouts to ensure consistent progression in weight, reps, or volume'
+        ],
+        'advanced': [
+            'Utilize advanced techniques like drop sets, rest-pause, and mechanical drop sets',
+            'Implement specialized blocks focusing on lagging body parts',
+            'Consider splitting push/pull workouts into chest/shoulders and back/arms days',
+            'Vary exercise selection regularly while maintaining progressive overload',
+            'Carefully manage fatigue with strategic deload weeks every 6-8 weeks'
+        ]
+    }
+    
+    return render_template(
+        'tailwind_workout.html',
+        analysis_id=analysis_id,
+        traits=formatted_traits,
+        recommendations=result['recommendations'],
+        user_info=result['user_info'],
+        training_split=training_split,
+        detailed_workouts=detailed_workouts,
+        weak_points=weak_points,
+        specialized_exercises=weak_point_exercises,
+        training_principles=training_principles.get(experience, training_principles['beginner']),
+        format_value=format_trait_value
+    )
+
 @app.route('/schedule_analysis')
 def schedule_analysis():
     """Schedule next analysis"""
