@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="1200" height="600" viewBox="0 0 1200 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF3A3A;stop-opacity:0.1" />
+      <stop offset="100%" style="stop-color:#222222;stop-opacity:0.3" />
+    </linearGradient>
+    <filter id="noise" x="0%" y="0%" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/>
+      <feColorMatrix type="matrix" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0.5 0"/>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="100%" height="100%" fill="#0A0A0A"/>
+  
+  <!-- Pattern Overlay -->
+  <rect width="100%" height="100%" fill="url(#grad1)"/>
+  
+  <!-- Noise Texture -->
+  <rect width="100%" height="100%" filter="url(#noise)" opacity="0.15"/>
+  
+  <!-- Fitness Elements -->
+  <g opacity="0.15">
+    <!-- DNA Strand -->
+    <path d="M200,100 Q220,150 200,200 Q180,250 200,300 Q220,350 200,400 Q180,450 200,500" 
+          stroke="#FF3A3A" stroke-width="8" fill="none"/>
+    <path d="M240,100 Q220,150 240,200 Q260,250 240,300 Q220,350 240,400 Q260,450 240,500" 
+          stroke="#FF3A3A" stroke-width="8" fill="none"/>
+    
+    <!-- CrossFit Icons -->
+    <circle cx="400" cy="200" r="50" stroke="#FF3A3A" stroke-width="8" fill="none"/>
+    <circle cx="800" cy="400" r="60" stroke="#FF3A3A" stroke-width="8" fill="none"/>
+    
+    <!-- Weights Icon -->
+    <rect x="700" y="150" width="80" height="20" rx="5" fill="#FF3A3A"/>
+    <rect x="650" y="150" width="30" height="80" rx="5" fill="#FF3A3A"/>
+    <rect x="800" y="150" width="30" height="80" rx="5" fill="#FF3A3A"/>
+    
+    <!-- Abstract Muscle Fiber -->
+    <path d="M900,300 C950,280 980,320 1000,300 S1050,260 1100,300" 
+          stroke="#FF3A3A" stroke-width="10" fill="none"/>
+  </g>
+</svg>

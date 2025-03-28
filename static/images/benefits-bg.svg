@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="1200" height="600" viewBox="0 0 1200 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF3A3A;stop-opacity:0.05" />
+      <stop offset="100%" style="stop-color:#222222;stop-opacity:0.2" />
+    </linearGradient>
+    <filter id="noise" x="0%" y="0%" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.35" numOctaves="3" stitchTiles="stitch"/>
+      <feColorMatrix type="matrix" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0.3 0"/>
+    </filter>
+    
+    <pattern id="gridPattern" width="40" height="40" patternUnits="userSpaceOnUse">
+      <rect width="40" height="40" fill="none"/>
+      <path d="M 40 0 L 0 0 0 40" stroke="#FF3A3A" stroke-width="0.5" fill="none" opacity="0.1"/>
+    </pattern>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="100%" height="100%" fill="#0A0A0A"/>
+  
+  <!-- Pattern Overlay -->
+  <rect width="100%" height="100%" fill="url(#grad1)"/>
+  
+  <!-- Noise Texture -->
+  <rect width="100%" height="100%" filter="url(#noise)" opacity="0.1"/>
+  
+  <!-- Grid Pattern -->
+  <rect width="100%" height="100%" fill="url(#gridPattern)" opacity="0.1"/>
+  
+  <!-- Fitness Elements -->
+  <g opacity="0.08">
+    <!-- Abstract Muscle Groups -->
+    <path d="M300,200 C350,150 450,150 500,200 S650,300 700,250 S800,150 850,200" 
+          stroke="#FF3A3A" stroke-width="15" fill="none"/>
+    <path d="M300,350 C350,300 450,300 500,350 S650,450 700,400 S800,300 850,350" 
+          stroke="#FF3A3A" stroke-width="15" fill="none"/>
+    
+    <!-- Protein Structure -->
+    <circle cx="950" cy="150" r="30" fill="#FF3A3A"/>
+    <circle cx="1000" cy="200" r="30" fill="#FF3A3A"/>
+    <circle cx="950" cy="250" r="30" fill="#FF3A3A"/>
+    <circle cx="900" cy="200" r="30" fill="#FF3A3A"/>
+    <line x1="950" y1="150" x2="1000" y2="200" stroke="#FF3A3A" stroke-width="10"/>
+    <line x1="1000" y1="200" x2="950" y2="250" stroke="#FF3A3A" stroke-width="10"/>
+    <line x1="950" y1="250" x2="900" y2="200" stroke="#FF3A3A" stroke-width="10"/>
+    <line x1="900" y1="200" x2="950" y2="150" stroke="#FF3A3A" stroke-width="10"/>
+    
+    <!-- Fitness Metrics -->
+    <path d="M150,450 L200,400 L250,425 L300,375 L350,390 L400,340 L450,360 L500,320" 
+          stroke="#FF3A3A" stroke-width="5" fill="none"/>
+  </g>
+</svg>

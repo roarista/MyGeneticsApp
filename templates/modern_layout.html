@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MyGenetics - Fitness Genetics Analysis{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/modern-fitness.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="{{ url_for('index') }}" class="navbar-logo">
+                <i class="fas fa-dna fa-lg text-fitness-red"></i>
+                <div class="navbar-logo-text">
+                    <span class="logo-brand">MyGenetics</span>
+                    <span class="logo-version">ALPHA</span>
+                </div>
+            </a>
+
+            <!-- Desktop Navigation -->
+            <div class="navbar-links">
+                <a href="{{ url_for('index') }}" class="nav-link">
+                    <i class="fas fa-home"></i>
+                    <span>Home</span>
+                </a>
+                <a href="{{ url_for('scan3d_page') }}" class="nav-link">
+                    <i class="fas fa-camera"></i>
+                    <span>3D Scanning</span>
+                </a>
+                <a href="{{ url_for('education') }}" class="nav-link">
+                    <i class="fas fa-book-open"></i>
+                    <span>Learn</span>
+                </a>
+            </div>
+
+            <div class="navbar-auth">
+                {% if current_user.is_authenticated %}
+                <a href="{{ url_for('profile') }}" class="button button-outline">
+                    <i class="fas fa-user"></i> Profile
+                </a>
+                <a href="{{ url_for('logout') }}" class="button button-filled">Logout</a>
+                {% else %}
+                <a href="{{ url_for('login') }}" class="button button-outline">Log In</a>
+                <a href="{{ url_for('signup') }}" class="button button-filled">Sign Up</a>
+                {% endif %}
+            </div>
+
+            <!-- Mobile Menu Button -->
+            <button id="menuButton" class="navbar-menu-button">
+                <i class="fas fa-bars fa-lg"></i>
+            </button>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobileMenu" class="mobile-menu" style="display: none;">
+            <div class="mobile-menu-items">
+                <a href="{{ url_for('index') }}" class="nav-link">
+                    <i class="fas fa-home"></i>
+                    <span>Home</span>
+                </a>
+                <a href="{{ url_for('scan3d_page') }}" class="nav-link">
+                    <i class="fas fa-camera"></i>
+                    <span>3D Scanning</span>
+                </a>
+                <a href="{{ url_for('education') }}" class="nav-link">
+                    <i class="fas fa-book-open"></i>
+                    <span>Learn</span>
+                </a>
+                <div class="flex flex-col gap-2 mt-2">
+                    {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('profile') }}" class="button button-outline w-full">
+                        <i class="fas fa-user"></i> Profile
+                    </a>
+                    <a href="{{ url_for('logout') }}" class="button button-filled w-full">Logout</a>
+                    {% else %}
+                    <a href="{{ url_for('login') }}" class="button button-outline w-full">Log In</a>
+                    <a href="{{ url_for('signup') }}" class="button button-filled w-full">Sign Up</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="min-h-screen">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <a href="{{ url_for('index') }}" class="footer-logo">
+                <i class="fas fa-dna fa-lg text-fitness-red"></i>
+                <span class="logo-brand">MyGenetics</span>
+            </a>
+            
+            <div class="footer-links">
+                <div class="footer-link-group">
+                    <h3 class="footer-link-title">Main Pages</h3>
+                    <a href="{{ url_for('index') }}" class="footer-link">Home</a>
+                    <a href="{{ url_for('scan3d_page') }}" class="footer-link">3D Scanning</a>
+                    <a href="{{ url_for('education') }}" class="footer-link">Learn</a>
+                </div>
+                
+                <div class="footer-link-group">
+                    <h3 class="footer-link-title">Account</h3>
+                    {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('profile') }}" class="footer-link">Profile</a>
+                    <a href="{{ url_for('account_settings') }}" class="footer-link">Settings</a>
+                    <a href="{{ url_for('logout') }}" class="footer-link">Logout</a>
+                    {% else %}
+                    <a href="{{ url_for('login') }}" class="footer-link">Login</a>
+                    <a href="{{ url_for('signup') }}" class="footer-link">Sign Up</a>
+                    {% endif %}
+                </div>
+                
+                <div class="footer-link-group">
+                    <h3 class="footer-link-title">Resources</h3>
+                    <a href="#" class="footer-link">Blog</a>
+                    <a href="#" class="footer-link">FAQ</a>
+                    <a href="#" class="footer-link">Documentation</a>
+                </div>
+                
+                <div class="footer-link-group">
+                    <h3 class="footer-link-title">Legal</h3>
+                    <a href="#" class="footer-link">Terms of Service</a>
+                    <a href="#" class="footer-link">Privacy Policy</a>
+                    <a href="#" class="footer-link">Cookie Policy</a>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <div class="footer-copyright">
+                    &copy; {{ now.year }} MyGenetics. All rights reserved.
+                </div>
+                
+                <div class="footer-social">
+                    <a href="#" class="social-link">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                    <a href="#" class="social-link">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="#" class="social-link">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="#" class="social-link">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu toggle
+        document.getElementById('menuButton').addEventListener('click', function() {
+            const mobileMenu = document.getElementById('mobileMenu');
+            const menuIcon = this.querySelector('i');
+            
+            if (mobileMenu.style.display === 'none') {
+                mobileMenu.style.display = 'block';
+                menuIcon.classList.remove('fa-bars');
+                menuIcon.classList.add('fa-times');
+            } else {
+                mobileMenu.style.display = 'none';
+                menuIcon.classList.remove('fa-times');
+                menuIcon.classList.add('fa-bars');
+            }
+        });
+        
+        // Get current year for copyright
+        document.querySelector('.footer-copyright').innerHTML = 
+            document.querySelector('.footer-copyright').innerHTML.replace('{{ now.year }}', new Date().getFullYear());
+    </script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

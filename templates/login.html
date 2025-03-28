@@ -71,9 +71,8 @@
 {% block scripts %}
 <script>
     function signInWithGoogle() {
-        // In a real implementation, this would use Firebase or Google OAuth
-        alert('Google Sign-In would be implemented here');
-        window.location.href = "{{ url_for('profile') }}";
+        // Redirect to Google OAuth login route
+        window.location.href = "{{ url_for('google_login') }}";
     }
     
     function signInWithApple() {
@@ -82,13 +81,11 @@
         window.location.href = "{{ url_for('profile') }}";
     }
     
-    // Add form validation
+    // Remove the form validation that prevents form submission
+    // Let the form submit normally to the server-side login handler
     document.getElementById('login-form').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        // In a real implementation, this would validate with the server
-        alert('Login successful!');
-        window.location.href = "{{ url_for('profile') }}";
+        // Form will be submitted to the server
+        // No need to prevent default or handle manually
     });
 </script>
 {% endblock %}

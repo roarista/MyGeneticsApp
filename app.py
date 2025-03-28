@@ -54,6 +54,13 @@ from utils.body_scan_3d import process_3d_scan, is_valid_3d_scan_file
 from admin import admin_bp
 app.register_blueprint(admin_bp)
 
+# Import Google auth blueprint
+try:
+    from google_auth import google_auth
+    app.register_blueprint(google_auth)
+except ImportError:
+    logger.warning("Google authentication module not available")
+
 # Configure upload settings
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 ALLOWED_3D_EXTENSIONS = {'obj', 'stl', 'ply'}
@@ -74,6 +81,11 @@ def allowed_3d_file(filename):
 def index():
     """Render the main page"""
     return render_template('index.html')
+    
+@app.route('/modern')
+def modern_index():
+    """Render the modernized UI main page"""
+    return render_template('modern_index.html')
 
 @app.route('/analyze', methods=['POST'])
 def analyze():
@@ -483,26 +495,16 @@ def login():
     
     return render_template('login.html')
 
-# Placeholder for Google OAuth implementation
+# Route to redirect to our Google auth blueprint
 @app.route('/google_login')
 def google_login():
-    """Start Google OAuth login process"""
-    # In a real implementation, this would redirect to Google OAuth
-    flash('Google login would be implemented with OAuth in production.', 'info')
-    
-    # For demo purposes, create a demo user if not exists
-    from models import User
-    demo_email = 'googleuser@example.com'
-    demo_user = User.query.filter_by(email=demo_email).first()
-    
-    if not demo_user:
-        demo_user = User(username='Google User', email=demo_email)
-        demo_user.set_password('demo_password')  # In real OAuth, we wouldn't set a password
-        db.session.add(demo_user)
-        db.session.commit()
-    
-    login_user(demo_user)
-    return redirect(url_for('profile'))
+    """Redirect to Google OAuth login process"""
+    try:
+        return redirect(url_for('google_auth.login'))
+    except Exception as e:
+        logger.error(f"Error redirecting to Google login: {str(e)}")
+        flash('Google login is currently unavailable. Please try again later or use email login.', 'warning')
+        return redirect(url_for('login'))
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():

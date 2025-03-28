@@ -1,0 +1,212 @@
+{% extends "modern_layout.html" %}
+
+{% block title %}MyGenetics - Personalized Fitness Analysis{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <h1 class="hero-title">Unlock Your Genetic Fitness Potential</h1>
+        <p class="hero-subtitle">
+            Discover your unique body type, muscle-building potential, and get personalized training recommendations based on your genetic traits.
+        </p>
+        <a href="#upload" class="button button-filled">
+            <i class="fas fa-dna"></i> Start Your Analysis
+        </a>
+    </div>
+</section>
+
+<!-- Upload Section -->
+<section id="upload" class="upload-section">
+    <div class="upload-container">
+        <h2 class="upload-title">Analyze Your Body Structure</h2>
+        <p class="upload-description">
+            Upload a photo of yourself in neutral standing position to analyze your body traits and get personalized workout recommendations.
+        </p>
+        
+        <form action="{{ url_for('analyze') }}" method="post" enctype="multipart/form-data" class="upload-form">
+            <div class="upload-dropzone" id="dropzone">
+                <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                <h3 class="text-white text-xl font-bold mb-2">Drop your image here</h3>
+                <p class="text-white mb-4">or click to browse files</p>
+                
+                <div class="mb-4">
+                    <span class="upload-format-badge">JPG</span>
+                    <span class="upload-format-badge">PNG</span>
+                    <span class="upload-format-badge">HEIC</span>
+                </div>
+                
+                <input type="file" name="file" id="file-upload" class="hidden" style="display: none;" accept="image/*" required>
+                
+                <div id="file-preview" class="hidden" style="display: none;">
+                    <div class="font-bold text-white mb-2">Selected file:</div>
+                    <div id="file-name" class="text-fitness-red"></div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div>
+                    <label for="height_cm" class="block text-white mb-2">Height (cm)</label>
+                    <input type="number" id="height_cm" name="height_cm" class="fitness-input w-full" min="100" max="250" required>
+                </div>
+                <div>
+                    <label for="weight_kg" class="block text-white mb-2">Weight (kg)</label>
+                    <input type="number" id="weight_kg" name="weight_kg" class="fitness-input w-full" min="30" max="200" required>
+                </div>
+                <div>
+                    <label for="gender" class="block text-white mb-2">Gender</label>
+                    <select id="gender" name="gender" class="fitness-input w-full fitness-select" required>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="experience_level" class="block text-white mb-2">Experience Level</label>
+                    <select id="experience_level" name="experience_level" class="fitness-input w-full fitness-select" required>
+                        <option value="beginner">Beginner (0-1 years)</option>
+                        <option value="intermediate">Intermediate (1-3 years)</option>
+                        <option value="advanced">Advanced (3+ years)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <button type="submit" class="button button-filled">
+                <i class="fas fa-dna"></i> Analyze Now
+            </button>
+        </form>
+    </div>
+</section>
+
+<!-- Benefits Section -->
+<section class="benefits-section">
+    <div class="container">
+        <h2 class="benefits-title">How MyGenetics Enhances Your Fitness Journey</h2>
+        
+        <div class="benefits-grid">
+            <div class="benefit-card">
+                <div class="benefit-icon-wrapper">
+                    <i class="fas fa-dna fa-lg"></i>
+                </div>
+                <h3 class="benefit-title">Genetic Insights</h3>
+                <p class="benefit-description">
+                    Discover your body's natural advantages and limitations based on your genetic traits, including muscle insertions and bone structure.
+                </p>
+            </div>
+            
+            <div class="benefit-card">
+                <div class="benefit-icon-wrapper">
+                    <i class="fas fa-bullseye fa-lg"></i>
+                </div>
+                <h3 class="benefit-title">Targeted Training</h3>
+                <p class="benefit-description">
+                    Get personalized workout plans that focus on your genetic strengths and help improve your weaker areas for balanced development.
+                </p>
+            </div>
+            
+            <div class="benefit-card">
+                <div class="benefit-icon-wrapper">
+                    <i class="fas fa-chart-line fa-lg"></i>
+                </div>
+                <h3 class="benefit-title">Progress Tracking</h3>
+                <p class="benefit-description">
+                    Monitor your body composition changes over time and see how your genetic potential is being realized with each training phase.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Body Analysis Section -->
+<section class="analysis-section">
+    <div class="container">
+        <h2 class="analysis-title">Our Comprehensive Analysis Process</h2>
+        <p class="analysis-subtitle">
+            Learn how our advanced AI technology analyzes your unique physical traits to create personalized fitness recommendations.
+        </p>
+        
+        <div class="analysis-cards">
+            <div class="analysis-card">
+                <div class="analysis-card-number">1</div>
+                <h3 class="analysis-card-title">Body Composition Analysis</h3>
+                <p class="analysis-card-description">
+                    Our AI analyzes your body fat percentage, muscle mass distribution, and overall body composition to establish a baseline for your fitness journey.
+                </p>
+            </div>
+            
+            <div class="analysis-card">
+                <div class="analysis-card-number">2</div>
+                <h3 class="analysis-card-title">Genetic Trait Identification</h3>
+                <p class="analysis-card-description">
+                    We identify key genetic traits like muscle insertions, bone structure, and body proportions that influence your optimal training approach.
+                </p>
+            </div>
+            
+            <div class="analysis-card">
+                <div class="analysis-card-number">3</div>
+                <h3 class="analysis-card-title">Personalized Recommendations</h3>
+                <p class="analysis-card-description">
+                    Based on your unique genetic profile, we provide tailored workout plans, nutrition advice, and training techniques to maximize your results.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // File upload preview
+    const dropzone = document.getElementById('dropzone');
+    const fileUpload = document.getElementById('file-upload');
+    const filePreview = document.getElementById('file-preview');
+    const fileName = document.getElementById('file-name');
+    
+    dropzone.addEventListener('click', () => {
+        fileUpload.click();
+    });
+    
+    dropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropzone.classList.add('border-fitness-red');
+        dropzone.style.backgroundColor = 'rgba(255, 58, 58, 0.1)';
+    });
+    
+    dropzone.addEventListener('dragleave', () => {
+        dropzone.classList.remove('border-fitness-red');
+        dropzone.style.backgroundColor = 'rgba(24, 24, 24, 0.4)';
+    });
+    
+    dropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('border-fitness-red');
+        dropzone.style.backgroundColor = 'rgba(24, 24, 24, 0.4)';
+        
+        if (e.dataTransfer.files.length) {
+            fileUpload.files = e.dataTransfer.files;
+            updateFilePreview();
+        }
+    });
+    
+    fileUpload.addEventListener('change', updateFilePreview);
+    
+    function updateFilePreview() {
+        if (fileUpload.files.length) {
+            filePreview.style.display = 'block';
+            fileName.textContent = fileUpload.files[0].name;
+        } else {
+            filePreview.style.display = 'none';
+        }
+    }
+    
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+    });
+</script>
+{% endblock %}
