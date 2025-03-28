@@ -3,15 +3,22 @@
 
 :root {
     /* Custom color variables */
-    --fitness-red: #ff3e5b;
-    --fitness-dark: #0c1116;
-    --fitness-darkgray: #1a1f24;
+    --fitness-red: #ea445b;
+    --fitness-dark: #0a0a0d;
+    --fitness-darkgray: #1a1a1d;
+    --fitness-card-bg: #141416;
     --fitness-gray: #a0a8b1;
     --fitness-light: #f5f5f7;
     --fitness-accent: #2563eb;
-    --fitness-success: #10b981;
+    --fitness-success: #27ae60;
     --fitness-warning: #f59e0b;
     --fitness-danger: #ef4444;
+    
+    /* Feature colors */
+    --benefit-green: #27ae60;
+    --benefit-blue: #3498db;
+    --benefit-yellow: #e6bc3b;
+    --benefit-red: #ea445b;
 }
 
 /* === Base Styles === */

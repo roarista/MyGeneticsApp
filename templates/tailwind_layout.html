@@ -14,6 +14,42 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
+    <!-- Inter Font -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--fitness-dark);
+        }
+        
+        .fitness-card {
+            background-color: var(--fitness-card-bg);
+        }
+        
+        .btn-primary {
+            border-radius: 0.25rem;
+            padding: 0.5rem 1.25rem;
+            font-weight: 500;
+        }
+        
+        .hero-title {
+            font-size: 4rem;
+            line-height: 1;
+            font-weight: 800;
+            letter-spacing: -0.025em;
+            margin-bottom: 1rem;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.5rem;
+            color: var(--fitness-red);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+    </style>
+    
     {% block styles %}{% endblock %}
 </head>
 <body>
@@ -29,7 +65,6 @@
                 </svg>
                 <div class="navbar-brand-text">
                     <span class="navbar-brand-title">MyGenetics</span>
-                    <span class="navbar-brand-badge">ALPHA</span>
                 </div>
             </a>
             
@@ -53,21 +88,23 @@
                     </svg>
                     <span>Learn</span>
                 </a>
+                {% if current_user.is_authenticated %}
+                <a href="{{ url_for('profile') }}" class="nav-link">
+                    <svg class="icon icon-sm">
+                        <use xlink:href="#icon-user"></use>
+                    </svg>
+                    <span>Profile</span>
+                </a>
+                {% endif %}
             </div>
             
             <!-- Desktop Authentication -->
             <div class="navbar-auth">
                 {% if current_user.is_authenticated %}
-                    <a href="{{ url_for('profile') }}" class="nav-link">
-                        <svg class="icon icon-sm">
-                            <use xlink:href="#icon-user"></use>
-                        </svg>
-                        <span>{{ current_user.username }}</span>
-                    </a>
                     <a href="{{ url_for('logout') }}" class="btn btn-outline">Logout</a>
                 {% else %}
-                    <a href="{{ url_for('login') }}" class="btn btn-outline">Log In</a>
-                    <a href="{{ url_for('signup') }}" class="btn btn-primary">Sign Up</a>
+                    <a href="{{ url_for('signup', ui='tailwind') }}" class="btn btn-primary">Sign Up</a>
+                    <a href="{{ url_for('login', ui='tailwind') }}" class="btn btn-outline">Login</a>
                 {% endif %}
             </div>
             
@@ -99,15 +136,22 @@
                 </svg>
                 <span>Learn</span>
             </a>
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('profile') }}" class="mobile-nav-link">
+                <svg class="icon icon-sm">
+                    <use xlink:href="#icon-user"></use>
+                </svg>
+                <span>Profile</span>
+            </a>
+            {% endif %}
             
             <!-- Mobile Authentication -->
             <div class="mobile-menu-buttons">
                 {% if current_user.is_authenticated %}
-                    <a href="{{ url_for('profile') }}" class="btn btn-outline btn-full">My Profile</a>
                     <a href="{{ url_for('logout') }}" class="btn btn-primary btn-full">Logout</a>
                 {% else %}
-                    <a href="{{ url_for('login') }}" class="btn btn-outline btn-full">Log In</a>
-                    <a href="{{ url_for('signup') }}" class="btn btn-primary btn-full">Sign Up</a>
+                    <a href="{{ url_for('signup', ui='tailwind') }}" class="btn btn-primary btn-full">Sign Up</a>
+                    <a href="{{ url_for('login', ui='tailwind') }}" class="btn btn-outline btn-full">Login</a>
                 {% endif %}
             </div>
         </div>
