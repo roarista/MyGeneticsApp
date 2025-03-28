@@ -80,7 +80,7 @@ def allowed_3d_file(filename):
 @app.route('/')
 def index():
     """Render the main page"""
-    return render_template('index.html')
+    return render_template('tailwind_index.html')
     
 @app.route('/modern')
 def modern_index():
@@ -498,11 +498,8 @@ def login():
         else:
             flash('Invalid email or password. Please try again.', 'danger')
     
-    # Check if we should use the tailwind template
-    if request.args.get('ui') == 'tailwind':
-        return render_template('tailwind_login.html')
-    else:
-        return render_template('login.html')
+    # Default to the Tailwind template
+    return render_template('tailwind_login.html')
 
 # Route to redirect to our Google auth blueprint
 @app.route('/google_login')
@@ -548,11 +545,8 @@ def signup():
         flash('Account created successfully!', 'success')
         return redirect(url_for('profile'))
     
-    # Check if we should use the tailwind template
-    if request.args.get('ui') == 'tailwind':
-        return render_template('tailwind_signup.html')
-    else:
-        return render_template('signup.html')
+    # Default to the Tailwind template
+    return render_template('tailwind_signup.html')
 
 @app.route('/logout')
 @login_required
