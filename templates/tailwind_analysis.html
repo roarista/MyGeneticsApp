@@ -362,6 +362,7 @@
                         <h5 class="font-bold">Macro Split</h5>
                     </div>
                     
+                    {% if recommendations.nutrition is defined and recommendations.nutrition.macros is defined %}
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-5">
                         {% for macro in recommendations.nutrition.macros %}
                             <div class="fitness-card bg-fitness-card-bg border border-gray-800 flex flex-col items-center">
@@ -377,6 +378,25 @@
                             </div>
                         {% endfor %}
                     </div>
+                    {% else %}
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-5">
+                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 flex flex-col items-center">
+                            <span class="text-xl font-bold text-red-500">40%</span>
+                            <span class="text-sm text-fitness-gray">Protein</span>
+                            <span class="text-xs text-fitness-gray mt-1">2g per kg bodyweight</span>
+                        </div>
+                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 flex flex-col items-center">
+                            <span class="text-xl font-bold text-blue-500">40%</span>
+                            <span class="text-sm text-fitness-gray">Carbs</span>
+                            <span class="text-xs text-fitness-gray mt-1">Based on activity level</span>
+                        </div>
+                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 flex flex-col items-center">
+                            <span class="text-xl font-bold text-yellow-500">20%</span>
+                            <span class="text-sm text-fitness-gray">Fat</span>
+                            <span class="text-xs text-fitness-gray mt-1">Essential for hormones</span>
+                        </div>
+                    </div>
+                    {% endif %}
                     
                     <div class="flex items-center gap-2 mb-3">
                         <svg class="icon icon-sm text-fitness-accent">
@@ -385,6 +405,7 @@
                         <h5 class="font-bold">Recommendations</h5>
                     </div>
                     
+                    {% if recommendations.nutrition is defined and recommendations.nutrition.tips is defined %}
                     <ul class="text-sm text-fitness-gray space-y-2">
                         {% for tip in recommendations.nutrition.tips %}
                             <li class="flex items-start gap-2">
@@ -395,6 +416,28 @@
                             </li>
                         {% endfor %}
                     </ul>
+                    {% else %}
+                    <ul class="text-sm text-fitness-gray space-y-2">
+                        <li class="flex items-start gap-2">
+                            <svg class="icon icon-xs text-fitness-red mt-1">
+                                <use xlink:href="#icon-chevron-right"></use>
+                            </svg>
+                            <span>Prioritize protein intake for muscle recovery and growth.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <svg class="icon icon-xs text-fitness-red mt-1">
+                                <use xlink:href="#icon-chevron-right"></use>
+                            </svg>
+                            <span>Include complex carbohydrates around workouts for optimal energy.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <svg class="icon icon-xs text-fitness-red mt-1">
+                                <use xlink:href="#icon-chevron-right"></use>
+                            </svg>
+                            <span>Don't neglect healthy fats - they're essential for hormone production.</span>
+                        </li>
+                    </ul>
+                    {% endif %}
                 </div>
             </div>
             

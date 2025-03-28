@@ -25,7 +25,21 @@ def generate_recommendations(traits, experience_level='beginner'):
             'training_split': {},
             'nutrition_tips': [],
             'calorie_recommendations': {},
-            'workout_plan': {}
+            'workout_plan': {},
+            'nutrition': {
+                'macros': [
+                    {'name': 'Protein', 'percentage': 40, 'grams': '2g per kg'},
+                    {'name': 'Carbs', 'percentage': 40, 'grams': 'Based on activity'},
+                    {'name': 'Fat', 'percentage': 20, 'grams': '0.5g per kg'}
+                ],
+                'tips': [
+                    'Prioritize protein intake for muscle recovery and growth.',
+                    'Include complex carbohydrates around workouts for optimal energy.',
+                    'Don\'t neglect healthy fats - they\'re essential for hormone production.',
+                    'Stay hydrated throughout the day to optimize performance and recovery.',
+                    'Consider timing nutrition around workouts for best results.'
+                ]
+            }
         }
         
         # Add strengths based on traits
@@ -154,20 +168,76 @@ def generate_recommendations(traits, experience_level='beginner'):
             if goal == 'lose_fat':
                 calories = recommendations['calorie_recommendations']['target']
                 protein = recommendations['calorie_recommendations']['protein_g']
+                fat = recommendations['calorie_recommendations']['fat_g']
+                carbs = recommendations['calorie_recommendations']['carbs_g']
                 recommendations['nutrition_tips'].append(f"Aim for {calories} calories per day with at least {protein}g of protein to preserve muscle")
                 recommendations['nutrition_tips'].append("Focus on high-volume, low-calorie foods like vegetables and lean proteins to stay full")
+                
+                # Update nutrition data with calculated values
+                recommendations['nutrition']['macros'] = [
+                    {'name': 'Protein', 'percentage': 40, 'grams': f"{protein}g ({round(protein*4/calories*100)}%)"},
+                    {'name': 'Carbs', 'percentage': 30, 'grams': f"{carbs}g ({round(carbs*4/calories*100)}%)"},
+                    {'name': 'Fat', 'percentage': 30, 'grams': f"{fat}g ({round(fat*9/calories*100)}%)"}
+                ]
+                recommendations['nutrition']['tips'] = [
+                    f"Daily calorie target: {calories} calories for fat loss.",
+                    f"Protein goal: {protein}g daily to preserve muscle mass.",
+                    "Prioritize protein and fiber-rich foods to stay fuller longer.",
+                    "Eat vegetables with every meal to increase volume without calories.",
+                    "Time carbohydrates around workouts for better performance."
+                ]
+                
             elif goal == 'gain_muscle':
                 calories = recommendations['calorie_recommendations']['target']
                 protein = recommendations['calorie_recommendations']['protein_g']
                 carbs = recommendations['calorie_recommendations']['carbs_g']
+                fat = recommendations['calorie_recommendations']['fat_g']
                 recommendations['nutrition_tips'].append(f"Consume {calories} calories daily with {protein}g protein and {carbs}g carbs to support growth")
                 recommendations['nutrition_tips'].append("Prioritize post-workout nutrition with protein and fast-digesting carbs")
+                
+                # Update nutrition data with calculated values
+                recommendations['nutrition']['macros'] = [
+                    {'name': 'Protein', 'percentage': 30, 'grams': f"{protein}g ({round(protein*4/calories*100)}%)"},
+                    {'name': 'Carbs', 'percentage': 50, 'grams': f"{carbs}g ({round(carbs*4/calories*100)}%)"},
+                    {'name': 'Fat', 'percentage': 20, 'grams': f"{fat}g ({round(fat*9/calories*100)}%)"}
+                ]
+                recommendations['nutrition']['tips'] = [
+                    f"Daily calorie target: {calories} calories to support muscle growth.",
+                    f"Protein goal: {protein}g daily for muscle repair and growth.",
+                    f"Consume {carbs}g of carbs daily, prioritizing around workout times.",
+                    "Eat calorie-dense foods if struggling to meet calorie targets.",
+                    "Consider adding a post-workout shake with protein and fast-digesting carbs."
+                ]
+                
             elif goal == 'recomp':
                 train_cals = recommendations['calorie_recommendations']['training_day']
                 rest_cals = recommendations['calorie_recommendations']['rest_day']
                 protein = recommendations['calorie_recommendations']['protein_g']
+                fat_train = recommendations['calorie_recommendations']['fat_training_day']
+                fat_rest = recommendations['calorie_recommendations']['fat_rest_day']
+                carbs_train = recommendations['calorie_recommendations']['carbs_training_day']
+                carbs_rest = recommendations['calorie_recommendations']['carbs_rest_day']
                 recommendations['nutrition_tips'].append(f"Training days: {train_cals} calories; Rest days: {rest_cals} calories; Protein: {protein}g daily")
                 recommendations['nutrition_tips'].append("Time your carbohydrate intake around training for optimal performance and recovery")
+                
+                # Calculate percentages for display
+                protein_pct_train = round(protein * 4 / train_cals * 100)
+                carbs_pct_train = round(carbs_train * 4 / train_cals * 100)
+                fat_pct_train = round(fat_train * 9 / train_cals * 100)
+                
+                # Update nutrition data with calculated values
+                recommendations['nutrition']['macros'] = [
+                    {'name': 'Protein', 'percentage': protein_pct_train, 'grams': f"{protein}g (same daily)"},
+                    {'name': 'Carbs', 'percentage': carbs_pct_train, 'grams': f"{carbs_train}g (training) / {carbs_rest}g (rest)"},
+                    {'name': 'Fat', 'percentage': fat_pct_train, 'grams': f"{fat_train}g (training) / {fat_rest}g (rest)"}
+                ]
+                recommendations['nutrition']['tips'] = [
+                    f"Training days: {train_cals} calories with higher carbs ({carbs_train}g).",
+                    f"Rest days: {rest_cals} calories with lower carbs ({carbs_rest}g).",
+                    f"Consistent protein: {protein}g every day for muscle maintenance.",
+                    "Focus carbohydrate intake around training sessions for better performance.",
+                    "Adjust fat intake between training days and rest days while keeping protein fixed."
+                ]
         
         return recommendations
         
@@ -178,7 +248,21 @@ def generate_recommendations(traits, experience_level='beginner'):
             'focus_areas': ['Unable to determine focus areas'],
             'exercise_recommendations': ['Basic full-body training recommended'],
             'training_split': get_default_training_split(experience_level),
-            'nutrition_tips': ['Maintain balanced nutrition with adequate protein']
+            'nutrition_tips': ['Maintain balanced nutrition with adequate protein'],
+            'nutrition': {
+                'macros': [
+                    {'name': 'Protein', 'percentage': 40, 'grams': '2g per kg'},
+                    {'name': 'Carbs', 'percentage': 40, 'grams': 'Based on activity'},
+                    {'name': 'Fat', 'percentage': 20, 'grams': '0.5g per kg'}
+                ],
+                'tips': [
+                    'Prioritize protein intake for muscle recovery and growth.',
+                    'Include complex carbohydrates around workouts for optimal energy.',
+                    'Don\'t neglect healthy fats - they\'re essential for hormone production.',
+                    'Stay hydrated throughout the day to optimize performance and recovery.',
+                    'Consider timing nutrition around workouts for best results.'
+                ]
+            }
         }
 
 def get_strength_for_trait(trait, rating):
@@ -875,15 +959,37 @@ def calculate_calorie_recommendations(weight_kg, height_cm, body_fat, activity_l
         rest_day_calories = maintenance_calories * 0.9
         target_calories = maintenance_calories  # Average
         protein_ratio = 0.3
-        carb_ratio = 0.4
+        carb_ratio_training = 0.45  # Higher carbs on training days
+        carb_ratio_rest = 0.35      # Lower carbs on rest days
         fat_ratio = 0.3
+        
+        # Calculate protein needs (consistent across all days)
+        protein_g = round(target_calories * protein_ratio / 4)  # 4 calories per gram
+        
+        # Calculate carbs (different for training vs rest days)
+        carbs_training_day = round(training_day_calories * carb_ratio_training / 4)
+        carbs_rest_day = round(rest_day_calories * carb_ratio_rest / 4)
+        
+        # Calculate fat (different for training vs rest days)
+        fat_training_day = round(training_day_calories * (1 - protein_ratio - carb_ratio_training) / 9)
+        fat_rest_day = round(rest_day_calories * (1 - protein_ratio - carb_ratio_rest) / 9)
+        
+        # For average, use target calories
+        fat_g = round(target_calories * fat_ratio / 9)
+        carbs_g = round(target_calories * carb_ratio_training / 4)  # Use training day carb ratio for overall
+        
         return {
             'maintenance': round(maintenance_calories),
+            'target': round(target_calories),  # Average target
             'training_day': round(training_day_calories),
             'rest_day': round(rest_day_calories),
-            'protein_g': round(target_calories * protein_ratio / 4),  # 4 calories per gram
-            'carbs_g': round(target_calories * carb_ratio / 4),       # 4 calories per gram
-            'fat_g': round(target_calories * fat_ratio / 9)           # 9 calories per gram
+            'protein_g': protein_g,
+            'carbs_g': carbs_g,
+            'fat_g': fat_g,
+            'carbs_training_day': carbs_training_day,
+            'carbs_rest_day': carbs_rest_day,
+            'fat_training_day': fat_training_day,
+            'fat_rest_day': fat_rest_day
         }
     else:  # maintain
         target_calories = maintenance_calories
@@ -891,10 +997,22 @@ def calculate_calorie_recommendations(weight_kg, height_cm, body_fat, activity_l
         carb_ratio = 0.4
         fat_ratio = 0.3
     
+    # Calculate macros
+    protein_g = round(target_calories * protein_ratio / 4)  # 4 calories per gram
+    carbs_g = round(target_calories * carb_ratio / 4)       # 4 calories per gram
+    fat_g = round(target_calories * fat_ratio / 9)           # 9 calories per gram
+    
     return {
         'maintenance': round(maintenance_calories),
         'target': round(target_calories),
-        'protein_g': round(target_calories * protein_ratio / 4),  # 4 calories per gram
-        'carbs_g': round(target_calories * carb_ratio / 4),       # 4 calories per gram
-        'fat_g': round(target_calories * fat_ratio / 9)           # 9 calories per gram
+        'protein_g': protein_g,
+        'carbs_g': carbs_g,
+        'fat_g': fat_g,
+        # Include training/rest day values as the same if not a recomp program
+        'training_day': round(target_calories),
+        'rest_day': round(target_calories),
+        'carbs_training_day': carbs_g,
+        'carbs_rest_day': carbs_g,
+        'fat_training_day': fat_g,
+        'fat_rest_day': fat_g
     }
