@@ -587,7 +587,8 @@ def profile():
         'analyses': formatted_analyses
     }
     
-    return render_template('profile.html', user=user_data)
+    # Use the Tailwind template version
+    return render_template('tailwind_profile.html', user=user_data)
 
 @app.route('/update_body_info', methods=['POST'])
 @login_required
@@ -631,8 +632,9 @@ def account_settings():
         db.session.add(privacy_settings)
         db.session.commit()
     
+    # Use the Tailwind template version
     return render_template(
-        'account_settings.html',
+        'tailwind_account_settings.html',
         user=current_user,
         notification_settings=notification_settings,
         privacy_settings=privacy_settings
