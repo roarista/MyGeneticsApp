@@ -422,27 +422,40 @@ def get_traits_data(analysis_id):
     
     # First, add the primary genetic structure traits
     for trait in primary_traits:
-        if trait in result['traits'] and isinstance(result['traits'][trait], dict) and 'rating' in result['traits'][trait]:
+        if trait in result['traits']:
+            trait_data = result['traits'][trait]
             # Format trait name for display
             display_name = ' '.join(word.capitalize() for word in trait.split('_'))
             chart_data['labels'].append(display_name)
             
+            # Handle both dictionary trait data with 'rating' key and string trait data that directly contains the rating
+            if isinstance(trait_data, dict) and 'rating' in trait_data:
+                # Dictionary trait data
+                rating = trait_data['rating']
+            elif isinstance(trait_data, str) and trait_data in color_map:
+                # String trait data that directly contains the rating
+                rating = trait_data
+            else:
+                # Default case
+                rating = 'informational'
+            
             # Determine numerical value and color
-            trait_data = result['traits'][trait]
             numeric_value = {
                 'excellent': 90,
                 'good': 75,
                 'average': 50,
                 'below_average': 25,
                 'informational': 50  # default for informational ratings
-            }.get(trait_data['rating'], 50)
+            }.get(rating, 50)
             
             chart_data['values'].append(numeric_value)
-            chart_data['colors'].append(color_map.get(trait_data['rating'], 'rgba(108, 117, 125, 0.7)'))
+            chart_data['colors'].append(color_map.get(rating, 'rgba(108, 117, 125, 0.7)'))
     
     # Then, add body composition metrics if they exist
     for trait in body_comp_traits:
-        if trait in result['traits'] and isinstance(result['traits'][trait], dict) and 'rating' in result['traits'][trait]:
+        if trait in result['traits']:
+            trait_data = result['traits'][trait]
+            
             # Format trait name for display
             if trait == 'bmi':
                 display_name = 'BMI'
@@ -455,18 +468,28 @@ def get_traits_data(analysis_id):
             
             chart_data['labels'].append(display_name)
             
-            # Determine numerical value and color
-            trait_data = result['traits'][trait]
-            if trait_data['rating'] != 'informational':
+            # Handle both dictionary trait data with 'rating' key and string trait data
+            if isinstance(trait_data, dict) and 'rating' in trait_data:
+                # Dictionary trait data
+                rating = trait_data['rating']
+            elif isinstance(trait_data, str) and trait_data in color_map:
+                # String trait data that directly contains the rating
+                rating = trait_data
+            else:
+                # Default case
+                rating = 'informational'
+            
+            # Process the value based on the rating
+            if rating != 'informational':
                 numeric_value = {
                     'excellent': 90,
                     'good': 75,
                     'average': 50,
                     'below_average': 25
-                }.get(trait_data['rating'], 50)
+                }.get(rating, 50)
                 
                 chart_data['values'].append(numeric_value)
-                chart_data['colors'].append(color_map.get(trait_data['rating'], 'rgba(108, 117, 125, 0.7)'))
+                chart_data['colors'].append(color_map.get(rating, 'rgba(108, 117, 125, 0.7)'))
             else:
                 # For informational values, use a neutral value
                 chart_data['values'].append(50)
@@ -733,7 +756,12 @@ def nutrition(analysis_id):
     }
     
     # Recommended foods based on body type and goals
-    body_type = result['traits'].get('body_type', {}).get('value', 'balanced')
+    # Handle both string body type and dict with 'value' key
+    body_type_data = result['traits'].get('body_type', 'balanced')
+    if isinstance(body_type_data, dict):
+        body_type = body_type_data.get('value', 'balanced')
+    else:
+        body_type = body_type_data
     
     food_recommendations = {
         'protein_sources': [
@@ -819,12 +847,20 @@ def workout(analysis_id):
     weak_points = []
     for trait_name, trait_data in result['traits'].items():
         if isinstance(trait_data, dict) and 'rating' in trait_data:
+            # Handle dictionary trait data
             if trait_data['rating'] in ['below_average', 'average']:
                 weak_points.append({
                     'name': trait_name.replace('_', ' ').title(),
                     'rating': trait_data['rating'],
                     'value': trait_data.get('value', 0)
                 })
+        elif isinstance(trait_data, str) and trait_data in ['below_average', 'average']:
+            # Handle string trait data that directly contains the rating
+            weak_points.append({
+                'name': trait_name.replace('_', ' ').title(),
+                'rating': trait_data,
+                'value': 0  # Default value since we don't have one
+            })
     
     # Get training split from recommendations
     training_split = result['recommendations'].get('training_split', {})
