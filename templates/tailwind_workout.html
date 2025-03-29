@@ -1,5 +1,9 @@
 {% extends "tailwind_layout.html" %}
 
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/workout-tabs.css') }}">
+{% endblock %}
+
 {% block content %}
 <div class="mb-6">
     <div class="fitness-card">
@@ -196,56 +200,159 @@
                 <h3 class="text-xl font-bold">Detailed Workout Plans</h3>
             </div>
             
-            <div class="mb-4">
-                <div x-data="{ activeTab: 'Monday' }" class="mb-6">
-                    <!-- Tabs -->
-                    <div class="flex flex-wrap gap-2 mb-4">
-                        {% for day, workout in detailed_workouts.items() %}
-                        <button 
-                            @click="activeTab = '{{ day }}'" 
-                            :class="activeTab === '{{ day }}' ? 'fitness-button-primary' : 'fitness-button-secondary'"
-                            class="px-3 py-1 text-sm">
-                            {{ day }}
-                        </button>
+            <div x-data="{ activeDay: 'Monday' }" class="mb-6">
+                <!-- Day Tabs -->
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <button 
+                        @click="activeDay = 'Monday'" 
+                        :class="activeDay === 'Monday' ? 'bg-white text-black' : ''"
+                        class="day-tab">
+                        Monday
+                    </button>
+                    <button 
+                        @click="activeDay = 'Tuesday'" 
+                        :class="activeDay === 'Tuesday' ? 'bg-white text-black' : ''"
+                        class="day-tab">
+                        Tuesday
+                    </button>
+                    <button 
+                        @click="activeDay = 'Wednesday'" 
+                        :class="activeDay === 'Wednesday' ? 'bg-white text-black' : ''"
+                        class="day-tab">
+                        Wednesday
+                    </button>
+                    <button 
+                        @click="activeDay = 'Thursday'" 
+                        :class="activeDay === 'Thursday' ? 'bg-white text-black' : ''"
+                        class="day-tab">
+                        Thursday
+                    </button>
+                    <button 
+                        @click="activeDay = 'Friday'" 
+                        :class="activeDay === 'Friday' ? 'bg-white text-black' : ''"
+                        class="day-tab">
+                        Friday
+                    </button>
+                    <button 
+                        @click="activeDay = 'Saturday'" 
+                        :class="activeDay === 'Saturday' ? 'bg-white text-black' : ''"
+                        class="day-tab">
+                        Saturday
+                    </button>
+                    <button 
+                        @click="activeDay = 'Sunday'" 
+                        :class="activeDay === 'Sunday' ? 'bg-white text-black' : ''"
+                        class="day-tab">
+                        Sunday
+                    </button>
+                </div>
+                
+                <!-- Monday Content -->
+                <div x-show="activeDay === 'Monday'" class="fitness-card bg-fitness-darkgray tab-content-fade">
+                    <h4 class="font-bold text-white mb-3">Monday: Push (Chest, Shoulders, Triceps)</h4>
+                    <p class="text-sm text-fitness-gray mb-3">Complete all exercises with proper form. Rest 1-2 minutes between sets for compound movements, 30-60 seconds for isolation exercises.</p>
+                    
+                    <div class="space-y-3">
+                        {% for exercise in detailed_workouts.get('Monday', {}).get('exercises', []) %}
+                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <span class="font-medium text-white">{{ exercise.name }}</span>
+                                    <div class="text-xs text-fitness-gray flex gap-4 mt-2">
+                                        <span>{{ exercise.sets }} sets</span>
+                                        <span>{{ exercise.reps }}</span>
+                                    </div>
+                                    <p class="text-sm text-fitness-gray mt-1">{{ exercise.focus }}</p>
+                                </div>
+                                <span class="text-xs px-2 py-1 rounded-full bg-fitness-accent bg-opacity-20 text-fitness-accent">Push</span>
+                            </div>
+                        </div>
                         {% endfor %}
                     </div>
+                </div>
+                
+                <!-- Wednesday Content -->
+                <div x-show="activeDay === 'Wednesday'" class="fitness-card bg-fitness-darkgray tab-content-fade">
+                    <h4 class="font-bold text-white mb-3">Wednesday: Pull (Back, Biceps)</h4>
+                    <p class="text-sm text-fitness-gray mb-3">Complete all exercises with proper form. Rest 1-2 minutes between sets for compound movements, 30-60 seconds for isolation exercises.</p>
                     
-                    <!-- Tab Content -->
-                    {% for day, workout in detailed_workouts.items() %}
-                    <div x-show="activeTab === '{{ day }}'" class="fitness-card bg-fitness-darkgray">
-                        <h4 class="font-bold text-fitness-accent mb-3">{{ day }}: {{ workout.focus }}</h4>
-                        
-                        {% if 'Rest' in workout.focus %}
-                        <p class="text-sm text-fitness-gray mb-3">Rest day with optional light activity and mobility work.</p>
-                        {% else %}
-                        <p class="text-sm text-fitness-gray mb-3">Complete all exercises with proper form. Rest 1-2 minutes between sets for compound movements, 30-60 seconds for isolation exercises.</p>
-                        {% endif %}
-                        
-                        <div class="space-y-3">
-                            {% for exercise in workout.exercises %}
-                            <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
-                                <div class="flex items-start justify-between">
-                                    <div>
-                                        <span class="font-medium text-white">{{ exercise.name }}</span>
-                                        <div class="text-xs text-fitness-gray flex gap-4 mt-2">
-                                            <span>{{ exercise.sets }} sets</span>
-                                            <span>{{ exercise.reps }}</span>
-                                        </div>
-                                        <p class="text-sm text-fitness-gray mt-1">{{ exercise.focus }}</p>
+                    <div class="space-y-3">
+                        {% for exercise in detailed_workouts.get('Wednesday', {}).get('exercises', []) %}
+                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <span class="font-medium text-white">{{ exercise.name }}</span>
+                                    <div class="text-xs text-fitness-gray flex gap-4 mt-2">
+                                        <span>{{ exercise.sets }} sets</span>
+                                        <span>{{ exercise.reps }}</span>
                                     </div>
-                                    <span class="text-xs px-2 py-1 rounded-full bg-fitness-accent bg-opacity-20 text-fitness-accent">
-                                        {% if 'Push' in workout.focus %}Push
-                                        {% elif 'Pull' in workout.focus %}Pull
-                                        {% elif 'Legs' in workout.focus %}Legs
-                                        {% else %}Active Rest
-                                        {% endif %}
-                                    </span>
+                                    <p class="text-sm text-fitness-gray mt-1">{{ exercise.focus }}</p>
                                 </div>
+                                <span class="text-xs px-2 py-1 rounded-full bg-fitness-accent bg-opacity-20 text-fitness-accent">Pull</span>
                             </div>
-                            {% endfor %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <!-- Friday Content -->
+                <div x-show="activeDay === 'Friday'" class="fitness-card bg-fitness-darkgray tab-content-fade">
+                    <h4 class="font-bold text-white mb-3">Friday: Legs (Quads, Hamstrings, Calves)</h4>
+                    <p class="text-sm text-fitness-gray mb-3">Complete all exercises with proper form. Rest 1-2 minutes between sets for compound movements, 30-60 seconds for isolation exercises.</p>
+                    
+                    <div class="space-y-3">
+                        {% for exercise in detailed_workouts.get('Friday', {}).get('exercises', []) %}
+                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <span class="font-medium text-white">{{ exercise.name }}</span>
+                                    <div class="text-xs text-fitness-gray flex gap-4 mt-2">
+                                        <span>{{ exercise.sets }} sets</span>
+                                        <span>{{ exercise.reps }}</span>
+                                    </div>
+                                    <p class="text-sm text-fitness-gray mt-1">{{ exercise.focus }}</p>
+                                </div>
+                                <span class="text-xs px-2 py-1 rounded-full bg-fitness-accent bg-opacity-20 text-fitness-accent">Legs</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <!-- Rest Days Content -->
+                <div x-show="activeDay === 'Tuesday' || activeDay === 'Thursday' || activeDay === 'Saturday' || activeDay === 'Sunday'" class="fitness-card bg-fitness-darkgray tab-content-fade">
+                    <h4 class="font-bold text-white mb-3" x-text="activeDay + ': Rest Day'"></h4>
+                    <p class="text-sm text-fitness-gray mb-3">Focus on recovery and mobility work. Consider light activities such as:</p>
+                    
+                    <div class="space-y-3">
+                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <span class="font-medium text-white">Walking (30-45 minutes)</span>
+                                    <p class="text-sm text-fitness-gray mt-1">Low-intensity steady state cardio for recovery</p>
+                                </div>
+                                <span class="text-xs px-2 py-1 rounded-full bg-green-500 bg-opacity-20 text-green-500">Active Rest</span>
+                            </div>
+                        </div>
+                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <span class="font-medium text-white">Stretching (10-15 minutes)</span>
+                                    <p class="text-sm text-fitness-gray mt-1">Focus on muscle groups worked in previous days</p>
+                                </div>
+                                <span class="text-xs px-2 py-1 rounded-full bg-green-500 bg-opacity-20 text-green-500">Active Rest</span>
+                            </div>
+                        </div>
+                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <span class="font-medium text-white">Foam Rolling</span>
+                                    <p class="text-sm text-fitness-gray mt-1">Self-myofascial release for tight muscles</p>
+                                </div>
+                                <span class="text-xs px-2 py-1 rounded-full bg-green-500 bg-opacity-20 text-green-500">Active Rest</span>
+                            </div>
                         </div>
                     </div>
-                    {% endfor %}
                 </div>
             </div>
         </div>
