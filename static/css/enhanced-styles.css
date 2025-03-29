@@ -41,13 +41,14 @@ body::before {
 }
 
 .hero-title {
-  font-size: 3rem;
+  font-size: 4.5rem;
   font-weight: 800;
   text-transform: uppercase;
   color: var(--text-light);
   letter-spacing: 2px;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
   line-height: 1.1;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
 .hero-accent {
@@ -59,6 +60,8 @@ body::before {
   color: var(--accent-red);
   position: relative;
   display: inline-block;
+  font-size: 5rem;
+  letter-spacing: 3px;
 }
 
 /* Button Enhancements */
@@ -264,6 +267,21 @@ body::before {
 /* Responsive adjustments */
 @media (min-width: 768px) {
   .hero-title {
+    font-size: 5.5rem;
+  }
+  
+  .genetic-title {
+    font-size: 6rem;
+  }
+}
+
+/* For smaller screens */
+@media (max-width: 767px) {
+  .hero-title {
+    font-size: 3.5rem;
+  }
+  
+  .genetic-title {
     font-size: 4rem;
   }
 }
