@@ -11,12 +11,24 @@
             <h1 class="hero-title">DISCOVER YOUR<br><span class="genetic-title">GENETIC POTENTIAL</span></h1>
             <p class="text-xl mb-8 max-w-2xl">Optimize your fitness routine based on your unique body structure. Upload a photo to analyze your genetic traits and get personalized workout recommendations.</p>
             
-            <div class="flex flex-col md:flex-row gap-4 mt-6">
+            <div class="flex flex-row gap-4 mt-6">
                 <a href="#start-analysis" class="btn btn-primary">
+                    <svg class="icon icon-sm mr-2">
+                        <use xlink:href="#icon-upload-cloud"></use>
+                    </svg>
                     Upload Photo
                 </a>
+                <a href="{{ url_for('scan3d_page') }}" class="btn btn-accent">
+                    <svg class="icon icon-sm mr-2">
+                        <use xlink:href="#icon-camera"></use>
+                    </svg>
+                    3D Scanning
+                </a>
                 <a href="{{ url_for('education') }}" class="btn btn-outline">
-                    Learn More
+                    <svg class="icon icon-sm mr-2">
+                        <use xlink:href="#icon-book-open"></use>
+                    </svg>
+                    Learn
                 </a>
             </div>
         </div>
@@ -266,9 +278,25 @@
         <h2 class="text-3xl font-bold mb-4">Ready to Unlock Your Potential?</h2>
         <p class="text-xl mb-6">Join thousands of others who have optimized their fitness journey with MyGenetics</p>
         
-        <div class="flex flex-col md:flex-row justify-center gap-4">
-            <a href="#start-analysis" class="btn btn-primary">Start Your Analysis</a>
-            <a href="{{ url_for('education') }}" class="btn btn-outline">Learn More</a>
+        <div class="flex flex-row justify-center gap-4">
+            <a href="#start-analysis" class="btn btn-primary">
+                <svg class="icon icon-sm mr-2">
+                    <use xlink:href="#icon-upload-cloud"></use>
+                </svg>
+                Start Analysis
+            </a>
+            <a href="{{ url_for('scan3d_page') }}" class="btn btn-accent">
+                <svg class="icon icon-sm mr-2">
+                    <use xlink:href="#icon-camera"></use>
+                </svg>
+                3D Scanning
+            </a>
+            <a href="{{ url_for('education') }}" class="btn btn-outline">
+                <svg class="icon icon-sm mr-2">
+                    <use xlink:href="#icon-book-open"></use>
+                </svg>
+                Learn
+            </a>
         </div>
     </div>
 </section>
