@@ -206,7 +206,7 @@
                         </tr>
                         <tr>
                             <td class="py-3 text-sm font-medium">Sunday</td>
-                            <td class="py-3 text-sm text-fitness-gray">Rest Day</td>
+                            <td class="py-3 text-sm text-fitness-gray">Legs 2 (Glutes, Hamstrings, Calves)</td>
                         </tr>
                     </tbody>
                 </table>
@@ -525,37 +525,88 @@
                     </div>
                 </div>
                 
-                <!-- Sunday Content - Rest Day -->
+                <!-- Sunday Content - Legs Day 2 -->
                 <div x-show="activeDay === 'Sunday'" class="fitness-card bg-fitness-darkgray tab-content-fade">
-                    <h4 class="font-bold text-white mb-3">Sunday: Rest Day</h4>
-                    <p class="text-sm text-fitness-gray mb-3">Full recovery day. Focus on sleep, nutrition, and light mobility work:</p>
+                    <h4 class="font-bold text-white mb-3">Sunday: Legs 2 (Glutes, Hamstrings, Calves)</h4>
+                    <p class="text-sm text-fitness-gray mb-3">Second leg day of the week with focus on posterior chain and calves. Different exercise variations for complete leg development.</p>
                     
                     <div class="space-y-3">
                         <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
                             <div class="flex items-start justify-between">
                                 <div>
-                                    <span class="font-medium text-white">Complete Rest</span>
-                                    <p class="text-sm text-fitness-gray mt-1">Allow your body to fully recover and rebuild muscle tissue</p>
+                                    <span class="font-medium text-white">Romanian Deadlifts</span>
+                                    <div class="text-xs text-fitness-gray flex gap-4 mt-2">
+                                        <span>4 sets</span>
+                                        <span>8-10 reps</span>
+                                    </div>
+                                    <p class="text-sm text-fitness-gray mt-1">Hamstring and posterior chain development</p>
                                 </div>
-                                <span class="text-xs px-2 py-1 rounded-full bg-green-500 bg-opacity-20 text-green-500">Recovery</span>
+                                <span class="text-xs px-2 py-1 rounded-full bg-fitness-accent bg-opacity-20 text-fitness-accent">Legs</span>
                             </div>
                         </div>
                         <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
                             <div class="flex items-start justify-between">
                                 <div>
-                                    <span class="font-medium text-white">Light Mobility</span>
-                                    <p class="text-sm text-fitness-gray mt-1">Focus on joint mobility and flexibility</p>
+                                    <span class="font-medium text-white">Hip Thrusts</span>
+                                    <div class="text-xs text-fitness-gray flex gap-4 mt-2">
+                                        <span>3 sets</span>
+                                        <span>10-12 reps</span>
+                                    </div>
+                                    <p class="text-sm text-fitness-gray mt-1">Glute activation and strength</p>
                                 </div>
-                                <span class="text-xs px-2 py-1 rounded-full bg-green-500 bg-opacity-20 text-green-500">Recovery</span>
+                                <span class="text-xs px-2 py-1 rounded-full bg-fitness-accent bg-opacity-20 text-fitness-accent">Legs</span>
                             </div>
                         </div>
                         <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
                             <div class="flex items-start justify-between">
                                 <div>
-                                    <span class="font-medium text-white">Plan Next Week</span>
-                                    <p class="text-sm text-fitness-gray mt-1">Review progress and set goals for the coming week</p>
+                                    <span class="font-medium text-white">Leg Curls</span>
+                                    <div class="text-xs text-fitness-gray flex gap-4 mt-2">
+                                        <span>3 sets</span>
+                                        <span>12-15 reps</span>
+                                    </div>
+                                    <p class="text-sm text-fitness-gray mt-1">Hamstring isolation</p>
                                 </div>
-                                <span class="text-xs px-2 py-1 rounded-full bg-green-500 bg-opacity-20 text-green-500">Planning</span>
+                                <span class="text-xs px-2 py-1 rounded-full bg-fitness-accent bg-opacity-20 text-fitness-accent">Legs</span>
+                            </div>
+                        </div>
+                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <span class="font-medium text-white">Bulgarian Split Squats</span>
+                                    <div class="text-xs text-fitness-gray flex gap-4 mt-2">
+                                        <span>3 sets</span>
+                                        <span>10-12 reps per leg</span>
+                                    </div>
+                                    <p class="text-sm text-fitness-gray mt-1">Unilateral leg development and balance</p>
+                                </div>
+                                <span class="text-xs px-2 py-1 rounded-full bg-fitness-accent bg-opacity-20 text-fitness-accent">Legs</span>
+                            </div>
+                        </div>
+                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <span class="font-medium text-white">Standing Calf Raises</span>
+                                    <div class="text-xs text-fitness-gray flex gap-4 mt-2">
+                                        <span>4 sets</span>
+                                        <span>15-20 reps</span>
+                                    </div>
+                                    <p class="text-sm text-fitness-gray mt-1">Gastrocnemius development</p>
+                                </div>
+                                <span class="text-xs px-2 py-1 rounded-full bg-fitness-accent bg-opacity-20 text-fitness-accent">Legs</span>
+                            </div>
+                        </div>
+                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <span class="font-medium text-white">Seated Calf Raises</span>
+                                    <div class="text-xs text-fitness-gray flex gap-4 mt-2">
+                                        <span>3 sets</span>
+                                        <span>15-20 reps</span>
+                                    </div>
+                                    <p class="text-sm text-fitness-gray mt-1">Soleus development</p>
+                                </div>
+                                <span class="text-xs px-2 py-1 rounded-full bg-fitness-accent bg-opacity-20 text-fitness-accent">Legs</span>
                             </div>
                         </div>
                     </div>
