@@ -8,7 +8,7 @@
     <div class="max-w-5xl mx-auto">
         <div class="flex flex-col mb-10">
             <div class="hero-subtitle">GENETIC FITNESS ANALYSIS</div>
-            <h1 class="hero-title">DISCOVER YOUR<br><span class="text-fitness-red">GENETIC POTENTIAL</span></h1>
+            <h1 class="hero-title">DISCOVER YOUR<br><span class="genetic-title">GENETIC POTENTIAL</span></h1>
             <p class="text-xl mb-8 max-w-2xl">Optimize your fitness routine based on your unique body structure. Upload a photo to analyze your genetic traits and get personalized workout recommendations.</p>
             
             <div class="flex flex-col md:flex-row gap-4 mt-6">
@@ -26,29 +26,51 @@
 <!-- How It Works Section -->
 <section class="py-10">
     <div class="max-w-5xl mx-auto">
-        <h2 class="text-3xl font-bold mb-8">How It Works</h2>
+        <div class="section-header">
+            <h2 class="text-3xl font-bold">How It Works</h2>
+        </div>
         
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
             <!-- Step 1 -->
-            <div class="fitness-card text-center p-6">
+            <div class="fitness-card text-center p-6 hover:transform hover:scale-105 transition-all duration-300">
+                <div class="feature-icon feature-icon-red mx-auto">
+                    <svg class="icon icon-lg">
+                        <use xlink:href="#icon-upload"></use>
+                    </svg>
+                </div>
                 <h3 class="text-xl font-bold mb-3">Upload Photo</h3>
                 <p class="text-gray">Upload a full-body photo in neutral standing position</p>
             </div>
             
             <!-- Step 2 -->
-            <div class="fitness-card text-center p-6">
+            <div class="fitness-card text-center p-6 hover:transform hover:scale-105 transition-all duration-300">
+                <div class="feature-icon feature-icon-blue mx-auto">
+                    <svg class="icon icon-lg">
+                        <use xlink:href="#icon-cpu"></use>
+                    </svg>
+                </div>
                 <h3 class="text-xl font-bold mb-3">AI Analysis</h3>
                 <p class="text-gray">Our AI analyzes your body's structural traits</p>
             </div>
             
             <!-- Step 3 -->
-            <div class="fitness-card text-center p-6">
+            <div class="fitness-card text-center p-6 hover:transform hover:scale-105 transition-all duration-300">
+                <div class="feature-icon feature-icon-green mx-auto">
+                    <svg class="icon icon-lg">
+                        <use xlink:href="#icon-file-text"></use>
+                    </svg>
+                </div>
                 <h3 class="text-xl font-bold mb-3">Get Results</h3>
                 <p class="text-gray">Get customized training recommendations based on your genetics</p>
             </div>
             
             <!-- Step 4 -->
-            <div class="fitness-card text-center p-6">
+            <div class="fitness-card text-center p-6 hover:transform hover:scale-105 transition-all duration-300">
+                <div class="feature-icon feature-icon-yellow mx-auto">
+                    <svg class="icon icon-lg">
+                        <use xlink:href="#icon-target"></use>
+                    </svg>
+                </div>
                 <h3 class="text-xl font-bold mb-3">Focus Training</h3>
                 <p class="text-gray">Focus your training effort where it matters most</p>
             </div>
@@ -99,11 +121,18 @@
             <!-- Upload Section -->
             <div class="fitness-card p-6">
                 <div class="text-center mb-6">
+                    <div class="flex justify-center mb-4">
+                        <div class="upload-icon">
+                            <svg class="icon icon-lg text-fitness-red">
+                                <use xlink:href="#icon-upload-cloud"></use>
+                            </svg>
+                        </div>
+                    </div>
                     <h3 class="text-2xl font-bold">UPLOAD YOUR PHOTO</h3>
                     <p class="text-gray mt-2">Our advanced AI will analyze your body structure</p>
                 </div>
                 
-                <div class="flex justify-center items-center min-h-[200px] border border-dashed border-gray-600 rounded-lg mb-4">
+                <div class="upload-box mb-4 hover:bg-opacity-10 transition-all">
                     <p class="text-gray">Click to select or drag and drop your photo</p>
                 </div>
                 
