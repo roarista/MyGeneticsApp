@@ -173,7 +173,7 @@
                     <h4 class="font-bold">Calorie Targets</h4>
                 </div>
                 
-                {% if recommendations.calorie_recommendations is defined %}
+                {% if recommendations is defined and recommendations.calorie_recommendations is defined %}
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
                     <div class="fitness-card bg-fitness-card-bg border border-gray-800 flex flex-col items-center p-4">
                         <span class="text-sm text-fitness-gray mb-1">Maintenance</span>
@@ -229,7 +229,7 @@
                     <h4 class="font-bold">Macro Split</h4>
                 </div>
                 
-                {% if recommendations.nutrition is defined and recommendations.nutrition.macros is defined %}
+                {% if recommendations is defined and recommendations.nutrition is defined and recommendations.nutrition.macros is defined %}
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
                     {% for macro in recommendations.nutrition.macros %}
                         <div class="fitness-card bg-fitness-card-bg border border-gray-800 flex flex-col items-center">
@@ -366,7 +366,7 @@
                 <h3 class="text-xl font-bold">Nutrition Recommendations</h3>
             </div>
             
-            {% if recommendations.nutrition is defined and recommendations.nutrition.tips is defined %}
+            {% if recommendations is defined and recommendations.nutrition is defined and recommendations.nutrition.tips is defined %}
             <ul class="text-sm text-fitness-gray space-y-2">
                 {% for tip in recommendations.nutrition.tips %}
                     <li class="flex items-start gap-2">
