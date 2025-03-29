@@ -180,12 +180,34 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-800">
-                        {% for day, focus in training_split.items() %}
                         <tr>
-                            <td class="py-3 text-sm font-medium">{{ day }}</td>
-                            <td class="py-3 text-sm text-fitness-gray">{{ focus }}</td>
+                            <td class="py-3 text-sm font-medium">Monday</td>
+                            <td class="py-3 text-sm text-fitness-gray">Push (Chest, Shoulders, Triceps)</td>
                         </tr>
-                        {% endfor %}
+                        <tr>
+                            <td class="py-3 text-sm font-medium">Tuesday</td>
+                            <td class="py-3 text-sm text-fitness-gray">Pull (Back, Biceps)</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 text-sm font-medium">Wednesday</td>
+                            <td class="py-3 text-sm text-fitness-gray">Legs (Quads, Hamstrings, Calves)</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 text-sm font-medium">Thursday</td>
+                            <td class="py-3 text-sm text-fitness-gray">Rest Day</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 text-sm font-medium">Friday</td>
+                            <td class="py-3 text-sm text-fitness-gray">Push 2 (Chest, Shoulders, Triceps)</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 text-sm font-medium">Saturday</td>
+                            <td class="py-3 text-sm text-fitness-gray">Pull 2 (Back, Biceps)</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 text-sm font-medium">Sunday</td>
+                            <td class="py-3 text-sm text-fitness-gray">Rest Day</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -247,7 +269,7 @@
                     </button>
                 </div>
                 
-                <!-- Monday Content -->
+                <!-- Monday Content - Push Day 1 -->
                 <div x-show="activeDay === 'Monday'" class="fitness-card bg-fitness-darkgray tab-content-fade">
                     <h4 class="font-bold text-white mb-3">Monday: Push (Chest, Shoulders, Triceps)</h4>
                     <p class="text-sm text-fitness-gray mb-3">Complete all exercises with proper form. Rest 1-2 minutes between sets for compound movements, 30-60 seconds for isolation exercises.</p>
@@ -271,9 +293,9 @@
                     </div>
                 </div>
                 
-                <!-- Wednesday Content -->
-                <div x-show="activeDay === 'Wednesday'" class="fitness-card bg-fitness-darkgray tab-content-fade">
-                    <h4 class="font-bold text-white mb-3">Wednesday: Pull (Back, Biceps)</h4>
+                <!-- Tuesday Content - Pull Day 1 -->
+                <div x-show="activeDay === 'Tuesday'" class="fitness-card bg-fitness-darkgray tab-content-fade">
+                    <h4 class="font-bold text-white mb-3">Tuesday: Pull (Back, Biceps)</h4>
                     <p class="text-sm text-fitness-gray mb-3">Complete all exercises with proper form. Rest 1-2 minutes between sets for compound movements, 30-60 seconds for isolation exercises.</p>
                     
                     <div class="space-y-3">
@@ -295,9 +317,9 @@
                     </div>
                 </div>
                 
-                <!-- Friday Content -->
-                <div x-show="activeDay === 'Friday'" class="fitness-card bg-fitness-darkgray tab-content-fade">
-                    <h4 class="font-bold text-white mb-3">Friday: Legs (Quads, Hamstrings, Calves)</h4>
+                <!-- Wednesday Content - Legs Day -->
+                <div x-show="activeDay === 'Wednesday'" class="fitness-card bg-fitness-darkgray tab-content-fade">
+                    <h4 class="font-bold text-white mb-3">Wednesday: Legs (Quads, Hamstrings, Calves)</h4>
                     <p class="text-sm text-fitness-gray mb-3">Complete all exercises with proper form. Rest 1-2 minutes between sets for compound movements, 30-60 seconds for isolation exercises.</p>
                     
                     <div class="space-y-3">
@@ -319,9 +341,9 @@
                     </div>
                 </div>
                 
-                <!-- Rest Days Content -->
-                <div x-show="activeDay === 'Tuesday' || activeDay === 'Thursday' || activeDay === 'Saturday' || activeDay === 'Sunday'" class="fitness-card bg-fitness-darkgray tab-content-fade">
-                    <h4 class="font-bold text-white mb-3" x-text="activeDay + ': Rest Day'"></h4>
+                <!-- Thursday Content - Rest Day -->
+                <div x-show="activeDay === 'Thursday'" class="fitness-card bg-fitness-darkgray tab-content-fade">
+                    <h4 class="font-bold text-white mb-3">Thursday: Rest Day</h4>
                     <p class="text-sm text-fitness-gray mb-3">Focus on recovery and mobility work. Consider light activities such as:</p>
                     
                     <div class="space-y-3">
@@ -350,6 +372,190 @@
                                     <p class="text-sm text-fitness-gray mt-1">Self-myofascial release for tight muscles</p>
                                 </div>
                                 <span class="text-xs px-2 py-1 rounded-full bg-green-500 bg-opacity-20 text-green-500">Active Rest</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Friday Content - Push Day 2 -->
+                <div x-show="activeDay === 'Friday'" class="fitness-card bg-fitness-darkgray tab-content-fade">
+                    <h4 class="font-bold text-white mb-3">Friday: Push 2 (Chest, Shoulders, Triceps)</h4>
+                    <p class="text-sm text-fitness-gray mb-3">Second push day of the week with different exercise variations and intensity. Focus on progressive overload.</p>
+                    
+                    <div class="space-y-3">
+                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <span class="font-medium text-white">Incline Dumbbell Press</span>
+                                    <div class="text-xs text-fitness-gray flex gap-4 mt-2">
+                                        <span>4 sets</span>
+                                        <span>8-10 reps</span>
+                                    </div>
+                                    <p class="text-sm text-fitness-gray mt-1">Upper chest development and shoulder stability</p>
+                                </div>
+                                <span class="text-xs px-2 py-1 rounded-full bg-fitness-accent bg-opacity-20 text-fitness-accent">Push</span>
+                            </div>
+                        </div>
+                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <span class="font-medium text-white">Dumbbell Shoulder Press</span>
+                                    <div class="text-xs text-fitness-gray flex gap-4 mt-2">
+                                        <span>3 sets</span>
+                                        <span>10-12 reps</span>
+                                    </div>
+                                    <p class="text-sm text-fitness-gray mt-1">Deltoid development and overhead strength</p>
+                                </div>
+                                <span class="text-xs px-2 py-1 rounded-full bg-fitness-accent bg-opacity-20 text-fitness-accent">Push</span>
+                            </div>
+                        </div>
+                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <span class="font-medium text-white">Cable Chest Flyes</span>
+                                    <div class="text-xs text-fitness-gray flex gap-4 mt-2">
+                                        <span>3 sets</span>
+                                        <span>12-15 reps</span>
+                                    </div>
+                                    <p class="text-sm text-fitness-gray mt-1">Chest isolation and stretching</p>
+                                </div>
+                                <span class="text-xs px-2 py-1 rounded-full bg-fitness-accent bg-opacity-20 text-fitness-accent">Push</span>
+                            </div>
+                        </div>
+                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <span class="font-medium text-white">Lateral Raises</span>
+                                    <div class="text-xs text-fitness-gray flex gap-4 mt-2">
+                                        <span>3 sets</span>
+                                        <span>12-15 reps</span>
+                                    </div>
+                                    <p class="text-sm text-fitness-gray mt-1">Side deltoid isolation</p>
+                                </div>
+                                <span class="text-xs px-2 py-1 rounded-full bg-fitness-accent bg-opacity-20 text-fitness-accent">Push</span>
+                            </div>
+                        </div>
+                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <span class="font-medium text-white">Tricep Pushdowns</span>
+                                    <div class="text-xs text-fitness-gray flex gap-4 mt-2">
+                                        <span>3 sets</span>
+                                        <span>12-15 reps</span>
+                                    </div>
+                                    <p class="text-sm text-fitness-gray mt-1">Tricep isolation and strengthening</p>
+                                </div>
+                                <span class="text-xs px-2 py-1 rounded-full bg-fitness-accent bg-opacity-20 text-fitness-accent">Push</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Saturday Content - Pull Day 2 -->
+                <div x-show="activeDay === 'Saturday'" class="fitness-card bg-fitness-darkgray tab-content-fade">
+                    <h4 class="font-bold text-white mb-3">Saturday: Pull 2 (Back, Biceps)</h4>
+                    <p class="text-sm text-fitness-gray mb-3">Second pull day of the week with different exercise variations and intensity.</p>
+                    
+                    <div class="space-y-3">
+                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <span class="font-medium text-white">Seated Cable Rows</span>
+                                    <div class="text-xs text-fitness-gray flex gap-4 mt-2">
+                                        <span>4 sets</span>
+                                        <span>8-10 reps</span>
+                                    </div>
+                                    <p class="text-sm text-fitness-gray mt-1">Mid-back development and scapular retraction</p>
+                                </div>
+                                <span class="text-xs px-2 py-1 rounded-full bg-fitness-accent bg-opacity-20 text-fitness-accent">Pull</span>
+                            </div>
+                        </div>
+                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <span class="font-medium text-white">Lat Pulldowns</span>
+                                    <div class="text-xs text-fitness-gray flex gap-4 mt-2">
+                                        <span>3 sets</span>
+                                        <span>10-12 reps</span>
+                                    </div>
+                                    <p class="text-sm text-fitness-gray mt-1">Lat width and development</p>
+                                </div>
+                                <span class="text-xs px-2 py-1 rounded-full bg-fitness-accent bg-opacity-20 text-fitness-accent">Pull</span>
+                            </div>
+                        </div>
+                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <span class="font-medium text-white">Face Pulls</span>
+                                    <div class="text-xs text-fitness-gray flex gap-4 mt-2">
+                                        <span>3 sets</span>
+                                        <span>12-15 reps</span>
+                                    </div>
+                                    <p class="text-sm text-fitness-gray mt-1">Rear deltoid and upper back</p>
+                                </div>
+                                <span class="text-xs px-2 py-1 rounded-full bg-fitness-accent bg-opacity-20 text-fitness-accent">Pull</span>
+                            </div>
+                        </div>
+                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <span class="font-medium text-white">Hammer Curls</span>
+                                    <div class="text-xs text-fitness-gray flex gap-4 mt-2">
+                                        <span>3 sets</span>
+                                        <span>10-12 reps</span>
+                                    </div>
+                                    <p class="text-sm text-fitness-gray mt-1">Brachialis and forearm development</p>
+                                </div>
+                                <span class="text-xs px-2 py-1 rounded-full bg-fitness-accent bg-opacity-20 text-fitness-accent">Pull</span>
+                            </div>
+                        </div>
+                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <span class="font-medium text-white">Preacher Curls</span>
+                                    <div class="text-xs text-fitness-gray flex gap-4 mt-2">
+                                        <span>3 sets</span>
+                                        <span>12-15 reps</span>
+                                    </div>
+                                    <p class="text-sm text-fitness-gray mt-1">Bicep isolation with controlled movement</p>
+                                </div>
+                                <span class="text-xs px-2 py-1 rounded-full bg-fitness-accent bg-opacity-20 text-fitness-accent">Pull</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Sunday Content - Rest Day -->
+                <div x-show="activeDay === 'Sunday'" class="fitness-card bg-fitness-darkgray tab-content-fade">
+                    <h4 class="font-bold text-white mb-3">Sunday: Rest Day</h4>
+                    <p class="text-sm text-fitness-gray mb-3">Full recovery day. Focus on sleep, nutrition, and light mobility work:</p>
+                    
+                    <div class="space-y-3">
+                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <span class="font-medium text-white">Complete Rest</span>
+                                    <p class="text-sm text-fitness-gray mt-1">Allow your body to fully recover and rebuild muscle tissue</p>
+                                </div>
+                                <span class="text-xs px-2 py-1 rounded-full bg-green-500 bg-opacity-20 text-green-500">Recovery</span>
+                            </div>
+                        </div>
+                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <span class="font-medium text-white">Light Mobility</span>
+                                    <p class="text-sm text-fitness-gray mt-1">Focus on joint mobility and flexibility</p>
+                                </div>
+                                <span class="text-xs px-2 py-1 rounded-full bg-green-500 bg-opacity-20 text-green-500">Recovery</span>
+                            </div>
+                        </div>
+                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <span class="font-medium text-white">Plan Next Week</span>
+                                    <p class="text-sm text-fitness-gray mt-1">Review progress and set goals for the coming week</p>
+                                </div>
+                                <span class="text-xs px-2 py-1 rounded-full bg-green-500 bg-opacity-20 text-green-500">Planning</span>
                             </div>
                         </div>
                     </div>
