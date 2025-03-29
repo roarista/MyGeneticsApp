@@ -118,6 +118,23 @@ a:hover {
     justify-content: space-between;
 }
 
+.flex-row {
+    flex-direction: row;
+}
+
+.w-full {
+    width: 100%;
+}
+
+/* Spacing */
+.space-x-8 > * + * {
+    margin-left: 2rem;
+}
+
+.mr-1 {
+    margin-right: 0.25rem;
+}
+
 .justify-evenly {
     justify-content: space-evenly;
 }
@@ -334,6 +351,10 @@ a:hover {
     display: block;
 }
 
+.hidden {
+    display: none;
+}
+
 .overflow-hidden {
     overflow: hidden;
 }
@@ -393,11 +414,28 @@ a:hover {
 }
 
 .navbar-nav {
-    display: none;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    margin: 0;
 }
 
 .navbar-auth {
     display: none;
+}
+
+@media (min-width: 768px) {
+    .navbar-auth {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .md\:flex {
+        display: flex;
+    }
 }
 
 .nav-link {
@@ -622,16 +660,12 @@ a:hover {
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
     
-    .navbar-nav {
+    .flex {
         display: flex;
-        align-items: center;
-        gap: 0.5rem;
     }
     
-    .navbar-auth {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
+    .flex-row {
+        flex-direction: row;
     }
     
     .navbar-toggler {
