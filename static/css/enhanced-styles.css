@@ -41,14 +41,16 @@ body::before {
 }
 
 .hero-title {
-  font-size: 4.5rem;
-  font-weight: 800;
+  font-size: 5.5rem;
+  font-weight: 900;
   text-transform: uppercase;
   color: var(--text-light);
   letter-spacing: 2px;
   margin-bottom: 1.5rem;
   line-height: 1.1;
-  text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
+  position: relative;
+  z-index: 1;
 }
 
 .hero-accent {
@@ -57,11 +59,30 @@ body::before {
 }
 
 .genetic-title {
-  color: var(--accent-red);
   position: relative;
   display: inline-block;
-  font-size: 5rem;
-  letter-spacing: 3px;
+  font-size: 6.5rem;
+  letter-spacing: 4px;
+  background: linear-gradient(90deg, #FF3D3D, #FF0055);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 25px rgba(255, 61, 61, 0.4);
+  transform: translateY(0.5rem);
+  margin-top: -0.5rem;
+  font-weight: 900;
+  z-index: 2;
+  animation: glow 2s ease-in-out infinite alternate;
+}
+
+/* Glowing title animation */
+@keyframes glow {
+  from {
+    text-shadow: 0 0 15px rgba(255, 61, 61, 0.3);
+  }
+  to {
+    text-shadow: 0 0 30px rgba(255, 61, 61, 0.7), 0 0 40px rgba(255, 0, 85, 0.4);
+  }
 }
 
 /* Button Enhancements */
@@ -264,8 +285,48 @@ body::before {
   margin-right: 0.75rem;
 }
 
+/* Add styling for all heading elements */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: var(--text-light);
+}
+
+h2 {
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+  text-transform: uppercase;
+}
+
+h3 {
+  font-size: 1.75rem;
+  margin-bottom: 1rem;
+}
+
+/* Special section titles */
+.section-title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 2.5rem;
+  margin-bottom: 1.25rem;
+  position: relative;
+  display: inline-block;
+}
+
 /* Responsive adjustments */
-@media (min-width: 768px) {
+@media (min-width: 1200px) {
+  .hero-title {
+    font-size: 6.5rem;
+  }
+  
+  .genetic-title {
+    font-size: 7.5rem;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
   .hero-title {
     font-size: 5.5rem;
   }
@@ -283,5 +344,18 @@ body::before {
   
   .genetic-title {
     font-size: 4rem;
+    margin-top: 0;
+  }
+}
+
+/* For extra small screens */
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 2.75rem;
+  }
+  
+  .genetic-title {
+    font-size: 3rem;
+    letter-spacing: 2px;
   }
 }
