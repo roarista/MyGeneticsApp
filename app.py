@@ -805,57 +805,58 @@ def nutrition(analysis_id):
         carb_strategy = "Moderate carb intake with a focus on quality sources and timing around workouts."
         timing_strategy = "Balance macros evenly throughout your meals with slight adjustments based on training schedule."
     
-    # Calculate calorie recommendations if they don't exist in the result data
-    # This ensures compatibility with the template
-    if 'calorie_recommendations' not in result.get('recommendations', {}):
-        # Basic BMR calculation using the Mifflin-St Jeor Equation
-        if gender.lower() == 'male':
-            bmr = 10 * weight_kg + 6.25 * height_cm - 5 * 25 + 5  # Assuming age 25 if not available
-        else:
-            bmr = 10 * weight_kg + 6.25 * height_cm - 5 * 25 - 161  # Assuming age 25 if not available
-        
-        # Adjust based on activity level (experience)
-        activity_multipliers = {
-            'beginner': 1.375,  # Light activity
-            'intermediate': 1.55,  # Moderate activity
-            'advanced': 1.725,  # Very active
-        }
-        activity_multiplier = activity_multipliers.get(experience, 1.375)
-        
-        # Calculate maintenance calories
-        maintenance_calories = int(bmr * activity_multiplier)
-        
-        # Define target calories based on body type and inferred goals
-        if body_type.lower() in ['endomorph', 'mesomorph-endomorph']:
-            # Slight deficit for fat loss focus
-            target_calories = int(maintenance_calories * 0.9)
-            training_day_calories = int(maintenance_calories * 0.95)
-            rest_day_calories = int(maintenance_calories * 0.85)
-        elif body_type.lower() in ['ectomorph', 'mesomorph-ectomorph']:
-            # Surplus for muscle gain focus
-            target_calories = int(maintenance_calories * 1.1)
-            training_day_calories = int(maintenance_calories * 1.15)
-            rest_day_calories = int(maintenance_calories * 1.05)
-        else:
-            # Maintenance for recomposition
-            target_calories = maintenance_calories
-            training_day_calories = int(maintenance_calories * 1.05)
-            rest_day_calories = int(maintenance_calories * 0.95)
-        
-        # Create calorie recommendations structure
-        calorie_recommendations = {
-            'maintenance': maintenance_calories,
-            'target': target_calories,
-            'training_day': training_day_calories,
-            'rest_day': rest_day_calories
-        }
-        
-        # If recommendations don't exist in result, create the structure
-        if 'recommendations' not in result:
-            result['recommendations'] = {}
-        
-        # Add calorie recommendations to the result
-        result['recommendations']['calorie_recommendations'] = calorie_recommendations
+    # Basic BMR calculation using the Mifflin-St Jeor Equation
+    if gender.lower() == 'male':
+        bmr = 10 * weight_kg + 6.25 * height_cm - 5 * 25 + 5  # Assuming age 25 if not available
+    else:
+        bmr = 10 * weight_kg + 6.25 * height_cm - 5 * 25 - 161  # Assuming age 25 if not available
+    
+    # Adjust based on activity level (experience)
+    activity_multipliers = {
+        'beginner': 1.375,  # Light activity
+        'intermediate': 1.55,  # Moderate activity
+        'advanced': 1.725,  # Very active
+    }
+    activity_multiplier = activity_multipliers.get(experience, 1.375)
+    
+    # Calculate maintenance calories
+    maintenance_calories = int(bmr * activity_multiplier)
+    
+    # Define target calories based on body type and inferred goals
+    if body_type.lower() in ['endomorph', 'mesomorph-endomorph']:
+        # Slight deficit for fat loss focus
+        target_calories = int(maintenance_calories * 0.9)
+        training_day_calories = int(maintenance_calories * 0.95)
+        rest_day_calories = int(maintenance_calories * 0.85)
+    elif body_type.lower() in ['ectomorph', 'mesomorph-ectomorph']:
+        # Surplus for muscle gain focus
+        target_calories = int(maintenance_calories * 1.1)
+        training_day_calories = int(maintenance_calories * 1.15)
+        rest_day_calories = int(maintenance_calories * 1.05)
+    else:
+        # Maintenance for recomposition
+        target_calories = maintenance_calories
+        training_day_calories = int(maintenance_calories * 1.05)
+        rest_day_calories = int(maintenance_calories * 0.95)
+    
+    # Create calorie recommendations structure
+    calorie_recommendations = {
+        'maintenance': maintenance_calories,
+        'target': target_calories,
+        'training_day': training_day_calories,
+        'rest_day': rest_day_calories
+    }
+    
+    # Ensure we have the right structure for recommendations
+    if 'recommendations' not in result:
+        result['recommendations'] = {}
+    
+    # Always save the newly calculated calorie recommendations
+    result['recommendations']['calorie_recommendations'] = calorie_recommendations
+    
+    # Add debugging information
+    print(f"DEBUG: Calorie recommendations created: {calorie_recommendations}")
+    print(f"DEBUG: Result structure: {result['recommendations']}")
     
     return render_template(
         'tailwind_nutrition.html',
