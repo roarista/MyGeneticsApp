@@ -3,7 +3,7 @@
  */
 
 :root {
-  --bg-dark: #0D0D0D;
+  --bg-dark: #000000;
   --text-light: #FFFFFF;
   --accent-red: #FF3D3D;
   --accent-pink: #FF0055;
@@ -12,11 +12,7 @@
 
 /* Dynamic Background Elements */
 body {
-  background: radial-gradient(
-    circle at top center,
-    rgba(255, 255, 255, 0.05),
-    var(--bg-dark) 80%
-  );
+  background-color: var(--bg-dark);
   position: relative;
 }
 
@@ -35,13 +31,23 @@ body::before {
 }
 
 /* Hero Text Effects */
+.hero-subtitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--accent-red);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 0.5rem;
+}
+
 .hero-title {
   font-size: 3rem;
   font-weight: 800;
   text-transform: uppercase;
   color: var(--text-light);
   letter-spacing: 2px;
-  text-shadow: 0 0 10px rgba(255, 61, 61, 0.4);
+  margin-bottom: 1rem;
+  line-height: 1.1;
 }
 
 .hero-accent {
@@ -57,17 +63,41 @@ body::before {
 
 /* Button Enhancements */
 .btn-primary {
-  box-shadow: 0 0 12px rgba(255, 62, 91, 0.3);
+  background-color: var(--accent-red);
+  border: none;
+  color: white;
+  padding: 0.5rem 1.5rem;
+  border-radius: 0.25rem;
   transition: all 0.3s ease;
+  text-transform: uppercase;
+  font-weight: 600;
 }
 
 .btn-primary:hover {
-  box-shadow: 0 0 18px rgba(255, 62, 91, 0.5);
-  transform: translateY(-2px);
+  background-color: #cc3333;
+  transform: translateY(-1px);
+}
+
+.btn-outline {
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background-color: transparent;
+  color: white;
+  padding: 0.5rem 1.5rem;
+  border-radius: 0.25rem;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.btn-outline:hover {
+  border-color: white;
 }
 
 /* Card Enhancements */
 .fitness-card {
+  background-color: #1A1A1A;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
@@ -76,35 +106,69 @@ body::before {
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
 }
 
-/* Feature Icons with Colors */
-.feature-icon-green {
+/* Benefit Circles */
+.bg-benefit-green {
   background-color: rgba(39, 174, 96, 0.15);
   color: #27ae60;
 }
 
-.feature-icon-blue {
+.bg-benefit-blue {
   background-color: rgba(52, 152, 219, 0.15);
   color: #3498db;
 }
 
-.feature-icon-yellow {
+.bg-benefit-yellow {
   background-color: rgba(230, 188, 59, 0.15);
   color: #e6bc3b;
 }
 
-.feature-icon-red {
+.bg-benefit-red {
   background-color: rgba(234, 68, 91, 0.15);
   color: #ea445b;
 }
 
-.feature-icon {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 1rem;
+/* Utility classes for fitness card text */
+.text-gray {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.text-white {
+  color: #FFFFFF;
+}
+
+/* Input styling */
+.fitness-input {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  background-color: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  border-radius: 0.25rem;
+}
+
+.fitness-input:focus {
+  outline: none;
+  border-color: var(--accent-red);
+}
+
+.fitness-select {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  background-color: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  border-radius: 0.25rem;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' height='24' viewBox='0 0 24 24' width='24'%3E%3Cpath d='M7 10l5 5 5-5H7z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+}
+
+.fitness-select:focus {
+  outline: none;
+  border-color: var(--accent-red);
 }
 
 /* Upload Box Enhancement */
