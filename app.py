@@ -708,169 +708,209 @@ def recommendations(analysis_id):
 @app.route('/nutrition/<analysis_id>')
 def nutrition(analysis_id):
     """Display detailed nutrition plan based on analysis results"""
-    # Check if analysis exists
-    if analysis_id not in analysis_results:
-        flash('Analysis not found', 'danger')
-        return redirect(url_for('profile'))
-    
-    result = analysis_results[analysis_id]
-    
-    # Get user's body info for calorie calculations
-    height_cm = result['user_info'].get('height', 0)
-    weight_kg = result['user_info'].get('weight', 0)
-    gender = result['user_info'].get('gender', 'male')
-    experience = result['user_info'].get('experience', 'beginner')
-    
-    # Get body fat percentage if available
-    body_fat = 15  # Default value
-    if 'body_fat_percentage' in result['traits']:
-        trait_data = result['traits']['body_fat_percentage']
-        if isinstance(trait_data, dict) and 'value' in trait_data:
-            body_fat = trait_data['value']
-        elif isinstance(trait_data, (int, float)):
-            body_fat = trait_data
-    
-    # Process traits to include their units for display
-    formatted_traits = {}
-    for trait_name, trait_data in result['traits'].items():
-        # For traits that are dictionaries with value keys
-        if isinstance(trait_data, dict) and 'value' in trait_data:
-            # Copy the trait data
-            formatted_trait = trait_data.copy()
-            # Format the value with units
-            formatted_trait['display_value'] = format_trait_value(trait_name, trait_data['value'])
-            formatted_trait['unit'] = get_unit(trait_name)
-            formatted_traits[trait_name] = formatted_trait
+    try:
+        # Start with detailed logging
+        logger.info(f"Accessing nutrition page for analysis_id: {analysis_id}")
+        
+        # Check if analysis exists
+        if analysis_id not in analysis_results:
+            logger.warning(f"Analysis not found with ID: {analysis_id}")
+            flash('Analysis not found', 'danger')
+            return redirect(url_for('profile'))
+        
+        # Get the result
+        result = analysis_results[analysis_id]
+        logger.debug(f"Retrieved analysis result for ID: {analysis_id}")
+        
+        # Get user's body info for calorie calculations
+        height_cm = result['user_info'].get('height', 0)
+        weight_kg = result['user_info'].get('weight', 0)
+        gender = result['user_info'].get('gender', 'male')
+        experience = result['user_info'].get('experience', 'beginner')
+        
+        logger.debug(f"User info - Height: {height_cm}, Weight: {weight_kg}, Gender: {gender}, Experience: {experience}")
+        
+        # Get body fat percentage if available
+        body_fat = 15  # Default value
+        if 'body_fat_percentage' in result['traits']:
+            trait_data = result['traits']['body_fat_percentage']
+            if isinstance(trait_data, dict) and 'value' in trait_data:
+                body_fat = trait_data['value']
+            elif isinstance(trait_data, (int, float)):
+                body_fat = trait_data
+            
+        logger.debug(f"Body fat percentage for calculation: {body_fat}%")
+        
+        # Process traits to include their units for display
+        formatted_traits = {}
+        for trait_name, trait_data in result['traits'].items():
+            try:
+                # For traits that are dictionaries with value keys
+                if isinstance(trait_data, dict) and 'value' in trait_data:
+                    # Copy the trait data
+                    formatted_trait = trait_data.copy()
+                    # Format the value with units
+                    formatted_trait['display_value'] = format_trait_value(trait_name, trait_data['value'])
+                    formatted_trait['unit'] = get_unit(trait_name)
+                    formatted_traits[trait_name] = formatted_trait
+                else:
+                    # For other types of traits
+                    formatted_traits[trait_name] = trait_data
+            except Exception as trait_error:
+                logger.error(f"Error formatting trait {trait_name}: {str(trait_error)}")
+                # Put a placeholder so the template doesn't break
+                formatted_traits[trait_name] = trait_data
+        
+        # Default recommendations for supplements based on goals
+        supplements = {
+            'essential': [
+                {'name': 'Protein Powder (Whey/Plant-based)', 'purpose': 'Muscle recovery and growth', 'timing': 'Post-workout or between meals', 'dosage': '20-30g per serving'},
+                {'name': 'Creatine Monohydrate', 'purpose': 'Strength and power output', 'timing': 'Daily, timing not critical', 'dosage': '5g daily'},
+                {'name': 'Multivitamin', 'purpose': 'Fill nutritional gaps', 'timing': 'With a meal', 'dosage': 'As directed on label'}
+            ],
+            'optional': [
+                {'name': 'Omega-3 Fatty Acids', 'purpose': 'Joint health and inflammation', 'timing': 'With meals', 'dosage': '1-3g daily'},
+                {'name': 'Vitamin D3', 'purpose': 'Immune function and bone health', 'timing': 'With a meal containing fat', 'dosage': '1000-5000 IU daily'},
+                {'name': 'Pre-Workout', 'purpose': 'Energy and performance', 'timing': '30 minutes before training', 'dosage': 'As directed on label'}
+            ]
+        }
+        
+        # Recommended foods based on body type and goals
+        # Handle both string body type and dict with 'value' key
+        body_type_data = result['traits'].get('body_type', 'balanced')
+        if isinstance(body_type_data, dict):
+            body_type = body_type_data.get('value', 'balanced')
         else:
-            # For other types of traits
-            formatted_traits[trait_name] = trait_data
-    
-    # Default recommendations for supplements based on goals
-    supplements = {
-        'essential': [
-            {'name': 'Protein Powder (Whey/Plant-based)', 'purpose': 'Muscle recovery and growth', 'timing': 'Post-workout or between meals', 'dosage': '20-30g per serving'},
-            {'name': 'Creatine Monohydrate', 'purpose': 'Strength and power output', 'timing': 'Daily, timing not critical', 'dosage': '5g daily'},
-            {'name': 'Multivitamin', 'purpose': 'Fill nutritional gaps', 'timing': 'With a meal', 'dosage': 'As directed on label'}
-        ],
-        'optional': [
-            {'name': 'Omega-3 Fatty Acids', 'purpose': 'Joint health and inflammation', 'timing': 'With meals', 'dosage': '1-3g daily'},
-            {'name': 'Vitamin D3', 'purpose': 'Immune function and bone health', 'timing': 'With a meal containing fat', 'dosage': '1000-5000 IU daily'},
-            {'name': 'Pre-Workout', 'purpose': 'Energy and performance', 'timing': '30 minutes before training', 'dosage': 'As directed on label'}
-        ]
-    }
-    
-    # Recommended foods based on body type and goals
-    # Handle both string body type and dict with 'value' key
-    body_type_data = result['traits'].get('body_type', 'balanced')
-    if isinstance(body_type_data, dict):
-        body_type = body_type_data.get('value', 'balanced')
-    else:
-        body_type = body_type_data
-    
-    food_recommendations = {
-        'protein_sources': [
-            {'name': 'Chicken Breast', 'benefits': 'Lean protein with minimal fat', 'portion': '100-150g per meal'},
-            {'name': 'Lean Beef', 'benefits': 'Protein, iron, zinc, and B vitamins', 'portion': '100-150g per meal'},
-            {'name': 'Eggs', 'benefits': 'Complete protein with healthy fats', 'portion': '2-3 whole eggs'},
-            {'name': 'Greek Yogurt', 'benefits': 'Protein and probiotics', 'portion': '150-200g serving'},
-            {'name': 'Whey/Plant Protein', 'benefits': 'Convenient post-workout option', 'portion': '25-30g protein per shake'}
-        ],
-        'carb_sources': [
-            {'name': 'Brown Rice', 'benefits': 'Sustained energy and fiber', 'portion': '50-80g uncooked'},
-            {'name': 'Sweet Potatoes', 'benefits': 'Vitamins and slower-digesting carbs', 'portion': '150-200g'},
-            {'name': 'Oats', 'benefits': 'Fiber and sustained energy', 'portion': '40-60g uncooked'},
-            {'name': 'Fruits', 'benefits': 'Vitamins, minerals, and fiber', 'portion': '1-2 pieces or 100-150g'},
-            {'name': 'Vegetables', 'benefits': 'Micronutrients and fiber', 'portion': 'Unlimited green vegetables'}
-        ],
-        'fat_sources': [
-            {'name': 'Avocado', 'benefits': 'Healthy monounsaturated fats', 'portion': '½ - 1 medium'},
-            {'name': 'Nuts and Seeds', 'benefits': 'Healthy fats and protein', 'portion': '30g or small handful'},
-            {'name': 'Olive Oil', 'benefits': 'Heart-healthy monounsaturated fats', 'portion': '1-2 tablespoons'},
-            {'name': 'Fatty Fish', 'benefits': 'Omega-3 fatty acids', 'portion': '100-150g serving, 2-3x week'},
-            {'name': 'Nut Butters', 'benefits': 'Protein and healthy fats', 'portion': '1-2 tablespoons'}
-        ]
-    }
-    
-    # Adjust food recommendations based on body type
-    if body_type.lower() in ['endomorph', 'mesomorph-endomorph']:
-        # For endomorphs: More protein, less carbs
-        carb_strategy = "Limit high-glycemic carbs. Focus on fiber-rich sources and primarily around workouts."
-        timing_strategy = "Practice carb timing: higher amounts around workouts, minimal on rest days."
-    elif body_type.lower() in ['ectomorph', 'mesomorph-ectomorph']:
-        # For ectomorphs: Higher carbs, moderate protein
-        carb_strategy = "Prioritize regular carb intake throughout the day for consistent energy and muscle building."
-        timing_strategy = "Consume larger meals with balanced macros. Consider adding calorie-dense foods."
-    else:
-        # For mesomorphs or balanced types
-        carb_strategy = "Moderate carb intake with a focus on quality sources and timing around workouts."
-        timing_strategy = "Balance macros evenly throughout your meals with slight adjustments based on training schedule."
-    
-    # Basic BMR calculation using the Mifflin-St Jeor Equation
-    if gender.lower() == 'male':
-        bmr = 10 * weight_kg + 6.25 * height_cm - 5 * 25 + 5  # Assuming age 25 if not available
-    else:
-        bmr = 10 * weight_kg + 6.25 * height_cm - 5 * 25 - 161  # Assuming age 25 if not available
-    
-    # Adjust based on activity level (experience)
-    activity_multipliers = {
-        'beginner': 1.375,  # Light activity
-        'intermediate': 1.55,  # Moderate activity
-        'advanced': 1.725,  # Very active
-    }
-    activity_multiplier = activity_multipliers.get(experience, 1.375)
-    
-    # Calculate maintenance calories
-    maintenance_calories = int(bmr * activity_multiplier)
-    
-    # Define target calories based on body type and inferred goals
-    if body_type.lower() in ['endomorph', 'mesomorph-endomorph']:
-        # Slight deficit for fat loss focus
-        target_calories = int(maintenance_calories * 0.9)
-        training_day_calories = int(maintenance_calories * 0.95)
-        rest_day_calories = int(maintenance_calories * 0.85)
-    elif body_type.lower() in ['ectomorph', 'mesomorph-ectomorph']:
-        # Surplus for muscle gain focus
-        target_calories = int(maintenance_calories * 1.1)
-        training_day_calories = int(maintenance_calories * 1.15)
-        rest_day_calories = int(maintenance_calories * 1.05)
-    else:
-        # Maintenance for recomposition
-        target_calories = maintenance_calories
-        training_day_calories = int(maintenance_calories * 1.05)
-        rest_day_calories = int(maintenance_calories * 0.95)
-    
-    # Create calorie recommendations structure
-    calorie_recommendations = {
-        'maintenance': maintenance_calories,
-        'target': target_calories,
-        'training_day': training_day_calories,
-        'rest_day': rest_day_calories
-    }
-    
-    # Ensure we have the right structure for recommendations
-    if 'recommendations' not in result:
-        result['recommendations'] = {}
-    
-    # Always save the newly calculated calorie recommendations
-    result['recommendations']['calorie_recommendations'] = calorie_recommendations
-    
-    # Add debugging information
-    print(f"DEBUG: Calorie recommendations created: {calorie_recommendations}")
-    print(f"DEBUG: Result structure: {result['recommendations']}")
-    
-    return render_template(
-        'tailwind_nutrition.html',
-        analysis_id=analysis_id,
-        traits=formatted_traits,
-        recommendations=result['recommendations'],
-        user_info=result['user_info'],
-        supplements=supplements,
-        foods=food_recommendations,
-        carb_strategy=carb_strategy,
-        timing_strategy=timing_strategy,
-        body_type=body_type,
-        format_value=format_trait_value
-    )
+            body_type = body_type_data
+        
+        logger.debug(f"Determined body type: {body_type}")
+        
+        food_recommendations = {
+            'protein_sources': [
+                {'name': 'Chicken Breast', 'benefits': 'Lean protein with minimal fat', 'portion': '100-150g per meal'},
+                {'name': 'Lean Beef', 'benefits': 'Protein, iron, zinc, and B vitamins', 'portion': '100-150g per meal'},
+                {'name': 'Eggs', 'benefits': 'Complete protein with healthy fats', 'portion': '2-3 whole eggs'},
+                {'name': 'Greek Yogurt', 'benefits': 'Protein and probiotics', 'portion': '150-200g serving'},
+                {'name': 'Whey/Plant Protein', 'benefits': 'Convenient post-workout option', 'portion': '25-30g protein per shake'}
+            ],
+            'carb_sources': [
+                {'name': 'Brown Rice', 'benefits': 'Sustained energy and fiber', 'portion': '50-80g uncooked'},
+                {'name': 'Sweet Potatoes', 'benefits': 'Vitamins and slower-digesting carbs', 'portion': '150-200g'},
+                {'name': 'Oats', 'benefits': 'Fiber and sustained energy', 'portion': '40-60g uncooked'},
+                {'name': 'Fruits', 'benefits': 'Vitamins, minerals, and fiber', 'portion': '1-2 pieces or 100-150g'},
+                {'name': 'Vegetables', 'benefits': 'Micronutrients and fiber', 'portion': 'Unlimited green vegetables'}
+            ],
+            'fat_sources': [
+                {'name': 'Avocado', 'benefits': 'Healthy monounsaturated fats', 'portion': '½ - 1 medium'},
+                {'name': 'Nuts and Seeds', 'benefits': 'Healthy fats and protein', 'portion': '30g or small handful'},
+                {'name': 'Olive Oil', 'benefits': 'Heart-healthy monounsaturated fats', 'portion': '1-2 tablespoons'},
+                {'name': 'Fatty Fish', 'benefits': 'Omega-3 fatty acids', 'portion': '100-150g serving, 2-3x week'},
+                {'name': 'Nut Butters', 'benefits': 'Protein and healthy fats', 'portion': '1-2 tablespoons'}
+            ]
+        }
+        
+        # Adjust food recommendations based on body type
+        if body_type.lower() in ['endomorph', 'mesomorph-endomorph']:
+            # For endomorphs: More protein, less carbs
+            carb_strategy = "Limit high-glycemic carbs. Focus on fiber-rich sources and primarily around workouts."
+            timing_strategy = "Practice carb timing: higher amounts around workouts, minimal on rest days."
+        elif body_type.lower() in ['ectomorph', 'mesomorph-ectomorph']:
+            # For ectomorphs: Higher carbs, moderate protein
+            carb_strategy = "Prioritize regular carb intake throughout the day for consistent energy and muscle building."
+            timing_strategy = "Consume larger meals with balanced macros. Consider adding calorie-dense foods."
+        else:
+            # For mesomorphs or balanced types
+            carb_strategy = "Moderate carb intake with a focus on quality sources and timing around workouts."
+            timing_strategy = "Balance macros evenly throughout your meals with slight adjustments based on training schedule."
+        
+        # Basic BMR calculation using the Mifflin-St Jeor Equation
+        try:
+            if gender.lower() == 'male':
+                bmr = 10 * float(weight_kg) + 6.25 * float(height_cm) - 5 * 25 + 5  # Assuming age 25 if not available
+            else:
+                bmr = 10 * float(weight_kg) + 6.25 * float(height_cm) - 5 * 25 - 161  # Assuming age 25 if not available
+            
+            # Adjust based on activity level (experience)
+            activity_multipliers = {
+                'beginner': 1.375,  # Light activity
+                'intermediate': 1.55,  # Moderate activity
+                'advanced': 1.725,  # Very active
+            }
+            activity_multiplier = activity_multipliers.get(experience, 1.375)
+            
+            # Calculate maintenance calories
+            maintenance_calories = int(bmr * activity_multiplier)
+            
+            # Define target calories based on body type and inferred goals
+            if body_type.lower() in ['endomorph', 'mesomorph-endomorph']:
+                # Slight deficit for fat loss focus
+                target_calories = int(maintenance_calories * 0.9)
+                training_day_calories = int(maintenance_calories * 0.95)
+                rest_day_calories = int(maintenance_calories * 0.85)
+            elif body_type.lower() in ['ectomorph', 'mesomorph-ectomorph']:
+                # Surplus for muscle gain focus
+                target_calories = int(maintenance_calories * 1.1)
+                training_day_calories = int(maintenance_calories * 1.15)
+                rest_day_calories = int(maintenance_calories * 1.05)
+            else:
+                # Maintenance for recomposition
+                target_calories = maintenance_calories
+                training_day_calories = int(maintenance_calories * 1.05)
+                rest_day_calories = int(maintenance_calories * 0.95)
+            
+            # Create calorie recommendations structure
+            calorie_recommendations = {
+                'maintenance': maintenance_calories,
+                'target': target_calories,
+                'training_day': training_day_calories,
+                'rest_day': rest_day_calories
+            }
+            
+            logger.debug(f"Calculated calorie recommendations: {calorie_recommendations}")
+        except Exception as calc_error:
+            logger.error(f"Error calculating calories: {str(calc_error)}")
+            # Provide default values if calculation fails
+            calorie_recommendations = {
+                'maintenance': 2200,
+                'target': 2200,
+                'training_day': 2300,
+                'rest_day': 2100
+            }
+        
+        # Ensure we have the right structure for recommendations
+        if 'recommendations' not in result:
+            result['recommendations'] = {}
+        
+        # Always save the newly calculated calorie recommendations
+        result['recommendations']['calorie_recommendations'] = calorie_recommendations
+        
+        # Prepare the context for the template
+        context = {
+            'analysis_id': analysis_id,
+            'traits': formatted_traits,
+            'recommendations': result['recommendations'],
+            'user_info': result['user_info'],
+            'supplements': supplements,
+            'foods': food_recommendations,
+            'carb_strategy': carb_strategy,
+            'timing_strategy': timing_strategy,
+            'body_type': body_type,
+            'format_value': format_trait_value
+        }
+        
+        # Log the key parts of context for debugging
+        logger.info(f"Rendering nutrition template for analysis_id: {analysis_id} with calorie recommendations")
+        
+        # Render the template with the context
+        return render_template('tailwind_nutrition.html', **context)
+        
+    except Exception as e:
+        # Log the error for debugging
+        logger.error(f"Error in nutrition endpoint for analysis_id {analysis_id}: {str(e)}")
+        # Return a user-friendly error message
+        flash('An error occurred while generating your nutrition plan. Please try again later.', 'danger')
+        # Return a fallback error page or redirect 
+        return render_template('error.html', error_message="We couldn't generate your nutrition plan right now. Our team is looking into it."), 500
 
 @app.route('/workout/<analysis_id>')
 def workout(analysis_id):
