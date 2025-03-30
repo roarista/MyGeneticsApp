@@ -1,307 +1,287 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full bg-black">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}MyGenetics - Fitness Genetics Analysis{% endblock %}</title>
-    
-    <!-- Bootstrap CSS for baseline functionality -->
-    <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
-    
-    <!-- Our custom Tailwind-inspired CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/fitness-tailwind.css') }}">
-    
-    <!-- Enhanced styling with modern effects -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/enhanced-styles.css') }}">
-    
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
-    <!-- Animate.css for animations -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-    
-    <!-- AOS - Animate On Scroll -->
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    
-    <!-- Alpine.js for interactivity -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    
-    <!-- Modern Fonts -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap">
-    
-    <style>
-        /* Custom animations and enhanced styles */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}MyGenetics - Fitness Genetics Analysis{% endblock %}</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Alpine.js for interactivity -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+  <!-- AOS - Animate On Scroll -->
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Modern Fonts -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            red: {
+              500: '#ff4b6e',
+              600: '#ff3356',
+              700: '#e01e3c',
+            }
+          }
         }
-        .animate-fade-in {
-            animation: fadeIn 0.6s ease-out forwards;
-        }
-        .text-gradient {
-            background: linear-gradient(to right, #ffffff, #ff4b6e);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        /* Smooth scrolling */
-        html {
-            scroll-behavior: smooth;
-        }
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #1a1a1a;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #ff4b6e;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #ff3356;
-        }
-        
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: var(--fitness-dark);
-        }
-        
-        h1, h2, h3, h4, h5, h6, .font-heading {
-            font-family: 'Montserrat', sans-serif;
-            font-weight: 800;
-        }
-        
-        .fitness-card {
-            background-color: var(--fitness-card-bg);
-        }
-        
-        .btn-primary {
-            border-radius: 0.25rem;
-            padding: 0.5rem 1.25rem;
-            font-weight: 500;
-        }
-        
-        .hero-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 4rem;
-            line-height: 1;
-            font-weight: 900;
-            letter-spacing: -0.025em;
-            margin-bottom: 1rem;
-            text-transform: uppercase;
-        }
-        
-        .genetic-title {
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            background: linear-gradient(90deg, #FF3D3D, #FF0055);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            text-shadow: 0 0 15px rgba(255, 0, 85, 0.3);
-        }
-        
-        .hero-subtitle {
-            font-size: 1.5rem;
-            color: var(--fitness-red);
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            font-family: 'Montserrat', sans-serif;
-        }
-    </style>
-    
-    {% block styles %}{% endblock %}
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(-100%); }
+      to { transform: translateX(0); }
+    }
+
+    .animate-fade-in {
+      animation: fadeIn 0.6s ease-out forwards;
+    }
+
+    .animate-slide-in {
+      animation: slideIn 0.3s ease-out forwards;
+    }
+
+    /* Text gradient effect */
+    .text-gradient {
+      background: linear-gradient(to right, #ffffff, #ff4b6e);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Smooth scrolling */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #1a1a1a;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #ff4b6e;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #ff3356;
+    }
+
+    /* Base styles */
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #000000;
+      color: #ffffff;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+    }
+
+    /* Navigation styles */
+    .nav-link {
+      @apply text-gray-300 hover:text-white transition-colors duration-200;
+    }
+    .nav-link.active {
+      @apply text-white border-b-2 border-red-500;
+    }
+
+    /* Button styles */
+    .btn-primary {
+      @apply bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg transition-colors duration-200;
+    }
+
+    .btn-outline {
+      @apply border border-red-600 text-red-600 hover:bg-red-600 hover:text-white px-6 py-2 rounded-lg transition-colors duration-200;
+    }
+
+    /* Card styles */
+    .fitness-card {
+      @apply bg-gray-900 rounded-xl p-6 shadow-lg border border-gray-800;
+    }
+
+    /* Hero section styles */
+    .hero-title {
+      @apply text-5xl md:text-6xl font-bold text-white mb-4;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .hero-subtitle {
+      @apply text-xl md:text-2xl text-gray-300 mb-8;
+    }
+  </style>
+
+  {% block styles %}{% endblock %}
 </head>
-<body>
-    <!-- SVG Icons Sprite Sheet -->
-    {% include 'tailwind_icons.html' %}
-    
-    <!-- Navigation Bar -->
-    <nav class="navbar">
-        <div class="navbar-container">
-            <div class="flex justify-between items-center w-full">
-                <!-- Left: Brand -->
-                <a href="{{ url_for('index') }}" class="navbar-brand">
-                    <svg class="icon icon-lg text-fitness-red">
-                        <use xlink:href="#icon-dna"></use>
-                    </svg>
-                    <div class="navbar-brand-text">
-                        <span class="navbar-brand-title">MyGenetics</span>
-                    </div>
-                </a>
-                
-                <!-- Center: Main Navigation - Horizontally arranged -->
-                <div class="hidden md:flex flex-row items-center space-x-8">
-                    <a href="{{ url_for('index') }}" class="nav-link">
-                        <svg class="icon icon-sm mr-1">
-                            <use xlink:href="#icon-home"></use>
-                        </svg>
-                        <span>Home</span>
-                    </a>
-                    <a href="{{ url_for('scan3d_page') }}" class="nav-link">
-                        <svg class="icon icon-sm mr-1">
-                            <use xlink:href="#icon-camera"></use>
-                        </svg>
-                        <span>3D Scanning</span>
-                    </a>
-                    <a href="{{ url_for('education') }}" class="nav-link">
-                        <svg class="icon icon-sm mr-1">
-                            <use xlink:href="#icon-book-open"></use>
-                        </svg>
-                        <span>Learn</span>
-                    </a>
-                    {% if current_user.is_authenticated %}
-                    <a href="{{ url_for('profile') }}" class="nav-link">
-                        <svg class="icon icon-sm mr-1">
-                            <use xlink:href="#icon-user"></use>
-                        </svg>
-                        <span>Profile</span>
-                    </a>
-                    {% endif %}
-                </div>
-                
-                <!-- Right: Authentication -->
-                <div class="navbar-auth">
-                    {% if current_user.is_authenticated %}
-                        <a href="{{ url_for('logout') }}" class="btn btn-outline">Logout</a>
-                    {% else %}
-                        <a href="{{ url_for('signup', ui='tailwind') }}" class="btn btn-primary">Sign Up</a>
-                        <a href="{{ url_for('login', ui='tailwind') }}" class="btn btn-outline">Login</a>
-                    {% endif %}
-                </div>
-                
-                <!-- Mobile Menu Toggle -->
-                <button class="navbar-toggler" id="mobile-menu-toggle">
-                    <svg class="icon">
-                        <use xlink:href="#icon-menu"></use>
-                    </svg>
-                </button>
-            </div>
+<body class="min-h-screen">
+  <!-- Navigation -->
+  <nav class="fixed w-full bg-black/80 backdrop-blur-md z-50 border-b border-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <!-- Logo -->
+        <a href="{{ url_for('index') }}" class="flex items-center space-x-2">
+          <svg class="h-8 w-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          <span class="text-xl font-bold text-white">MyGenetics</span>
+        </a>
+
+        <!-- Desktop Navigation -->
+        <div class="hidden md:flex items-center space-x-8">
+          <a href="{{ url_for('index') }}" class="nav-link {% if request.endpoint == 'index' or request.endpoint == 'tailwind_index' or request.endpoint == 'modern_index' %}active{% endif %}">
+            Home
+          </a>
+          <a href="{{ url_for('scan3d_page') }}" class="nav-link {% if request.endpoint == 'scan3d_page' %}active{% endif %}">
+            3D Scanning
+          </a>
+          <a href="{{ url_for('education') }}" class="nav-link {% if request.endpoint == 'education' %}active{% endif %}">
+            Learn
+          </a>
+          {% if current_user.is_authenticated %}
+          <a href="{{ url_for('profile') }}" class="nav-link {% if request.endpoint == 'profile' %}active{% endif %}">
+            Profile
+          </a>
+          {% endif %}
         </div>
-        
-        <!-- Mobile Menu (Hidden by Default) -->
-        <div class="navbar-menu" id="mobile-menu">
-            <a href="{{ url_for('index') }}" class="mobile-nav-link">
-                <svg class="icon icon-sm">
-                    <use xlink:href="#icon-home"></use>
-                </svg>
-                <span>Home</span>
-            </a>
-            <a href="{{ url_for('scan3d_page') }}" class="mobile-nav-link">
-                <svg class="icon icon-sm">
-                    <use xlink:href="#icon-camera"></use>
-                </svg>
-                <span>3D Scanning</span>
-            </a>
-            <a href="{{ url_for('education') }}" class="mobile-nav-link">
-                <svg class="icon icon-sm">
-                    <use xlink:href="#icon-book-open"></use>
-                </svg>
-                <span>Learn</span>
-            </a>
-            {% if current_user.is_authenticated %}
-            <a href="{{ url_for('profile') }}" class="mobile-nav-link">
-                <svg class="icon icon-sm">
-                    <use xlink:href="#icon-user"></use>
-                </svg>
-                <span>Profile</span>
-            </a>
-            {% endif %}
-            
-            <!-- Mobile Authentication -->
-            <div class="mobile-menu-buttons">
-                {% if current_user.is_authenticated %}
-                    <a href="{{ url_for('logout') }}" class="btn btn-primary btn-full">Logout</a>
-                {% else %}
-                    <a href="{{ url_for('signup', ui='tailwind') }}" class="btn btn-primary btn-full">Sign Up</a>
-                    <a href="{{ url_for('login', ui='tailwind') }}" class="btn btn-outline btn-full">Login</a>
-                {% endif %}
-            </div>
+
+        <!-- Auth Buttons -->
+        <div class="hidden md:flex items-center space-x-4">
+          {% if current_user.is_authenticated %}
+          <a href="{{ url_for('logout') }}" class="btn-outline">Logout</a>
+          {% else %}
+          <a href="{{ url_for('signup', ui='tailwind') }}" class="btn-primary">Sign Up</a>
+          <a href="{{ url_for('login', ui='tailwind') }}" class="btn-outline">Login</a>
+          {% endif %}
         </div>
-    </nav>
-    
-    <!-- Flash Messages -->
-    <div class="container mt-4">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    {% set alert_class = "success" if category == "success" else "danger" if category == "danger" else "warning" if category == "warning" else "info" %}
-                    <div class="fitness-card mb-4 {{ category }}-alert" role="alert">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
+
+        <!-- Mobile menu button -->
+        <div class="md:hidden">
+          <button type="button" id="mobile-menu-button" class="text-gray-400 hover:text-white">
+            <span class="sr-only">Open menu</span>
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
+      </div>
     </div>
-    
-    <!-- Main Content -->
-    <main class="container py-4">
-        {% block content %}{% endblock %}
-    </main>
-    
-    <!-- Footer -->
-    <footer class="py-4 px-4 border-t border-gray-800 mt-8">
-        <div class="container mx-auto">
-            <div class="flex flex-col md:flex-row justify-between items-center">
-                <div class="flex items-center gap-2 mb-4 md:mb-0">
-                    <svg class="icon icon-lg text-fitness-red">
-                        <use xlink:href="#icon-dna"></use>
-                    </svg>
-                    <div class="flex flex-col">
-                        <span class="text-xl font-bold text-white">MyGenetics</span>
-                        <span class="text-xs text-fitness-red uppercase tracking-widest">ALPHA</span>
-                    </div>
-                </div>
-                <div class="text-center md:text-right text-sm text-gray">
-                    <p>&copy; 2025 MyGenetics. All rights reserved.</p>
-                    <p class="mt-1">Unlock your genetic potential</p>
-                </div>
+
+    <!-- Mobile menu -->
+    <div class="md:hidden hidden" id="mobile-menu">
+      <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-black border-b border-gray-800">
+        <a href="{{ url_for('index') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800">
+          Home
+        </a>
+        <a href="{{ url_for('scan3d_page') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800">
+          3D Scanning
+        </a>
+        <a href="{{ url_for('education') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800">
+          Learn
+        </a>
+        {% if current_user.is_authenticated %}
+        <a href="{{ url_for('profile') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800">
+          Profile
+        </a>
+        {% endif %}
+        {% if current_user.is_authenticated %}
+        <a href="{{ url_for('logout') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800">
+          Logout
+        </a>
+        {% else %}
+        <a href="{{ url_for('signup', ui='tailwind') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800">
+          Sign Up
+        </a>
+        <a href="{{ url_for('login', ui='tailwind') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800">
+          Login
+        </a>
+        {% endif %}
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="pt-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="mb-4 p-4 rounded-lg {% if category == 'error' or category == 'danger' %}bg-red-500/10 text-red-500{% else %}bg-green-500/10 text-green-500{% endif %}">
+              {{ message }}
             </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-black border-t border-gray-800 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row justify-between items-center">
+        <div class="flex items-center mb-4 md:mb-0">
+          <svg class="h-8 w-8 text-red-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          <div>
+            <div class="text-xl font-bold text-white">MyGenetics</div>
+            <div class="text-xs text-red-500 uppercase tracking-wider">ALPHA</div>
+          </div>
         </div>
-    </footer>
-    
-    <!-- jQuery and Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- Mobile Menu and Initialization Scripts -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize AOS
-            if (typeof AOS !== 'undefined') {
-                AOS.init({
-                    duration: 800,
-                    once: true,
-                    offset: 100
-                });
-            }
-            
-            // Mobile menu toggle
-            const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
-            const mobileMenu = document.getElementById('mobile-menu');
-            if (mobileMenuToggle && mobileMenu) {
-                const mobileMenuIcon = mobileMenuToggle.querySelector('use');
-                
-                mobileMenuToggle.addEventListener('click', function() {
-                    if (mobileMenu.classList.contains('active')) {
-                        mobileMenu.classList.remove('active');
-                        mobileMenuIcon.setAttribute('xlink:href', '#icon-menu');
-                    } else {
-                        mobileMenu.classList.add('active');
-                        mobileMenuIcon.setAttribute('xlink:href', '#icon-x');
-                    }
-                });
-            }
+        <div class="text-gray-400 text-sm">
+          <p>&copy; 2025 MyGenetics. All rights reserved.</p>
+          <p class="mt-1">Unlock your genetic potential</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize AOS
+      if (typeof AOS !== 'undefined') {
+        AOS.init({
+          duration: 800,
+          once: true,
+          offset: 100
         });
-    </script>
-    
-    {% block scripts %}{% endblock %}
+      }
+
+      // Mobile menu toggle
+      const mobileMenuButton = document.getElementById('mobile-menu-button');
+      const mobileMenu = document.getElementById('mobile-menu');
+      
+      if (mobileMenuButton && mobileMenu) {
+        mobileMenuButton.addEventListener('click', function() {
+          mobileMenu.classList.toggle('hidden');
+        });
+      }
+    });
+  </script>
+  
+  {% block scripts %}{% endblock %}
 </body>
 </html>

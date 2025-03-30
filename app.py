@@ -79,8 +79,8 @@ def allowed_3d_file(filename):
 
 @app.route('/')
 def index():
-    """Render the main page - redirect to analyze form"""
-    return redirect(url_for('analyze_form'))
+    """Render the main page with the Tailwind UI"""
+    return render_template('tailwind_index.html')
     
 @app.route('/modern')
 def modern_index():

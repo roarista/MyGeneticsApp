@@ -4,300 +4,260 @@
 
 {% block content %}
 <!-- Hero Section -->
-<section class="py-8 md:py-12 px-4">
-    <div class="max-w-5xl mx-auto">
-        <div class="flex flex-col mb-10" data-aos="fade-up">
-            <div class="hero-subtitle animate-fade-in">GENETIC FITNESS ANALYSIS</div>
-            <h1 class="hero-title">DISCOVER YOUR<br><span class="genetic-title">GENETIC POTENTIAL</span></h1>
-            <p class="text-xl mb-8 max-w-2xl animate-fade-in" style="animation-delay: 0.2s">Optimize your fitness routine based on your unique body structure. Upload a photo to analyze your genetic traits and get personalized workout recommendations.</p>
-            
-            <div class="flex flex-row gap-4 mt-6 animate-fade-in" style="animation-delay: 0.4s">
-                <a href="#start-analysis" class="btn btn-primary button-glow">
-                    <svg class="icon icon-sm mr-2">
-                        <use xlink:href="#icon-upload-cloud"></use>
-                    </svg>
-                    Upload Photo
-                </a>
-                <a href="{{ url_for('scan3d_page') }}" class="btn btn-accent">
-                    <svg class="icon icon-sm mr-2">
-                        <use xlink:href="#icon-camera"></use>
-                    </svg>
-                    3D Scanning
-                </a>
-                <a href="{{ url_for('education') }}" class="btn btn-outline">
-                    <svg class="icon icon-sm mr-2">
-                        <use xlink:href="#icon-book-open"></use>
-                    </svg>
-                    Learn
-                </a>
-            </div>
-        </div>
+<section class="py-16 md:py-24">
+  <div class="container mx-auto px-4">
+    <div class="flex flex-col items-center text-center max-w-4xl mx-auto" data-aos="fade-up">
+      <span class="text-red-500 font-bold tracking-widest mb-4">GENETIC FITNESS ANALYSIS</span>
+      <h1 class="hero-title">DISCOVER YOUR <span class="text-gradient">GENETIC POTENTIAL</span></h1>
+      <p class="text-xl text-gray-300 mb-10 max-w-2xl mx-auto">
+        Optimize your fitness routine based on your unique body structure. Upload a photo to analyze your genetic traits and get personalized workout recommendations.
+      </p>
+      
+      <div class="flex flex-wrap justify-center gap-4">
+        <a href="#analyze" class="btn-primary">
+          <i class="fas fa-upload mr-2"></i>
+          Upload Photo
+        </a>
+        <a href="{{ url_for('scan3d_page') }}" class="btn-primary">
+          <i class="fas fa-camera mr-2"></i>
+          3D Scanning
+        </a>
+        <a href="{{ url_for('education') }}" class="btn-outline">
+          <i class="fas fa-book-open mr-2"></i>
+          Learn
+        </a>
+      </div>
     </div>
+  </div>
 </section>
 
-<!-- How It Works Section -->
-<section class="py-10">
-    <div class="max-w-5xl mx-auto">
-        <h2 class="text-2xl font-bold mb-8 text-white text-gradient" data-aos="fade-right">How It Works</h2>
+<!-- How It Works -->
+<section class="py-16 bg-gray-900/30">
+  <div class="container mx-auto px-4">
+    <h2 class="text-3xl font-bold mb-16 text-center" data-aos="fade-up">How It Works</h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+      <!-- Step 1 -->
+      <div class="fitness-card" data-aos="fade-up" data-aos-delay="100">
+        <div class="text-center p-6">
+          <div class="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-upload text-red-500 text-xl"></i>
+          </div>
+          <h3 class="text-xl font-bold mb-2">Upload Photo</h3>
+          <p class="text-gray-400">Upload a full-body photo in neutral standing position</p>
+        </div>
+      </div>
+      
+      <!-- Step 2 -->
+      <div class="fitness-card" data-aos="fade-up" data-aos-delay="200">
+        <div class="text-center p-6">
+          <div class="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-brain text-red-500 text-xl"></i>
+          </div>
+          <h3 class="text-xl font-bold mb-2">AI Analysis</h3>
+          <p class="text-gray-400">Our AI analyzes your body's structural traits</p>
+        </div>
+      </div>
+      
+      <!-- Step 3 -->
+      <div class="fitness-card" data-aos="fade-up" data-aos-delay="300">
+        <div class="text-center p-6">
+          <div class="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-chart-line text-red-500 text-xl"></i>
+          </div>
+          <h3 class="text-xl font-bold mb-2">Get Results</h3>
+          <p class="text-gray-400">Get customized training recommendations</p>
+        </div>
+      </div>
+      
+      <!-- Step 4 -->
+      <div class="fitness-card" data-aos="fade-up" data-aos-delay="400">
+        <div class="text-center p-6">
+          <div class="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-dumbbell text-red-500 text-xl"></i>
+          </div>
+          <h3 class="text-xl font-bold mb-2">Focus Training</h3>
+          <p class="text-gray-400">Focus your training effort where it matters most</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Body Analysis -->
+<section class="py-16">
+  <div class="container mx-auto px-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+      <!-- Left column -->
+      <div data-aos="fade-right">
+        <h2 class="text-3xl font-bold mb-6">Why Body Analysis Matters</h2>
+        <p class="text-gray-300 mb-8">
+          Your body's structure significantly affects how you should train. Everyone has genetic advantages and limitations.
+        </p>
         
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <!-- Step 1 -->
-            <div class="fitness-card text-center p-6" data-aos="fade-up" data-aos-delay="100">
-                <h3 class="text-xl font-bold mb-3 text-white">Upload Photo</h3>
-                <p class="text-gray">Upload a full-body photo in neutral standing position</p>
+        <div class="space-y-6">
+          <div class="flex items-start">
+            <div class="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center mr-4">
+              <i class="fas fa-dna text-red-500"></i>
             </div>
-            
-            <!-- Step 2 -->
-            <div class="fitness-card text-center p-6" data-aos="fade-up" data-aos-delay="200">
-                <h3 class="text-xl font-bold mb-3 text-white">AI Analysis</h3>
-                <p class="text-gray">Our AI analyzes your body's structural traits</p>
-            </div>
-            
-            <!-- Step 3 -->
-            <div class="fitness-card text-center p-6" data-aos="fade-up" data-aos-delay="300">
-                <h3 class="text-xl font-bold mb-3 text-white">Get Results</h3>
-                <p class="text-gray">Get customized training recommendations based on your genetics</p>
-            </div>
-            
-            <!-- Step 4 -->
-            <div class="fitness-card text-center p-6" data-aos="fade-up" data-aos-delay="400">
-                <h3 class="text-xl font-bold mb-3 text-white">Focus Training</h3>
-                <p class="text-gray">Focus your training effort where it matters most</p>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Why Body Analysis Matters -->
-<section class="py-10">
-    <div class="max-w-5xl mx-auto">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
-                <h2 class="text-3xl font-bold mb-6">
-                    WHY BODY ANALYSIS MATTERS
-                </h2>
-                
-                <p class="mb-6 text-gray">Your body's structure significantly affects how you should train. Everyone has genetic advantages and limitations:</p>
-                
-                <div class="mb-6">
-                    <h3 class="text-xl font-bold mb-2">Muscle Insertions</h3>
-                    <p class="text-gray">The points where muscles attach to bones determine leverage and growth potential</p>
-                </div>
-                
-                <div class="mb-6">
-                    <h3 class="text-xl font-bold mb-2">Limb Proportions</h3>
-                    <p class="text-gray">Arm and leg length affect exercise mechanics and muscle activation</p>
-                </div>
-                
-                <div class="mb-6">
-                    <h3 class="text-xl font-bold mb-2">Bone Structure</h3>
-                    <p class="text-gray">Frame size influences muscle appearance and functional strength</p>
-                </div>
-                
-                <div class="mb-6">
-                    <h3 class="text-xl font-bold mb-2">Body Type</h3>
-                    <p class="text-gray">Your natural somatotype affects ideal training and nutrition approaches</p>
-                </div>
-                
-                <div>
-                    <h3 class="text-xl font-bold mb-2">Body Composition</h3>
-                    <p class="text-gray">Estimated body fat percentage, lean mass, and ideal weight range</p>
-                </div>
+              <h3 class="font-bold mb-1">Muscle Insertions</h3>
+              <p class="text-gray-400">The points where muscles attach to bones determine leverage and growth potential</p>
+            </div>
+          </div>
+          
+          <div class="flex items-start">
+            <div class="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center mr-4">
+              <i class="fas fa-ruler text-red-500"></i>
+            </div>
+            <div>
+              <h3 class="font-bold mb-1">Limb Proportions</h3>
+              <p class="text-gray-400">Arm and leg length affect exercise mechanics and muscle activation</p>
+            </div>
+          </div>
+          
+          <div class="flex items-start">
+            <div class="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center mr-4">
+              <i class="fas fa-bone text-red-500"></i>
+            </div>
+            <div>
+              <h3 class="font-bold mb-1">Bone Structure</h3>
+              <p class="text-gray-400">Frame size influences muscle appearance and functional strength</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Right column -->
+      <div class="fitness-card p-8" data-aos="fade-left">
+        <div class="text-center mb-8">
+          <div class="w-20 h-20 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-camera text-red-500 text-2xl"></i>
+          </div>
+          <h3 class="text-2xl font-bold">Ready to Start?</h3>
+          <p class="text-gray-400 mt-2">Upload your photo and get personalized genetic insights</p>
+        </div>
+        
+        <div id="analyze" class="border border-gray-700 rounded-lg p-6 mb-6 hover:border-red-500 transition-all">
+          <form action="{{ url_for('analyze') }}" method="POST" enctype="multipart/form-data">
+            <div class="mb-4">
+              <label for="file" class="block mb-2 font-medium">Upload a full body photo:</label>
+              <input type="file" name="file" id="file" accept=".jpg,.jpeg,.png" class="w-full p-2 border border-gray-700 rounded bg-gray-800 text-white" required>
+              <p class="text-sm text-gray-400 mt-2">Please upload a clear, full-body photo in good lighting</p>
             </div>
             
-            <!-- Upload Section -->
-            <div class="fitness-card p-6">
-                <div class="text-center mb-6">
-                    <div class="flex justify-center mb-4">
-                        <div class="upload-icon">
-                            <svg class="icon icon-lg text-fitness-red">
-                                <use xlink:href="#icon-upload-cloud"></use>
-                            </svg>
-                        </div>
-                    </div>
-                    <h3 class="text-2xl font-bold">UPLOAD YOUR PHOTO</h3>
-                    <p class="text-gray mt-2">Our advanced AI will analyze your body structure</p>
-                </div>
-                
-                <div class="upload-box mb-4 hover:bg-opacity-10 transition-all">
-                    <p class="text-gray">Click to select or drag and drop your photo</p>
-                </div>
-                
-                <p class="text-sm text-gray mb-6">Upload a clear, full-body photo in a neutral standing position.</p>
-                
-                <!-- Form inputs reproduced here for quick access -->
-                <div>
-                    <h3 class="text-xl font-bold mb-4">Advanced Body Metrics</h3>
-                    <p class="text-sm text-gray mb-4">Providing your height and weight enables advanced analysis including body composition estimates, lean mass calculation, and frame size assessment.</p>
-                    
-                    <div class="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label class="block mb-2 text-sm">Height (cm)</label>
-                            <input type="text" class="fitness-input" placeholder="Enter your height">
-                        </div>
-                        <div>
-                            <label class="block mb-2 text-sm">Weight (kg)</label>
-                            <input type="text" class="fitness-input" placeholder="Enter your weight">
-                        </div>
-                    </div>
-                    
-                    <div class="mb-6">
-                        <label class="block mb-2 text-sm">Training Experience</label>
-                        <select class="fitness-select">
-                            <option>Beginner (0-1 years)</option>
-                            <option>Intermediate (1-3 years)</option>
-                            <option>Advanced (3-5 years)</option>
-                            <option>Expert (5+ years)</option>
-                        </select>
-                    </div>
-                    
-                    <button class="btn btn-primary btn-full">ANALYZE MY GENETICS</button>
-                </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label for="height" class="block mb-2 font-medium">Height (cm):</label>
+                <input type="number" name="height" id="height" min="120" max="220" class="w-full p-2 border border-gray-700 rounded bg-gray-800 text-white" placeholder="170">
+              </div>
+              <div>
+                <label for="weight" class="block mb-2 font-medium">Weight (kg):</label>
+                <input type="number" name="weight" id="weight" min="40" max="180" class="w-full p-2 border border-gray-700 rounded bg-gray-800 text-white" placeholder="70">
+              </div>
             </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <div>
+                <label for="gender" class="block mb-2 font-medium">Gender:</label>
+                <select name="gender" id="gender" class="w-full p-2 border border-gray-700 rounded bg-gray-800 text-white">
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                </select>
+              </div>
+              <div>
+                <label for="experience" class="block mb-2 font-medium">Training Experience:</label>
+                <select name="experience" id="experience" class="w-full p-2 border border-gray-700 rounded bg-gray-800 text-white">
+                  <option value="beginner">Beginner (0-1 years)</option>
+                  <option value="intermediate">Intermediate (1-3 years)</option>
+                  <option value="advanced">Advanced (3-5 years)</option>
+                  <option value="expert">Expert (5+ years)</option>
+                </select>
+              </div>
+            </div>
+            
+            <button type="submit" class="btn-primary w-full">
+              <i class="fas fa-dna mr-2"></i>
+              Analyze My Genetics
+            </button>
+          </form>
         </div>
+      </div>
     </div>
+  </div>
 </section>
 
-<!-- Analysis Form Section -->
-<section id="start-analysis" class="py-8">
-    <div class="max-w-2xl mx-auto">
-        <div class="fitness-card">
-            <h2 class="text-2xl font-bold mb-4 text-center">Start Your Genetic Analysis</h2>
-            
-            <form action="{{ url_for('analyze') }}" method="POST" enctype="multipart/form-data" class="flex flex-col gap-4">
-                <!-- Image Upload -->
-                <div class="mb-4">
-                    <label for="file" class="block mb-2 font-medium">Upload a full body photo:</label>
-                    <input type="file" name="file" id="file" accept=".jpg,.jpeg,.png" class="fitness-input" required>
-                    <p class="text-sm text-gray mt-2">Please upload a clear, full-body photo in good lighting</p>
-                </div>
-                
-                <!-- Height and Weight -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label for="height" class="block mb-2 font-medium">Height (cm):</label>
-                        <input type="number" name="height" id="height" min="120" max="220" class="fitness-input" placeholder="170">
-                    </div>
-                    <div>
-                        <label for="weight" class="block mb-2 font-medium">Weight (kg):</label>
-                        <input type="number" name="weight" id="weight" min="40" max="180" class="fitness-input" placeholder="70">
-                    </div>
-                </div>
-                
-                <!-- Gender and Experience -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label for="gender" class="block mb-2 font-medium">Gender:</label>
-                        <select name="gender" id="gender" class="fitness-select">
-                            <option value="male">Male</option>
-                            <option value="female">Female</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="experience" class="block mb-2 font-medium">Training Experience:</label>
-                        <select name="experience" id="experience" class="fitness-select">
-                            <option value="beginner">Beginner (0-1 years)</option>
-                            <option value="intermediate">Intermediate (1-3 years)</option>
-                            <option value="advanced">Advanced (3-5 years)</option>
-                            <option value="expert">Expert (5+ years)</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <!-- Submit Button -->
-                <button type="submit" class="btn btn-primary mt-4">
-                    Start Analysis
-                </button>
-            </form>
-        </div>
+<!-- Benefits -->
+<section class="py-16 bg-gray-900/30">
+  <div class="container mx-auto px-4">
+    <div class="text-center max-w-2xl mx-auto mb-16" data-aos="fade-up">
+      <h2 class="text-3xl font-bold mb-4">Benefits of Genetic Analysis</h2>
+      <p class="text-gray-300">Knowing your genetic advantages helps you train smarter, not just harder</p>
     </div>
-</section>
-
-<!-- Genetic Potential Section -->
-<section class="py-10">
-    <div class="max-w-5xl mx-auto">
-        <div class="mb-8">
-            <h2 class="text-3xl font-bold mb-2">Genetic Potential</h2>
-            <p class="text-lg text-gray">Assessment of your muscle building capacity based on structural traits</p>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <!-- Benefit 1 -->
+      <div class="fitness-card p-6" data-aos="fade-up" data-aos-delay="100">
+        <div class="flex items-start">
+          <div class="w-14 h-14 bg-red-500/20 rounded-full flex items-center justify-center mr-4">
+            <i class="fas fa-bullseye text-red-500 text-xl"></i>
+          </div>
+          <div>
+            <h3 class="text-xl font-bold mb-2">Targeted Training</h3>
+            <p class="text-gray-400">Focus your efforts on exercises that work best for your body type and genetic potential.</p>
+          </div>
         </div>
-        
-        <div class="fitness-card p-6 mb-10">
-            <p class="text-gray">Understanding your genetic advantages allows you to train smarter, focus on areas with the most potential, and avoid wasted effort.</p>
+      </div>
+      
+      <!-- Benefit 2 -->
+      <div class="fitness-card p-6" data-aos="fade-up" data-aos-delay="200">
+        <div class="flex items-start">
+          <div class="w-14 h-14 bg-red-500/20 rounded-full flex items-center justify-center mr-4">
+            <i class="fas fa-bolt text-red-500 text-xl"></i>
+          </div>
+          <div>
+            <h3 class="text-xl font-bold mb-2">Faster Results</h3>
+            <p class="text-gray-400">Achieve your fitness goals more efficiently by working with your natural advantages.</p>
+          </div>
         </div>
-        
-        <div class="text-center mb-12">
-            <h2 class="text-3xl font-bold mb-4">
-                BENEFITS OF GENETIC ANALYSIS
-            </h2>
-            <p class="text-lg max-w-2xl mx-auto">Knowing your genetic advantages helps you train smarter, not just harder</p>
+      </div>
+      
+      <!-- Benefit 3 -->
+      <div class="fitness-card p-6" data-aos="fade-up" data-aos-delay="300">
+        <div class="flex items-start">
+          <div class="w-14 h-14 bg-red-500/20 rounded-full flex items-center justify-center mr-4">
+            <i class="fas fa-shield-alt text-red-500 text-xl"></i>
+          </div>
+          <div>
+            <h3 class="text-xl font-bold mb-2">Injury Prevention</h3>
+            <p class="text-gray-400">Understand your structural limitations and reduce your risk of training-related injuries.</p>
+          </div>
         </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <!-- Benefit 1 -->
-            <div class="text-center">
-                <div class="h-20 w-20 rounded-full bg-benefit-green flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-bullseye text-2xl"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-2">Targeted Training</h3>
-                <p class="text-gray">Focus your efforts on exercises that work best for your body type</p>
-            </div>
-            
-            <!-- Benefit 2 -->
-            <div class="text-center">
-                <div class="h-20 w-20 rounded-full bg-benefit-blue flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-ban text-2xl"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-2">Avoid Genetic Limitations</h3>
-                <p class="text-gray">Stop fighting your genetics and work with your natural advantages</p>
-            </div>
-            
-            <!-- Benefit 3 -->
-            <div class="text-center">
-                <div class="h-20 w-20 rounded-full bg-benefit-yellow flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-bolt text-2xl"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-2">Optimize Workouts</h3>
-                <p class="text-gray">Customize your training split based on recovery patterns</p>
-            </div>
-            
-            <!-- Benefit 4 -->
-            <div class="text-center">
-                <div class="h-20 w-20 rounded-full bg-benefit-red flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-trophy text-2xl"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-2">Maximize Results</h3>
-                <p class="text-gray">Achieve your physique goals faster with personalized training</p>
-            </div>
-        </div>
+      </div>
     </div>
+  </div>
 </section>
 
 <!-- Call to Action -->
-<section class="py-8 mt-8 text-center">
-    <div class="max-w-3xl mx-auto" data-aos="fade-up">
-        <h2 class="text-3xl font-bold mb-4 text-gradient">Ready to Unlock Your Potential?</h2>
-        <p class="text-xl mb-6">Join thousands of others who have optimized their fitness journey with MyGenetics</p>
-        
-        <div class="flex flex-row justify-center gap-4">
-            <a href="#start-analysis" class="btn btn-primary button-glow animate-fade-in" style="animation-delay: 0.1s">
-                <svg class="icon icon-sm mr-2">
-                    <use xlink:href="#icon-upload-cloud"></use>
-                </svg>
-                Start Analysis
-            </a>
-            <a href="{{ url_for('scan3d_page') }}" class="btn btn-accent animate-fade-in" style="animation-delay: 0.2s">
-                <svg class="icon icon-sm mr-2">
-                    <use xlink:href="#icon-camera"></use>
-                </svg>
-                3D Scanning
-            </a>
-            <a href="{{ url_for('education') }}" class="btn btn-outline animate-fade-in" style="animation-delay: 0.3s">
-                <svg class="icon icon-sm mr-2">
-                    <use xlink:href="#icon-book-open"></use>
-                </svg>
-                Learn
-            </a>
-        </div>
+<section class="py-16">
+  <div class="container mx-auto px-4 text-center max-w-3xl" data-aos="fade-up">
+    <h2 class="text-3xl font-bold mb-6">Ready to Unlock Your Potential?</h2>
+    <p class="text-xl text-gray-300 mb-8">Join thousands of others who have optimized their fitness journey with MyGenetics</p>
+    
+    <div class="flex flex-wrap justify-center gap-4">
+      <a href="#analyze" class="btn-primary animate-fade-in" style="animation-delay: 0.1s">
+        <i class="fas fa-dna mr-2"></i>
+        Start Analysis
+      </a>
+      <a href="{{ url_for('scan3d_page') }}" class="btn-primary animate-fade-in" style="animation-delay: 0.2s">
+        <i class="fas fa-camera mr-2"></i>
+        3D Scanning
+      </a>
+      <a href="{{ url_for('education') }}" class="btn-outline animate-fade-in" style="animation-delay: 0.3s">
+        <i class="fas fa-book-open mr-2"></i>
+        Learn More
+      </a>
     </div>
+  </div>
 </section>
 {% endblock %}
