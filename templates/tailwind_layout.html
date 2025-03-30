@@ -20,12 +20,51 @@
     <!-- Animate.css for animations -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     
+    <!-- AOS - Animate On Scroll -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    
+    <!-- Alpine.js for interactivity -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
     <!-- Modern Fonts -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap">
     
     <style>
+        /* Custom animations and enhanced styles */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+        .text-gradient {
+            background: linear-gradient(to right, #ffffff, #ff4b6e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ff4b6e;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ff3356;
+        }
+        
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: var(--fitness-dark);
@@ -228,27 +267,38 @@
         </div>
     </footer>
     
-    <!-- jQuery, Bootstrap JS, and Alpine.js -->
+    <!-- jQuery and Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     
-    <!-- Mobile Menu Script -->
+    <!-- Mobile Menu and Initialization Scripts -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize AOS
+            if (typeof AOS !== 'undefined') {
+                AOS.init({
+                    duration: 800,
+                    once: true,
+                    offset: 100
+                });
+            }
+            
+            // Mobile menu toggle
             const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
             const mobileMenu = document.getElementById('mobile-menu');
-            const mobileMenuIcon = mobileMenuToggle.querySelector('use');
-            
-            mobileMenuToggle.addEventListener('click', function() {
-                if (mobileMenu.classList.contains('active')) {
-                    mobileMenu.classList.remove('active');
-                    mobileMenuIcon.setAttribute('xlink:href', '#icon-menu');
-                } else {
-                    mobileMenu.classList.add('active');
-                    mobileMenuIcon.setAttribute('xlink:href', '#icon-x');
-                }
-            });
+            if (mobileMenuToggle && mobileMenu) {
+                const mobileMenuIcon = mobileMenuToggle.querySelector('use');
+                
+                mobileMenuToggle.addEventListener('click', function() {
+                    if (mobileMenu.classList.contains('active')) {
+                        mobileMenu.classList.remove('active');
+                        mobileMenuIcon.setAttribute('xlink:href', '#icon-menu');
+                    } else {
+                        mobileMenu.classList.add('active');
+                        mobileMenuIcon.setAttribute('xlink:href', '#icon-x');
+                    }
+                });
+            }
         });
     </script>
     

@@ -6,13 +6,13 @@
 <!-- Hero Section -->
 <section class="py-8 md:py-12 px-4">
     <div class="max-w-5xl mx-auto">
-        <div class="flex flex-col mb-10">
-            <div class="hero-subtitle">GENETIC FITNESS ANALYSIS</div>
+        <div class="flex flex-col mb-10" data-aos="fade-up">
+            <div class="hero-subtitle animate-fade-in">GENETIC FITNESS ANALYSIS</div>
             <h1 class="hero-title">DISCOVER YOUR<br><span class="genetic-title">GENETIC POTENTIAL</span></h1>
-            <p class="text-xl mb-8 max-w-2xl">Optimize your fitness routine based on your unique body structure. Upload a photo to analyze your genetic traits and get personalized workout recommendations.</p>
+            <p class="text-xl mb-8 max-w-2xl animate-fade-in" style="animation-delay: 0.2s">Optimize your fitness routine based on your unique body structure. Upload a photo to analyze your genetic traits and get personalized workout recommendations.</p>
             
-            <div class="flex flex-row gap-4 mt-6">
-                <a href="#start-analysis" class="btn btn-primary">
+            <div class="flex flex-row gap-4 mt-6 animate-fade-in" style="animation-delay: 0.4s">
+                <a href="#start-analysis" class="btn btn-primary button-glow">
                     <svg class="icon icon-sm mr-2">
                         <use xlink:href="#icon-upload-cloud"></use>
                     </svg>
@@ -38,29 +38,29 @@
 <!-- How It Works Section -->
 <section class="py-10">
     <div class="max-w-5xl mx-auto">
-        <h2 class="text-2xl font-bold mb-8 text-white">How It Works</h2>
+        <h2 class="text-2xl font-bold mb-8 text-white text-gradient" data-aos="fade-right">How It Works</h2>
         
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
             <!-- Step 1 -->
-            <div class="fitness-card text-center p-6">
+            <div class="fitness-card text-center p-6" data-aos="fade-up" data-aos-delay="100">
                 <h3 class="text-xl font-bold mb-3 text-white">Upload Photo</h3>
                 <p class="text-gray">Upload a full-body photo in neutral standing position</p>
             </div>
             
             <!-- Step 2 -->
-            <div class="fitness-card text-center p-6">
+            <div class="fitness-card text-center p-6" data-aos="fade-up" data-aos-delay="200">
                 <h3 class="text-xl font-bold mb-3 text-white">AI Analysis</h3>
                 <p class="text-gray">Our AI analyzes your body's structural traits</p>
             </div>
             
             <!-- Step 3 -->
-            <div class="fitness-card text-center p-6">
+            <div class="fitness-card text-center p-6" data-aos="fade-up" data-aos-delay="300">
                 <h3 class="text-xl font-bold mb-3 text-white">Get Results</h3>
                 <p class="text-gray">Get customized training recommendations based on your genetics</p>
             </div>
             
             <!-- Step 4 -->
-            <div class="fitness-card text-center p-6">
+            <div class="fitness-card text-center p-6" data-aos="fade-up" data-aos-delay="400">
                 <h3 class="text-xl font-bold mb-3 text-white">Focus Training</h3>
                 <p class="text-gray">Focus your training effort where it matters most</p>
             </div>
@@ -274,24 +274,24 @@
 
 <!-- Call to Action -->
 <section class="py-8 mt-8 text-center">
-    <div class="max-w-3xl mx-auto">
-        <h2 class="text-3xl font-bold mb-4">Ready to Unlock Your Potential?</h2>
+    <div class="max-w-3xl mx-auto" data-aos="fade-up">
+        <h2 class="text-3xl font-bold mb-4 text-gradient">Ready to Unlock Your Potential?</h2>
         <p class="text-xl mb-6">Join thousands of others who have optimized their fitness journey with MyGenetics</p>
         
         <div class="flex flex-row justify-center gap-4">
-            <a href="#start-analysis" class="btn btn-primary">
+            <a href="#start-analysis" class="btn btn-primary button-glow animate-fade-in" style="animation-delay: 0.1s">
                 <svg class="icon icon-sm mr-2">
                     <use xlink:href="#icon-upload-cloud"></use>
                 </svg>
                 Start Analysis
             </a>
-            <a href="{{ url_for('scan3d_page') }}" class="btn btn-accent">
+            <a href="{{ url_for('scan3d_page') }}" class="btn btn-accent animate-fade-in" style="animation-delay: 0.2s">
                 <svg class="icon icon-sm mr-2">
                     <use xlink:href="#icon-camera"></use>
                 </svg>
                 3D Scanning
             </a>
-            <a href="{{ url_for('education') }}" class="btn btn-outline">
+            <a href="{{ url_for('education') }}" class="btn btn-outline animate-fade-in" style="animation-delay: 0.3s">
                 <svg class="icon icon-sm mr-2">
                     <use xlink:href="#icon-book-open"></use>
                 </svg>
