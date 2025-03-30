@@ -183,10 +183,14 @@
                     <div class="space-y-4">
                         <div class="bg-gray-700 rounded-lg p-4">
                             <h4 class="text-lg font-semibold text-white mb-2">Push/Pull/Legs Split</h4>
-                            <p class="text-gray-400">{{ recommendations.training_split.description }}</p>
+                            {% if recommendations.training_split is defined and recommendations.training_split.description is defined %}
+                                <p class="text-gray-400">{{ recommendations.training_split.description }}</p>
+                            {% else %}
+                                <p class="text-gray-400">A training split dividing workouts into push movements (chest, shoulders, triceps), pull movements (back, biceps), and leg exercises for optimal recovery and growth.</p>
+                            {% endif %}
                         </div>
                         
-                        {% if 'workout_schedule' in recommendations.training_split %}
+                        {% if recommendations.training_split is defined and recommendations.training_split.workout_schedule is defined %}
                         <div class="mt-4">
                             <h4 class="text-lg font-semibold text-white mb-2">Weekly Schedule</h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -198,6 +202,28 @@
                                 {% endfor %}
                             </div>
                         </div>
+                        {% else %}
+                        <div class="mt-4">
+                            <h4 class="text-lg font-semibold text-white mb-2">Weekly Schedule</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="bg-gray-700 rounded-lg p-4">
+                                    <h5 class="font-medium text-white mb-1">Monday</h5>
+                                    <p class="text-gray-400">Push (Chest, Shoulders, Triceps)</p>
+                                </div>
+                                <div class="bg-gray-700 rounded-lg p-4">
+                                    <h5 class="font-medium text-white mb-1">Tuesday</h5>
+                                    <p class="text-gray-400">Pull (Back, Biceps)</p>
+                                </div>
+                                <div class="bg-gray-700 rounded-lg p-4">
+                                    <h5 class="font-medium text-white mb-1">Wednesday</h5>
+                                    <p class="text-gray-400">Legs (Quads, Hamstrings, Calves)</p>
+                                </div>
+                                <div class="bg-gray-700 rounded-lg p-4">
+                                    <h5 class="font-medium text-white mb-1">Thursday</h5>
+                                    <p class="text-gray-400">Rest</p>
+                                </div>
+                            </div>
+                        </div>
                         {% endif %}
                     </div>
                 </div>
@@ -206,53 +232,93 @@
                 <div class="bg-gray-800 rounded-lg p-4 mb-6">
                     <h3 class="text-xl font-bold text-white mb-4">Focus Areas</h3>
                     <div class="space-y-2">
-                        {% for focus in recommendations.focus_areas %}
-                        <div class="flex items-center gap-2">
-                            <svg class="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                            <p class="text-gray-400">{{ focus }}</p>
-                        </div>
-                        {% endfor %}
+                        {% if recommendations.focus_areas is defined and recommendations.focus_areas|length > 0 %}
+                            {% for focus in recommendations.focus_areas %}
+                            <div class="flex items-center gap-2">
+                                <svg class="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <p class="text-gray-400">{{ focus }}</p>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="flex items-center gap-2">
+                                <svg class="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <p class="text-gray-400">Maintain balanced training across all major muscle groups</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <svg class="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <p class="text-gray-400">Emphasize compound exercises for overall strength development</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <svg class="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <p class="text-gray-400">Pay attention to proper form and technique</p>
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
 
                 <!-- Nutrition Recommendations -->
-                {% if 'nutrition' in recommendations %}
                 <div class="bg-gray-800 rounded-lg p-4">
                     <h3 class="text-xl font-bold text-white mb-4">Nutrition Recommendations</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="bg-gray-700 rounded-lg p-4">
                             <h4 class="text-lg font-semibold text-white mb-2">Macro Split</h4>
                             <div class="space-y-2">
-                                {% for macro, value in recommendations.nutrition.macro_split.items() %}
-                                <div class="flex justify-between">
-                                    <span class="text-gray-400">{{ macro|capitalize }}</span>
-                                    <span class="text-white">{{ value }}%</span>
-                                </div>
-                                {% endfor %}
+                                {% if recommendations.nutrition is defined and recommendations.nutrition.macro_split is defined %}
+                                    {% for macro, value in recommendations.nutrition.macro_split.items() %}
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400">{{ macro|capitalize }}</span>
+                                        <span class="text-white">{{ value }}%</span>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400">Protein</span>
+                                        <span class="text-white">30%</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400">Carbs</span>
+                                        <span class="text-white">40%</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400">Fat</span>
+                                        <span class="text-white">30%</span>
+                                    </div>
+                                {% endif %}
                             </div>
                         </div>
-                        {% if 'daily_calories' in recommendations.nutrition %}
                         <div class="bg-gray-700 rounded-lg p-4">
                             <h4 class="text-lg font-semibold text-white mb-2">Daily Calories</h4>
-                            <p class="text-2xl text-white">{{ recommendations.nutrition.daily_calories }} kcal</p>
+                            {% if recommendations.nutrition is defined and recommendations.nutrition.daily_calories is defined %}
+                                <p class="text-2xl text-white">{{ recommendations.nutrition.daily_calories }} kcal</p>
+                            {% else %}
+                                <p class="text-2xl text-white">2000 kcal</p>
+                            {% endif %}
                         </div>
-                        {% endif %}
                     </div>
                     
-                    {% if 'tips' in recommendations.nutrition %}
                     <div class="mt-4 bg-gray-700 rounded-lg p-4">
                         <h4 class="text-lg font-semibold text-white mb-2">Nutrition Tips</h4>
                         <ul class="list-disc ml-4 text-gray-400">
-                            {% for tip in recommendations.nutrition.tips %}
-                            <li class="mb-1">{{ tip }}</li>
-                            {% endfor %}
+                            {% if recommendations.nutrition is defined and recommendations.nutrition.tips is defined %}
+                                {% for tip in recommendations.nutrition.tips %}
+                                <li class="mb-1">{{ tip }}</li>
+                                {% endfor %}
+                            {% else %}
+                                <li class="mb-1">Prioritize protein intake to support muscle recovery and growth</li>
+                                <li class="mb-1">Stay hydrated by drinking at least 2-3 liters of water daily</li>
+                                <li class="mb-1">Time your carbohydrates around your workouts for optimal energy</li>
+                            {% endif %}
                         </ul>
                     </div>
-                    {% endif %}
                 </div>
-                {% endif %}
                 
                 <!-- Action Buttons -->
                 <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
