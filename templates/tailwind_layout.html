@@ -153,7 +153,7 @@
           <a href="{{ url_for('index') }}" class="nav-link {% if request.endpoint == 'index' or request.endpoint == 'tailwind_index' or request.endpoint == 'modern_index' %}active{% endif %}">
             Home
           </a>
-          <a href="{{ url_for('scan3d_page') }}" class="nav-link {% if request.endpoint == 'scan3d_page' %}active{% endif %}">
+          <a href="{{ url_for('scan3d') }}" class="nav-link {% if request.endpoint == 'scan3d' %}active{% endif %}">
             3D Scanning
           </a>
           <a href="{{ url_for('education') }}" class="nav-link {% if request.endpoint == 'education' %}active{% endif %}">
@@ -194,7 +194,7 @@
         <a href="{{ url_for('index') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800">
           Home
         </a>
-        <a href="{{ url_for('scan3d_page') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800">
+        <a href="{{ url_for('scan3d') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800">
           3D Scanning
         </a>
         <a href="{{ url_for('education') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800">

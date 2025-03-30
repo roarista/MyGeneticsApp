@@ -241,7 +241,7 @@ def education():
     return render_template('tailwind_education.html')
 
 @app.route('/scan3d')
-def scan3d_page():
+def scan3d():
     """Display the 3D body scan upload page"""
     return render_template('tailwind_scan3d.html')
 
@@ -256,7 +256,7 @@ def scan3d_upload():
     if 'scan_file' not in request.files:
         logger.error("No scan file in request.files")
         flash('No file selected', 'danger')
-        return redirect(url_for('scan3d_page'))
+        return redirect(url_for('scan3d'))
     
     file = request.files['scan_file']
     logger.debug(f"File object: {file}, filename: {file.filename}")
@@ -264,7 +264,7 @@ def scan3d_upload():
     if file.filename == '':
         logger.error("Empty filename")
         flash('No file selected', 'danger')
-        return redirect(url_for('scan3d_page'))
+        return redirect(url_for('scan3d'))
     
     if file and allowed_3d_file(file.filename):
         try:
@@ -295,7 +295,7 @@ def scan3d_upload():
             
             if not scan_results:
                 flash('Failed to process 3D scan. Please try again with a different file.', 'warning')
-                return redirect(url_for('scan3d_page'))
+                return redirect(url_for('scan3d'))
             
             # Extra processing for measurements
             measurements = scan_results.get('measurements', {})
@@ -336,24 +336,24 @@ def scan3d_upload():
         except Exception as e:
             logger.error(f"Error during 3D scan analysis: {str(e)}")
             flash(f'Error during analysis: {str(e)}', 'danger')
-            return redirect(url_for('scan3d_page'))
+            return redirect(url_for('scan3d'))
     else:
         flash('Invalid file type. Please upload OBJ, STL, or PLY 3D model files.', 'warning')
-        return redirect(url_for('scan3d_page'))
+        return redirect(url_for('scan3d'))
 
 @app.route('/scan3d/results/<analysis_id>')
 def scan3d_results(analysis_id):
     """Display 3D scan analysis results"""
     if analysis_id not in analysis_results:
         flash('Analysis not found', 'danger')
-        return redirect(url_for('scan3d_page'))
+        return redirect(url_for('scan3d'))
     
     result = analysis_results[analysis_id]
     
     # Check if this is a 3D scan analysis
     if result.get('analysis_type') != '3d_scan':
         flash('Invalid analysis type', 'danger')
-        return redirect(url_for('scan3d_page'))
+        return redirect(url_for('scan3d'))
     
     # For this prototype version, we'll use a placeholder image
     # In a real implementation, we would generate a visualization of the 3D model
