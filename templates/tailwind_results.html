@@ -1,0 +1,291 @@
+{% extends "tailwind_layout.html" %}
+
+{% block title %}MyGenetics - Analysis Results{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header Section -->
+    <div class="text-center mb-12" data-aos="fade-up">
+        <h1 class="text-4xl font-bold text-white mb-4">Body Analysis Results</h1>
+        <p class="text-xl text-gray-400 max-w-3xl mx-auto">
+            These results identify your genetic traits to help optimize your training approach. Remember that genetics are just one factor - consistency and proper technique are equally important!
+        </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
+        <!-- Left Column -->
+        <div class="md:col-span-5">
+            <!-- Your Analysis Card -->
+            <div class="bg-gray-900 rounded-xl p-6 shadow-lg border border-gray-800 mb-8" data-aos="fade-right">
+                <h2 class="text-2xl font-bold text-white mb-6">Your Analysis</h2>
+                
+                <!-- Body Measurements Card -->
+                <div class="bg-gray-800 rounded-lg p-4 mb-6">
+                    <h3 class="text-xl font-bold text-white mb-4">Body Measurements</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-gray-400">Height</p>
+                            <p class="text-xl text-white">{{ user_info.height }} cm</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-400">Weight</p>
+                            <p class="text-xl text-white">{{ user_info.weight }} kg</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Body Composition Card -->
+                <div class="bg-gray-800 rounded-lg p-4 mb-6">
+                    <h3 class="text-xl font-bold text-white mb-4">Body Composition</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <p class="text-gray-400">Experience Level</p>
+                            <p class="text-xl text-white capitalize">{{ user_info.experience }}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-400">Gender</p>
+                            <p class="text-xl text-white capitalize">{{ user_info.gender }}</p>
+                        </div>
+                        {% if 'body_fat_percentage' in traits %}
+                        <div>
+                            <p class="text-gray-400">Body Fat Percentage</p>
+                            <p class="text-xl text-white">{{ traits.body_fat_percentage.display_value }}</p>
+                        </div>
+                        {% endif %}
+                        {% if 'muscle_building_potential' in traits %}
+                        <div>
+                            <p class="text-gray-400">Muscle Building Potential</p>
+                            <p class="text-xl text-white">{{ traits.muscle_building_potential.display_value }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Uploaded Image/Scan Preview -->
+                <div class="bg-gray-800 rounded-lg p-4">
+                    <h3 class="text-xl font-bold text-white mb-4">Your Upload</h3>
+                    <div class="aspect-w-1 aspect-h-1 rounded-lg overflow-hidden">
+                        {% if is_3d_scan %}
+                            <div class="bg-gray-700 p-4 rounded-lg text-center">
+                                <svg class="w-12 h-12 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                                </svg>
+                                <p class="text-gray-400">3D Scan Analysis</p>
+                            </div>
+                        {% else %}
+                            {% if image_data %}
+                                <img src="data:image/jpeg;base64,{{ image_data }}" alt="Analysis Photo" class="w-full h-full object-cover">
+                            {% else %}
+                                <div class="bg-gray-700 p-4 rounded-lg text-center">
+                                    <svg class="w-12 h-12 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                                    </svg>
+                                    <p class="text-gray-400">No image available</p>
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="md:col-span-7">
+            <!-- Genetic Structure Assessment -->
+            <div class="bg-gray-900 rounded-xl p-6 shadow-lg border border-gray-800 mb-8" data-aos="fade-left">
+                <h2 class="text-2xl font-bold text-white mb-6">Genetic Structure Assessment</h2>
+                
+                <!-- Score Legend -->
+                <div class="grid grid-cols-4 gap-4 mb-6 text-center text-sm">
+                    <div class="bg-green-900/50 text-green-400 py-2 px-4 rounded-lg">
+                        90-100
+                        <span class="block text-xs mt-1">Excellent</span>
+                    </div>
+                    <div class="bg-blue-900/50 text-blue-400 py-2 px-4 rounded-lg">
+                        70-89
+                        <span class="block text-xs mt-1">Good</span>
+                    </div>
+                    <div class="bg-yellow-900/50 text-yellow-400 py-2 px-4 rounded-lg">
+                        40-69
+                        <span class="block text-xs mt-1">Average</span>
+                    </div>
+                    <div class="bg-red-900/50 text-red-400 py-2 px-4 rounded-lg">
+                        0-39
+                        <span class="block text-xs mt-1">Needs Work</span>
+                    </div>
+                </div>
+
+                <!-- Genetic Traits -->
+                <div class="space-y-4 mb-8">
+                    {% for trait_name, trait_data in traits.items() %}
+                        {% if trait_name not in ['body_fat_percentage', 'muscle_building_potential', 'body_type'] %}
+                            {% if trait_data is mapping and 'rating' in trait_data %}
+                                <div class="bg-gray-800 rounded-lg p-4">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <h4 class="text-white font-medium">{{ trait_name|replace('_', ' ')|title }}</h4>
+                                        {% if trait_data.rating == 'excellent' %}
+                                            <span class="text-green-400">{{ trait_data.display_value }}</span>
+                                        {% elif trait_data.rating == 'good' %}
+                                            <span class="text-blue-400">{{ trait_data.display_value }}</span>
+                                        {% elif trait_data.rating == 'average' %}
+                                            <span class="text-yellow-400">{{ trait_data.display_value }}</span>
+                                        {% elif trait_data.rating == 'below_average' %}
+                                            <span class="text-red-400">{{ trait_data.display_value }}</span>
+                                        {% else %}
+                                            <span class="text-gray-400">{{ trait_data.display_value }}</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="w-full bg-gray-700 rounded-full h-2.5">
+                                        {% if trait_data.rating == 'excellent' %}
+                                            <div class="bg-green-500 h-2.5 rounded-full" style="width: 90%"></div>
+                                        {% elif trait_data.rating == 'good' %}
+                                            <div class="bg-blue-500 h-2.5 rounded-full" style="width: 75%"></div>
+                                        {% elif trait_data.rating == 'average' %}
+                                            <div class="bg-yellow-500 h-2.5 rounded-full" style="width: 50%"></div>
+                                        {% elif trait_data.rating == 'below_average' %}
+                                            <div class="bg-red-500 h-2.5 rounded-full" style="width: 25%"></div>
+                                        {% else %}
+                                            <div class="bg-gray-500 h-2.5 rounded-full" style="width: 50%"></div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Personalized Recommendations -->
+            <div class="bg-gray-900 rounded-xl p-6 shadow-lg border border-gray-800" data-aos="fade-up">
+                <h2 class="text-2xl font-bold text-white mb-6">Personalized Recommendations</h2>
+                
+                <!-- Body Type -->
+                {% if 'body_type' in traits %}
+                <div class="bg-gray-800 rounded-lg p-4 mb-6">
+                    <h3 class="text-xl font-bold text-white mb-2">Body Type</h3>
+                    <p class="text-gray-400">
+                        {% if traits.body_type is mapping and 'description' in traits.body_type %}
+                            {{ traits.body_type.description }}
+                        {% elif traits.body_type is mapping and 'value' in traits.body_type %}
+                            {{ traits.body_type.value|capitalize }}
+                        {% elif traits.body_type is string %}
+                            {{ traits.body_type|capitalize }}
+                        {% else %}
+                            Balanced
+                        {% endif %}
+                    </p>
+                </div>
+                {% endif %}
+                
+                <!-- Training Program -->
+                <div class="bg-gray-800 rounded-lg p-4 mb-6">
+                    <h3 class="text-xl font-bold text-white mb-4">Training Program</h3>
+                    <div class="space-y-4">
+                        <div class="bg-gray-700 rounded-lg p-4">
+                            <h4 class="text-lg font-semibold text-white mb-2">Push/Pull/Legs Split</h4>
+                            <p class="text-gray-400">{{ recommendations.training_split.description }}</p>
+                        </div>
+                        
+                        {% if 'workout_schedule' in recommendations.training_split %}
+                        <div class="mt-4">
+                            <h4 class="text-lg font-semibold text-white mb-2">Weekly Schedule</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {% for day, workout in recommendations.training_split.workout_schedule.items() %}
+                                <div class="bg-gray-700 rounded-lg p-4">
+                                    <h5 class="font-medium text-white mb-1">{{ day|capitalize }}</h5>
+                                    <p class="text-gray-400">{{ workout }}</p>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Focus Areas -->
+                <div class="bg-gray-800 rounded-lg p-4 mb-6">
+                    <h3 class="text-xl font-bold text-white mb-4">Focus Areas</h3>
+                    <div class="space-y-2">
+                        {% for focus in recommendations.focus_areas %}
+                        <div class="flex items-center gap-2">
+                            <svg class="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <p class="text-gray-400">{{ focus }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Nutrition Recommendations -->
+                {% if 'nutrition' in recommendations %}
+                <div class="bg-gray-800 rounded-lg p-4">
+                    <h3 class="text-xl font-bold text-white mb-4">Nutrition Recommendations</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-gray-700 rounded-lg p-4">
+                            <h4 class="text-lg font-semibold text-white mb-2">Macro Split</h4>
+                            <div class="space-y-2">
+                                {% for macro, value in recommendations.nutrition.macro_split.items() %}
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">{{ macro|capitalize }}</span>
+                                    <span class="text-white">{{ value }}%</span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% if 'daily_calories' in recommendations.nutrition %}
+                        <div class="bg-gray-700 rounded-lg p-4">
+                            <h4 class="text-lg font-semibold text-white mb-2">Daily Calories</h4>
+                            <p class="text-2xl text-white">{{ recommendations.nutrition.daily_calories }} kcal</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    {% if 'tips' in recommendations.nutrition %}
+                    <div class="mt-4 bg-gray-700 rounded-lg p-4">
+                        <h4 class="text-lg font-semibold text-white mb-2">Nutrition Tips</h4>
+                        <ul class="list-disc ml-4 text-gray-400">
+                            {% for tip in recommendations.nutrition.tips %}
+                            <li class="mb-1">{{ tip }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+                
+                <!-- Action Buttons -->
+                <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <a href="{{ url_for('nutrition', analysis_id=analysis_id) }}" class="bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-6 rounded-lg text-center transition-colors duration-200 flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                        <span>Detailed Nutrition Plan</span>
+                    </a>
+                    <a href="{{ url_for('workout', analysis_id=analysis_id) }}" class="bg-gray-700 hover:bg-gray-600 text-white font-medium py-3 px-6 rounded-lg text-center transition-colors duration-200 flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                        <span>Full Workout Program</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize AOS
+        AOS.init({
+            duration: 800,
+            once: true,
+            offset: 100
+        });
+        
+        // Radar chart could be initialized here if using Chart.js
+    });
+</script>
+{% endblock %}

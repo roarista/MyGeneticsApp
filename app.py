@@ -226,13 +226,14 @@ def results(analysis_id):
             formatted_traits[trait_name] = trait_data
     
     return render_template(
-        'tailwind_analysis.html',
+        'tailwind_results.html',
         analysis_id=analysis_id,
         traits=formatted_traits,
         recommendations=result['recommendations'],
         user_info=result['user_info'],
         image_data=img_b64,
-        format_value=format_trait_value  # Pass the formatter to the template
+        format_value=format_trait_value,  # Pass the formatter to the template
+        is_3d_scan=False  # Flag to indicate this is not a 3D scan analysis
     )
 
 @app.route('/education')
@@ -375,7 +376,7 @@ def scan3d_results(analysis_id):
             formatted_traits[trait_name] = trait_data
     
     return render_template(
-        'tailwind_analysis.html',
+        'tailwind_results.html',
         analysis_id=analysis_id,
         traits=formatted_traits,
         recommendations=result['recommendations'],
@@ -695,14 +696,15 @@ def recommendations(analysis_id):
             formatted_traits[trait_name] = trait_data
     
     return render_template(
-        'tailwind_analysis.html',
+        'tailwind_results.html',
         analysis_id=analysis_id,
         traits=formatted_traits,
         recommendations=result['recommendations'],
         user_info=result['user_info'],
         image_data=None,
         format_value=format_trait_value,  # Pass the formatter to the template
-        recommendations_view=True  # Flag to indicate this is just recommendations view
+        recommendations_view=True,  # Flag to indicate this is just recommendations view
+        is_3d_scan=False  # Flag to indicate this is not a 3D scan
     )
 
 @app.route('/nutrition/<analysis_id>')
