@@ -92,26 +92,29 @@
         </div>
         
         <!-- Weak Points Section -->
-        <div class="fitness-card">
-            <div class="flex items-center gap-3 mb-4">
-                <svg class="icon text-fitness-red">
+        <div class="fitness-card bg-gray-800/80 backdrop-blur-sm p-6 rounded-xl border border-gray-700 shadow-lg" data-aos="fade-up" data-aos-delay="200">
+            <div class="flex items-center gap-3 mb-5">
+                <svg class="icon text-red-500">
                     <use xlink:href="#icon-alert-triangle"></use>
                 </svg>
-                <h3 class="text-xl font-bold">Areas to Prioritize</h3>
+                <h3 class="text-xl font-bold text-white">Areas to Prioritize</h3>
             </div>
             
             {% if weak_points|length > 0 %}
             <div class="mb-4">
-                <ul class="space-y-3">
+                <ul class="space-y-4 mt-3">
                     {% for weak_point in weak_points %}
-                    <li class="fitness-card bg-fitness-darkgray p-3">
-                        <div class="flex items-start gap-2">
-                            <svg class="icon icon-sm text-fitness-red mt-1">
+                    <li class="bg-gray-700/60 p-4 rounded-lg border border-gray-600 hover:bg-gray-700/80 transition-colors duration-300 shadow-md">
+                        <div class="flex items-start gap-3">
+                            <svg class="icon icon-sm text-red-400 mt-1 flex-shrink-0">
                                 <use xlink:href="#icon-target"></use>
                             </svg>
                             <div>
-                                <span class="font-medium text-fitness-red">{{ weak_point.name }}</span>
-                                <p class="text-sm text-fitness-gray mt-1">
+                                <span class="font-medium text-red-400 text-lg">{{ weak_point.name }}</span>
+                                <div class="mt-2 w-full bg-gray-800 rounded-full h-2.5">
+                                    <div class="bg-gradient-to-r from-red-600 to-red-400 h-2.5 rounded-full" style="width: 45%"></div>
+                                </div>
+                                <p class="text-gray-300 mt-2">
                                     This area shows potential for improvement. We've added specialized exercises to target this weak point.
                                 </p>
                             </div>
@@ -121,12 +124,12 @@
                 </ul>
             </div>
             {% else %}
-            <div class="fitness-card bg-fitness-darkgray mb-4">
-                <div class="flex items-center gap-2">
-                    <svg class="icon text-fitness-accent">
+            <div class="bg-gray-700/60 p-4 rounded-lg border border-gray-600 hover:bg-gray-700/80 transition-colors duration-300 shadow-md mb-4">
+                <div class="flex items-start gap-3">
+                    <svg class="icon text-green-400 flex-shrink-0 mt-1">
                         <use xlink:href="#icon-smile"></use>
                     </svg>
-                    <p class="text-fitness-gray">
+                    <p class="text-gray-300">
                         No significant weak points detected. Your workout plan focuses on balanced development across all muscle groups.
                     </p>
                 </div>
@@ -135,22 +138,22 @@
             
             <!-- Specialized Exercises for Weak Points -->
             {% if specialized_exercises|length > 0 %}
-            <div>
-                <h4 class="text-lg font-bold mb-3 text-fitness-accent">Specialized Exercises</h4>
-                <div class="space-y-3">
+            <div class="mt-6" data-aos="fade-up" data-aos-delay="300">
+                <h4 class="text-lg font-bold mb-4 text-blue-400">Specialized Exercises</h4>
+                <div class="space-y-4">
                     {% for exercise in specialized_exercises %}
-                    <div class="fitness-card bg-fitness-darkgray p-3">
-                        <div class="flex items-start gap-2">
-                            <svg class="icon icon-sm text-blue-500 mt-1">
+                    <div class="bg-gray-700/80 backdrop-blur-sm p-4 rounded-xl border border-gray-600 shadow-lg hover:bg-gray-700/90 transition-all duration-300">
+                        <div class="flex items-start gap-3">
+                            <svg class="icon icon-sm text-blue-400 mt-1 flex-shrink-0">
                                 <use xlink:href="#icon-zap"></use>
                             </svg>
                             <div>
-                                <span class="font-medium text-blue-500">{{ exercise.name }}</span>
-                                <div class="text-xs text-fitness-gray flex gap-4 mt-2">
-                                    <span>{{ exercise.sets }} sets</span>
-                                    <span>{{ exercise.reps }}</span>
+                                <span class="font-medium text-blue-400 text-lg">{{ exercise.name }}</span>
+                                <div class="flex flex-wrap gap-3 mt-3">
+                                    <span class="bg-blue-900/50 text-blue-300 px-3 py-1 rounded-full text-sm">{{ exercise.sets }} sets</span>
+                                    <span class="bg-blue-900/50 text-blue-300 px-3 py-1 rounded-full text-sm">{{ exercise.reps }}</span>
                                 </div>
-                                <p class="text-sm text-fitness-gray mt-1">{{ exercise.focus }}</p>
+                                <p class="text-gray-300 mt-3">{{ exercise.focus }}</p>
                             </div>
                         </div>
                     </div>
