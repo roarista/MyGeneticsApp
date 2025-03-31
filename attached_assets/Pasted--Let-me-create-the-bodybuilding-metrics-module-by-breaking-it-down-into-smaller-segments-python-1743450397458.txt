@@ -1,0 +1,1777 @@
+
+Let me create the bodybuilding metrics module by breaking it down into smaller segments:
+
+```python:MyGeneticsApp/utils/bodybuilding_metrics.py
+"""
+Bodybuilding Metrics Module
+
+This module provides specialized analysis functions for bodybuilders and fitness enthusiasts,
+focusing on physique proportions, symmetry, and body composition metrics.
+"""
+
+import math
+import numpy as np
+import logging
+
+# Set up logging
+logger = logging.getLogger(__name__)
+
+# Constants for ideal bodybuilding proportions
+# Based on classical bodybuilding aesthetics like the Golden Ratio
+IDEAL_SHOULDER_WAIST_RATIO = 1.618  # Golden ratio
+IDEAL_CHEST_WAIST_RATIO = 1.4
+IDEAL_ARM_NECK_RATIO = 1.0
+IDEAL_CALF_NECK_RATIO = 0.96
+IDEAL_THIGH_WAIST_RATIO = 0.75
+IDEAL_ARM_FOREARM_RATIO = 1.47
+
+# Formulas for body composition calculations
+def calculate_body_fat_percentage(weight_kg, height_cm, age, gender, neck_cm, waist_cm, hip_cm=None):
+    """
+    Calculate body fat percentage using Navy method formula.
+    
+    Args:
+        weight_kg: Weight in kilograms
+        height_cm: Height in centimeters
+        age: Age in years
+        gender: 'male' or 'female'
+        neck_cm: Neck circumference in cm
+        waist_cm: Waist circumference in cm
+        hip_cm: Hip circumference in cm (required for females)
+        
+    Returns:
+        Body fat percentage as float
+    """
+    height_m = height_cm / 100
+    
+    try:
+        if gender.lower() == 'male':
+            # Male Navy formula
+            body_fat = 495 / (1.0324 - 0.19077 * math.log10(waist_cm - neck_cm) + 0.15456 * math.log10(height_cm)) - 450
+        else:
+            # Female Navy formula (requires hip measurement)
+            if hip_cm is None:
+                raise ValueError("Hip circumference is required for female body fat calculation")
+            body_fat = 495 / (1.29579 - 0.35004 * math.log10(waist_cm + hip_cm - neck_cm) + 0.22100 * math.log10(height_cm)) - 450
+        
+        # Ensure result is within reasonable bounds
+        body_fat = max(3.0, min(body_fat, 45.0))
+        return round(body_fat, 1)
+        
+    except (ValueError, ZeroDivisionError) as e:
+        logger.error(f"Error calculating body fat percentage: {e}")
+        return None
+
+def calculate_lean_body_mass(weight_kg, body_fat_percentage):
+    """
+    Calculate lean body mass (everything except fat).
+    
+    Args:
+        weight_kg: Total body weight in kg
+        body_fat_percentage: Body fat as percentage
+        
+    Returns:
+        Lean body mass in kg
+    """
+    try:
+        lbm = weight_kg * (1 - (body_fat_percentage / 100))
+        return round(lbm, 1)
+    except (TypeError, ValueError) as e:
+        logger.error(f"Error calculating lean body mass: {e}")
+        return None
+
+def calculate_fat_free_mass_index(lean_body_mass_kg, height_cm):
+    """
+    Calculate Fat-Free Mass Index (FFMI), a measure of muscularity normalized for height.
+    
+    Args:
+        lean_body_mass_kg: Lean body mass in kg
+        height_cm: Height in centimeters
+        
+    Returns:
+        FFMI value (standard range is approximately 18-25 for men, 15-21 for women)
+    """
+    try:
+        height_m = height_cm / 100
+        ffmi = lean_body_mass_kg / (height_m * height_m)
+        return round(ffmi, 1)
+    except (TypeError, ValueError, ZeroDivisionError) as e:
+        logger.error(f"Error calculating FFMI: {e}")
+        return None
+
+def calculate_normalized_ffmi(ffmi, height_cm):
+    """
+    Calculate normalized FFMI, adjusted to a height of 1.83m (6ft).
+    Values above 25 may indicate exceptional muscle development.
+    
+    Args:
+        ffmi: FFMI value
+        height_cm: Height in centimeters
+        
+    Returns:
+        Normalized FFMI value
+    """
+    try:
+        height_m = height_cm / 100
+        normalized_ffmi = ffmi + (6.1 * (1.83 - height_m))
+        return round(normalized_ffmi, 1)
+    except (TypeError, ValueError) as e:
+        logger.error(f"Error calculating normalized FFMI: {e}")
+        return None
+
+# Physique proportion analysis
+def analyze_shoulder_to_waist_ratio(shoulder_cm, waist_cm):
+    """
+    Calculate and evaluate shoulder-to-waist ratio (V-taper).
+    
+    Args:
+        shoulder_cm: Shoulder circumference or shoulder width in cm
+        waist_cm: Waist circumference at narrowest point in cm
+        
+    Returns:
+        Dictionary with ratio value and assessment
+    """
+    try:
+        ratio = shoulder_cm / waist_cm
+        
+        if ratio < 1.3:
+            assessment = "below_average"
+            description = "Below average V-taper. Focus on developing lats and deltoids."
+        elif 1.3 <= ratio < 1.5:
+            assessment = "average"
+            description = "Average V-taper. Continue developing shoulder width."
+        elif 1.5 <= ratio < 1.618:
+            assessment = "above_average"
+            description = "Good V-taper. Close to the ideal golden ratio."
+        else:  # ratio >= 1.618
+            assessment = "excellent"
+            description = "Excellent V-taper, matching or exceeding the golden ratio."
+            
+        return {
+            "value": round(ratio, 2),
+            "rating": assessment,
+            "description": description,
+            "ideal": IDEAL_SHOULDER_WAIST_RATIO
+        }
+    except (TypeError, ValueError, ZeroDivisionError) as e:
+        logger.error(f"Error analyzing shoulder-to-waist ratio: {e}")
+        return None
+```
+Now let's add more bodybuilding metrics to the same file:
+
+```python:MyGeneticsApp/utils/bodybuilding_metrics.py
+def analyze_arm_symmetry(left_arm_cm, right_arm_cm):
+    """
+    Analyze the symmetry between left and right arm measurements.
+    
+    Args:
+        left_arm_cm: Left arm circumference in cm
+        right_arm_cm: Right arm circumference in cm
+        
+    Returns:
+        Dictionary with symmetry ratio and assessment
+    """
+    try:
+        # Always divide larger by smaller for consistent ratio > 1
+        if left_arm_cm >= right_arm_cm:
+            ratio = left_arm_cm / right_arm_cm
+            dominant = "left"
+        else:
+            ratio = right_arm_cm / left_arm_cm
+            dominant = "right"
+        
+        # Interpret the ratio
+        if ratio < 1.03:
+            assessment = "excellent"
+            description = "Excellent arm symmetry. Difference is less than 3%."
+        elif 1.03 <= ratio < 1.05:
+            assessment = "good"
+            description = "Good arm symmetry. Minor difference (3-5%)."
+        elif 1.05 <= ratio < 1.1:
+            assessment = "average"
+            description = f"Average symmetry. {dominant.title()} arm is noticeably larger (5-10%)."
+        else:  # ratio >= 1.1
+            assessment = "below_average"
+            description = f"Below average symmetry. {dominant.title()} arm is significantly larger (>10%)."
+        
+        difference_percent = (ratio - 1) * 100
+        
+        return {
+            "ratio": round(ratio, 2),
+            "difference_percent": round(difference_percent, 1),
+            "dominant_arm": dominant,
+            "rating": assessment,
+            "description": description
+        }
+    except (TypeError, ValueError, ZeroDivisionError) as e:
+        logger.error(f"Error analyzing arm symmetry: {e}")
+        return None
+
+def analyze_muscle_balance(measurements):
+    """
+    Analyze overall muscle balance across major body parts.
+    
+    Args:
+        measurements: Dictionary with the following keys (all in cm):
+            - chest
+            - shoulders
+            - waist
+            - hips
+            - left_arm
+            - right_arm
+            - left_thigh
+            - right_thigh
+            - left_calf
+            - right_calf
+            - neck
+            
+    Returns:
+        Dictionary with balance assessments and recommendations
+    """
+    try:
+        balance = {}
+        
+        # Calculate averages for paired measurements
+        arms_avg = (measurements.get('left_arm', 0) + measurements.get('right_arm', 0)) / 2
+        thighs_avg = (measurements.get('left_thigh', 0) + measurements.get('right_thigh', 0)) / 2
+        calves_avg = (measurements.get('left_calf', 0) + measurements.get('right_calf', 0)) / 2
+        
+        # Get other measurements
+        chest = measurements.get('chest', 0)
+        waist = measurements.get('waist', 0)
+        neck = measurements.get('neck', 0)
+        shoulders = measurements.get('shoulders', 0)
+        
+        # Calculate key ratios
+        if waist > 0:
+            chest_waist_ratio = chest / waist
+            balance['chest_waist_ratio'] = {
+                "value": round(chest_waist_ratio, 2),
+                "ideal": IDEAL_CHEST_WAIST_RATIO,
+                "description": "Ratio of chest to waist circumference"
+            }
+            
+            thigh_waist_ratio = thighs_avg / waist
+            balance['thigh_waist_ratio'] = {
+                "value": round(thigh_waist_ratio, 2),
+                "ideal": IDEAL_THIGH_WAIST_RATIO,
+                "description": "Ratio of thigh to waist circumference"
+            }
+        
+        if neck > 0:
+            arm_neck_ratio = arms_avg / neck
+            balance['arm_neck_ratio'] = {
+                "value": round(arm_neck_ratio, 2),
+                "ideal": IDEAL_ARM_NECK_RATIO,
+                "description": "Ratio of arm to neck circumference"
+            }
+            
+            calf_neck_ratio = calves_avg / neck
+            balance['calf_neck_ratio'] = {
+                "value": round(calf_neck_ratio, 2),
+                "ideal": IDEAL_CALF_NECK_RATIO,
+                "description": "Ratio of calf to neck circumference"
+            }
+        
+        # Calculate upper/lower body balance
+        if thighs_avg > 0 and arms_avg > 0:
+            upper_lower_ratio = arms_avg / thighs_avg
+            
+            if upper_lower_ratio < 0.5:
+                upper_lower_assessment = "Lower body dominant"
+                upper_lower_recommendation = "Focus on upper body development"
+            elif 0.5 <= upper_lower_ratio < 0.6:
+                upper_lower_assessment = "Moderately lower body dominant"
+                upper_lower_recommendation = "Slightly increase upper body training"
+            elif 0.6 <= upper_lower_ratio < 0.7:
+                upper_lower_assessment = "Balanced with slight lower body emphasis"
+                upper_lower_recommendation = "Maintain current balance"
+            elif 0.7 <= upper_lower_ratio < 0.8:
+                upper_lower_assessment = "Well balanced physique"
+                upper_lower_recommendation = "Maintain current balance"
+            elif 0.8 <= upper_lower_ratio < 0.9:
+                upper_lower_assessment = "Balanced with slight upper body emphasis"
+                upper_lower_recommendation = "Maintain current balance"
+            elif 0.9 <= upper_lower_ratio < 1.1:
+                upper_lower_assessment = "Moderately upper body dominant"
+                upper_lower_recommendation = "Slightly increase lower body training"
+            else:  # ratio >= 1.1
+                upper_lower_assessment = "Upper body dominant"
+                upper_lower_recommendation = "Focus on lower body development"
+            
+            balance['upper_lower_balance'] = {
+                "ratio": round(upper_lower_ratio, 2),
+                "assessment": upper_lower_assessment,
+                "recommendation": upper_lower_recommendation
+            }
+        
+        # Generate overall assessment
+        imbalances = []
+        
+        if 'chest_waist_ratio' in balance and balance['chest_waist_ratio']['value'] < IDEAL_CHEST_WAIST_RATIO * 0.9:
+            imbalances.append("chest development")
+        
+        if 'arm_neck_ratio' in balance and balance['arm_neck_ratio']['value'] < IDEAL_ARM_NECK_RATIO * 0.9:
+            imbalances.append("arm development")
+        
+        if 'calf_neck_ratio' in balance and balance['calf_neck_ratio']['value'] < IDEAL_CALF_NECK_RATIO * 0.9:
+            imbalances.append("calf development")
+        
+        if 'thigh_waist_ratio' in balance and balance['thigh_waist_ratio']['value'] < IDEAL_THIGH_WAIST_RATIO * 0.9:
+            imbalances.append("quad development")
+        
+        if imbalances:
+            balance['weak_points'] = imbalances
+        
+        return balance
+        
+    except (TypeError, ValueError, ZeroDivisionError) as e:
+        logger.error(f"Error analyzing muscle balance: {e}")
+        return None
+
+def estimate_bodyfat_from_measurements(gender, waist_cm, neck_cm, height_cm, hip_cm=None):
+    """
+    Estimate body fat percentage from circumference measurements.
+    
+    Args:
+        gender: 'male' or 'female'
+        waist_cm: Waist circumference at navel in cm
+        neck_cm: Neck circumference in cm
+        height_cm: Height in cm
+        hip_cm: Hip circumference in cm (required for females)
+        
+    Returns:
+        Estimated body fat percentage
+    """
+    try:
+        if gender.lower() == 'male':
+            # US Navy formula for men
+            bf_percent = 86.010 * math.log10(waist_cm - neck_cm) - 70.041 * math.log10(height_cm) + 36.76
+        else:
+            # US Navy formula for women
+            if hip_cm is None:
+                raise ValueError("Hip circumference is required for female body fat calculation")
+            bf_percent = 163.205 * math.log10(waist_cm + hip_cm - neck_cm) - 97.684 * math.log10(height_cm) - 78.387
+        
+        # Constrain to reasonable values
+        bf_percent = max(2.0, min(bf_percent, 45.0))
+        
+        return round(bf_percent, 1)
+    except Exception as e:
+        logger.error(f"Error estimating body fat from measurements: {e}")
+        return None
+
+def analyze_muscle_insertions(user_images=None, arm_length_cm=None, torso_length_cm=None):
+    """
+    Analyze muscle insertion points to identify genetic advantages.
+    This is a simplified approximation as true insertion analysis requires detailed imaging.
+    
+    Args:
+        user_images: Optional image data (unused in simplified formula)
+        arm_length_cm: Arm length from shoulder to wrist in cm
+        torso_length_cm: Torso length from shoulders to hips in cm
+        
+    Returns:
+        Dictionary with muscle insertion assessments
+    """
+    # This is a placeholder for more complex insertion analysis
+    # In a real application, this would use computer vision to analyze images
+    insertion_analysis = {
+        "biceps": {
+            "insertion_type": "average",
+            "description": "Average bicep insertion point, providing balanced peak and fullness."
+        },
+        "lats": {
+            "insertion_type": "average",
+            "description": "Average lat insertion, giving standard V-taper capabilities."
+        },
+        "calves": {
+            "insertion_type": "average", 
+            "description": "Average calf insertions, providing standard development potential."
+        }
+    }
+    
+    # If arm length is provided, make a simple approximation of bicep insertion
+    if arm_length_cm:
+        # This is a simplified approximation - in reality, would need actual insertion point data
+        # Shorter people often have higher insertions relative to limb length
+        if arm_length_cm < 65:  # Shorter arms (approximation)
+            insertion_analysis["biceps"] = {
+                "insertion_type": "high",
+                "description": "Higher bicep insertion point. May create more peaked biceps but reduced overall size potential."
+            }
+        elif arm_length_cm > 75:  # Longer arms (approximation)
+            insertion_analysis["biceps"] = {
+                "insertion_type": "low",
+                "description": "Lower bicep insertion point. Provides good size potential and fullness."
+            }
+    
+    return insertion_analysis
+
+def analyze_genetic_potential(gender, wrist_cm, ankle_cm, height_cm, shoulder_width_cm=None):
+    """
+    Analyze genetic potential for muscle building based on frame size.
+    
+    Args:
+        gender: 'male' or 'female'
+        wrist_cm: Wrist circumference in cm
+        ankle_cm: Ankle circumference in cm
+        height_cm: Height in cm
+        shoulder_width_cm: Optional shoulder width in cm
+        
+    Returns:
+        Dictionary with potential assessment
+    """
+    try:
+        # Calculate frame size index
+        frame_index = (wrist_cm + ankle_cm) / height_cm * 100
+        
+        # Adjust thresholds based on gender
+        if gender.lower() == 'male':
+            if frame_index < 5.8:
+                frame_size = "small"
+                muscle_potential = "below_average"
+                description = "Small frame. May need more time to build appreciable mass."
+                max_potential_ffmi = 23
+            elif 5.8 <= frame_index < 6.5:
+                frame_size = "medium"
+                muscle_potential = "average"
+                description = "Average frame. Good baseline for balanced development."
+                max_potential_ffmi = 25
+            else:  # frame_index >= 6.5
+                frame_size = "large"
+                muscle_potential = "above_average"
+                description = "Large frame. Good potential for overall mass."
+                max_potential_ffmi = 27
+        else:  # female
+            if frame_index < 5.4:
+                frame_size = "small"
+                muscle_potential = "below_average"
+                description = "Small frame. Focus on definition over mass."
+                max_potential_ffmi = 19
+            elif 5.4 <= frame_index < 6.0:
+                frame_size = "medium"
+                muscle_potential = "average"
+                description = "Average frame. Good balance of mass and definition potential."
+                max_potential_ffmi = 21
+            else:  # frame_index >= 6.0
+                frame_size = "large"
+                muscle_potential = "above_average"
+                description = "Large frame. Good potential for muscle mass."
+                max_potential_ffmi = 23
+        
+        # Additional shoulder width analysis if available
+        shoulder_assessment = None
+        if shoulder_width_cm and height_cm:
+            shoulder_height_ratio = shoulder_width_cm / height_cm
+            
+            if gender.lower() == 'male':
+                if shoulder_height_ratio > 0.25:
+                    shoulder_assessment = "Wide shoulder structure. Excellent potential for V-taper."
+                    max_potential_ffmi += 1  # Bonus for wide shoulders
+                elif shoulder_height_ratio < 0.22:
+                    shoulder_assessment = "Narrow shoulder structure. May require more focus on deltoid development."
+            else:  # female
+                if shoulder_height_ratio > 0.23:
+                    shoulder_assessment = "Wide shoulder structure. Excellent potential for athletic physique."
+                    max_potential_ffmi += 0.5  # Bonus for wide shoulders
+                elif shoulder_height_ratio < 0.2:
+                    shoulder_assessment = "Narrow shoulder structure. May require more focus on deltoid development."
+        
+        result = {
+            "frame_size": frame_size,
+            "frame_index": round(frame_index, 2),
+            "muscle_building_potential": muscle_potential,
+            "description": description,
+            "max_potential_ffmi": max_potential_ffmi
+        }
+        
+        if shoulder_assessment:
+            result["shoulder_assessment"] = shoulder_assessment
+            
+        return result
+        
+    except (TypeError, ValueError, ZeroDivisionError) as e:
+        logger.error(f"Error analyzing genetic potential: {e}")
+        return None
+```
+Now let's finish the bodybuilding metrics module by adding more advanced functions:
+
+```python:MyGeneticsApp/utils/bodybuilding_metrics.py
+def calculate_ideal_competition_weight(height_cm, gender, body_fat_target=None):
+    """
+    Calculate ideal competition weight based on height.
+    
+    Args:
+        height_cm: Height in centimeters
+        gender: 'male' or 'female'
+        body_fat_target: Target body fat percentage (default: 5% for men, 12% for women)
+        
+    Returns:
+        Dictionary with ideal weight and metrics
+    """
+    try:
+        # Default competition body fat targets if not specified
+        if body_fat_target is None:
+            body_fat_target = 5.0 if gender.lower() == 'male' else 12.0
+        
+        # Calculate FFMI targets by division/category
+        if gender.lower() == 'male':
+            # Male competition FFMI targets by division (approximate)
+            ffmi_targets = {
+                "mens_physique": 23.5,
+                "classic_physique": 25.0,
+                "bodybuilding": 26.5
+            }
+            
+            # Ensure body fat is in reasonable competition range
+            body_fat_target = max(4.0, min(body_fat_target, 10.0))
+        else:
+            # Female competition FFMI targets by division (approximate)
+            ffmi_targets = {
+                "bikini": 19.0,
+                "figure": 20.5,
+                "physique": 22.0,
+                "bodybuilding": 23.0
+            }
+            
+            # Ensure body fat is in reasonable competition range
+            body_fat_target = max(10.0, min(body_fat_target, 15.0))
+        
+        # Calculate ideal weights for each division
+        height_m = height_cm / 100
+        result = {
+            "height_cm": height_cm,
+            "body_fat_target": body_fat_target,
+            "divisions": {}
+        }
+        
+        for division, ffmi in ffmi_targets.items():
+            # Calculate lean mass at target FFMI
+            target_lbm = ffmi * (height_m * height_m)
+            
+            # Calculate total weight with target body fat
+            target_weight = target_lbm / (1 - (body_fat_target / 100))
+            
+            result["divisions"][division] = {
+                "target_ffmi": ffmi,
+                "ideal_weight_kg": round(target_weight, 1)
+            }
+        
+        return result
+        
+    except (TypeError, ValueError, ZeroDivisionError) as e:
+        logger.error(f"Error calculating ideal competition weight: {e}")
+        return None
+
+def analyze_posture(shoulder_height_left, shoulder_height_right, hip_height_left, hip_height_right):
+    """
+    Analyze posture based on shoulder and hip height measurements.
+    
+    Args:
+        shoulder_height_left: Height measurement of left shoulder
+        shoulder_height_right: Height measurement of right shoulder 
+        hip_height_left: Height measurement of left hip
+        hip_height_right: Height measurement of right hip
+        
+    Returns:
+        Dictionary with posture assessments
+    """
+    try:
+        # Calculate imbalances (using relative values for simplicity)
+        shoulder_difference = abs(shoulder_height_left - shoulder_height_right)
+        shoulder_imbalance_percent = (shoulder_difference / max(shoulder_height_left, shoulder_height_right)) * 100
+        
+        hip_difference = abs(hip_height_left - hip_height_right)
+        hip_imbalance_percent = (hip_difference / max(hip_height_left, hip_height_right)) * 100
+        
+        # Interpret shoulder imbalance
+        if shoulder_imbalance_percent < 1:
+            shoulder_assessment = "Excellent shoulder alignment"
+            shoulder_rating = "excellent"
+        elif 1 <= shoulder_imbalance_percent < 3:
+            shoulder_assessment = "Minor shoulder imbalance"
+            shoulder_rating = "good"
+        elif 3 <= shoulder_imbalance_percent < 5:
+            shoulder_assessment = "Moderate shoulder imbalance"
+            shoulder_rating = "average"
+        else:  # >= 5%
+            shoulder_assessment = "Significant shoulder imbalance"
+            shoulder_rating = "below_average"
+        
+        # Interpret hip imbalance
+        if hip_imbalance_percent < 1:
+            hip_assessment = "Excellent hip alignment"
+            hip_rating = "excellent"
+        elif 1 <= hip_imbalance_percent < 3:
+            hip_assessment = "Minor hip imbalance"
+            hip_rating = "good"
+        elif 3 <= hip_imbalance_percent < 5:
+            hip_assessment = "Moderate hip imbalance"
+            hip_rating = "average"
+        else:  # >= 5%
+            hip_assessment = "Significant hip imbalance"
+            hip_rating = "below_average"
+        
+        # Determine which side is higher
+        higher_shoulder = "left" if shoulder_height_left > shoulder_height_right else "right"
+        higher_hip = "left" if hip_height_left > hip_height_right else "right"
+        
+        # Check for overall posture patterns
+        posture_patterns = []
+        
+        # Check for indications of scoliosis
+        if shoulder_imbalance_percent >= 3 and hip_imbalance_percent >= 3:
+            if higher_shoulder == higher_hip:
+                posture_patterns.append("Possible C-curve pattern")
+            else:
+                posture_patterns.append("Possible S-curve pattern")
+        
+        # Check for common imbalances
+        if shoulder_imbalance_percent >= 3 and hip_imbalance_percent < 3:
+            posture_patterns.append("Upper body imbalance pattern")
+        elif shoulder_imbalance_percent < 3 and hip_imbalance_percent >= 3:
+            posture_patterns.append("Lower body imbalance pattern")
+        
+        return {
+            "shoulder_imbalance": {
+                "percent": round(shoulder_imbalance_percent, 1),
+                "assessment": shoulder_assessment,
+                "rating": shoulder_rating,
+                "higher_side": higher_shoulder
+            },
+            "hip_imbalance": {
+                "percent": round(hip_imbalance_percent, 1),
+                "assessment": hip_assessment,
+                "rating": hip_rating,
+                "higher_side": higher_hip
+            },
+            "posture_patterns": posture_patterns,
+            "recommendation": generate_posture_recommendation(shoulder_rating, hip_rating, posture_patterns)
+        }
+        
+    except (TypeError, ValueError, ZeroDivisionError) as e:
+        logger.error(f"Error analyzing posture: {e}")
+        return None
+
+def generate_posture_recommendation(shoulder_rating, hip_rating, posture_patterns):
+    """Generate personalized posture recommendations based on assessments."""
+    
+    recommendations = []
+    
+    # Add based on shoulder rating
+    if shoulder_rating in ["below_average", "average"]:
+        recommendations.append("Include unilateral shoulder exercises to address imbalances.")
+        recommendations.append("Consider postural assessments with a physical therapist or chiropractor.")
+    
+    # Add based on hip rating
+    if hip_rating in ["below_average", "average"]:
+        recommendations.append("Focus on unilateral lower body exercises to address imbalances.")
+        recommendations.append("Incorporate hip mobility work to improve alignment.")
+    
+    # Add based on patterns
+    if "Possible C-curve pattern" in posture_patterns or "Possible S-curve pattern" in posture_patterns:
+        recommendations.append("Consider consulting a healthcare professional to assess for possible scoliosis.")
+    
+    if "Upper body imbalance pattern" in posture_patterns:
+        recommendations.append("Focus on balanced upper body training and consider addressing specific muscle imbalances.")
+    
+    if "Lower body imbalance pattern" in posture_patterns:
+        recommendations.append("Add specific mobility and strengthening exercises for the lower body.")
+    
+    # Default recommendations
+    if not recommendations:
+        recommendations.append("Continue with balanced training and periodic posture assessments.")
+    
+    return recommendations
+
+def calculate_muscular_potential_by_bodypart(height_cm, gender, wrist_cm=None, ankle_cm=None):
+    """
+    Calculate potential maximum muscular measurements by body part based on height and frame.
+    Based on common bodybuilding formulas for natural potential.
+    
+    Args:
+        height_cm: Height in centimeters
+        gender: 'male' or 'female'
+        wrist_cm: Optional wrist circumference in cm for frame adjustment
+        ankle_cm: Optional ankle circumference in cm for frame adjustment
+        
+    Returns:
+        Dictionary with maximum natural measurements by body part
+    """
+    try:
+        # Base multipliers for standard medium frame
+        if gender.lower() == 'male':
+            # Male multipliers (Steve Reeves formula as a base)
+            arm_multiplier = 0.36
+            calf_multiplier = 0.34
+            neck_multiplier = 0.38
+            chest_multiplier = 1.15
+            thigh_multiplier = 0.5
+            waist_multiplier = 0.45
+        else:
+            # Female multipliers (adjusted from male values)
+            arm_multiplier = 0.31
+            calf_multiplier = 0.30
+            neck_multiplier = 0.31
+            chest_multiplier = 1.05
+            thigh_multiplier = 0.46
+            waist_multiplier = 0.42
+        
+        # Calculate frame adjustment if both wrist and ankle are provided
+        frame_adjustment = 1.0  # Default = no adjustment
+        if wrist_cm and ankle_cm:
+            frame_index = (wrist_cm + ankle_cm) / height_cm * 100
+            
+            # Adjust multipliers based on frame size
+            if gender.lower() == 'male':
+                if frame_index < 5.8:  # Small frame
+                    frame_adjustment = 0.95
+                elif frame_index >= 6.5:  # Large frame
+                    frame_adjustment = 1.05
+            else:  # female
+                if frame_index < 5.4:  # Small frame
+                    frame_adjustment = 0.95
+                elif frame_index >= 6.0:  # Large frame
+                    frame_adjustment = 1.05
+        
+        # Calculate maximum measurements
+        results = {
+            "arms_cm": round(height_cm * arm_multiplier * frame_adjustment, 1),
+            "calves_cm": round(height_cm * calf_multiplier * frame_adjustment, 1),
+            "neck_cm": round(height_cm * neck_multiplier * frame_adjustment, 1),
+            "chest_cm": round(height_cm * chest_multiplier * frame_adjustment, 1),
+            "thighs_cm": round(height_cm * thigh_multiplier * frame_adjustment, 1),
+            "waist_cm": round(height_cm * waist_multiplier * frame_adjustment, 1),
+            "forearms_cm": round(height_cm * arm_multiplier * 0.8 * frame_adjustment, 1),  # Approx 80% of arms
+            "description": "Maximum natural muscular potential based on height and frame",
+            "note": "Assumes 8-10% body fat for males, 15-18% for females"
+        }
+        
+        return results
+        
+    except (TypeError, ValueError, ZeroDivisionError) as e:
+        logger.error(f"Error calculating muscular potential: {e}")
+        return None
+
+def complete_bodybuilding_analysis(user_data):
+    """
+    Perform a complete bodybuilding-specific analysis using all available metrics.
+    
+    Args:
+        user_data: Dictionary containing user measurements and parameters
+            Required fields: height_cm, weight_kg, gender
+            Optional fields: various measurements, experience level, etc.
+            
+    Returns:
+        Comprehensive analysis dictionary with all bodybuilding metrics
+    """
+    try:
+        # Initialize result dictionary
+        analysis = {
+            "basic_info": {
+                "height_cm": user_data.get("height_cm"),
+                "weight_kg": user_data.get("weight_kg"),
+                "gender": user_data.get("gender", "male"),
+                "experience": user_data.get("experience", "beginner")
+            },
+            "timestamp": datetime.now().isoformat()
+        }
+        
+        # Get required parameters
+        height_cm = user_data.get("height_cm")
+        weight_kg = user_data.get("weight_kg")
+        gender = user_data.get("gender", "male")
+        
+        if not all([height_cm, weight_kg, gender]):
+            return {"error": "Missing required parameters: height_cm, weight_kg, gender"}
+        
+        # 1. Body Composition Analysis
+        # Calculate body fat if measurements are available
+        neck_cm = user_data.get("neck_cm")
+        waist_cm = user_data.get("waist_cm")
+        hip_cm = user_data.get("hip_cm")
+        
+        if neck_cm and waist_cm:
+            body_fat = estimate_bodyfat_from_measurements(
+                gender, waist_cm, neck_cm, height_cm, hip_cm
+            )
+            
+            if body_fat:
+                analysis["body_composition"] = {
+                    "body_fat_percentage": body_fat
+                }
+                
+                # Calculate lean body mass if body fat is available
+                lbm = calculate_lean_body_mass(weight_kg, body_fat)
+                if lbm:
+                    analysis["body_composition"]["lean_body_mass_kg"] = lbm
+                    
+                    # Calculate FFMI
+                    ffmi = calculate_fat_free_mass_index(lbm, height_cm)
+                    if ffmi:
+                        analysis["body_composition"]["ffmi"] = ffmi
+                        analysis["body_composition"]["normalized_ffmi"] = calculate_normalized_ffmi(ffmi, height_cm)
+        
+        # 2. Physique Proportions
+        measurements = {}
+        for key in ["chest", "shoulders", "waist", "hips", "neck", 
+                   "left_arm", "right_arm", "left_thigh", "right_thigh", 
+                   "left_calf", "right_calf"]:
+            if user_data.get(f"{key}_cm"):
+                measurements[key] = user_data.get(f"{key}_cm")
+        
+        if measurements:
+            analysis["measurements"] = measurements
+            
+            # Analyze muscle balance if sufficient measurements exist
+            if len(measurements) >= 4:  # Arbitrary threshold for meaningful analysis
+                balance = analyze_muscle_balance(measurements)
+                if balance:
+                    analysis["muscle_balance"] = balance
+            
+            # Analyze symmetry if paired measurements exist
+            if "left_arm" in measurements and "right_arm" in measurements:
+                arm_symmetry = analyze_arm_symmetry(measurements["left_arm"], measurements["right_arm"])
+                if arm_symmetry:
+                    if "symmetry" not in analysis:
+                        analysis["symmetry"] = {}
+                    analysis["symmetry"]["arms"] = arm_symmetry
+            
+            if "left_thigh" in measurements and "right_thigh" in measurements:
+                thigh_symmetry = analyze_arm_symmetry(measurements["left_thigh"], measurements["right_thigh"])
+                if thigh_symmetry:
+                    if "symmetry" not in analysis:
+                        analysis["symmetry"] = {}
+                    analysis["symmetry"]["thighs"] = thigh_symmetry
+            
+            if "left_calf" in measurements and "right_calf" in measurements:
+                calf_symmetry = analyze_arm_symmetry(measurements["left_calf"], measurements["right_calf"])
+                if calf_symmetry:
+                    if "symmetry" not in analysis:
+                        analysis["symmetry"] = {}
+                    analysis["symmetry"]["calves"] = calf_symmetry
+            
+            # Shoulder to waist ratio if both measurements exist
+            if "shoulders" in measurements and "waist" in measurements:
+                analysis["proportions"] = {
+                    "shoulder_to_waist": analyze_shoulder_to_waist_ratio(
+                        measurements["shoulders"], measurements["waist"]
+                    )
+                }
+        
+        # 3. Genetic Potential Analysis
+        wrist_cm = user_data.get("wrist_cm")
+        ankle_cm = user_data.get("ankle_cm")
+        shoulder_width_cm = user_data.get("shoulder_width_cm")
+        
+        if wrist_cm and ankle_cm:
+            genetic_potential = analyze_genetic_potential(
+                gender, wrist_cm, ankle_cm, height_cm, shoulder_width_cm
+            )
+            if genetic_potential:
+                analysis["genetic_potential"] = genetic_potential
+                
+                # Add maximum muscular measurements
+                max_measurements = calculate_muscular_potential_by_bodypart(
+                    height_cm, gender, wrist_cm, ankle_cm
+                )
+                if max_measurements:
+                    analysis["maximum_muscular_measurements"] = max_measurements
+        
+        # 4. Competition Planning (if applicable)
+        competition_goal = user_data.get("competition_goal", False)
+        if competition_goal:
+            target_bf = user_data.get("target_body_fat")
+            ideal_weight = calculate_ideal_competition_weight(height_cm, gender, target_bf)
+            if ideal_weight:
+                analysis["competition"] = ideal_weight
+        
+        # 5. Posture Analysis
+        shoulder_height_left = user_data.get("shoulder_height_left")
+        shoulder_height_right = user_data.get("shoulder_height_right")
+        hip_height_left = user_data.get("hip_height_left")
+        hip_height_right = user_data.get("hip_height_right")
+        
+        if all([shoulder_height_left, shoulder_height_right, hip_height_left, hip_height_right]):
+            posture = analyze_posture(
+                shoulder_height_left, shoulder_height_right, 
+                hip_height_left, hip_height_right
+            )
+            if posture:
+                analysis["posture"] = posture
+        
+        # 6. Generate recommendations based on complete analysis
+        analysis["recommendations"] = generate_bodybuilding_recommendations(analysis)
+        
+        return analysis
+        
+    except Exception as e:
+        logger.error(f"Error in complete bodybuilding analysis: {e}")
+        return {"error": str(e)}
+
+def generate_bodybuilding_recommendations(analysis):
+    """Generate comprehensive training recommendations based on analysis results."""
+    
+    recommendations = {
+        "training": [],
+        "nutrition": [],
+        "recovery": [],
+        "focus_areas": []
+    }
+    
+    # Extract key information
+    body_fat = analysis.get("body_composition", {}).get("body_fat_percentage")
+    ffmi = analysis.get("body_composition", {}).get("ffmi")
+    experience = analysis.get("basic_info", {}).get("experience", "beginner")
+    gender = analysis.get("basic_info", {}).get("gender", "male")
+    weak_points = analysis.get("muscle_balance", {}).get("weak_points", [])
+    
+    # 1. Training recommendations based on experience level
+    if experience == "beginner":
+        recommendations["training"].append("Focus on full-body workouts 3 times per week to build a foundation.")
+        recommendations["training"].append("Emphasize basic compound movements with proper form.")
+    elif experience == "intermediate":
+        recommendations["training"].append("Consider a push/pull/legs split to increase training volume.")
+        recommendations["training"].append("Incorporate progressive overload with periodization.")
+    else:  # advanced
+        recommendations["training"].append("Implement specialized training splits targeting specific muscle groups.")
+        recommendations["training"].append("Utilize advanced techniques like drop sets and rest-pause for continued progress.")
+    
+    # 2. Nutrition recommendations based on body composition
+    if body_fat is not None:
+        if gender.lower() == "male":
+            if body_fat > 20:
+                recommendations["nutrition"].append("Focus on a moderate caloric deficit (300-500 calories) for fat loss.")
+            elif 15 <= body_fat <= 20:
+                recommendations["nutrition"].append("Consider a slight caloric deficit or body recomposition approach.")
+            elif 10 <= body_fat < 15:
+                recommendations["nutrition"].append("Maintain calories at maintenance or slight surplus for lean muscle gains.")
+            else:  # < 10
+                recommendations["nutrition"].append("Focus on a caloric surplus (200-400 calories) for muscle gains.")
+        else:  # female
+            if body_fat > 30:
+                recommendations["nutrition"].append("Focus on a moderate caloric deficit (300-500 calories) for fat loss.")
+            elif 25 <= body_fat <= 30:
+                recommendations["nutrition"].append("Consider a slight caloric deficit or body recomposition approach.")
+            elif 18 <= body_fat < 25:
+                recommendations["nutrition"].append("Maintain calories at maintenance or slight surplus for lean muscle gains.")
+            else:  # < 18
+                recommendations["nutrition"].append("Focus on a caloric surplus (200-300 calories) for muscle gains.")
+    
+    # 3. Recovery recommendations
+    recommendations["recovery"].append("Ensure 7-9 hours of quality sleep for optimal recovery and hormonal balance.")
+    
+    if experience == "advanced":
+        recommendations["recovery"].append("Consider deload weeks every 6-8 weeks to prevent overtraining.")
+    
+    # 4. Focus areas based on weak points and muscle balance
+    for weak_point in weak_points:
+        recommendations["focus_areas"].append(f"Prioritize {weak_point} with targeted exercises 2-3 times per week.")
+    
+    # 5. Posture recommendations if available
+    if "posture" in analysis and "recommendation" in analysis["posture"]:
+        for rec in analysis["posture"]["recommendation"]:
+            recommendations["training"].append(rec)
+    
+    return recommendations
+
+# Import datetime at the top of the file for timestamp generation
+from datetime import datetime
+```
+Now let's integrate the bodybuilding metrics with the Flask app by adding a new route:
+
+```python:MyGeneticsApp/app.py
+# ... existing code ...
+
+# Import the bodybuilding_metrics module
+from utils.bodybuilding_metrics import *
+
+# ... existing code ...
+
+@app.route('/bodybuilding_analysis', methods=['GET', 'POST'])
+@login_required
+def bodybuilding_analysis():
+    """
+    Route for bodybuilding-specific body composition analysis.
+    Provides detailed metrics for bodybuilders and fitness enthusiasts.
+    """
+    if request.method == 'POST':
+        try:
+            # Extract form data
+            user_data = {
+                "height_cm": float(request.form.get('height_cm')),
+                "weight_kg": float(request.form.get('weight_kg')),
+                "gender": request.form.get('gender', 'male'),
+                "experience": request.form.get('experience', 'beginner'),
+                "competition_goal": bool(request.form.get('competition_goal', False))
+            }
+            
+            # Optional measurements - add if provided
+            optional_fields = [
+                'neck_cm', 'chest_cm', 'shoulders_cm', 'waist_cm', 'hips_cm',
+                'left_arm_cm', 'right_arm_cm', 'left_thigh_cm', 'right_thigh_cm',
+                'left_calf_cm', 'right_calf_cm', 'wrist_cm', 'ankle_cm',
+                'shoulder_width_cm', 'target_body_fat',
+                'shoulder_height_left', 'shoulder_height_right',
+                'hip_height_left', 'hip_height_right'
+            ]
+            
+            for field in optional_fields:
+                value = request.form.get(field)
+                if value and value.strip():
+                    try:
+                        user_data[field] = float(value)
+                    except ValueError:
+                        pass  # Skip if not a valid number
+            
+            # Perform comprehensive analysis
+            analysis_results = complete_bodybuilding_analysis(user_data)
+            
+            # Save analysis to database
+            analysis = Analysis(
+                user_id=current_user.id,
+                analysis_type="bodybuilding",
+                analysis_data=json.dumps(analysis_results),
+                created_at=datetime.now()
+            )
+            db.session.add(analysis)
+            db.session.commit()
+            
+            # Return the analysis results page
+            return render_template(
+                'bodybuilding_results.html',
+                analysis=analysis_results,
+                user=current_user
+            )
+            
+        except Exception as e:
+            flash(f"Error performing analysis: {str(e)}", "danger")
+            return redirect(url_for('bodybuilding_analysis'))
+    
+    # GET request - show the form
+    return render_template('bodybuilding_form.html', user=current_user)
+    
+# ... existing code ...
+```
+Now let's create the HTML templates for the bodybuilding analysis feature. First, let's create the form template:
+
+```html:MyGeneticsApp/templates/bodybuilding_form.html
+{% extends "base.html" %}
+
+{% block title %}Bodybuilding Analysis{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6 text-center">Bodybuilding Physique Analysis</h1>
+    
+    <div class="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-md">
+        <p class="mb-4 text-gray-700">Complete the form below for a detailed analysis of your physique from a bodybuilding perspective. This analysis will provide insights into your body composition, proportions, symmetry, and genetic potential.</p>
+        
+        <form method="POST" action="{{ url_for('bodybuilding_analysis') }}" class="space-y-6">
+            <div class="bg-blue-50 p-4 rounded-md mb-6">
+                <h2 class="text-xl font-semibold mb-2 text-blue-800">Basic Information (Required)</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="height_cm" class="block text-sm font-medium text-gray-700">Height (cm)</label>
+                        <input type="number" step="0.1" name="height_cm" id="height_cm" required 
+                               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label for="weight_kg" class="block text-sm font-medium text-gray-700">Weight (kg)</label>
+                        <input type="number" step="0.1" name="weight_kg" id="weight_kg" required 
+                               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label for="gender" class="block text-sm font-medium text-gray-700">Gender</label>
+                        <select name="gender" id="gender" required 
+                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="experience" class="block text-sm font-medium text-gray-700">Training Experience</label>
+                        <select name="experience" id="experience" 
+                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            <option value="beginner">Beginner (0-2 years)</option>
+                            <option value="intermediate">Intermediate (2-5 years)</option>
+                            <option value="advanced">Advanced (5+ years)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-purple-50 p-4 rounded-md mb-6">
+                <h2 class="text-xl font-semibold mb-2 text-purple-800">Body Composition Measurements (Optional)</h2>
+                <p class="text-sm text-gray-600 mb-3">For more accurate body composition analysis, provide as many measurements as possible. All measurements should be in centimeters.</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label for="neck_cm" class="block text-sm font-medium text-gray-700">Neck (cm)</label>
+                        <input type="number" step="0.1" name="neck_cm" id="neck_cm" 
+                               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label for="chest_cm" class="block text-sm font-medium text-gray-700">Chest (cm)</label>
+                        <input type="number" step="0.1" name="chest_cm" id="chest_cm" 
+                               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label for="shoulders_cm" class="block text-sm font-medium text-gray-700">Shoulders (cm)</label>
+                        <input type="number" step="0.1" name="shoulders_cm" id="shoulders_cm" 
+                               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label for="waist_cm" class="block text-sm font-medium text-gray-700">Waist (cm)</label>
+                        <input type="number" step="0.1" name="waist_cm" id="waist_cm" 
+                               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label for="hips_cm" class="block text-sm font-medium text-gray-700">Hips (cm)</label>
+                        <input type="number" step="0.1" name="hips_cm" id="hips_cm" 
+                               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label for="left_arm_cm" class="block text-sm font-medium text-gray-700">Left Arm (cm)</label>
+                        <input type="number" step="0.1" name="left_arm_cm" id="left_arm_cm" 
+                               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label for="right_arm_cm" class="block text-sm font-medium text-gray-700">Right Arm (cm)</label>
+                        <input type="number" step="0.1" name="right_arm_cm" id="right_arm_cm" 
+                               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label for="left_thigh_cm" class="block text-sm font-medium text-gray-700">Left Thigh (cm)</label>
+                        <input type="number" step="0.1" name="left_thigh_cm" id="left_thigh_cm" 
+                               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label for="right_thigh_cm" class="block text-sm font-medium text-gray-700">Right Thigh (cm)</label>
+                        <input type="number" step="0.1" name="right_thigh_cm" id="right_thigh_cm" 
+                               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label for="left_calf_cm" class="block text-sm font-medium text-gray-700">Left Calf (cm)</label>
+                        <input type="number" step="0.1" name="left_calf_cm" id="left_calf_cm" 
+                               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label for="right_calf_cm" class="block text-sm font-medium text-gray-700">Right Calf (cm)</label>
+                        <input type="number" step="0.1" name="right_calf_cm" id="right_calf_cm" 
+                               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-green-50 p-4 rounded-md mb-6">
+                <h2 class="text-xl font-semibold mb-2 text-green-800">Frame Size & Genetic Analysis (Optional)</h2>
+                <p class="text-sm text-gray-600 mb-3">These measurements help determine your frame size and genetic potential.</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="wrist_cm" class="block text-sm font-medium text-gray-700">Wrist Circumference (cm)</label>
+                        <input type="number" step="0.1" name="wrist_cm" id="wrist_cm" 
+                               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label for="ankle_cm" class="block text-sm font-medium text-gray-700">Ankle Circumference (cm)</label>
+                        <input type="number" step="0.1" name="ankle_cm" id="ankle_cm" 
+                               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label for="shoulder_width_cm" class="block text-sm font-medium text-gray-700">Shoulder Width (cm)</label>
+                        <input type="number" step="0.1" name="shoulder_width_cm" id="shoulder_width_cm" 
+                               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        <p class="text-xs text-gray-500 mt-1">Measure between the bony parts of your shoulders (acromion process)</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-amber-50 p-4 rounded-md mb-6">
+                <h2 class="text-xl font-semibold mb-2 text-amber-800">Posture Analysis (Optional)</h2>
+                <p class="text-sm text-gray-600 mb-3">These measurements help analyze your posture and structural balance. Use a consistent unit of measurement.</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="shoulder_height_left" class="block text-sm font-medium text-gray-700">Left Shoulder Height</label>
+                        <input type="number" step="0.1" name="shoulder_height_left" id="shoulder_height_left" 
+                               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label for="shoulder_height_right" class="block text-sm font-medium text-gray-700">Right Shoulder Height</label>
+                        <input type="number" step="0.1" name="shoulder_height_right" id="shoulder_height_right" 
+                               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label for="hip_height_left" class="block text-sm font-medium text-gray-700">Left Hip Height</label>
+                        <input type="number" step="0.1" name="hip_height_left" id="hip_height_left" 
+                               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label for="hip_height_right" class="block text-sm font-medium text-gray-700">Right Hip Height</label>
+                        <input type="number" step="0.1" name="hip_height_right" id="hip_height_right" 
+                               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-red-50 p-4 rounded-md mb-6">
+                <h2 class="text-xl font-semibold mb-2 text-red-800">Competition Goals (Optional)</h2>
+                <div class="flex items-center mb-4">
+                    <input type="checkbox" name="competition_goal" id="competition_goal" value="true" 
+                           class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                    <label for="competition_goal" class="ml-2 block text-sm text-gray-700">I'm preparing for a bodybuilding competition</label>
+                </div>
+                
+                <div id="competition_fields" class="hidden">
+                    <div>
+                        <label for="target_body_fat" class="block text-sm font-medium text-gray-700">Target Body Fat Percentage</label>
+                        <input type="number" step="0.1" name="target_body_fat" id="target_body_fat" 
+                               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex justify-center">
+                <button type="submit" class="px-6 py-3 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    Analyze My Physique
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Show/hide competition fields
+    document.getElementById('competition_goal').addEventListener('change', function() {
+        const competitionFields = document.getElementById('competition_fields');
+        if (this.checked) {
+            competitionFields.classList.remove('hidden');
+        } else {
+            competitionFields.classList.add('hidden');
+        }
+    });
+</script>
+{% endblock %}
+```
+Now let's create the results template to display the analysis:
+
+```html:MyGeneticsApp/templates/bodybuilding_results.html
+{% extends "base.html" %}
+
+{% block title %}Bodybuilding Analysis Results{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6 text-center">Your Bodybuilding Analysis Results</h1>
+    
+    <div class="max-w-4xl mx-auto">
+        {% if analysis.error %}
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                <p>Error: {{ analysis.error }}</p>
+                <p class="mt-2">
+                    <a href="{{ url_for('bodybuilding_analysis') }}" class="text-blue-600 hover:underline">
+                        Return to analysis form
+                    </a>
+                </p>
+            </div>
+        {% else %}
+            <!-- Basic Info Card -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-800">Basic Information</h2>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-blue-50 p-3 rounded">
+                        <span class="block text-sm font-medium text-gray-500">Height</span>
+                        <span class="block text-lg font-semibold">{{ analysis.basic_info.height_cm }} cm</span>
+                    </div>
+                    <div class="bg-blue-50 p-3 rounded">
+                        <span class="block text-sm font-medium text-gray-500">Weight</span>
+                        <span class="block text-lg font-semibold">{{ analysis.basic_info.weight_kg }} kg</span>
+                    </div>
+                    <div class="bg-blue-50 p-3 rounded">
+                        <span class="block text-sm font-medium text-gray-500">Gender</span>
+                        <span class="block text-lg font-semibold capitalize">{{ analysis.basic_info.gender }}</span>
+                    </div>
+                    <div class="bg-blue-50 p-3 rounded">
+                        <span class="block text-sm font-medium text-gray-500">Experience</span>
+                        <span class="block text-lg font-semibold capitalize">{{ analysis.basic_info.experience }}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Body Composition Card -->
+            {% if analysis.body_composition %}
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-800">Body Composition</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Body Fat -->
+                    <div class="text-center">
+                        <div class="relative w-32 h-32 mx-auto">
+                            <svg viewBox="0 0 36 36" class="w-full h-full">
+                                <path class="stroke-0 fill-blue-100"
+                                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+                                <path class="stroke-0 fill-blue-500"
+                                      stroke-dasharray="{{ analysis.body_composition.body_fat_percentage }}, 100"
+                                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+                                <text x="18" y="20.5" class="text-5xl font-semibold" text-anchor="middle" fill="#1F2937">{{ analysis.body_composition.body_fat_percentage|round(1) }}%</text>
+                            </svg>
+                        </div>
+                        <p class="mt-2 font-medium text-gray-800">Body Fat</p>
+                    </div>
+                    
+                    <!-- Lean Body Mass -->
+                    {% if analysis.body_composition.lean_body_mass_kg %}
+                    <div class="text-center">
+                        <div class="bg-green-50 rounded-full w-32 h-32 flex items-center justify-center mx-auto">
+                            <div>
+                                <span class="block text-4xl font-bold text-green-700">{{ analysis.body_composition.lean_body_mass_kg|round(1) }}</span>
+                                <span class="text-sm text-green-600">kg</span>
+                            </div>
+                        </div>
+                        <p class="mt-2 font-medium text-gray-800">Lean Body Mass</p>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- FFMI -->
+                    {% if analysis.body_composition.normalized_ffmi %}
+                    <div class="text-center">
+                        <div class="bg-purple-50 rounded-full w-32 h-32 flex items-center justify-center mx-auto">
+                            <div>
+                                <span class="block text-4xl font-bold text-purple-700">{{ analysis.body_composition.normalized_ffmi|round(1) }}</span>
+                                <span class="text-sm text-purple-600">FFMI</span>
+                            </div>
+                        </div>
+                        <p class="mt-2 font-medium text-gray-800">Normalized FFMI</p>
+                        <p class="text-xs text-gray-500 mt-1">
+                            {% if analysis.body_composition.normalized_ffmi < 18 %}
+                                Below Average
+                            {% elif analysis.body_composition.normalized_ffmi < 20 %}
+                                Average
+                            {% elif analysis.body_composition.normalized_ffmi < 22 %}
+                                Above Average
+                            {% elif analysis.body_composition.normalized_ffmi < 24 %}
+                                Excellent
+                            {% elif analysis.body_composition.normalized_ffmi < 26 %}
+                                Superior
+                            {% else %}
+                                Exceptional
+                            {% endif %}
+                        </p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Measurements -->
+            {% if analysis.measurements %}
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-800">Your Measurements</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead>
+                            <tr class="bg-gray-50">
+                                <th class="px-4 py-2 text-left text-sm font-medium text-gray-500">Body Part</th>
+                                <th class="px-4 py-2 text-left text-sm font-medium text-gray-500">Measurement (cm)</th>
+                                {% if analysis.maximum_muscular_measurements %}
+                                <th class="px-4 py-2 text-left text-sm font-medium text-gray-500">Natural Potential (cm)</th>
+                                <th class="px-4 py-2 text-left text-sm font-medium text-gray-500">% of Potential</th>
+                                {% endif %}
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            {% for part, value in analysis.measurements.items() %}
+                            <tr>
+                                <td class="px-4 py-3 text-sm font-medium text-gray-800 capitalize">{{ part.replace('_', ' ') }}</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">{{ value|round(1) }}</td>
+                                {% if analysis.maximum_muscular_measurements %}
+                                    {% set part_base = part.split('_')[-1] if '_' in part else part %}
+                                    {% set potential_key = part_base + 's_cm' if part_base in ['arm', 'thigh', 'calf'] else part_base + '_cm' %}
+                                    {% if potential_key in analysis.maximum_muscular_measurements %}
+                                        <td class="px-4 py-3 text-sm text-gray-600">{{ analysis.maximum_muscular_measurements[potential_key]|round(1) }}</td>
+                                        {% set percent = (value / analysis.maximum_muscular_measurements[potential_key] * 100)|round(1) %}
+                                        <td class="px-4 py-3 text-sm">
+                                            <div class="flex items-center">
+                                                <div class="w-full bg-gray-200 rounded-full h-2.5 mr-2">
+                                                    <div class="bg-blue-600 h-2.5 rounded-full" style="width: {{ percent }}%"></div>
+                                                </div>
+                                                <span class="text-gray-600">{{ percent }}%</span>
+                                            </div>
+                                        </td>
+                                    {% else %}
+                                        <td class="px-4 py-3 text-sm text-gray-400">N/A</td>
+                                        <td class="px-4 py-3 text-sm text-gray-400">N/A</td>
+                                    {% endif %}
+                                {% endif %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Symmetry Analysis -->
+            {% if analysis.symmetry %}
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-800">Symmetry Analysis</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {% for part, data in analysis.symmetry.items() %}
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h3 class="font-semibold text-lg mb-2 capitalize">{{ part }} Symmetry</h3>
+                        <div class="flex items-center mb-2">
+                            <div class="w-full bg-gray-200 rounded-full h-2.5 mr-2">
+                                {% set perfect = 100 - (data.difference_percent * 10)|round if data.difference_percent < 10 else 0 %}
+                                <div class="bg-green-500 h-2.5 rounded-full" style="width: {{ perfect }}%"></div>
+                            </div>
+                            <span class="text-sm text-gray-600">{{ (100 - data.difference_percent)|round }}%</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-2">{{ data.description }}</p>
+                        {% if data.dominant %}
+                        <p class="text-xs text-gray-500 mt-1">Dominant: <span class="font-medium capitalize">{{ data.dominant }}</span></p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Proportions Analysis -->
+            {% if analysis.proportions and analysis.proportions.shoulder_to_waist %}
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-800">Physique Proportions</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h3 class="font-semibold text-lg mb-2">Shoulder-to-Waist Ratio</h3>
+                        <div class="text-center mb-4">
+                            <span class="text-4xl font-bold text-indigo-600">{{ analysis.proportions.shoulder_to_waist.ratio|round(2) }}</span>
+                        </div>
+                        <p class="text-sm text-gray-600">{{ analysis.proportions.shoulder_to_waist.assessment }}</p>
+                        <p class="text-xs text-gray-500 mt-2">Rating: 
+                            <span class="font-medium capitalize">{{ analysis.proportions.shoulder_to_waist.rating }}</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Posture Analysis -->
+            {% if analysis.posture %}
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-800">Posture Analysis</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h3 class="font-semibold text-lg mb-2">Shoulder Balance</h3>
+                        <div class="mb-2">
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm text-gray-600">{{ analysis.posture.shoulder_imbalance.percent }}% Imbalance</span>
+                                <span class="text-sm font-medium capitalize text-gray-600">{{ analysis.posture.shoulder_imbalance.rating }}</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                {% set bar_width = 100 - (analysis.posture.shoulder_imbalance.percent * 10) if analysis.posture.shoulder_imbalance.percent < 10 else 0 %}
+                                <div class="bg-blue-600 h-2.5 rounded-full" style="width: {{ bar_width }}%"></div>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-600">{{ analysis.posture.shoulder_imbalance.assessment }}</p>
+                        <p class="text-xs text-gray-500 mt-1">Higher side: <span class="font-medium capitalize">{{ analysis.posture.shoulder_imbalance.higher_side }}</span></p>
+                    </div>
+                    
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h3 class="font-semibold text-lg mb-2">Hip Balance</h3>
+                        <div class="mb-2">
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm text-gray-600">{{ analysis.posture.hip_imbalance.percent }}% Imbalance</span>
+                                <span class="text-sm font-medium capitalize text-gray-600">{{ analysis.posture.hip_imbalance.rating }}</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                {% set bar_width = 100 - (analysis.posture.hip_imbalance.percent * 10) if analysis.posture.hip_imbalance.percent < 10 else 0 %}
+                                <div class="bg-blue-600 h-2.5 rounded-full" style="width: {{ bar_width }}%"></div>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-600">{{ analysis.posture.hip_imbalance.assessment }}</p>
+                        <p class="text-xs text-gray-500 mt-1">Higher side: <span class="font-medium capitalize">{{ analysis.posture.hip_imbalance.higher_side }}</span></p>
+                    </div>
+                </div>
+                
+                {% if analysis.posture.posture_patterns %}
+                <div class="bg-yellow-50 p-4 rounded-lg mb-4">
+                    <h3 class="font-semibold text-lg mb-2">Posture Patterns</h3>
+                    <ul class="list-disc pl-5 text-sm text-gray-600">
+                        {% for pattern in analysis.posture.posture_patterns %}
+                        <li>{{ pattern }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+            
+            <!-- Genetic Potential -->
+            {% if analysis.genetic_potential %}
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-800">Genetic Potential Analysis</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h3 class="font-semibold text-lg mb-2">Frame Size</h3>
+                        <div class="text-center mb-4">
+                            <span class="text-2xl font-bold text-indigo-600 capitalize">{{ analysis.genetic_potential.frame_size }}</span>
+                        </div>
+                        <p class="text-sm text-gray-600">{{ analysis.genetic_potential.description }}</p>
+                        
+                        {% if analysis.genetic_potential.frame_index %}
+                        <div class="mt-3">
+                            <span class="text-xs text-gray-500">Frame Index: {{ analysis.genetic_potential.frame_index|round(2) }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    {% if analysis.genetic_potential.muscle_building_potential %}
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h3 class="font-semibold text-lg mb-2">Muscle Building Potential</h3>
+                        <div class="text-center mb-4">
+                            <span class="text-2xl font-bold text-green-600 capitalize">{{ analysis.genetic_potential.muscle_building_potential.rating }}</span>
+                        </div>
+                        <p class="text-sm text-gray-600">{{ analysis.genetic_potential.muscle_building_potential.description }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Competition Weight Targets -->
+            {% if analysis.competition %}
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-800">Competition Weight Targets</h2>
+                <p class="text-sm text-gray-600 mb-4">Estimated ideal weights at {{ analysis.competition.body_fat_target }}% body fat:</p>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {% for division, data in analysis.competition.divisions.items() %}
+                    <div class="bg-blue-50 p-4 rounded-lg text-center">
+                        <h3 class="font-medium text-sm mb-1 capitalize">{{ division.replace('_', ' ') }}</h3>
+                        <p class="text-2xl font-bold text-blue-700">{{ data.ideal_weight_kg }} kg</p>
+                        <p class="text-xs text-gray-500 mt-1">FFMI: {{ data.target_ffmi }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Recommendations -->
+            {% if analysis.recommendations %}
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-800">Personalized Recommendations</h2>
+                
+                {% if analysis.recommendations.training %}
+                <div class="mb-4">
+                    <h3 class="font-semibold text-lg mb-2 text-blue-700">Training</h3>
+                    <ul class="list-disc pl-5 space-y-1">
+                        {% for recommendation in analysis.recommendations.training %}
+                        <li class="text-gray-700">{{ recommendation }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+                
+                {% if analysis.recommendations.nutrition %}
+                <div class="mb-4">
+                    <h3 class="font-semibold text-lg mb-2 text-green-700">Nutrition</h3>
+                    <ul class="list-disc pl-5 space-y-1">
+                        {% for recommendation in analysis.recommendations.nutrition %}
+                        <li class="text-gray-700">{{ recommendation }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+                
+                {% if analysis.recommendations.recovery %}
+                <div class="mb-4">
+                    <h3 class="font-semibold text-lg mb-2 text-purple-700">Recovery</h3>
+                    <ul class="list-disc pl-5 space-y-1">
+                        {% for recommendation in analysis.recommendations.recovery %}
+                        <li class="text-gray-700">{{ recommendation }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+                
+                {% if analysis.recommendations.focus_areas %}
+                <div>
+                    <h3 class="font-semibold text-lg mb-2 text-amber-700">Focus Areas</h3>
+                    <ul class="list-disc pl-5 space-y-1">
+                        {% for recommendation in analysis.recommendations.focus_areas %}
+                        <li class="text-gray-700">{{ recommendation }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+            
+            <div class="flex justify-between mt-8">
+                <a href="{{ url_for('bodybuilding_analysis') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none">
+                    ← Back to Analysis Form
+                </a>
+                
+                <a href="{{ url_for('dashboard') }}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none">
+                    Go to Dashboard →
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+```
+Let's fix the CSS linter errors by making sure the SVG elements have proper CSS classes:
+
+```html:MyGeneticsApp/templates/bodybuilding_results.html
+# ... existing code ...
+
+                    <!-- Body Fat -->
+                    <div class="text-center">
+                        <div class="relative w-32 h-32 mx-auto">
+                            <svg viewBox="0 0 36 36" class="w-full h-full">
+                                <path class="fill-blue-100"
+                                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+                                <path class="fill-blue-500"
+                                      stroke-dasharray="{{ analysis.body_composition.body_fat_percentage }}, 100"
+                                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+                                <text x="18" y="20.5" class="fill-gray-800 text-5xl font-semibold" text-anchor="middle">{{ analysis.body_composition.body_fat_percentage|round(1) }}%</text>
+                            </svg>
+                        </div>
+                        <p class="mt-2 font-medium text-gray-800">Body Fat</p>
+                    </div>
+
+# ... existing code ...
+```
+Now let's add a link to the bodybuilding analysis feature in the navigation:
+
+```html:MyGeneticsApp/templates/base.html
+# ... existing code ...
+
+                    <a href="{{ url_for('workout_plan') }}" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Workout Plans</a>
+
+                    <a href="{{ url_for('bodybuilding_analysis') }}" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Bodybuilding Analysis</a>
+
+# ... existing code ...
+```
+Let's complete the feature by adding a card for it on the dashboard:
+
+```html:MyGeneticsApp/templates/dashboard.html
+# ... existing code ...
+
+                <!-- Add Card for Bodybuilding Analysis -->
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                    <div class="p-5">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 bg-purple-500 rounded-md p-3">
+                                <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                                </svg>
+                            </div>
+                            <div class="ml-5 w-0 flex-1">
+                                <dl>
+                                    <dt class="text-sm font-medium text-gray-500 truncate">
+                                        Bodybuilding Analysis
+                                    </dt>
+                                    <dd class="flex items-baseline">
+                                        <div class="text-lg font-semibold text-gray-900">
+                                            {{ bodybuilding_analyses|default(0) }}
+                                        </div>
+                                        <div class="ml-2 flex items-baseline text-sm font-semibold text-green-600">
+                                            <span class="sr-only">Analyses completed</span>
+                                        </div>
+                                    </dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-5 py-3">
+                        <div class="text-sm">
+                            <a href="{{ url_for('bodybuilding_analysis') }}" class="font-medium text-purple-700 hover:text-purple-900">
+                                Analyze your physique for bodybuilding
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+# ... existing code ...
+```
+Finally, let's update the dashboard route to count bodybuilding analyses:
+
+```python:MyGeneticsApp/app.py
+# ... existing code ...
+
+@app.route('/dashboard')
+@login_required
+def dashboard():
+    analyses = Analysis.query.filter_by(user_id=current_user.id).all()
+    body_scans = BodyScan3D.query.filter_by(user_id=current_user.id).all()
+    workout_plans = WorkoutPlan.query.filter_by(user_id=current_user.id).all()
+    measurement_logs = MeasurementLog.query.filter_by(user_id=current_user.id).all()
+    
+    # Count bodybuilding analyses
+    bodybuilding_analyses = Analysis.query.filter_by(
+        user_id=current_user.id, 
+        analysis_type="bodybuilding"
+    ).count()
+    
+    recent_analyses = Analysis.query.filter_by(user_id=current_user.id).order_by(Analysis.created_at.desc()).limit(5).all()
+    
+    return render_template(
+        'dashboard.html', 
+        user=current_user, 
+        analyses=len(analyses),
+        body_scans=len(body_scans),
+        workout_plans=len(workout_plans),
+        measurement_logs=len(measurement_logs),
+        bodybuilding_analyses=bodybuilding_analyses,
+        recent_analyses=recent_analyses
+    )
+
+# ... existing code ...
+```
+I've successfully implemented comprehensive bodybuilding metrics for the MyGenetics app! Here's what was created:
+
+1. A new `bodybuilding_metrics.py` module with specialized functions for:
+   - Body composition calculations (body fat, lean mass, FFMI)
+   - Physique proportion analysis (shoulder-to-waist ratio)
+   - Symmetry evaluation (arm/leg balance)
+   - Genetic potential assessment
+   - Posture analysis
+   - Competition weight targets
+   - Personalized recommendations
+
+2. A new Flask route for bodybuilding analysis that:
+   - Collects user measurements
+   - Processes them through comprehensive analysis
+   - Saves results to the database
+   - Displays detailed results
+
+3. Beautiful UI templates:
+   - Input form with organized measurement sections
+   - Results page with visualizations and actionable insights
+
+4. Integration with the app's navigation and dashboard
+
+The new functionality will help bodybuilders and fitness enthusiasts analyze their physique, understand their genetic potential, track their progress toward ideal proportions, and receive personalized recommendations.
