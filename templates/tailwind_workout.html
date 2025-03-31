@@ -258,55 +258,41 @@
                 </div>
             </div>
             
-            <div x-data="{ activeDay: 'Monday' }" class="mb-6">
+            <div class="mb-6">
                 <!-- Day Tabs -->
                 <div class="flex flex-wrap gap-3 mb-5 bg-gray-700/60 p-4 rounded-lg border border-gray-600 shadow-md">
                     <button 
-                        @click="activeDay = 'Monday'" 
-                        :class="activeDay === 'Monday' ? 'bg-gradient-to-r from-red-600 to-red-500 text-white shadow-lg' : 'bg-gray-600 text-gray-200 hover:bg-gray-500'"
-                        class="day-tab transition-all duration-300 px-4 py-2 rounded-lg">
+                        class="day-tab transition-all duration-300 px-4 py-2 rounded-lg bg-gradient-to-r from-red-600 to-red-500 text-white shadow-lg">
                         Monday
                     </button>
                     <button 
-                        @click="activeDay = 'Tuesday'" 
-                        :class="activeDay === 'Tuesday' ? 'bg-gradient-to-r from-red-600 to-red-500 text-white shadow-lg' : 'bg-gray-600 text-gray-200 hover:bg-gray-500'"
-                        class="day-tab transition-all duration-300 px-4 py-2 rounded-lg">
+                        class="day-tab transition-all duration-300 px-4 py-2 rounded-lg bg-gray-600 text-gray-200 hover:bg-gray-500">
                         Tuesday
                     </button>
                     <button 
-                        @click="activeDay = 'Wednesday'" 
-                        :class="activeDay === 'Wednesday' ? 'bg-gradient-to-r from-red-600 to-red-500 text-white shadow-lg' : 'bg-gray-600 text-gray-200 hover:bg-gray-500'"
-                        class="day-tab transition-all duration-300 px-4 py-2 rounded-lg">
+                        class="day-tab transition-all duration-300 px-4 py-2 rounded-lg bg-gray-600 text-gray-200 hover:bg-gray-500">
                         Wednesday
                     </button>
                     <button 
-                        @click="activeDay = 'Thursday'" 
-                        :class="activeDay === 'Thursday' ? 'bg-gradient-to-r from-red-600 to-red-500 text-white shadow-lg' : 'bg-gray-600 text-gray-200 hover:bg-gray-500'"
-                        class="day-tab transition-all duration-300 px-4 py-2 rounded-lg">
+                        class="day-tab transition-all duration-300 px-4 py-2 rounded-lg bg-gray-600 text-gray-200 hover:bg-gray-500">
                         Thursday
                     </button>
                     <button 
-                        @click="activeDay = 'Friday'" 
-                        :class="activeDay === 'Friday' ? 'bg-gradient-to-r from-red-600 to-red-500 text-white shadow-lg' : 'bg-gray-600 text-gray-200 hover:bg-gray-500'"
-                        class="day-tab transition-all duration-300 px-4 py-2 rounded-lg">
+                        class="day-tab transition-all duration-300 px-4 py-2 rounded-lg bg-gray-600 text-gray-200 hover:bg-gray-500">
                         Friday
                     </button>
                     <button 
-                        @click="activeDay = 'Saturday'" 
-                        :class="activeDay === 'Saturday' ? 'bg-gradient-to-r from-red-600 to-red-500 text-white shadow-lg' : 'bg-gray-600 text-gray-200 hover:bg-gray-500'"
-                        class="day-tab transition-all duration-300 px-4 py-2 rounded-lg">
+                        class="day-tab transition-all duration-300 px-4 py-2 rounded-lg bg-gray-600 text-gray-200 hover:bg-gray-500">
                         Saturday
                     </button>
                     <button 
-                        @click="activeDay = 'Sunday'" 
-                        :class="activeDay === 'Sunday' ? 'bg-gradient-to-r from-red-600 to-red-500 text-white shadow-lg' : 'bg-gray-600 text-gray-200 hover:bg-gray-500'"
-                        class="day-tab transition-all duration-300 px-4 py-2 rounded-lg">
+                        class="day-tab transition-all duration-300 px-4 py-2 rounded-lg bg-gray-600 text-gray-200 hover:bg-gray-500">
                         Sunday
                     </button>
                 </div>
                 
                 <!-- Monday Content - Push Day 1 -->
-                <div x-show="activeDay === 'Monday'" class="bg-gray-700/60 p-5 rounded-lg border border-gray-600 shadow-md tab-content-fade">
+                <div data-day="Monday" class="bg-gray-700/60 p-5 rounded-lg border border-gray-600 shadow-md tab-content-fade day-content">
                     <h4 class="font-bold text-white text-lg mb-3">Monday: Push (Chest, Shoulders, Triceps)</h4>
                     <p class="text-gray-300 mb-4">Complete all exercises with proper form. Rest 1-2 minutes between sets for compound movements, 30-60 seconds for isolation exercises.</p>
                     
@@ -330,7 +316,7 @@
                 </div>
                 
                 <!-- Tuesday Content - Pull Day 1 -->
-                <div x-show="activeDay === 'Tuesday'" class="bg-gray-700/60 p-5 rounded-lg border border-gray-600 shadow-md tab-content-fade">
+                <div data-day="Tuesday" class="bg-gray-700/60 p-5 rounded-lg border border-gray-600 shadow-md tab-content-fade day-content">
                     <h4 class="font-bold text-white text-lg mb-3">Tuesday: Pull (Back, Biceps)</h4>
                     <p class="text-gray-300 mb-4">Complete all exercises with proper form. Rest 1-2 minutes between sets for compound movements, 30-60 seconds for isolation exercises.</p>
                     
@@ -354,7 +340,7 @@
                 </div>
                 
                 <!-- Wednesday Content - Legs Day -->
-                <div x-show="activeDay === 'Wednesday'" class="bg-gray-700/60 p-5 rounded-lg border border-gray-600 shadow-md tab-content-fade">
+                <div data-day="Wednesday" class="bg-gray-700/60 p-5 rounded-lg border border-gray-600 shadow-md tab-content-fade day-content">
                     <h4 class="font-bold text-white text-lg mb-3">Wednesday: Legs (Quads, Hamstrings, Calves)</h4>
                     <p class="text-gray-300 mb-4">Complete all exercises with proper form. Rest 1-2 minutes between sets for compound movements, 30-60 seconds for isolation exercises.</p>
                     
@@ -378,7 +364,7 @@
                 </div>
                 
                 <!-- Thursday Content - Rest Day -->
-                <div x-show="activeDay === 'Thursday'" class="bg-gray-700/60 p-5 rounded-lg border border-gray-600 shadow-md tab-content-fade">
+                <div data-day="Thursday" class="bg-gray-700/60 p-5 rounded-lg border border-gray-600 shadow-md tab-content-fade day-content">
                     <h4 class="font-bold text-white text-lg mb-3">Thursday: Rest Day</h4>
                     <p class="text-gray-300 mb-4">Focus on recovery and mobility work. Consider light activities such as:</p>
                     
@@ -414,7 +400,7 @@
                 </div>
                 
                 <!-- Friday Content - Push Day 2 -->
-                <div x-show="activeDay === 'Friday'" class="bg-gray-700/60 p-5 rounded-lg border border-gray-600 shadow-md tab-content-fade">
+                <div data-day="Friday" class="bg-gray-700/60 p-5 rounded-lg border border-gray-600 shadow-md tab-content-fade day-content">
                     <h4 class="font-bold text-white text-lg mb-3">Friday: Push 2 (Chest, Shoulders, Triceps)</h4>
                     <p class="text-gray-300 mb-4">Second push day of the week with different exercise variations and intensity. Focus on progressive overload.</p>
                     
@@ -488,7 +474,7 @@
                 </div>
                 
                 <!-- Saturday Content - Pull Day 2 -->
-                <div x-show="activeDay === 'Saturday'" class="bg-gray-700/60 p-5 rounded-lg border border-gray-600 shadow-md tab-content-fade">
+                <div data-day="Saturday" class="bg-gray-700/60 p-5 rounded-lg border border-gray-600 shadow-md tab-content-fade day-content">
                     <h4 class="font-bold text-white text-lg mb-3">Saturday: Pull 2 (Back, Biceps)</h4>
                     <p class="text-gray-300 mb-4">Second pull day of the week with different exercise variations and intensity.</p>
                     
@@ -562,7 +548,7 @@
                 </div>
                 
                 <!-- Sunday Content - Legs Day 2 -->
-                <div x-show="activeDay === 'Sunday'" class="bg-gray-700/60 p-5 rounded-lg border border-gray-600 shadow-md tab-content-fade">
+                <div data-day="Sunday" class="bg-gray-700/60 p-5 rounded-lg border border-gray-600 shadow-md tab-content-fade day-content">
                     <h4 class="font-bold text-white text-lg mb-3">Sunday: Legs 2 (Glutes, Hamstrings, Calves)</h4>
                     <p class="text-gray-300 mb-4">Second leg day of the week with focus on posterior chain and calves. Different exercise variations for complete leg development.</p>
                     
@@ -699,4 +685,58 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Initialize workout tabs when the page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set Monday as the default active day
+        window.activeWorkoutDay = 'Monday';
+        
+        // Get all day tabs
+        const dayTabs = document.querySelectorAll('.day-tab');
+        const tabContents = document.querySelectorAll('.day-content');
+        
+        // Manually handle the tabs
+        dayTabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Extract day name from the button text
+                const day = this.textContent.trim();
+                
+                // Remove active class from all tabs and add to clicked tab
+                dayTabs.forEach(t => {
+                    t.classList.remove('bg-gradient-to-r', 'from-red-600', 'to-red-500', 'text-white', 'shadow-lg');
+                    t.classList.add('bg-gray-600', 'text-gray-200', 'hover:bg-gray-500');
+                });
+                
+                // Add active class to clicked tab
+                this.classList.remove('bg-gray-600', 'text-gray-200', 'hover:bg-gray-500');
+                this.classList.add('bg-gradient-to-r', 'from-red-600', 'to-red-500', 'text-white', 'shadow-lg');
+                
+                // Hide all content sections
+                tabContents.forEach(content => {
+                    content.style.display = 'none';
+                });
+                
+                // Show the selected day's content
+                document.querySelector(`.day-content[data-day="${day}"]`).style.display = 'block';
+            });
+        });
+        
+        // Show Monday content by default
+        if (tabContents.length > 0) {
+            tabContents.forEach(content => {
+                content.style.display = 'none';
+            });
+            
+            // Show Monday content
+            document.querySelector('.day-content[data-day="Monday"]').style.display = 'block';
+            
+            // Highlight Monday tab as active
+            document.querySelector('.day-tab').classList.remove('bg-gray-600', 'text-gray-200', 'hover:bg-gray-500');
+            document.querySelector('.day-tab').classList.add('bg-gradient-to-r', 'from-red-600', 'to-red-500', 'text-white', 'shadow-lg');
+        }
+    });
+</script>
 {% endblock %}
