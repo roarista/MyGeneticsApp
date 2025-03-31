@@ -262,31 +262,38 @@
                 <!-- Day Tabs -->
                 <div class="flex flex-wrap gap-3 mb-5 bg-gray-700/60 p-4 rounded-lg border border-gray-600 shadow-md">
                     <button 
-                        class="day-tab transition-all duration-300 px-4 py-2 rounded-lg bg-gradient-to-r from-red-600 to-red-500 text-white shadow-lg">
+                        class="day-tab transition-all duration-300 px-4 py-2 rounded-lg bg-gradient-to-r from-red-600 to-red-500 text-white shadow-lg"
+                        onclick="showWorkout('Monday')">
                         Monday
                     </button>
                     <button 
-                        class="day-tab transition-all duration-300 px-4 py-2 rounded-lg bg-gray-600 text-gray-200 hover:bg-gray-500">
+                        class="day-tab transition-all duration-300 px-4 py-2 rounded-lg bg-gray-600 text-gray-200 hover:bg-gray-500"
+                        onclick="showWorkout('Tuesday')">
                         Tuesday
                     </button>
                     <button 
-                        class="day-tab transition-all duration-300 px-4 py-2 rounded-lg bg-gray-600 text-gray-200 hover:bg-gray-500">
+                        class="day-tab transition-all duration-300 px-4 py-2 rounded-lg bg-gray-600 text-gray-200 hover:bg-gray-500"
+                        onclick="showWorkout('Wednesday')">
                         Wednesday
                     </button>
                     <button 
-                        class="day-tab transition-all duration-300 px-4 py-2 rounded-lg bg-gray-600 text-gray-200 hover:bg-gray-500">
+                        class="day-tab transition-all duration-300 px-4 py-2 rounded-lg bg-gray-600 text-gray-200 hover:bg-gray-500"
+                        onclick="showWorkout('Thursday')">
                         Thursday
                     </button>
                     <button 
-                        class="day-tab transition-all duration-300 px-4 py-2 rounded-lg bg-gray-600 text-gray-200 hover:bg-gray-500">
+                        class="day-tab transition-all duration-300 px-4 py-2 rounded-lg bg-gray-600 text-gray-200 hover:bg-gray-500"
+                        onclick="showWorkout('Friday')">
                         Friday
                     </button>
                     <button 
-                        class="day-tab transition-all duration-300 px-4 py-2 rounded-lg bg-gray-600 text-gray-200 hover:bg-gray-500">
+                        class="day-tab transition-all duration-300 px-4 py-2 rounded-lg bg-gray-600 text-gray-200 hover:bg-gray-500"
+                        onclick="showWorkout('Saturday')">
                         Saturday
                     </button>
                     <button 
-                        class="day-tab transition-all duration-300 px-4 py-2 rounded-lg bg-gray-600 text-gray-200 hover:bg-gray-500">
+                        class="day-tab transition-all duration-300 px-4 py-2 rounded-lg bg-gray-600 text-gray-200 hover:bg-gray-500"
+                        onclick="showWorkout('Sunday')">
                         Sunday
                     </button>
                 </div>
@@ -689,40 +696,45 @@
 
 {% block scripts %}
 <script>
-    // Initialize workout tabs when the page loads
-    document.addEventListener('DOMContentLoaded', function() {
-        // Set Monday as the default active day
-        window.activeWorkoutDay = 'Monday';
+    // Function to show the selected workout day
+    function showWorkout(day) {
+        console.log('Showing workout for:', day);
         
-        // Get all day tabs
+        // Get all day tabs and content sections
         const dayTabs = document.querySelectorAll('.day-tab');
         const tabContents = document.querySelectorAll('.day-content');
         
-        // Manually handle the tabs
-        dayTabs.forEach(tab => {
-            tab.addEventListener('click', function() {
-                // Extract day name from the button text
-                const day = this.textContent.trim();
-                
-                // Remove active class from all tabs and add to clicked tab
-                dayTabs.forEach(t => {
-                    t.classList.remove('bg-gradient-to-r', 'from-red-600', 'to-red-500', 'text-white', 'shadow-lg');
-                    t.classList.add('bg-gray-600', 'text-gray-200', 'hover:bg-gray-500');
-                });
-                
-                // Add active class to clicked tab
-                this.classList.remove('bg-gray-600', 'text-gray-200', 'hover:bg-gray-500');
-                this.classList.add('bg-gradient-to-r', 'from-red-600', 'to-red-500', 'text-white', 'shadow-lg');
-                
-                // Hide all content sections
-                tabContents.forEach(content => {
-                    content.style.display = 'none';
-                });
-                
-                // Show the selected day's content
-                document.querySelector(`.day-content[data-day="${day}"]`).style.display = 'block';
-            });
+        // Remove active class from all tabs
+        dayTabs.forEach(t => {
+            t.classList.remove('bg-gradient-to-r', 'from-red-600', 'to-red-500', 'text-white', 'shadow-lg');
+            t.classList.add('bg-gray-600', 'text-gray-200', 'hover:bg-gray-500');
         });
+        
+        // Find the button for this day and add active class
+        dayTabs.forEach(t => {
+            if (t.textContent.trim() === day) {
+                t.classList.remove('bg-gray-600', 'text-gray-200', 'hover:bg-gray-500');
+                t.classList.add('bg-gradient-to-r', 'from-red-600', 'to-red-500', 'text-white', 'shadow-lg');
+            }
+        });
+        
+        // Hide all content sections
+        tabContents.forEach(content => {
+            content.style.display = 'none';
+        });
+        
+        // Show the selected day's content
+        const selectedContent = document.querySelector(`.day-content[data-day="${day}"]`);
+        if (selectedContent) {
+            selectedContent.style.display = 'block';
+            selectedContent.scrollIntoView({behavior: 'smooth'});
+        }
+    }
+
+    // Initialize workout tabs when the page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get all content sections
+        const tabContents = document.querySelectorAll('.day-content');
         
         // Show Monday content by default
         if (tabContents.length > 0) {
@@ -731,11 +743,10 @@
             });
             
             // Show Monday content
-            document.querySelector('.day-content[data-day="Monday"]').style.display = 'block';
-            
-            // Highlight Monday tab as active
-            document.querySelector('.day-tab').classList.remove('bg-gray-600', 'text-gray-200', 'hover:bg-gray-500');
-            document.querySelector('.day-tab').classList.add('bg-gradient-to-r', 'from-red-600', 'to-red-500', 'text-white', 'shadow-lg');
+            const mondayContent = document.querySelector('.day-content[data-day="Monday"]');
+            if (mondayContent) {
+                mondayContent.style.display = 'block';
+            }
         }
     });
 </script>

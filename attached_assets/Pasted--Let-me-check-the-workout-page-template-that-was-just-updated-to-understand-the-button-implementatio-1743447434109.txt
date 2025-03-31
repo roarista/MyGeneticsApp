@@ -1,0 +1,525 @@
+
+Let me check the workout page template that was just updated to understand the button implementation:
+
+Read file: templates/tailwind_workout.html
+Let me check the correct file path:
+
+Read file: MyGeneticsApp/templates/tailwind_workout.html
+Let me see the rest of this file to understand the workout buttons:
+
+Read file: MyGeneticsApp/templates/tailwind_workout.html
+Let me see the end of the file to find any JavaScript that might handle the workout buttons:
+
+Read file: MyGeneticsApp/templates/tailwind_workout.html
+Let's also check for any related JavaScript files or external scripts:
+
+Ran tool
+Let me also check for any CSS that might be related to the workout tabs:
+
+Read file: MyGeneticsApp/static/css/workout-tabs.css
+Let's check the new template file in case there's any updated workout implementation:
+
+Read file: MyGeneticsApp/templates/tailwind_workout_new.html
+Now I'm going to check the app.py file to see how the workout view is handled:
+
+Ran tool
+Let's look at the workout route implementation:
+
+Read file: MyGeneticsApp/app.py
+Based on my analysis, I found the issue with the workout buttons not working. Here's what's wrong:
+
+1. In the main template (`tailwind_workout.html`), the day buttons are set up correctly, but there's a problem with the JavaScript implementation:
+
+2. The issue is that the JavaScript for switching between workout days isn't properly connected to the buttons displayed in the user's screen (the ones from the image).
+
+3. In the updated code (found in `tailwind_workout_new.html`), there's a proper implementation with the `onclick="showWorkout('{{ day }}')"` attribute and corresponding JavaScript function, but this doesn't seem to be implemented in the main template that's being used.
+
+Here's my solution:
+
+```html:MyGeneticsApp/templates/tailwind_workout.html
+
+```
+Let me create a fixed version of the JavaScript code:
+
+```html:MyGeneticsApp/templates/tailwind_workout.html
+<!-- Day Tabs -->
+<div class="flex flex-wrap gap-3 mb-5 bg-gray-700/60 p-4 rounded-lg border border-gray-600 shadow-md">
+    <button 
+        class="day-tab transition-all duration-300 px-4 py-2 rounded-lg bg-gradient-to-r from-red-600 to-red-500 text-white shadow-lg"
+        onclick="showWorkout('Monday')">
+        Monday
+    </button>
+    <button 
+        class="day-tab transition-all duration-300 px-4 py-2 rounded-lg bg-gray-600 text-gray-200 hover:bg-gray-500"
+        onclick="showWorkout('Tuesday')">
+        Tuesday
+    </button>
+    <button 
+        class="day-tab transition-all duration-300 px-4 py-2 rounded-lg bg-gray-600 text-gray-200 hover:bg-gray-500"
+        onclick="showWorkout('Wednesday')">
+        Wednesday
+    </button>
+    <button 
+        class="day-tab transition-all duration-300 px-4 py-2 rounded-lg bg-gray-600 text-gray-200 hover:bg-gray-500"
+        onclick="showWorkout('Thursday')">
+        Thursday
+    </button>
+    <button 
+        class="day-tab transition-all duration-300 px-4 py-2 rounded-lg bg-gray-600 text-gray-200 hover:bg-gray-500"
+        onclick="showWorkout('Friday')">
+        Friday
+    </button>
+    <button 
+        class="day-tab transition-all duration-300 px-4 py-2 rounded-lg bg-gray-600 text-gray-200 hover:bg-gray-500"
+        onclick="showWorkout('Saturday')">
+        Saturday
+    </button>
+    <button 
+        class="day-tab transition-all duration-300 px-4 py-2 rounded-lg bg-gray-600 text-gray-200 hover:bg-gray-500"
+        onclick="showWorkout('Sunday')">
+        Sunday
+    </button>
+</div>
+
+// ... existing code ...
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get all day tabs and content sections
+        const dayTabs = document.querySelectorAll('.day-tab');
+        const tabContents = document.querySelectorAll('.day-content');
+        
+        // Show Monday content by default
+        if (tabContents.length > 0) {
+            tabContents.forEach(content => {
+                content.style.display = 'none';
+            });
+            
+            // Show Monday content
+            document.querySelector('.day-content[data-day="Monday"]').style.display = 'block';
+            
+            // Highlight Monday tab as active
+            document.querySelector('.day-tab').classList.remove('bg-gray-600', 'text-gray-200', 'hover:bg-gray-500');
+            document.querySelector('.day-tab').classList.add('bg-gradient-to-r', 'from-red-600', 'to-red-500', 'text-white', 'shadow-lg');
+        }
+    });
+    
+    // Function to show the selected workout day
+    function showWorkout(day) {
+        console.log('Showing workout for:', day);
+        
+        // Get all day tabs and content sections
+        const dayTabs = document.querySelectorAll('.day-tab');
+        const tabContents = document.querySelectorAll('.day-content');
+        
+        // Remove active class from all tabs and add to clicked tab
+        dayTabs.forEach(t => {
+            t.classList.remove('bg-gradient-to-r', 'from-red-600', 'to-red-500', 'text-white', 'shadow-lg');
+            t.classList.add('bg-gray-600', 'text-gray-200', 'hover:bg-gray-500');
+        });
+        
+        // Find the button for this day and add active class
+        dayTabs.forEach(t => {
+            if (t.textContent.trim() === day) {
+                t.classList.remove('bg-gray-600', 'text-gray-200', 'hover:bg-gray-500');
+                t.classList.add('bg-gradient-to-r', 'from-red-600', 'to-red-500', 'text-white', 'shadow-lg');
+            }
+        });
+        
+        // Hide all content sections
+        tabContents.forEach(content => {
+            content.style.display = 'none';
+        });
+        
+        // Show the selected day's content
+        const selectedContent = document.querySelector(`.day-content[data-day="${day}"]`);
+        if (selectedContent) {
+            selectedContent.style.display = 'block';
+            selectedContent.scrollIntoView({behavior: 'smooth'});
+        }
+    }
+</script>
+```
+Now I'll update the button implementation in your workout layout for the select workout section. Let's create a similar fix for the buttons that appear in the image you shared:
+
+Read file: MyGeneticsApp/templates/tailwind_workout_direct.html
+Let's update the main app.py file to use the new workout template format:
+
+```python:MyGeneticsApp/app.py
+@app.route('/workout/<analysis_id>')
+def workout(analysis_id):
+    """Display detailed workout plan based on analysis results and user's weak points"""
+    try:
+        # Start with detailed logging
+        logger.info(f"Accessing workout page for analysis_id: {analysis_id}")
+        
+        # Check if analysis exists
+        if analysis_id not in analysis_results:
+            logger.warning(f"Analysis not found with ID: {analysis_id}")
+            flash('Analysis not found', 'danger')
+            return redirect(url_for('profile'))
+        
+        # Get the result
+        result = analysis_results[analysis_id]
+        logger.debug(f"Retrieved analysis result for ID: {analysis_id}")
+        
+        # Get user info and training experience
+        experience = result['user_info'].get('experience', 'beginner')
+        
+        # Process traits to include their units for display
+        formatted_traits = {}
+        for trait_name, trait_data in result['traits'].items():
+            try:
+                # For traits that are dictionaries with value keys
+                if isinstance(trait_data, dict) and 'value' in trait_data:
+                    # Copy the trait data
+                    formatted_trait = trait_data.copy()
+                    # Format the value with units
+                    formatted_trait['display_value'] = format_trait_value(trait_name, trait_data['value'])
+                    formatted_trait['unit'] = get_unit(trait_name)
+                    formatted_traits[trait_name] = formatted_trait
+                else:
+                    # For other types of traits
+                    formatted_traits[trait_name] = trait_data
+            except Exception as trait_error:
+                logger.error(f"Error formatting trait {trait_name}: {str(trait_error)}")
+                formatted_traits[trait_name] = trait_data
+        
+        # Get user genetic traits
+        logger.debug(f"Processing user genetic traits for workout planning")
+        
+        # Get training split from recommendations or use default push/pull/legs
+        training_split = result['recommendations'].get('training_split', {
+            'Monday': 'Push (Chest, Shoulders, Triceps)',
+            'Tuesday': 'Pull (Back, Biceps)',
+            'Wednesday': 'Legs + Core',
+            'Thursday': 'Rest & Recovery',
+            'Friday': 'Push (Chest, Shoulders, Triceps)',
+            'Saturday': 'Pull (Back, Biceps)',
+            'Sunday': 'Legs (Posterior Chain Focus)'
+        })
+        
+        # Identify weak points from traits for targeted training
+        weak_points = []
+        for trait_name, trait_data in result['traits'].items():
+            if isinstance(trait_data, dict) and 'rating' in trait_data:
+                # Handle dictionary trait data
+                if trait_data['rating'] in ['below_average', 'average']:
+                    weak_points.append({
+                        'name': trait_name.replace('_', ' ').title(),
+                        'rating': trait_data['rating'],
+                        'value': trait_data.get('value', 0)
+                    })
+            elif isinstance(trait_data, str) and trait_data in ['below_average', 'average']:
+                # Handle string trait data that directly contains the rating
+                weak_points.append({
+                    'name': trait_name.replace('_', ' ').title(),
+                    'rating': trait_data,
+                    'value': 0  # Default value since we don't have one
+                })
+        
+        # Create workout structure
+        push_exercises = [
+            {'name': 'Bench Press', 'sets': '4', 'reps': '8-10', 'focus': 'Chest', 'category': 'push'},
+            {'name': 'Incline Dumbbell Press', 'sets': '3', 'reps': '10-12', 'focus': 'Upper Chest', 'category': 'push'},
+            {'name': 'Seated Shoulder Press', 'sets': '3', 'reps': '8-10', 'focus': 'Shoulders', 'category': 'push'},
+            {'name': 'Lateral Raises', 'sets': '3', 'reps': '12-15', 'focus': 'Side Delts', 'category': 'push'},
+            {'name': 'Tricep Pushdowns', 'sets': '3', 'reps': '10-12', 'focus': 'Triceps', 'category': 'push'},
+            {'name': 'Overhead Tricep Extensions', 'sets': '3', 'reps': '10-12', 'focus': 'Triceps', 'category': 'push'}
+        ]
+        
+        # Rest of the workout exercise definitions...
+        pull_exercises = [
+            {'name': 'Pull-Ups/Lat Pulldowns', 'sets': '4', 'reps': '8-10', 'focus': 'Back Width', 'category': 'pull'},
+            {'name': 'Bent Over Rows', 'sets': '3', 'reps': '10-12', 'focus': 'Back Thickness', 'category': 'pull'},
+            {'name': 'Seated Cable Rows', 'sets': '3', 'reps': '10-12', 'focus': 'Mid Back', 'category': 'pull'},
+            {'name': 'Face Pulls', 'sets': '3', 'reps': '12-15', 'focus': 'Rear Delts', 'category': 'pull'},
+            {'name': 'Barbell Curls', 'sets': '3', 'reps': '10-12', 'focus': 'Biceps', 'category': 'pull'},
+            {'name': 'Hammer Curls', 'sets': '3', 'reps': '10-12', 'focus': 'Biceps/Forearms', 'category': 'pull'}
+        ]
+        
+        leg_exercises = [
+            {'name': 'Squats', 'sets': '4', 'reps': '8-10', 'focus': 'Quads/Overall', 'category': 'legs'},
+            {'name': 'Romanian Deadlifts', 'sets': '3', 'reps': '8-10', 'focus': 'Hamstrings/Glutes', 'category': 'legs'},
+            {'name': 'Walking Lunges', 'sets': '3', 'reps': '10-12 per leg', 'focus': 'Quads/Balance', 'category': 'legs'},
+            {'name': 'Leg Press', 'sets': '3', 'reps': '10-12', 'focus': 'Overall Legs', 'category': 'legs'},
+            {'name': 'Calf Raises', 'sets': '4', 'reps': '15-20', 'focus': 'Calves', 'category': 'legs'},
+            {'name': 'Leg Curls', 'sets': '3', 'reps': '12-15', 'focus': 'Hamstrings', 'category': 'legs'}
+        ]
+        
+        posterior_focus = [
+            {'name': 'Deadlifts', 'sets': '4', 'reps': '6-8', 'focus': 'Posterior Chain', 'category': 'legs'},
+            {'name': 'Good Mornings', 'sets': '3', 'reps': '10-12', 'focus': 'Hamstrings/Lower Back', 'category': 'legs'},
+            {'name': 'Glute Bridges', 'sets': '3', 'reps': '12-15', 'focus': 'Glutes', 'category': 'legs'},
+            {'name': 'Back Extensions', 'sets': '3', 'reps': '12-15', 'focus': 'Lower Back/Glutes', 'category': 'legs'},
+            {'name': 'Standing Calf Raises', 'sets': '4', 'reps': '15-20', 'focus': 'Calves', 'category': 'legs'},
+            {'name': 'Seated Calf Raises', 'sets': '3', 'reps': '15-20', 'focus': 'Calves', 'category': 'legs'}
+        ]
+        
+        core_exercises = [
+            {'name': 'Planks', 'sets': '3', 'reps': '30-60 sec', 'focus': 'Core Stability', 'category': 'core'},
+            {'name': 'Russian Twists', 'sets': '3', 'reps': '15 per side', 'focus': 'Obliques', 'category': 'core'},
+            {'name': 'Hanging Leg Raises', 'sets': '3', 'reps': '10-15', 'focus': 'Lower Abs', 'category': 'core'}
+        ]
+        
+        rest_day = [
+            {'name': 'Light Cardio', 'sets': '1', 'reps': '20-30 min', 'focus': 'Recovery', 'category': 'rest'},
+            {'name': 'Stretching', 'sets': '1', 'reps': '15-20 min', 'focus': 'Flexibility', 'category': 'rest'},
+            {'name': 'Foam Rolling', 'sets': '1', 'reps': '10-15 min', 'focus': 'Muscle Recovery', 'category': 'rest'}
+        ]
+        
+        # Generate detailed weekly workout plan
+        workout_plan = {}
+        for day, focus in training_split.items():
+            if 'Push' in focus:
+                workout_plan[day] = {
+                    'focus': focus,
+                    'category': 'push',
+                    'exercises': push_exercises.copy()
+                }
+            elif 'Pull' in focus:
+                workout_plan[day] = {
+                    'focus': focus,
+                    'category': 'pull',
+                    'exercises': pull_exercises.copy()
+                }
+            elif 'Legs' in focus and 'Posterior' in focus:
+                workout_plan[day] = {
+                    'focus': focus,
+                    'category': 'legs',
+                    'exercises': posterior_focus.copy()
+                }
+            elif 'Legs' in focus:
+                workout_plan[day] = {
+                    'focus': focus,
+                    'category': 'legs',
+                    'exercises': leg_exercises.copy() + core_exercises.copy()
+                }
+            elif 'Rest' in focus:
+                workout_plan[day] = {
+                    'focus': focus,
+                    'category': 'rest',
+                    'exercises': rest_day.copy()
+                }
+            else:
+                workout_plan[day] = {
+                    'focus': focus,
+                    'category': 'other',
+                    'exercises': []
+                }
+        
+        # Add specialized exercises for weak points
+        specialized_exercises_list = []
+        for weak_point in weak_points:
+            name = weak_point['name'].lower()
+            if 'shoulder' in name and 'shoulder_width' in specialized_exercises:
+                specialized_exercises_list.extend(specialized_exercises['shoulder_width'])
+            elif 'arm' in name and 'arm_development' in specialized_exercises:
+                specialized_exercises_list.extend(specialized_exercises['arm_development'])
+            elif 'chest' in name and 'chest_development' in specialized_exercises:
+                specialized_exercises_list.extend(specialized_exercises['chest_development'])
+            elif 'back' in name and 'back_width' in specialized_exercises:
+                specialized_exercises_list.extend(specialized_exercises['back_width'])
+            elif 'leg' in name and 'leg_development' in specialized_exercises:
+                specialized_exercises_list.extend(specialized_exercises['leg_development'])
+        
+        # Add training tips
+        training_tips = [
+            "Warm up properly before each workout with 5-10 minutes of light cardio and dynamic stretching.",
+            "Focus on proper form and technique over lifting heavy weights.",
+            "Stay hydrated by drinking water before, during, and after your workouts.",
+            "Allow 48-72 hours of recovery between training the same muscle groups.",
+            "Aim for 7-9 hours of quality sleep each night for optimal recovery and growth.",
+            "Track your workouts to ensure progressive overload and continued progress."
+        ]
+        
+        progression_methods = [
+            "Increase weight lifted while maintaining proper form.",
+            "Add 1-2 additional reps to each set before increasing weight.",
+            "Decrease rest time between sets to increase workout intensity.",
+            "Add an additional set to key exercises when plateauing.",
+            "Implement tempo variations (slower eccentric phase) to increase time under tension."
+        ]
+        
+        # Equipment list
+        equipment = [
+            "Access to a gym with free weights and machines",
+            "Weight lifting belt for heavy compound movements",
+            "Appropriate footwear for stability",
+            "Resistance bands for warm-ups and assistance work",
+            "Foam roller for recovery"
+        ]
+        
+        # Calculate the split type
+        split_type = "Push/Pull/Legs"
+        
+        # Render the workout plan using the new template
+        return render_template('tailwind_workout_direct.html', 
+                              user_info=result['user_info'],
+                              traits=formatted_traits,
+                              workout_plan=workout_plan,
+                              detailed_workouts=workout_plan,
+                              weak_points=weak_points,
+                              specialized_exercises=specialized_exercises_list,
+                              training_tips=training_tips,
+                              progression_methods=progression_methods,
+                              experience=experience,
+                              equipment=equipment,
+                              split_type=split_type,
+                              format_value=format_trait_value)
+        
+    except Exception as e:
+        logger.error(f"Error generating workout plan: {str(e)}")
+        flash('Error generating workout plan. Please try again.', 'danger')
+        return redirect(url_for('profile'))
+```
+Now let's create a complete standalone solution you can implement directly in Replit. I'll create a new JavaScript file with the workout buttons functionality:
+
+```javascript:MyGeneticsApp/static/js/workout-buttons.js
+// MyGenetics App - Workout Day Buttons Functionality
+
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('Workout buttons script loaded');
+  
+  // Find all day buttons by their class
+  const dayButtons = document.querySelectorAll('.day-button');
+  const workoutPanels = document.querySelectorAll('.workout-day');
+  
+  // Show the first day by default if no buttons are active yet
+  if (dayButtons.length > 0) {
+    const activeButton = document.querySelector('.day-button.active');
+    
+    if (!activeButton) {
+      const firstDay = dayButtons[0].getAttribute('data-day');
+      showWorkout(firstDay);
+    }
+  }
+  
+  // Add click handlers to all buttons if they don't have onclick yet
+  dayButtons.forEach(button => {
+    if (!button.getAttribute('onclick')) {
+      const day = button.getAttribute('data-day');
+      button.onclick = function() {
+        showWorkout(day);
+      };
+    }
+  });
+});
+
+// Function to show the selected workout day
+function showWorkout(day) {
+  console.log('Showing workout for:', day);
+  
+  // Hide all workout panels
+  document.querySelectorAll('.workout-day').forEach(panel => {
+    panel.classList.add('hidden');
+  });
+  
+  // Remove active class from all buttons
+  document.querySelectorAll('.day-button').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  
+  // Show the selected workout panel
+  const workoutPanel = document.getElementById('workout-' + day);
+  if (workoutPanel) {
+    workoutPanel.classList.remove('hidden');
+    workoutPanel.scrollIntoView({behavior: 'smooth'});
+  }
+  
+  // Highlight the active button
+  document.querySelectorAll('.day-button').forEach(btn => {
+    if (btn.getAttribute('data-day') === day) {
+      btn.classList.add('active');
+    }
+  });
+}
+
+// Alternative button handling for older template format
+function handleDayTabClick(button) {
+  // Get all day tabs and content sections
+  const dayTabs = document.querySelectorAll('.day-tab');
+  const tabContents = document.querySelectorAll('.day-content');
+  
+  // Get the day from the button text
+  const day = button.textContent.trim();
+  
+  // Remove active class from all tabs
+  dayTabs.forEach(tab => {
+    tab.classList.remove('bg-gradient-to-r', 'from-red-600', 'to-red-500', 'text-white', 'shadow-lg');
+    tab.classList.add('bg-gray-600', 'text-gray-200', 'hover:bg-gray-500');
+  });
+  
+  // Add active class to clicked tab
+  button.classList.remove('bg-gray-600', 'text-gray-200', 'hover:bg-gray-500');
+  button.classList.add('bg-gradient-to-r', 'from-red-600', 'to-red-500', 'text-white', 'shadow-lg');
+  
+  // Hide all content sections
+  tabContents.forEach(content => {
+    content.style.display = 'none';
+  });
+  
+  // Show the selected day's content
+  const dayContent = document.querySelector(`.day-content[data-day="${day}"]`);
+  if (dayContent) {
+    dayContent.style.display = 'block';
+    dayContent.scrollIntoView({behavior: 'smooth'});
+  }
+}
+```
+Now let's include this JavaScript file in the workout templates:
+
+```html:MyGeneticsApp/templates/tailwind_layout.html
+{% if title %}
+    <title>{{ title }} - MyGenetics</title>
+{% else %}
+    <title>MyGenetics</title>
+{% endif %}
+<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
+<!-- Stylesheets -->
+<link href="{{ url_for('static', filename='css/tailwind.css') }}" rel="stylesheet">
+<link href="{{ url_for('static', filename='css/main.css') }}" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Scripts -->
+<script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
+<script src="{{ url_for('static', filename='js/workout-buttons.js') }}" defer></script>
+
+{% block head %}{% endblock %}
+```
+Let me check what the original layout file looked like and fix my edit:
+
+Read file: MyGeneticsApp/templates/tailwind_layout.html
+I see the script link was already added correctly. Let's check if we need to update the tailwind_workout_direct.html template to ensure it works well with the JavaScript:
+
+Read file: MyGeneticsApp/templates/tailwind_workout_direct.html
+Now I'll check the specific section with the day buttons in the new template:
+
+Ran tool
+Great! We've now successfully fixed the workout buttons issue by:
+
+1. Adding `onclick="showWorkout('Day')"` attributes to all the day buttons in the template
+2. Created a dedicated JavaScript file (workout-buttons.js) to handle the workout day selection
+3. Updated the app.py route to use the better `tailwind_workout_direct.html` template that properly implements the button functionality
+4. Ensured the JavaScript file is loaded in the layout template
+
+Here's a summary of what to do in Replit:
+
+1. **Add the workout-buttons.js script**:
+   - Create a new file at `/static/js/workout-buttons.js` with the code I provided
+   - This script handles both old and new template button formats
+
+2. **Update the workout template buttons**:
+   - In your workout templates, make sure all day buttons have:
+     - A properly formatted `onclick="showWorkout('Day')"` attribute
+     - A `data-day="Day"` attribute to identify which day they refer to
+
+3. **Ensure workout content sections are properly identified**:
+   - Each content section should have an `id="workout-Day"` attribute (like `id="workout-Monday"`)
+   - And a `data-day="Day"` attribute for the older template format
+
+4. **Use the direct template in the app.py route**:
+   - Update the `/workout/<analysis_id>` route to use `tailwind_workout_direct.html` instead of the older template
+
+Once you implement these changes, your workout buttons will properly switch between different days and show the relevant workout routines when clicked.
