@@ -99,6 +99,42 @@
     transform: translateY(-3px);
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
   }
+  
+  .day-button {
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .day-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  }
+  
+  .day-button.active {
+    border-color: rgba(99, 102, 241, 0.8);
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+  }
+  
+  .day-button.push-day:hover, .day-button.push-day.active {
+    border-color: rgba(238, 44, 44, 0.8);
+    box-shadow: 0 0 15px rgba(238, 44, 44, 0.4);
+  }
+  
+  .day-button.pull-day:hover, .day-button.pull-day.active {
+    border-color: rgba(61, 157, 248, 0.8);
+    box-shadow: 0 0 15px rgba(61, 157, 248, 0.4);
+  }
+  
+  .day-button.legs-day:hover, .day-button.legs-day.active {
+    border-color: rgba(157, 80, 187, 0.8);
+    box-shadow: 0 0 15px rgba(157, 80, 187, 0.4);
+  }
+  
+  .day-button.rest-day:hover, .day-button.rest-day.active {
+    border-color: rgba(82, 194, 52, 0.8);
+    box-shadow: 0 0 15px rgba(82, 194, 52, 0.4);
+  }
 </style>
 {% endblock %}
 
@@ -197,10 +233,30 @@
         </div>
       </div>
       
-      <!-- Daily workout plans -->
-      <div class="space-y-8">
+      <!-- Day selector buttons -->
+      <div class="p-6 bg-gray-800 rounded-xl shadow-lg" data-aos="fade-up">
+        <h3 class="text-2xl font-bold text-white mb-4">Select Your Workout</h3>
+        <p class="text-gray-300 mb-6">Click on a day to view the specific workout routine</p>
+        
+        <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2">
+          {% for day, workout in workout_plan.items() %}
+          <div id="day-btn-{{ loop.index }}" 
+               class="day-button {% if 'push' in workout.category %}push-day{% elif 'pull' in workout.category %}pull-day{% elif 'legs' in workout.category %}legs-day{% elif 'rest' in workout.category %}rest-day{% endif %} bg-gray-900 rounded-lg p-3 flex flex-col items-center justify-center text-center"
+               onclick="showWorkout('{{ day }}')">
+            <div class="w-6 h-6 rounded-full flex items-center justify-center mb-2 {% if 'push' in workout.category %}push-badge{% elif 'pull' in workout.category %}pull-badge{% elif 'legs' in workout.category %}legs-badge{% elif 'rest' in workout.category %}rest-badge{% else %}core-badge{% endif %}">
+              <span class="text-white text-xs font-bold">{{ loop.index }}</span>
+            </div>
+            <span class="text-white font-medium">{{ day }}</span>
+            <span class="text-xs text-gray-400">{{ workout.category|capitalize }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      
+      <!-- Daily workout plans - hidden by default, shown when day is selected -->
+      <div id="workout-container" class="space-y-8">
         {% for day, workout in workout_plan.items() %}
-        <div class="workout-day {{ workout.category }} bg-gray-800 rounded-xl shadow-lg overflow-hidden" data-aos="fade-up" data-aos-delay="{{ loop.index * 100 }}">
+        <div id="workout-{{ day }}" class="workout-day {{ workout.category }} bg-gray-800 rounded-xl shadow-lg overflow-hidden hidden" data-aos="fade-up">
           <div class="p-6">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4">
               <div>
@@ -273,4 +329,51 @@
     </div>
   </div>
 </div>
+
+<script>
+  // JavaScript to handle day selection and workout display
+  document.addEventListener('DOMContentLoaded', function() {
+    // Show the first day's workout by default
+    const firstDay = document.querySelector('.day-button');
+    if (firstDay) {
+      firstDay.classList.add('active');
+      const dayName = firstDay.querySelector('.text-white.font-medium').textContent;
+      showWorkout(dayName);
+    }
+  });
+  
+  function showWorkout(day) {
+    // Hide all workout panels
+    const workoutPanels = document.querySelectorAll('[id^="workout-"]');
+    workoutPanels.forEach(panel => {
+      panel.classList.add('hidden');
+    });
+    
+    // Remove active class from all buttons
+    const dayButtons = document.querySelectorAll('.day-button');
+    dayButtons.forEach(button => {
+      button.classList.remove('active');
+    });
+    
+    // Show the selected day's workout
+    const selectedWorkout = document.getElementById(`workout-${day}`);
+    if (selectedWorkout) {
+      selectedWorkout.classList.remove('hidden');
+    }
+    
+    // Add active class to the clicked button
+    const dayButtons2 = document.querySelectorAll('.day-button');
+    dayButtons2.forEach(button => {
+      const buttonDay = button.querySelector('.text-white.font-medium').textContent;
+      if (buttonDay === day) {
+        button.classList.add('active');
+      }
+    });
+    
+    // Scroll to the workout panel
+    if (selectedWorkout) {
+      selectedWorkout.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }
+</script>
 {% endblock %}
