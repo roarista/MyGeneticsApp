@@ -166,50 +166,50 @@
     
     <div class="md:col-span-7">
         <!-- Weekly Schedule Section -->
-        <div class="fitness-card mb-6">
-            <div class="flex items-center gap-3 mb-4">
-                <svg class="icon text-fitness-red">
+        <div class="fitness-card bg-gray-800/80 backdrop-blur-sm p-6 rounded-xl border border-gray-700 shadow-lg mb-6" data-aos="fade-up" data-aos-delay="200">
+            <div class="flex items-center gap-3 mb-5">
+                <svg class="icon text-red-500">
                     <use xlink:href="#icon-calendar"></use>
                 </svg>
-                <h3 class="text-xl font-bold">Weekly Schedule</h3>
+                <h3 class="text-xl font-bold text-white">Weekly Schedule</h3>
             </div>
             
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto bg-gray-700/60 p-4 rounded-lg border border-gray-600 shadow-md">
                 <table class="w-full">
                     <thead>
                         <tr>
-                            <th class="text-left text-sm font-medium text-fitness-accent pb-3">Day</th>
-                            <th class="text-left text-sm font-medium text-fitness-accent pb-3">Focus</th>
+                            <th class="text-left text-sm font-medium text-red-400 pb-4">Day</th>
+                            <th class="text-left text-sm font-medium text-red-400 pb-4">Focus</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-800">
+                    <tbody class="divide-y divide-gray-600">
                         <tr>
-                            <td class="py-3 text-sm font-medium">Monday</td>
-                            <td class="py-3 text-sm text-fitness-gray">Push (Chest, Shoulders, Triceps)</td>
+                            <td class="py-3 text-base font-medium text-white">Monday</td>
+                            <td class="py-3 text-base text-gray-300">Push (Chest, Shoulders, Triceps)</td>
                         </tr>
                         <tr>
-                            <td class="py-3 text-sm font-medium">Tuesday</td>
-                            <td class="py-3 text-sm text-fitness-gray">Pull (Back, Biceps)</td>
+                            <td class="py-3 text-base font-medium text-white">Tuesday</td>
+                            <td class="py-3 text-base text-gray-300">Pull (Back, Biceps)</td>
                         </tr>
                         <tr>
-                            <td class="py-3 text-sm font-medium">Wednesday</td>
-                            <td class="py-3 text-sm text-fitness-gray">Legs (Quads, Hamstrings, Calves)</td>
+                            <td class="py-3 text-base font-medium text-white">Wednesday</td>
+                            <td class="py-3 text-base text-gray-300">Legs (Quads, Hamstrings, Calves)</td>
                         </tr>
                         <tr>
-                            <td class="py-3 text-sm font-medium">Thursday</td>
-                            <td class="py-3 text-sm text-fitness-gray">Rest Day</td>
+                            <td class="py-3 text-base font-medium text-white">Thursday</td>
+                            <td class="py-3 text-base text-gray-300">Rest Day</td>
                         </tr>
                         <tr>
-                            <td class="py-3 text-sm font-medium">Friday</td>
-                            <td class="py-3 text-sm text-fitness-gray">Push 2 (Chest, Shoulders, Triceps)</td>
+                            <td class="py-3 text-base font-medium text-white">Friday</td>
+                            <td class="py-3 text-base text-gray-300">Push 2 (Chest, Shoulders, Triceps)</td>
                         </tr>
                         <tr>
-                            <td class="py-3 text-sm font-medium">Saturday</td>
-                            <td class="py-3 text-sm text-fitness-gray">Pull 2 (Back, Biceps)</td>
+                            <td class="py-3 text-base font-medium text-white">Saturday</td>
+                            <td class="py-3 text-base text-gray-300">Pull 2 (Back, Biceps)</td>
                         </tr>
                         <tr>
-                            <td class="py-3 text-sm font-medium">Sunday</td>
-                            <td class="py-3 text-sm text-fitness-gray">Legs 2 (Glutes, Hamstrings, Calves)</td>
+                            <td class="py-3 text-base font-medium text-white">Sunday</td>
+                            <td class="py-3 text-base text-gray-300">Legs 2 (Glutes, Hamstrings, Calves)</td>
                         </tr>
                     </tbody>
                 </table>
@@ -217,79 +217,79 @@
         </div>
         
         <!-- Detailed Workout Plans -->
-        <div class="fitness-card mb-6">
-            <div class="flex items-center gap-3 mb-4">
-                <svg class="icon text-fitness-red">
+        <div class="fitness-card bg-gray-800/80 backdrop-blur-sm p-6 rounded-xl border border-gray-700 shadow-lg mb-6" data-aos="fade-up" data-aos-delay="300">
+            <div class="flex items-center gap-3 mb-5">
+                <svg class="icon text-red-500">
                     <use xlink:href="#icon-list"></use>
                 </svg>
-                <h3 class="text-xl font-bold">Detailed Workout Plans</h3>
+                <h3 class="text-xl font-bold text-white">Detailed Workout Plans</h3>
             </div>
             
             <div x-data="{ activeDay: 'Monday' }" class="mb-6">
                 <!-- Day Tabs -->
-                <div class="flex flex-wrap gap-2 mb-4">
+                <div class="flex flex-wrap gap-3 mb-5 bg-gray-700/60 p-4 rounded-lg border border-gray-600 shadow-md">
                     <button 
                         @click="activeDay = 'Monday'" 
-                        :class="activeDay === 'Monday' ? 'bg-white text-black' : ''"
-                        class="day-tab">
+                        :class="activeDay === 'Monday' ? 'bg-gradient-to-r from-red-600 to-red-500 text-white shadow-lg' : 'bg-gray-600 text-gray-200 hover:bg-gray-500'"
+                        class="day-tab transition-all duration-300 px-4 py-2 rounded-lg">
                         Monday
                     </button>
                     <button 
                         @click="activeDay = 'Tuesday'" 
-                        :class="activeDay === 'Tuesday' ? 'bg-white text-black' : ''"
-                        class="day-tab">
+                        :class="activeDay === 'Tuesday' ? 'bg-gradient-to-r from-red-600 to-red-500 text-white shadow-lg' : 'bg-gray-600 text-gray-200 hover:bg-gray-500'"
+                        class="day-tab transition-all duration-300 px-4 py-2 rounded-lg">
                         Tuesday
                     </button>
                     <button 
                         @click="activeDay = 'Wednesday'" 
-                        :class="activeDay === 'Wednesday' ? 'bg-white text-black' : ''"
-                        class="day-tab">
+                        :class="activeDay === 'Wednesday' ? 'bg-gradient-to-r from-red-600 to-red-500 text-white shadow-lg' : 'bg-gray-600 text-gray-200 hover:bg-gray-500'"
+                        class="day-tab transition-all duration-300 px-4 py-2 rounded-lg">
                         Wednesday
                     </button>
                     <button 
                         @click="activeDay = 'Thursday'" 
-                        :class="activeDay === 'Thursday' ? 'bg-white text-black' : ''"
-                        class="day-tab">
+                        :class="activeDay === 'Thursday' ? 'bg-gradient-to-r from-red-600 to-red-500 text-white shadow-lg' : 'bg-gray-600 text-gray-200 hover:bg-gray-500'"
+                        class="day-tab transition-all duration-300 px-4 py-2 rounded-lg">
                         Thursday
                     </button>
                     <button 
                         @click="activeDay = 'Friday'" 
-                        :class="activeDay === 'Friday' ? 'bg-white text-black' : ''"
-                        class="day-tab">
+                        :class="activeDay === 'Friday' ? 'bg-gradient-to-r from-red-600 to-red-500 text-white shadow-lg' : 'bg-gray-600 text-gray-200 hover:bg-gray-500'"
+                        class="day-tab transition-all duration-300 px-4 py-2 rounded-lg">
                         Friday
                     </button>
                     <button 
                         @click="activeDay = 'Saturday'" 
-                        :class="activeDay === 'Saturday' ? 'bg-white text-black' : ''"
-                        class="day-tab">
+                        :class="activeDay === 'Saturday' ? 'bg-gradient-to-r from-red-600 to-red-500 text-white shadow-lg' : 'bg-gray-600 text-gray-200 hover:bg-gray-500'"
+                        class="day-tab transition-all duration-300 px-4 py-2 rounded-lg">
                         Saturday
                     </button>
                     <button 
                         @click="activeDay = 'Sunday'" 
-                        :class="activeDay === 'Sunday' ? 'bg-white text-black' : ''"
-                        class="day-tab">
+                        :class="activeDay === 'Sunday' ? 'bg-gradient-to-r from-red-600 to-red-500 text-white shadow-lg' : 'bg-gray-600 text-gray-200 hover:bg-gray-500'"
+                        class="day-tab transition-all duration-300 px-4 py-2 rounded-lg">
                         Sunday
                     </button>
                 </div>
                 
                 <!-- Monday Content - Push Day 1 -->
-                <div x-show="activeDay === 'Monday'" class="fitness-card bg-fitness-darkgray tab-content-fade">
-                    <h4 class="font-bold text-white mb-3">Monday: Push (Chest, Shoulders, Triceps)</h4>
-                    <p class="text-sm text-fitness-gray mb-3">Complete all exercises with proper form. Rest 1-2 minutes between sets for compound movements, 30-60 seconds for isolation exercises.</p>
+                <div x-show="activeDay === 'Monday'" class="bg-gray-700/60 p-5 rounded-lg border border-gray-600 shadow-md tab-content-fade">
+                    <h4 class="font-bold text-white text-lg mb-3">Monday: Push (Chest, Shoulders, Triceps)</h4>
+                    <p class="text-gray-300 mb-4">Complete all exercises with proper form. Rest 1-2 minutes between sets for compound movements, 30-60 seconds for isolation exercises.</p>
                     
-                    <div class="space-y-3">
+                    <div class="space-y-4">
                         {% for exercise in detailed_workouts.get('Monday', {}).get('exercises', []) %}
-                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                        <div class="bg-gray-700/80 backdrop-blur-sm p-4 rounded-xl border border-gray-600 shadow-lg hover:bg-gray-700/90 transition-all duration-300">
                             <div class="flex items-start justify-between">
                                 <div>
-                                    <span class="font-medium text-white">{{ exercise.name }}</span>
-                                    <div class="text-xs text-fitness-gray flex gap-4 mt-2">
-                                        <span>{{ exercise.sets }} sets</span>
-                                        <span>{{ exercise.reps }}</span>
+                                    <span class="font-medium text-white text-base">{{ exercise.name }}</span>
+                                    <div class="flex flex-wrap gap-3 mt-3">
+                                        <span class="bg-red-900/50 text-red-300 px-3 py-1 rounded-full text-sm">{{ exercise.sets }} sets</span>
+                                        <span class="bg-red-900/50 text-red-300 px-3 py-1 rounded-full text-sm">{{ exercise.reps }}</span>
                                     </div>
-                                    <p class="text-sm text-fitness-gray mt-1">{{ exercise.focus }}</p>
+                                    <p class="text-gray-300 mt-3">{{ exercise.focus }}</p>
                                 </div>
-                                <span class="text-xs px-2 py-1 rounded-full bg-fitness-accent bg-opacity-20 text-fitness-accent">Push</span>
+                                <span class="text-sm px-3 py-1 rounded-full bg-gradient-to-r from-red-600 to-red-500 text-white shadow-sm">Push</span>
                             </div>
                         </div>
                         {% endfor %}
@@ -297,23 +297,23 @@
                 </div>
                 
                 <!-- Tuesday Content - Pull Day 1 -->
-                <div x-show="activeDay === 'Tuesday'" class="fitness-card bg-fitness-darkgray tab-content-fade">
-                    <h4 class="font-bold text-white mb-3">Tuesday: Pull (Back, Biceps)</h4>
-                    <p class="text-sm text-fitness-gray mb-3">Complete all exercises with proper form. Rest 1-2 minutes between sets for compound movements, 30-60 seconds for isolation exercises.</p>
+                <div x-show="activeDay === 'Tuesday'" class="bg-gray-700/60 p-5 rounded-lg border border-gray-600 shadow-md tab-content-fade">
+                    <h4 class="font-bold text-white text-lg mb-3">Tuesday: Pull (Back, Biceps)</h4>
+                    <p class="text-gray-300 mb-4">Complete all exercises with proper form. Rest 1-2 minutes between sets for compound movements, 30-60 seconds for isolation exercises.</p>
                     
-                    <div class="space-y-3">
+                    <div class="space-y-4">
                         {% for exercise in detailed_workouts.get('Wednesday', {}).get('exercises', []) %}
-                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                        <div class="bg-gray-700/80 backdrop-blur-sm p-4 rounded-xl border border-gray-600 shadow-lg hover:bg-gray-700/90 transition-all duration-300">
                             <div class="flex items-start justify-between">
                                 <div>
-                                    <span class="font-medium text-white">{{ exercise.name }}</span>
-                                    <div class="text-xs text-fitness-gray flex gap-4 mt-2">
-                                        <span>{{ exercise.sets }} sets</span>
-                                        <span>{{ exercise.reps }}</span>
+                                    <span class="font-medium text-white text-base">{{ exercise.name }}</span>
+                                    <div class="flex flex-wrap gap-3 mt-3">
+                                        <span class="bg-blue-900/50 text-blue-300 px-3 py-1 rounded-full text-sm">{{ exercise.sets }} sets</span>
+                                        <span class="bg-blue-900/50 text-blue-300 px-3 py-1 rounded-full text-sm">{{ exercise.reps }}</span>
                                     </div>
-                                    <p class="text-sm text-fitness-gray mt-1">{{ exercise.focus }}</p>
+                                    <p class="text-gray-300 mt-3">{{ exercise.focus }}</p>
                                 </div>
-                                <span class="text-xs px-2 py-1 rounded-full bg-fitness-accent bg-opacity-20 text-fitness-accent">Pull</span>
+                                <span class="text-sm px-3 py-1 rounded-full bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-sm">Pull</span>
                             </div>
                         </div>
                         {% endfor %}
@@ -321,23 +321,23 @@
                 </div>
                 
                 <!-- Wednesday Content - Legs Day -->
-                <div x-show="activeDay === 'Wednesday'" class="fitness-card bg-fitness-darkgray tab-content-fade">
-                    <h4 class="font-bold text-white mb-3">Wednesday: Legs (Quads, Hamstrings, Calves)</h4>
-                    <p class="text-sm text-fitness-gray mb-3">Complete all exercises with proper form. Rest 1-2 minutes between sets for compound movements, 30-60 seconds for isolation exercises.</p>
+                <div x-show="activeDay === 'Wednesday'" class="bg-gray-700/60 p-5 rounded-lg border border-gray-600 shadow-md tab-content-fade">
+                    <h4 class="font-bold text-white text-lg mb-3">Wednesday: Legs (Quads, Hamstrings, Calves)</h4>
+                    <p class="text-gray-300 mb-4">Complete all exercises with proper form. Rest 1-2 minutes between sets for compound movements, 30-60 seconds for isolation exercises.</p>
                     
-                    <div class="space-y-3">
+                    <div class="space-y-4">
                         {% for exercise in detailed_workouts.get('Friday', {}).get('exercises', []) %}
-                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                        <div class="bg-gray-700/80 backdrop-blur-sm p-4 rounded-xl border border-gray-600 shadow-lg hover:bg-gray-700/90 transition-all duration-300">
                             <div class="flex items-start justify-between">
                                 <div>
-                                    <span class="font-medium text-white">{{ exercise.name }}</span>
-                                    <div class="text-xs text-fitness-gray flex gap-4 mt-2">
-                                        <span>{{ exercise.sets }} sets</span>
-                                        <span>{{ exercise.reps }}</span>
+                                    <span class="font-medium text-white text-base">{{ exercise.name }}</span>
+                                    <div class="flex flex-wrap gap-3 mt-3">
+                                        <span class="bg-purple-900/50 text-purple-300 px-3 py-1 rounded-full text-sm">{{ exercise.sets }} sets</span>
+                                        <span class="bg-purple-900/50 text-purple-300 px-3 py-1 rounded-full text-sm">{{ exercise.reps }}</span>
                                     </div>
-                                    <p class="text-sm text-fitness-gray mt-1">{{ exercise.focus }}</p>
+                                    <p class="text-gray-300 mt-3">{{ exercise.focus }}</p>
                                 </div>
-                                <span class="text-xs px-2 py-1 rounded-full bg-fitness-accent bg-opacity-20 text-fitness-accent">Legs</span>
+                                <span class="text-sm px-3 py-1 rounded-full bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-sm">Legs</span>
                             </div>
                         </div>
                         {% endfor %}
@@ -345,271 +345,271 @@
                 </div>
                 
                 <!-- Thursday Content - Rest Day -->
-                <div x-show="activeDay === 'Thursday'" class="fitness-card bg-fitness-darkgray tab-content-fade">
-                    <h4 class="font-bold text-white mb-3">Thursday: Rest Day</h4>
-                    <p class="text-sm text-fitness-gray mb-3">Focus on recovery and mobility work. Consider light activities such as:</p>
+                <div x-show="activeDay === 'Thursday'" class="bg-gray-700/60 p-5 rounded-lg border border-gray-600 shadow-md tab-content-fade">
+                    <h4 class="font-bold text-white text-lg mb-3">Thursday: Rest Day</h4>
+                    <p class="text-gray-300 mb-4">Focus on recovery and mobility work. Consider light activities such as:</p>
                     
-                    <div class="space-y-3">
-                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                    <div class="space-y-4">
+                        <div class="bg-gray-700/80 backdrop-blur-sm p-4 rounded-xl border border-gray-600 shadow-lg hover:bg-gray-700/90 transition-all duration-300">
                             <div class="flex items-start justify-between">
                                 <div>
-                                    <span class="font-medium text-white">Walking (30-45 minutes)</span>
-                                    <p class="text-sm text-fitness-gray mt-1">Low-intensity steady state cardio for recovery</p>
+                                    <span class="font-medium text-white text-base">Walking (30-45 minutes)</span>
+                                    <p class="text-gray-300 mt-3">Low-intensity steady state cardio for recovery</p>
                                 </div>
-                                <span class="text-xs px-2 py-1 rounded-full bg-green-500 bg-opacity-20 text-green-500">Active Rest</span>
+                                <span class="text-sm px-3 py-1 rounded-full bg-gradient-to-r from-green-600 to-green-500 text-white shadow-sm">Active Rest</span>
                             </div>
                         </div>
-                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                        <div class="bg-gray-700/80 backdrop-blur-sm p-4 rounded-xl border border-gray-600 shadow-lg hover:bg-gray-700/90 transition-all duration-300">
                             <div class="flex items-start justify-between">
                                 <div>
-                                    <span class="font-medium text-white">Stretching (10-15 minutes)</span>
-                                    <p class="text-sm text-fitness-gray mt-1">Focus on muscle groups worked in previous days</p>
+                                    <span class="font-medium text-white text-base">Stretching (10-15 minutes)</span>
+                                    <p class="text-gray-300 mt-3">Focus on muscle groups worked in previous days</p>
                                 </div>
-                                <span class="text-xs px-2 py-1 rounded-full bg-green-500 bg-opacity-20 text-green-500">Active Rest</span>
+                                <span class="text-sm px-3 py-1 rounded-full bg-gradient-to-r from-green-600 to-green-500 text-white shadow-sm">Active Rest</span>
                             </div>
                         </div>
-                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                        <div class="bg-gray-700/80 backdrop-blur-sm p-4 rounded-xl border border-gray-600 shadow-lg hover:bg-gray-700/90 transition-all duration-300">
                             <div class="flex items-start justify-between">
                                 <div>
-                                    <span class="font-medium text-white">Foam Rolling</span>
-                                    <p class="text-sm text-fitness-gray mt-1">Self-myofascial release for tight muscles</p>
+                                    <span class="font-medium text-white text-base">Foam Rolling</span>
+                                    <p class="text-gray-300 mt-3">Self-myofascial release for tight muscles</p>
                                 </div>
-                                <span class="text-xs px-2 py-1 rounded-full bg-green-500 bg-opacity-20 text-green-500">Active Rest</span>
+                                <span class="text-sm px-3 py-1 rounded-full bg-gradient-to-r from-green-600 to-green-500 text-white shadow-sm">Active Rest</span>
                             </div>
                         </div>
                     </div>
                 </div>
                 
                 <!-- Friday Content - Push Day 2 -->
-                <div x-show="activeDay === 'Friday'" class="fitness-card bg-fitness-darkgray tab-content-fade">
-                    <h4 class="font-bold text-white mb-3">Friday: Push 2 (Chest, Shoulders, Triceps)</h4>
-                    <p class="text-sm text-fitness-gray mb-3">Second push day of the week with different exercise variations and intensity. Focus on progressive overload.</p>
+                <div x-show="activeDay === 'Friday'" class="bg-gray-700/60 p-5 rounded-lg border border-gray-600 shadow-md tab-content-fade">
+                    <h4 class="font-bold text-white text-lg mb-3">Friday: Push 2 (Chest, Shoulders, Triceps)</h4>
+                    <p class="text-gray-300 mb-4">Second push day of the week with different exercise variations and intensity. Focus on progressive overload.</p>
                     
-                    <div class="space-y-3">
-                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                    <div class="space-y-4">
+                        <div class="bg-gray-700/80 backdrop-blur-sm p-4 rounded-xl border border-gray-600 shadow-lg hover:bg-gray-700/90 transition-all duration-300">
                             <div class="flex items-start justify-between">
                                 <div>
-                                    <span class="font-medium text-white">Incline Dumbbell Press</span>
-                                    <div class="text-xs text-fitness-gray flex gap-4 mt-2">
-                                        <span>4 sets</span>
-                                        <span>8-10 reps</span>
+                                    <span class="font-medium text-white text-base">Incline Dumbbell Press</span>
+                                    <div class="flex flex-wrap gap-3 mt-3">
+                                        <span class="bg-red-900/50 text-red-300 px-3 py-1 rounded-full text-sm">4 sets</span>
+                                        <span class="bg-red-900/50 text-red-300 px-3 py-1 rounded-full text-sm">8-10 reps</span>
                                     </div>
-                                    <p class="text-sm text-fitness-gray mt-1">Upper chest development and shoulder stability</p>
+                                    <p class="text-gray-300 mt-3">Upper chest development and shoulder stability</p>
                                 </div>
-                                <span class="text-xs px-2 py-1 rounded-full bg-fitness-accent bg-opacity-20 text-fitness-accent">Push</span>
+                                <span class="text-sm px-3 py-1 rounded-full bg-gradient-to-r from-red-600 to-red-500 text-white shadow-sm">Push</span>
                             </div>
                         </div>
-                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                        <div class="bg-gray-700/80 backdrop-blur-sm p-4 rounded-xl border border-gray-600 shadow-lg hover:bg-gray-700/90 transition-all duration-300">
                             <div class="flex items-start justify-between">
                                 <div>
-                                    <span class="font-medium text-white">Dumbbell Shoulder Press</span>
-                                    <div class="text-xs text-fitness-gray flex gap-4 mt-2">
-                                        <span>3 sets</span>
-                                        <span>10-12 reps</span>
+                                    <span class="font-medium text-white text-base">Dumbbell Shoulder Press</span>
+                                    <div class="flex flex-wrap gap-3 mt-3">
+                                        <span class="bg-red-900/50 text-red-300 px-3 py-1 rounded-full text-sm">3 sets</span>
+                                        <span class="bg-red-900/50 text-red-300 px-3 py-1 rounded-full text-sm">10-12 reps</span>
                                     </div>
-                                    <p class="text-sm text-fitness-gray mt-1">Deltoid development and overhead strength</p>
+                                    <p class="text-gray-300 mt-3">Deltoid development and overhead strength</p>
                                 </div>
-                                <span class="text-xs px-2 py-1 rounded-full bg-fitness-accent bg-opacity-20 text-fitness-accent">Push</span>
+                                <span class="text-sm px-3 py-1 rounded-full bg-gradient-to-r from-red-600 to-red-500 text-white shadow-sm">Push</span>
                             </div>
                         </div>
-                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                        <div class="bg-gray-700/80 backdrop-blur-sm p-4 rounded-xl border border-gray-600 shadow-lg hover:bg-gray-700/90 transition-all duration-300">
                             <div class="flex items-start justify-between">
                                 <div>
-                                    <span class="font-medium text-white">Cable Chest Flyes</span>
-                                    <div class="text-xs text-fitness-gray flex gap-4 mt-2">
-                                        <span>3 sets</span>
-                                        <span>12-15 reps</span>
+                                    <span class="font-medium text-white text-base">Cable Chest Flyes</span>
+                                    <div class="flex flex-wrap gap-3 mt-3">
+                                        <span class="bg-red-900/50 text-red-300 px-3 py-1 rounded-full text-sm">3 sets</span>
+                                        <span class="bg-red-900/50 text-red-300 px-3 py-1 rounded-full text-sm">12-15 reps</span>
                                     </div>
-                                    <p class="text-sm text-fitness-gray mt-1">Chest isolation and stretching</p>
+                                    <p class="text-gray-300 mt-3">Chest isolation and stretching</p>
                                 </div>
-                                <span class="text-xs px-2 py-1 rounded-full bg-fitness-accent bg-opacity-20 text-fitness-accent">Push</span>
+                                <span class="text-sm px-3 py-1 rounded-full bg-gradient-to-r from-red-600 to-red-500 text-white shadow-sm">Push</span>
                             </div>
                         </div>
-                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                        <div class="bg-gray-700/80 backdrop-blur-sm p-4 rounded-xl border border-gray-600 shadow-lg hover:bg-gray-700/90 transition-all duration-300">
                             <div class="flex items-start justify-between">
                                 <div>
-                                    <span class="font-medium text-white">Lateral Raises</span>
-                                    <div class="text-xs text-fitness-gray flex gap-4 mt-2">
-                                        <span>3 sets</span>
-                                        <span>12-15 reps</span>
+                                    <span class="font-medium text-white text-base">Lateral Raises</span>
+                                    <div class="flex flex-wrap gap-3 mt-3">
+                                        <span class="bg-red-900/50 text-red-300 px-3 py-1 rounded-full text-sm">3 sets</span>
+                                        <span class="bg-red-900/50 text-red-300 px-3 py-1 rounded-full text-sm">12-15 reps</span>
                                     </div>
-                                    <p class="text-sm text-fitness-gray mt-1">Side deltoid isolation</p>
+                                    <p class="text-gray-300 mt-3">Side deltoid isolation</p>
                                 </div>
-                                <span class="text-xs px-2 py-1 rounded-full bg-fitness-accent bg-opacity-20 text-fitness-accent">Push</span>
+                                <span class="text-sm px-3 py-1 rounded-full bg-gradient-to-r from-red-600 to-red-500 text-white shadow-sm">Push</span>
                             </div>
                         </div>
-                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                        <div class="bg-gray-700/80 backdrop-blur-sm p-4 rounded-xl border border-gray-600 shadow-lg hover:bg-gray-700/90 transition-all duration-300">
                             <div class="flex items-start justify-between">
                                 <div>
-                                    <span class="font-medium text-white">Tricep Pushdowns</span>
-                                    <div class="text-xs text-fitness-gray flex gap-4 mt-2">
-                                        <span>3 sets</span>
-                                        <span>12-15 reps</span>
+                                    <span class="font-medium text-white text-base">Tricep Pushdowns</span>
+                                    <div class="flex flex-wrap gap-3 mt-3">
+                                        <span class="bg-red-900/50 text-red-300 px-3 py-1 rounded-full text-sm">3 sets</span>
+                                        <span class="bg-red-900/50 text-red-300 px-3 py-1 rounded-full text-sm">12-15 reps</span>
                                     </div>
-                                    <p class="text-sm text-fitness-gray mt-1">Tricep isolation and strengthening</p>
+                                    <p class="text-gray-300 mt-3">Tricep isolation and strengthening</p>
                                 </div>
-                                <span class="text-xs px-2 py-1 rounded-full bg-fitness-accent bg-opacity-20 text-fitness-accent">Push</span>
+                                <span class="text-sm px-3 py-1 rounded-full bg-gradient-to-r from-red-600 to-red-500 text-white shadow-sm">Push</span>
                             </div>
                         </div>
                     </div>
                 </div>
                 
                 <!-- Saturday Content - Pull Day 2 -->
-                <div x-show="activeDay === 'Saturday'" class="fitness-card bg-fitness-darkgray tab-content-fade">
-                    <h4 class="font-bold text-white mb-3">Saturday: Pull 2 (Back, Biceps)</h4>
-                    <p class="text-sm text-fitness-gray mb-3">Second pull day of the week with different exercise variations and intensity.</p>
+                <div x-show="activeDay === 'Saturday'" class="bg-gray-700/60 p-5 rounded-lg border border-gray-600 shadow-md tab-content-fade">
+                    <h4 class="font-bold text-white text-lg mb-3">Saturday: Pull 2 (Back, Biceps)</h4>
+                    <p class="text-gray-300 mb-4">Second pull day of the week with different exercise variations and intensity.</p>
                     
-                    <div class="space-y-3">
-                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                    <div class="space-y-4">
+                        <div class="bg-gray-700/80 backdrop-blur-sm p-4 rounded-xl border border-gray-600 shadow-lg hover:bg-gray-700/90 transition-all duration-300">
                             <div class="flex items-start justify-between">
                                 <div>
-                                    <span class="font-medium text-white">Seated Cable Rows</span>
-                                    <div class="text-xs text-fitness-gray flex gap-4 mt-2">
-                                        <span>4 sets</span>
-                                        <span>8-10 reps</span>
+                                    <span class="font-medium text-white text-base">Seated Cable Rows</span>
+                                    <div class="flex flex-wrap gap-3 mt-3">
+                                        <span class="bg-blue-900/50 text-blue-300 px-3 py-1 rounded-full text-sm">4 sets</span>
+                                        <span class="bg-blue-900/50 text-blue-300 px-3 py-1 rounded-full text-sm">8-10 reps</span>
                                     </div>
-                                    <p class="text-sm text-fitness-gray mt-1">Mid-back development and scapular retraction</p>
+                                    <p class="text-gray-300 mt-3">Mid-back development and scapular retraction</p>
                                 </div>
-                                <span class="text-xs px-2 py-1 rounded-full bg-fitness-accent bg-opacity-20 text-fitness-accent">Pull</span>
+                                <span class="text-sm px-3 py-1 rounded-full bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-sm">Pull</span>
                             </div>
                         </div>
-                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                        <div class="bg-gray-700/80 backdrop-blur-sm p-4 rounded-xl border border-gray-600 shadow-lg hover:bg-gray-700/90 transition-all duration-300">
                             <div class="flex items-start justify-between">
                                 <div>
-                                    <span class="font-medium text-white">Lat Pulldowns</span>
-                                    <div class="text-xs text-fitness-gray flex gap-4 mt-2">
-                                        <span>3 sets</span>
-                                        <span>10-12 reps</span>
+                                    <span class="font-medium text-white text-base">Lat Pulldowns</span>
+                                    <div class="flex flex-wrap gap-3 mt-3">
+                                        <span class="bg-blue-900/50 text-blue-300 px-3 py-1 rounded-full text-sm">3 sets</span>
+                                        <span class="bg-blue-900/50 text-blue-300 px-3 py-1 rounded-full text-sm">10-12 reps</span>
                                     </div>
-                                    <p class="text-sm text-fitness-gray mt-1">Lat width and development</p>
+                                    <p class="text-gray-300 mt-3">Lat width and development</p>
                                 </div>
-                                <span class="text-xs px-2 py-1 rounded-full bg-fitness-accent bg-opacity-20 text-fitness-accent">Pull</span>
+                                <span class="text-sm px-3 py-1 rounded-full bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-sm">Pull</span>
                             </div>
                         </div>
-                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                        <div class="bg-gray-700/80 backdrop-blur-sm p-4 rounded-xl border border-gray-600 shadow-lg hover:bg-gray-700/90 transition-all duration-300">
                             <div class="flex items-start justify-between">
                                 <div>
-                                    <span class="font-medium text-white">Face Pulls</span>
-                                    <div class="text-xs text-fitness-gray flex gap-4 mt-2">
-                                        <span>3 sets</span>
-                                        <span>12-15 reps</span>
+                                    <span class="font-medium text-white text-base">Face Pulls</span>
+                                    <div class="flex flex-wrap gap-3 mt-3">
+                                        <span class="bg-blue-900/50 text-blue-300 px-3 py-1 rounded-full text-sm">3 sets</span>
+                                        <span class="bg-blue-900/50 text-blue-300 px-3 py-1 rounded-full text-sm">12-15 reps</span>
                                     </div>
-                                    <p class="text-sm text-fitness-gray mt-1">Rear deltoid and upper back</p>
+                                    <p class="text-gray-300 mt-3">Rear deltoid and upper back</p>
                                 </div>
-                                <span class="text-xs px-2 py-1 rounded-full bg-fitness-accent bg-opacity-20 text-fitness-accent">Pull</span>
+                                <span class="text-sm px-3 py-1 rounded-full bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-sm">Pull</span>
                             </div>
                         </div>
-                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                        <div class="bg-gray-700/80 backdrop-blur-sm p-4 rounded-xl border border-gray-600 shadow-lg hover:bg-gray-700/90 transition-all duration-300">
                             <div class="flex items-start justify-between">
                                 <div>
-                                    <span class="font-medium text-white">Hammer Curls</span>
-                                    <div class="text-xs text-fitness-gray flex gap-4 mt-2">
-                                        <span>3 sets</span>
-                                        <span>10-12 reps</span>
+                                    <span class="font-medium text-white text-base">Hammer Curls</span>
+                                    <div class="flex flex-wrap gap-3 mt-3">
+                                        <span class="bg-blue-900/50 text-blue-300 px-3 py-1 rounded-full text-sm">3 sets</span>
+                                        <span class="bg-blue-900/50 text-blue-300 px-3 py-1 rounded-full text-sm">10-12 reps</span>
                                     </div>
-                                    <p class="text-sm text-fitness-gray mt-1">Brachialis and forearm development</p>
+                                    <p class="text-gray-300 mt-3">Brachialis and forearm development</p>
                                 </div>
-                                <span class="text-xs px-2 py-1 rounded-full bg-fitness-accent bg-opacity-20 text-fitness-accent">Pull</span>
+                                <span class="text-sm px-3 py-1 rounded-full bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-sm">Pull</span>
                             </div>
                         </div>
-                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                        <div class="bg-gray-700/80 backdrop-blur-sm p-4 rounded-xl border border-gray-600 shadow-lg hover:bg-gray-700/90 transition-all duration-300">
                             <div class="flex items-start justify-between">
                                 <div>
-                                    <span class="font-medium text-white">Preacher Curls</span>
-                                    <div class="text-xs text-fitness-gray flex gap-4 mt-2">
-                                        <span>3 sets</span>
-                                        <span>12-15 reps</span>
+                                    <span class="font-medium text-white text-base">Preacher Curls</span>
+                                    <div class="flex flex-wrap gap-3 mt-3">
+                                        <span class="bg-blue-900/50 text-blue-300 px-3 py-1 rounded-full text-sm">3 sets</span>
+                                        <span class="bg-blue-900/50 text-blue-300 px-3 py-1 rounded-full text-sm">12-15 reps</span>
                                     </div>
-                                    <p class="text-sm text-fitness-gray mt-1">Bicep isolation with controlled movement</p>
+                                    <p class="text-gray-300 mt-3">Bicep isolation with controlled movement</p>
                                 </div>
-                                <span class="text-xs px-2 py-1 rounded-full bg-fitness-accent bg-opacity-20 text-fitness-accent">Pull</span>
+                                <span class="text-sm px-3 py-1 rounded-full bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-sm">Pull</span>
                             </div>
                         </div>
                     </div>
                 </div>
                 
                 <!-- Sunday Content - Legs Day 2 -->
-                <div x-show="activeDay === 'Sunday'" class="fitness-card bg-fitness-darkgray tab-content-fade">
-                    <h4 class="font-bold text-white mb-3">Sunday: Legs 2 (Glutes, Hamstrings, Calves)</h4>
-                    <p class="text-sm text-fitness-gray mb-3">Second leg day of the week with focus on posterior chain and calves. Different exercise variations for complete leg development.</p>
+                <div x-show="activeDay === 'Sunday'" class="bg-gray-700/60 p-5 rounded-lg border border-gray-600 shadow-md tab-content-fade">
+                    <h4 class="font-bold text-white text-lg mb-3">Sunday: Legs 2 (Glutes, Hamstrings, Calves)</h4>
+                    <p class="text-gray-300 mb-4">Second leg day of the week with focus on posterior chain and calves. Different exercise variations for complete leg development.</p>
                     
-                    <div class="space-y-3">
-                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                    <div class="space-y-4">
+                        <div class="bg-gray-700/80 backdrop-blur-sm p-4 rounded-xl border border-gray-600 shadow-lg hover:bg-gray-700/90 transition-all duration-300">
                             <div class="flex items-start justify-between">
                                 <div>
-                                    <span class="font-medium text-white">Romanian Deadlifts</span>
-                                    <div class="text-xs text-fitness-gray flex gap-4 mt-2">
-                                        <span>4 sets</span>
-                                        <span>8-10 reps</span>
+                                    <span class="font-medium text-white text-base">Romanian Deadlifts</span>
+                                    <div class="flex flex-wrap gap-3 mt-3">
+                                        <span class="bg-purple-900/50 text-purple-300 px-3 py-1 rounded-full text-sm">4 sets</span>
+                                        <span class="bg-purple-900/50 text-purple-300 px-3 py-1 rounded-full text-sm">8-10 reps</span>
                                     </div>
-                                    <p class="text-sm text-fitness-gray mt-1">Hamstring and posterior chain development</p>
+                                    <p class="text-gray-300 mt-3">Hamstring and posterior chain development</p>
                                 </div>
-                                <span class="text-xs px-2 py-1 rounded-full bg-fitness-accent bg-opacity-20 text-fitness-accent">Legs</span>
+                                <span class="text-sm px-3 py-1 rounded-full bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-sm">Legs</span>
                             </div>
                         </div>
-                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                        <div class="bg-gray-700/80 backdrop-blur-sm p-4 rounded-xl border border-gray-600 shadow-lg hover:bg-gray-700/90 transition-all duration-300">
                             <div class="flex items-start justify-between">
                                 <div>
-                                    <span class="font-medium text-white">Hip Thrusts</span>
-                                    <div class="text-xs text-fitness-gray flex gap-4 mt-2">
-                                        <span>3 sets</span>
-                                        <span>10-12 reps</span>
+                                    <span class="font-medium text-white text-base">Hip Thrusts</span>
+                                    <div class="flex flex-wrap gap-3 mt-3">
+                                        <span class="bg-purple-900/50 text-purple-300 px-3 py-1 rounded-full text-sm">3 sets</span>
+                                        <span class="bg-purple-900/50 text-purple-300 px-3 py-1 rounded-full text-sm">10-12 reps</span>
                                     </div>
-                                    <p class="text-sm text-fitness-gray mt-1">Glute activation and strength</p>
+                                    <p class="text-gray-300 mt-3">Glute activation and strength</p>
                                 </div>
-                                <span class="text-xs px-2 py-1 rounded-full bg-fitness-accent bg-opacity-20 text-fitness-accent">Legs</span>
+                                <span class="text-sm px-3 py-1 rounded-full bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-sm">Legs</span>
                             </div>
                         </div>
-                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                        <div class="bg-gray-700/80 backdrop-blur-sm p-4 rounded-xl border border-gray-600 shadow-lg hover:bg-gray-700/90 transition-all duration-300">
                             <div class="flex items-start justify-between">
                                 <div>
-                                    <span class="font-medium text-white">Leg Curls</span>
-                                    <div class="text-xs text-fitness-gray flex gap-4 mt-2">
-                                        <span>3 sets</span>
-                                        <span>12-15 reps</span>
+                                    <span class="font-medium text-white text-base">Leg Curls</span>
+                                    <div class="flex flex-wrap gap-3 mt-3">
+                                        <span class="bg-purple-900/50 text-purple-300 px-3 py-1 rounded-full text-sm">3 sets</span>
+                                        <span class="bg-purple-900/50 text-purple-300 px-3 py-1 rounded-full text-sm">12-15 reps</span>
                                     </div>
-                                    <p class="text-sm text-fitness-gray mt-1">Hamstring isolation</p>
+                                    <p class="text-gray-300 mt-3">Hamstring isolation</p>
                                 </div>
-                                <span class="text-xs px-2 py-1 rounded-full bg-fitness-accent bg-opacity-20 text-fitness-accent">Legs</span>
+                                <span class="text-sm px-3 py-1 rounded-full bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-sm">Legs</span>
                             </div>
                         </div>
-                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                        <div class="bg-gray-700/80 backdrop-blur-sm p-4 rounded-xl border border-gray-600 shadow-lg hover:bg-gray-700/90 transition-all duration-300">
                             <div class="flex items-start justify-between">
                                 <div>
-                                    <span class="font-medium text-white">Bulgarian Split Squats</span>
-                                    <div class="text-xs text-fitness-gray flex gap-4 mt-2">
-                                        <span>3 sets</span>
-                                        <span>10-12 reps per leg</span>
+                                    <span class="font-medium text-white text-base">Bulgarian Split Squats</span>
+                                    <div class="flex flex-wrap gap-3 mt-3">
+                                        <span class="bg-purple-900/50 text-purple-300 px-3 py-1 rounded-full text-sm">3 sets</span>
+                                        <span class="bg-purple-900/50 text-purple-300 px-3 py-1 rounded-full text-sm">10-12 reps per leg</span>
                                     </div>
-                                    <p class="text-sm text-fitness-gray mt-1">Unilateral leg development and balance</p>
+                                    <p class="text-gray-300 mt-3">Unilateral leg development and balance</p>
                                 </div>
-                                <span class="text-xs px-2 py-1 rounded-full bg-fitness-accent bg-opacity-20 text-fitness-accent">Legs</span>
+                                <span class="text-sm px-3 py-1 rounded-full bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-sm">Legs</span>
                             </div>
                         </div>
-                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                        <div class="bg-gray-700/80 backdrop-blur-sm p-4 rounded-xl border border-gray-600 shadow-lg hover:bg-gray-700/90 transition-all duration-300">
                             <div class="flex items-start justify-between">
                                 <div>
-                                    <span class="font-medium text-white">Standing Calf Raises</span>
-                                    <div class="text-xs text-fitness-gray flex gap-4 mt-2">
-                                        <span>4 sets</span>
-                                        <span>15-20 reps</span>
+                                    <span class="font-medium text-white text-base">Standing Calf Raises</span>
+                                    <div class="flex flex-wrap gap-3 mt-3">
+                                        <span class="bg-purple-900/50 text-purple-300 px-3 py-1 rounded-full text-sm">4 sets</span>
+                                        <span class="bg-purple-900/50 text-purple-300 px-3 py-1 rounded-full text-sm">15-20 reps</span>
                                     </div>
-                                    <p class="text-sm text-fitness-gray mt-1">Gastrocnemius development</p>
+                                    <p class="text-gray-300 mt-3">Gastrocnemius development</p>
                                 </div>
-                                <span class="text-xs px-2 py-1 rounded-full bg-fitness-accent bg-opacity-20 text-fitness-accent">Legs</span>
+                                <span class="text-sm px-3 py-1 rounded-full bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-sm">Legs</span>
                             </div>
                         </div>
-                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                        <div class="bg-gray-700/80 backdrop-blur-sm p-4 rounded-xl border border-gray-600 shadow-lg hover:bg-gray-700/90 transition-all duration-300">
                             <div class="flex items-start justify-between">
                                 <div>
-                                    <span class="font-medium text-white">Seated Calf Raises</span>
-                                    <div class="text-xs text-fitness-gray flex gap-4 mt-2">
-                                        <span>3 sets</span>
-                                        <span>15-20 reps</span>
+                                    <span class="font-medium text-white text-base">Seated Calf Raises</span>
+                                    <div class="flex flex-wrap gap-3 mt-3">
+                                        <span class="bg-purple-900/50 text-purple-300 px-3 py-1 rounded-full text-sm">3 sets</span>
+                                        <span class="bg-purple-900/50 text-purple-300 px-3 py-1 rounded-full text-sm">15-20 reps</span>
                                     </div>
-                                    <p class="text-sm text-fitness-gray mt-1">Soleus development</p>
+                                    <p class="text-gray-300 mt-3">Soleus development</p>
                                 </div>
-                                <span class="text-xs px-2 py-1 rounded-full bg-fitness-accent bg-opacity-20 text-fitness-accent">Legs</span>
+                                <span class="text-sm px-3 py-1 rounded-full bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-sm">Legs</span>
                             </div>
                         </div>
                     </div>
@@ -618,18 +618,18 @@
         </div>
         
         <!-- Training Principles -->
-        <div class="fitness-card">
-            <div class="flex items-center gap-3 mb-4">
-                <svg class="icon text-fitness-red">
+        <div class="fitness-card bg-gray-800/80 backdrop-blur-sm p-6 rounded-xl border border-gray-700 shadow-lg mb-6" data-aos="fade-up" data-aos-delay="400">
+            <div class="flex items-center gap-3 mb-5">
+                <svg class="icon text-red-500">
                     <use xlink:href="#icon-book"></use>
                 </svg>
-                <h3 class="text-xl font-bold">Training Principles for {{ user_info.experience|capitalize }}</h3>
+                <h3 class="text-xl font-bold text-white">Training Principles for {{ user_info.experience|capitalize }}</h3>
             </div>
             
-            <ul class="text-sm text-fitness-gray space-y-2">
+            <ul class="text-gray-300 space-y-3 mb-6">
                 {% for principle in training_principles %}
-                    <li class="flex items-start gap-2">
-                        <svg class="icon icon-xs text-fitness-red mt-1">
+                    <li class="flex items-start gap-3 bg-gray-700/60 p-3 rounded-lg border border-gray-600 transition-all duration-300 hover:bg-gray-700/90">
+                        <svg class="icon icon-xs text-red-500 mt-1 flex-shrink-0">
                             <use xlink:href="#icon-chevron-right"></use>
                         </svg>
                         <span>{{ principle }}</span>
@@ -637,26 +637,26 @@
                 {% endfor %}
             </ul>
             
-            <div class="fitness-card bg-fitness-darkgray mt-4">
-                <div class="flex items-center gap-2">
-                    <svg class="icon text-fitness-accent">
+            <div class="bg-gray-700/60 p-4 rounded-lg border border-gray-600 shadow-md mt-5">
+                <div class="flex items-start gap-3">
+                    <svg class="icon text-yellow-500 flex-shrink-0 mt-1">
                         <use xlink:href="#icon-alert-circle"></use>
                     </svg>
-                    <p class="text-fitness-gray text-sm">
+                    <p class="text-gray-300">
                         This workout plan serves as a guide. Adjust weights based on your strength levels and always prioritize proper form over weight. 
                         For exercises you're unfamiliar with, consider working with a qualified fitness professional.
                     </p>
                 </div>
             </div>
             
-            <div class="flex gap-3 mt-6">
-                <a href="{{ url_for('nutrition', analysis_id=analysis_id) }}" class="fitness-button-secondary flex items-center gap-2">
+            <div class="flex flex-wrap gap-4 mt-8">
+                <a href="{{ url_for('nutrition', analysis_id=analysis_id) }}" class="px-6 py-3 bg-gray-700 hover:bg-gray-600 text-gray-200 rounded-lg transition-all duration-300 flex items-center gap-2 shadow-md">
                     <svg class="icon icon-sm">
                         <use xlink:href="#icon-arrow-left"></use>
                     </svg>
                     Back to Nutrition
                 </a>
-                <a href="{{ url_for('profile') }}" class="fitness-button-primary flex items-center gap-2">
+                <a href="{{ url_for('profile') }}" class="px-6 py-3 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white rounded-lg transition-all duration-300 flex items-center gap-2 shadow-md">
                     Return to Profile
                     <svg class="icon icon-sm">
                         <use xlink:href="#icon-user"></use>
