@@ -241,8 +241,8 @@
         <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2">
           {% for day, workout in workout_plan.items() %}
           <div id="day-btn-{{ loop.index }}" 
-               class="day-button {% if 'push' in workout.category %}push-day{% elif 'pull' in workout.category %}pull-day{% elif 'legs' in workout.category %}legs-day{% elif 'rest' in workout.category %}rest-day{% endif %} bg-gray-900 rounded-lg p-3 flex flex-col items-center justify-center text-center"
-               onclick="showWorkout('{{ day }}')">
+               data-day="{{ day }}"
+               class="day-button {% if 'push' in workout.category %}push-day{% elif 'pull' in workout.category %}pull-day{% elif 'legs' in workout.category %}legs-day{% elif 'rest' in workout.category %}rest-day{% endif %} bg-gray-900 rounded-lg p-3 flex flex-col items-center justify-center text-center">
             <div class="w-6 h-6 rounded-full flex items-center justify-center mb-2 {% if 'push' in workout.category %}push-badge{% elif 'pull' in workout.category %}pull-badge{% elif 'legs' in workout.category %}legs-badge{% elif 'rest' in workout.category %}rest-badge{% else %}core-badge{% endif %}">
               <span class="text-white text-xs font-bold">{{ loop.index }}</span>
             </div>
@@ -332,19 +332,47 @@
 
 <script>
   // JavaScript to handle day selection and workout display
-  document.addEventListener('DOMContentLoaded', function() {
+  window.onload = function() {
+    console.log('Window loaded - initializing workout selector');
+    initWorkoutSelector();
+  };
+
+  function initWorkoutSelector() {
     // Show the first day's workout by default
     const firstDay = document.querySelector('.day-button');
     if (firstDay) {
+      console.log('First day found:', firstDay);
       firstDay.classList.add('active');
-      const dayName = firstDay.querySelector('.text-white.font-medium').textContent;
+      const dayName = firstDay.dataset.day || firstDay.querySelector('.text-white.font-medium').textContent;
+      console.log('Setting active day:', dayName);
       showWorkout(dayName);
+    } else {
+      console.log('No day buttons found');
     }
-  });
+    
+    // Add click event listeners to all day buttons
+    const allDayButtons = document.querySelectorAll('.day-button');
+    console.log('Total day buttons found:', allDayButtons.length);
+    
+    allDayButtons.forEach(button => {
+      button.style.cursor = 'pointer'; // Ensure cursor shows it's clickable
+      
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        const day = this.dataset.day;
+        console.log('Button clicked for day:', day);
+        showWorkout(day);
+        return false;
+      });
+    });
+  }
   
   function showWorkout(day) {
+    console.log('showWorkout called for day:', day);
+    
     // Hide all workout panels
     const workoutPanels = document.querySelectorAll('[id^="workout-"]');
+    console.log('Found workout panels:', workoutPanels.length);
     workoutPanels.forEach(panel => {
       panel.classList.add('hidden');
     });
@@ -357,14 +385,14 @@
     
     // Show the selected day's workout
     const selectedWorkout = document.getElementById(`workout-${day}`);
+    console.log('Selected workout element:', selectedWorkout ? 'found' : 'not found');
     if (selectedWorkout) {
       selectedWorkout.classList.remove('hidden');
     }
     
     // Add active class to the clicked button
-    const dayButtons2 = document.querySelectorAll('.day-button');
-    dayButtons2.forEach(button => {
-      const buttonDay = button.querySelector('.text-white.font-medium').textContent;
+    dayButtons.forEach(button => {
+      const buttonDay = button.dataset.day;
       if (buttonDay === day) {
         button.classList.add('active');
       }
