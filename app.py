@@ -1324,7 +1324,7 @@ def workout(analysis_id):
         logger.info(f"Rendering workout template for analysis_id: {analysis_id}")
         
         # Render the template with the context
-        return render_template('tailwind_workout_new.html', **context)
+        return render_template('tailwind_workout_direct.html', **context)
         
     except Exception as e:
         # Log the error for debugging
