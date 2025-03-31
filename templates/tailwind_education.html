@@ -1,233 +1,333 @@
 {% extends "tailwind_layout.html" %}
 
 {% block content %}
-<div class="fitness-card mb-6">
-    <div class="flex items-center gap-3 mb-4">
-        <svg class="icon text-fitness-red">
+<div class="fitness-card bg-gray-800/80 backdrop-blur-sm p-6 rounded-xl border border-gray-700 shadow-lg mb-6" data-aos="fade-up">
+    <div class="flex items-center gap-4 mb-5">
+        <svg class="icon text-red-500 h-8 w-8">
             <use xlink:href="#icon-book-open"></use>
         </svg>
-        <h2 class="text-3xl font-bold">Understanding Genetic Traits in Fitness</h2>
+        <h1 class="text-3xl font-bold text-white bg-gradient-to-r from-red-500 to-pink-500 bg-clip-text text-transparent">Understanding Genetic Traits in Fitness</h1>
     </div>
     
-    <div class="mb-6 p-4 rounded-lg bg-fitness-darkgray border-l-4 border-fitness-accent">
-        <div class="flex items-center gap-2">
-            <svg class="icon text-fitness-accent">
+    <div class="bg-gray-700/60 p-5 rounded-lg border border-gray-600 shadow-md mb-5">
+        <div class="flex items-start gap-3">
+            <svg class="icon text-yellow-400 flex-shrink-0 mt-1">
                 <use xlink:href="#icon-bulb"></use>
             </svg>
-            <span class="font-bold">Knowledge is power!</span>
+            <div>
+                <h4 class="font-bold text-yellow-400 text-lg mb-2">Knowledge is power!</h4>
+                <p class="text-gray-200">
+                    Understanding your genetic body traits can help you train smarter, not just harder.
+                </p>
+            </div>
         </div>
-        <p>Understanding your genetic body traits can help you train smarter, not just harder.</p>
     </div>
     
-    <p class="text-lg mb-6">
-        Our genetic makeup significantly influences our physical capabilities and potential. While dedication and proper training are essential, understanding your genetic advantages can help optimize your fitness journey.
-    </p>
+    <div class="bg-gray-700/60 p-5 rounded-lg border border-gray-600 shadow-md mt-4">
+        <div class="flex items-start gap-3">
+            <svg class="icon text-blue-400 flex-shrink-0 mt-1">
+                <use xlink:href="#icon-info"></use>
+            </svg>
+            <p class="text-gray-200">
+                Our genetic makeup significantly influences our physical capabilities and potential. While dedication and proper training are essential, understanding your genetic advantages can help optimize your fitness journey.
+            </p>
+        </div>
+    </div>
 </div>
 
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
     <!-- Body Types Section -->
-    <div class="fitness-card">
-        <div class="flex items-center gap-3 mb-4">
-            <svg class="icon text-fitness-red">
+    <div class="fitness-card bg-gray-800/80 backdrop-blur-sm p-6 rounded-xl border border-gray-700 shadow-lg" data-aos="fade-up">
+        <div class="flex items-center gap-3 mb-5">
+            <svg class="icon text-red-500 h-7 w-7">
                 <use xlink:href="#icon-dna"></use>
             </svg>
-            <h3 class="text-2xl font-bold">Body Types (Somatotypes)</h3>
+            <h3 class="text-2xl font-bold text-white">Body Types (Somatotypes)</h3>
+        </div>
+        
+        <!-- Information Card -->
+        <div class="bg-gray-700/60 p-4 rounded-lg border border-gray-600 shadow-md mb-6">
+            <div class="flex items-start gap-3">
+                <svg class="icon text-blue-400 flex-shrink-0 mt-1">
+                    <use xlink:href="#icon-info"></use>
+                </svg>
+                <p class="text-gray-200">
+                    Your body type significantly impacts how you respond to training and nutrition. Understanding your somatotype helps you create a more effective fitness strategy.
+                </p>
+            </div>
         </div>
         
         <!-- Ectomorph -->
-        <div class="mb-6">
-            <div class="flex items-center gap-2 mb-2">
-                <svg class="icon text-fitness-accent">
+        <div class="bg-gray-700/60 p-5 rounded-lg border border-gray-600 shadow-md mb-5">
+            <div class="flex items-center gap-3 mb-3">
+                <svg class="icon text-blue-400">
                     <use xlink:href="#icon-user"></use>
                 </svg>
-                <h4 class="text-xl font-bold">Ectomorph</h4>
+                <h4 class="text-xl font-bold text-blue-400">Ectomorph</h4>
             </div>
-            <div class="ml-8">
-                <p class="mb-2"><span class="font-bold">Characteristics:</span> Naturally lean, slender build with small joints and thin muscles. Typically have a fast metabolism.</p>
-                <p class="font-bold mb-1">Training Approach:</p>
-                <ul class="list-disc pl-5 mb-3 text-fitness-gray">
-                    <li>Focus on heavy compound lifts with lower repetitions (4-8 reps)</li>
-                    <li>Longer rest periods between sets (2-3 minutes)</li>
-                    <li>Limit cardio to maintain caloric surplus</li>
-                    <li>Higher training frequency for muscle groups (2-3x per week)</li>
-                </ul>
-                <p class="font-bold mb-1">Nutritional Needs:</p>
-                <ul class="list-disc pl-5 mb-3 text-fitness-gray">
-                    <li>Consistent caloric surplus (300-500 calories above maintenance)</li>
-                    <li>Higher carbohydrate intake (50-60% of calories)</li>
-                    <li>Frequent meals (5-7 per day)</li>
-                    <li>Consider liquid calories to increase intake</li>
-                </ul>
+            <div class="space-y-3">
+                <p class="text-gray-300"><span class="font-semibold text-white">Characteristics:</span> Naturally lean, slender build with small joints and thin muscles. Typically have a fast metabolism.</p>
+                
+                <div class="bg-gray-800/60 p-4 rounded-lg border border-gray-600">
+                    <p class="font-semibold text-white mb-2">Training Approach:</p>
+                    <ul class="list-disc pl-5 text-gray-300 space-y-1">
+                        <li>Focus on heavy compound lifts with lower repetitions (4-8 reps)</li>
+                        <li>Longer rest periods between sets (2-3 minutes)</li>
+                        <li>Limit cardio to maintain caloric surplus</li>
+                        <li>Higher training frequency for muscle groups (2-3x per week)</li>
+                    </ul>
+                </div>
+                
+                <div class="bg-gray-800/60 p-4 rounded-lg border border-gray-600">
+                    <p class="font-semibold text-white mb-2">Nutritional Needs:</p>
+                    <ul class="list-disc pl-5 text-gray-300 space-y-1">
+                        <li>Consistent caloric surplus (300-500 calories above maintenance)</li>
+                        <li>Higher carbohydrate intake (50-60% of calories)</li>
+                        <li>Frequent meals (5-7 per day)</li>
+                        <li>Consider liquid calories to increase intake</li>
+                    </ul>
+                </div>
             </div>
         </div>
         
         <!-- Mesomorph -->
-        <div class="mb-6">
-            <div class="flex items-center gap-2 mb-2">
-                <svg class="icon text-benefit-green">
+        <div class="bg-gray-700/60 p-5 rounded-lg border border-gray-600 shadow-md mb-5">
+            <div class="flex items-center gap-3 mb-3">
+                <svg class="icon text-green-400">
                     <use xlink:href="#icon-user"></use>
                 </svg>
-                <h4 class="text-xl font-bold">Mesomorph</h4>
+                <h4 class="text-xl font-bold text-green-400">Mesomorph</h4>
             </div>
-            <div class="ml-8">
-                <p class="mb-2"><span class="font-bold">Characteristics:</span> Athletic build with well-defined muscles, broader shoulders, and a narrow waist. Gain muscle and lose fat relatively easily.</p>
-                <p class="font-bold mb-1">Training Approach:</p>
-                <ul class="list-disc pl-5 mb-3 text-fitness-gray">
-                    <li>Balanced mix of compound and isolation exercises</li>
-                    <li>Moderate rep ranges (8-12 reps) for hypertrophy</li>
-                    <li>Moderate rest periods (60-90 seconds)</li>
-                    <li>Can respond well to variety in training methods</li>
-                </ul>
-                <p class="font-bold mb-1">Nutritional Needs:</p>
-                <ul class="list-disc pl-5 mb-3 text-fitness-gray">
-                    <li>Balanced macronutrient intake (40% carbs, 30% protein, 30% fat)</li>
-                    <li>Cyclical caloric intake based on training demands</li>
-                    <li>Can cycle between bulking and cutting phases effectively</li>
-                </ul>
+            <div class="space-y-3">
+                <p class="text-gray-300"><span class="font-semibold text-white">Characteristics:</span> Athletic build with well-defined muscles, broader shoulders, and a narrow waist. Gain muscle and lose fat relatively easily.</p>
+                
+                <div class="bg-gray-800/60 p-4 rounded-lg border border-gray-600">
+                    <p class="font-semibold text-white mb-2">Training Approach:</p>
+                    <ul class="list-disc pl-5 text-gray-300 space-y-1">
+                        <li>Balanced mix of compound and isolation exercises</li>
+                        <li>Moderate rep ranges (8-12 reps) for hypertrophy</li>
+                        <li>Moderate rest periods (60-90 seconds)</li>
+                        <li>Can respond well to variety in training methods</li>
+                    </ul>
+                </div>
+                
+                <div class="bg-gray-800/60 p-4 rounded-lg border border-gray-600">
+                    <p class="font-semibold text-white mb-2">Nutritional Needs:</p>
+                    <ul class="list-disc pl-5 text-gray-300 space-y-1">
+                        <li>Balanced macronutrient intake (40% carbs, 30% protein, 30% fat)</li>
+                        <li>Cyclical caloric intake based on training demands</li>
+                        <li>Can cycle between bulking and cutting phases effectively</li>
+                    </ul>
+                </div>
             </div>
         </div>
         
         <!-- Endomorph -->
-        <div>
-            <div class="flex items-center gap-2 mb-2">
-                <svg class="icon text-fitness-warning">
+        <div class="bg-gray-700/60 p-5 rounded-lg border border-gray-600 shadow-md">
+            <div class="flex items-center gap-3 mb-3">
+                <svg class="icon text-orange-400">
                     <use xlink:href="#icon-user"></use>
                 </svg>
-                <h4 class="text-xl font-bold">Endomorph</h4>
+                <h4 class="text-xl font-bold text-orange-400">Endomorph</h4>
             </div>
-            <div class="ml-8">
-                <p class="mb-2"><span class="font-bold">Characteristics:</span> Naturally higher body fat, wider waist, and larger frame. Generally have a slower metabolism and may gain weight easily.</p>
-                <p class="font-bold mb-1">Training Approach:</p>
-                <ul class="list-disc pl-5 mb-3 text-fitness-gray">
-                    <li>Higher intensity training with shorter rest periods</li>
-                    <li>Incorporate regular HIIT and circuit training</li>
-                    <li>Higher volume (10-15 reps) with moderate weight</li>
-                    <li>Include regular cardio for fat loss (3-5 sessions/week)</li>
-                </ul>
-                <p class="font-bold mb-1">Nutritional Needs:</p>
-                <ul class="list-disc pl-5 mb-3 text-fitness-gray">
-                    <li>Moderate caloric deficit with carb cycling</li>
-                    <li>Higher protein intake (35-40% of calories)</li>
-                    <li>Lower carbohydrate intake on non-training days</li>
-                    <li>Focus on nutrient timing (carbs around workouts)</li>
-                </ul>
+            <div class="space-y-3">
+                <p class="text-gray-300"><span class="font-semibold text-white">Characteristics:</span> Naturally higher body fat, wider waist, and larger frame. Generally have a slower metabolism and may gain weight easily.</p>
+                
+                <div class="bg-gray-800/60 p-4 rounded-lg border border-gray-600">
+                    <p class="font-semibold text-white mb-2">Training Approach:</p>
+                    <ul class="list-disc pl-5 text-gray-300 space-y-1">
+                        <li>Higher intensity training with shorter rest periods</li>
+                        <li>Incorporate regular HIIT and circuit training</li>
+                        <li>Higher volume (10-15 reps) with moderate weight</li>
+                        <li>Include regular cardio for fat loss (3-5 sessions/week)</li>
+                    </ul>
+                </div>
+                
+                <div class="bg-gray-800/60 p-4 rounded-lg border border-gray-600">
+                    <p class="font-semibold text-white mb-2">Nutritional Needs:</p>
+                    <ul class="list-disc pl-5 text-gray-300 space-y-1">
+                        <li>Moderate caloric deficit with carb cycling</li>
+                        <li>Higher protein intake (35-40% of calories)</li>
+                        <li>Lower carbohydrate intake on non-training days</li>
+                        <li>Focus on nutrient timing (carbs around workouts)</li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
     
     <!-- Muscle Fiber Types Section -->
-    <div class="fitness-card">
-        <div class="flex items-center gap-3 mb-4">
-            <svg class="icon text-fitness-red">
+    <div class="fitness-card bg-gray-800/80 backdrop-blur-sm p-6 rounded-xl border border-gray-700 shadow-lg" data-aos="fade-up">
+        <div class="flex items-center gap-3 mb-5">
+            <svg class="icon text-red-500 h-7 w-7">
                 <use xlink:href="#icon-zap"></use>
             </svg>
-            <h3 class="text-2xl font-bold">Muscle Fiber Types</h3>
+            <h3 class="text-2xl font-bold text-white">Muscle Fiber Types</h3>
+        </div>
+        
+        <!-- Information Card -->
+        <div class="bg-gray-700/60 p-4 rounded-lg border border-gray-600 shadow-md mb-6">
+            <div class="flex items-start gap-3">
+                <svg class="icon text-purple-400 flex-shrink-0 mt-1">
+                    <use xlink:href="#icon-info"></use>
+                </svg>
+                <p class="text-gray-200">
+                    Your muscle fiber composition affects how you respond to different training styles. Some people are naturally better suited for endurance activities, while others excel at explosive power movements.
+                </p>
+            </div>
         </div>
         
         <!-- Type I Fibers -->
-        <div class="mb-6">
-            <div class="flex items-center gap-2 mb-2">
-                <svg class="icon text-benefit-blue">
+        <div class="bg-gray-700/60 p-5 rounded-lg border border-gray-600 shadow-md mb-5">
+            <div class="flex items-center gap-3 mb-3">
+                <svg class="icon text-blue-400">
                     <use xlink:href="#icon-activity"></use>
                 </svg>
-                <h4 class="text-xl font-bold">Type I (Slow Twitch) Fibers</h4>
+                <h4 class="text-xl font-bold text-blue-400">Type I (Slow Twitch) Fibers</h4>
             </div>
-            <div class="ml-8">
-                <p class="mb-2"><span class="font-bold">Characteristics:</span> Smaller in size, rich in mitochondria, and have high resistance to fatigue. Excellent for endurance activities.</p>
-                <p class="font-bold mb-1">Training Approach:</p>
-                <ul class="list-disc pl-5 mb-3 text-fitness-gray">
-                    <li>Higher repetition ranges (15-20+ reps)</li>
-                    <li>Shorter rest periods (30-60 seconds)</li>
-                    <li>Endurance-focused training (steady-state cardio)</li>
-                    <li>Circuit training protocols</li>
-                </ul>
-                <p class="mb-2"><span class="font-bold">Common Dominant Areas:</span> Postural muscles (lower back, deep core), calves, forearms</p>
+            <div class="space-y-3">
+                <p class="text-gray-300"><span class="font-semibold text-white">Characteristics:</span> Smaller in size, rich in mitochondria, and have high resistance to fatigue. Excellent for endurance activities.</p>
+                
+                <div class="bg-gray-800/60 p-4 rounded-lg border border-gray-600">
+                    <p class="font-semibold text-white mb-2">Training Approach:</p>
+                    <ul class="list-disc pl-5 text-gray-300 space-y-1">
+                        <li>Higher repetition ranges (15-20+ reps)</li>
+                        <li>Shorter rest periods (30-60 seconds)</li>
+                        <li>Endurance-focused training (steady-state cardio)</li>
+                        <li>Circuit training protocols</li>
+                    </ul>
+                </div>
+                
+                <div class="bg-gray-800/60 p-4 rounded-lg border border-gray-600">
+                    <p class="font-semibold text-white mb-2">Common Dominant Areas:</p>
+                    <p class="text-gray-300">Postural muscles (lower back, deep core), calves, forearms</p>
+                </div>
             </div>
         </div>
         
         <!-- Type II Fibers -->
-        <div class="mb-6">
-            <div class="flex items-center gap-2 mb-2">
-                <svg class="icon text-fitness-red">
+        <div class="bg-gray-700/60 p-5 rounded-lg border border-gray-600 shadow-md mb-5">
+            <div class="flex items-center gap-3 mb-3">
+                <svg class="icon text-red-400">
                     <use xlink:href="#icon-activity"></use>
                 </svg>
-                <h4 class="text-xl font-bold">Type II (Fast Twitch) Fibers</h4>
+                <h4 class="text-xl font-bold text-red-400">Type II (Fast Twitch) Fibers</h4>
             </div>
-            <div class="ml-8">
-                <p class="mb-2"><span class="font-bold">Characteristics:</span> Larger in size, generate more force quickly, but fatigue faster. Better for explosive, powerful movements.</p>
-                <p class="font-bold mb-1">Training Approach:</p>
-                <ul class="list-disc pl-5 mb-3 text-fitness-gray">
-                    <li>Lower repetition ranges (1-8 reps)</li>
-                    <li>Heavier loads (80-95% 1RM)</li>
-                    <li>Longer rest periods (2-5 minutes)</li>
-                    <li>Explosive movements (plyometrics, Olympic lifting)</li>
-                </ul>
-                <p class="mb-2"><span class="font-bold">Common Dominant Areas:</span> Chest, shoulders, quadriceps</p>
+            <div class="space-y-3">
+                <p class="text-gray-300"><span class="font-semibold text-white">Characteristics:</span> Larger in size, generate more force quickly, but fatigue faster. Better for explosive, powerful movements.</p>
+                
+                <div class="bg-gray-800/60 p-4 rounded-lg border border-gray-600">
+                    <p class="font-semibold text-white mb-2">Training Approach:</p>
+                    <ul class="list-disc pl-5 text-gray-300 space-y-1">
+                        <li>Lower repetition ranges (1-8 reps)</li>
+                        <li>Heavier loads (80-95% 1RM)</li>
+                        <li>Longer rest periods (2-5 minutes)</li>
+                        <li>Explosive movements (plyometrics, Olympic lifting)</li>
+                    </ul>
+                </div>
+                
+                <div class="bg-gray-800/60 p-4 rounded-lg border border-gray-600">
+                    <p class="font-semibold text-white mb-2">Common Dominant Areas:</p>
+                    <p class="text-gray-300">Chest, shoulders, quadriceps</p>
+                </div>
             </div>
         </div>
         
         <!-- Muscle Insertion Points -->
-        <div>
-            <div class="flex items-center gap-3 mb-4">
-                <svg class="icon text-fitness-red">
+        <div class="bg-gray-700/60 p-5 rounded-lg border border-gray-600 shadow-md">
+            <div class="flex items-center gap-3 mb-3">
+                <svg class="icon text-yellow-400">
                     <use xlink:href="#icon-layers"></use>
                 </svg>
-                <h3 class="text-2xl font-bold">Muscle Insertion Points</h3>
+                <h4 class="text-xl font-bold text-yellow-400">Muscle Insertion Points</h4>
             </div>
-            <p class="mb-3">The points where muscles attach to bones significantly impact strength and visual appearance. These differences are genetic and may require tailored training approaches.</p>
+            <p class="text-gray-300 mb-4">The points where muscles attach to bones significantly impact strength and visual appearance. These differences are genetic and may require tailored training approaches.</p>
             
-            <div class="mb-3">
-                <p class="font-bold mb-1">High Vs. Low Muscle Insertions:</p>
-                <ul class="list-disc pl-5 mb-3 text-fitness-gray">
-                    <li><span class="font-bold">High insertions:</span> Shorter muscle bellies with longer tendons (e.g., biceps that don't extend near the elbow)</li>
-                    <li><span class="font-bold">Low insertions:</span> Longer muscle bellies with shorter tendons (e.g., biceps that extend closer to the elbow)</li>
-                </ul>
-            </div>
-            
-            <div class="mb-3">
-                <p class="font-bold mb-1">Training Implications:</p>
-                <ul class="list-disc pl-5 mb-3 text-fitness-gray">
-                    <li>Focus on exercises that emphasize your advantageous muscle groups</li>
-                    <li>Use varied angles and techniques to maximize development</li>
-                    <li>Understanding these differences helps set realistic expectations</li>
-                </ul>
+            <div class="space-y-3">
+                <div class="bg-gray-800/60 p-4 rounded-lg border border-gray-600">
+                    <p class="font-semibold text-white mb-2">High Vs. Low Muscle Insertions:</p>
+                    <ul class="list-disc pl-5 text-gray-300 space-y-1">
+                        <li><span class="font-semibold text-white">High insertions:</span> Shorter muscle bellies with longer tendons (e.g., biceps that don't extend near the elbow)</li>
+                        <li><span class="font-semibold text-white">Low insertions:</span> Longer muscle bellies with shorter tendons (e.g., biceps that extend closer to the elbow)</li>
+                    </ul>
+                </div>
+                
+                <div class="bg-gray-800/60 p-4 rounded-lg border border-gray-600">
+                    <p class="font-semibold text-white mb-2">Training Implications:</p>
+                    <ul class="list-disc pl-5 text-gray-300 space-y-1">
+                        <li>Focus on exercises that emphasize your advantageous muscle groups</li>
+                        <li>Use varied angles and techniques to maximize development</li>
+                        <li>Understanding these differences helps set realistic expectations</li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Additional Educational Section -->
-<div class="fitness-card mt-6">
-    <div class="flex items-center gap-3 mb-4">
-        <svg class="icon text-fitness-red">
+<div class="fitness-card bg-gray-800/80 backdrop-blur-sm p-6 rounded-xl border border-gray-700 shadow-lg mt-6" data-aos="fade-up">
+    <div class="flex items-center gap-4 mb-5">
+        <svg class="icon text-red-500 h-7 w-7">
             <use xlink:href="#icon-target"></use>
         </svg>
-        <h3 class="text-2xl font-bold">Working With Your Genetics</h3>
+        <h3 class="text-2xl font-bold text-white">Working With Your Genetics</h3>
     </div>
     
-    <p class="mb-4">While we can't change our genetic makeup, understanding our predispositions allows us to create more effective training and nutrition strategies:</p>
+    <div class="bg-gray-700/60 p-4 rounded-lg border border-gray-600 shadow-md mb-6">
+        <div class="flex items-start gap-3">
+            <svg class="icon text-green-400 flex-shrink-0 mt-1">
+                <use xlink:href="#icon-info"></use>
+            </svg>
+            <p class="text-gray-200">
+                While we can't change our genetic makeup, understanding our predispositions allows us to create more effective training and nutrition strategies.
+            </p>
+        </div>
+    </div>
     
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="fitness-card">
-            <h4 class="text-xl font-bold mb-3 text-fitness-accent">Play to Your Strengths</h4>
-            <p class="mb-3">Identify and leverage your genetic advantages to build a stand-out physique. If you have naturally broad shoulders, emphasize development in that area.</p>
-            <p>For competitions or aesthetic goals, focus on poses and outfits that highlight your advantageous body parts.</p>
+        <div class="bg-gray-700/60 p-5 rounded-lg border border-gray-600 shadow-md">
+            <div class="flex items-center gap-3 mb-3">
+                <svg class="icon text-purple-400">
+                    <use xlink:href="#icon-award"></use>
+                </svg>
+                <h4 class="text-xl font-bold text-purple-400">Play to Your Strengths</h4>
+            </div>
+            <div class="space-y-3">
+                <p class="text-gray-300">
+                    Identify and leverage your genetic advantages to build a stand-out physique. If you have naturally broad shoulders, emphasize development in that area.
+                </p>
+                <p class="text-gray-300">
+                    For competitions or aesthetic goals, focus on poses and outfits that highlight your advantageous body parts.
+                </p>
+            </div>
         </div>
         
-        <div class="fitness-card">
-            <h4 class="text-xl font-bold mb-3 text-fitness-red">Address Limitations Strategically</h4>
-            <p class="mb-3">For areas where you have genetic limitations, use specialized techniques to maximize development.</p>
-            <ul class="list-disc pl-5 mb-3 text-fitness-gray">
-                <li>Increased training frequency for lagging areas</li>
-                <li>Higher volume approaches with varied angles</li>
-                <li>Strategic use of isolation exercises</li>
-            </ul>
+        <div class="bg-gray-700/60 p-5 rounded-lg border border-gray-600 shadow-md">
+            <div class="flex items-center gap-3 mb-3">
+                <svg class="icon text-red-400">
+                    <use xlink:href="#icon-tool"></use>
+                </svg>
+                <h4 class="text-xl font-bold text-red-400">Address Limitations Strategically</h4>
+            </div>
+            <div class="space-y-3">
+                <p class="text-gray-300">
+                    For areas where you have genetic limitations, use specialized techniques to maximize development.
+                </p>
+                <div class="bg-gray-800/60 p-4 rounded-lg border border-gray-600">
+                    <ul class="list-disc pl-5 text-gray-300 space-y-1">
+                        <li>Increased training frequency for lagging areas</li>
+                        <li>Higher volume approaches with varied angles</li>
+                        <li>Strategic use of isolation exercises</li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </div>
     
-    <div class="flex justify-center mt-6">
-        <a href="{{ url_for('analyze') }}" class="btn btn-primary flex items-center gap-2">
-            <svg class="icon icon-sm">
+    <div class="flex justify-center mt-8">
+        <a href="{{ url_for('analyze') }}" class="px-6 py-3 rounded-lg bg-gradient-to-r from-red-600 to-red-500 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2">
+            <svg class="icon h-5 w-5">
                 <use xlink:href="#icon-camera"></use>
             </svg>
             <span>Start Your Body Analysis</span>
@@ -238,12 +338,16 @@
 
 {% block styles %}
 <style>
-    .fitness-card {
-        background-color: var(--fitness-card-bg);
-        border-radius: 0.5rem;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        padding: 1.5rem;
-        border: 1px solid rgba(255, 255, 255, 0.05);
+    /* Custom animation for card hover effects */
+    .bg-gray-700\/60:hover {
+        background-color: rgba(55, 65, 81, 0.7);
+        transform: translateY(-2px);
+        transition: all 0.3s ease;
+    }
+    
+    /* Improve text readability with subtle text shadow */
+    .text-white, .text-gray-200, .text-gray-300 {
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
     }
 </style>
 {% endblock %}
