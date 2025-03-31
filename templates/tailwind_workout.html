@@ -5,20 +5,21 @@
 {% endblock %}
 
 {% block content %}
-<div class="mb-6">
-    <div class="fitness-card">
-        <div class="flex items-center gap-3 mb-4">
-            <svg class="icon text-fitness-red">
+<div class="mb-8">
+    <div class="fitness-card bg-gray-800/80 backdrop-blur-sm p-6 rounded-xl border border-gray-700 shadow-lg" data-aos="fade-up">
+        <div class="flex items-center gap-4 mb-5">
+            <svg class="icon text-red-500 h-8 w-8">
                 <use xlink:href="#icon-dumbbell"></use>
             </svg>
-            <h1 class="text-3xl font-bold">Personalized Workout Plan</h1>
+            <h1 class="text-3xl font-bold text-white bg-gradient-to-r from-red-500 to-pink-500 bg-clip-text text-transparent">Personalized Workout Plan</h1>
         </div>
-        <div class="fitness-card bg-fitness-darkgray">
-            <div class="flex items-center gap-2">
-                <svg class="icon text-fitness-accent">
+        
+        <div class="bg-gray-700/60 p-5 rounded-lg border border-gray-600 shadow-md mt-4">
+            <div class="flex items-start gap-3">
+                <svg class="icon text-red-400 flex-shrink-0 mt-1">
                     <use xlink:href="#icon-info"></use>
                 </svg>
-                <p class="text-fitness-gray">
+                <p class="text-gray-200">
                     This workout plan is customized based on your body structure, weak points, and genetic traits.
                     Follow this program consistently while pairing it with your nutrition plan for optimal results.
                 </p>
@@ -30,61 +31,68 @@
 <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
     <div class="md:col-span-5">
         <!-- User Information -->
-        <div class="fitness-card mb-6">
-            <div class="flex items-center gap-3 mb-4">
-                <svg class="icon text-fitness-red">
+        <div class="fitness-card bg-gray-800/80 backdrop-blur-sm p-6 rounded-xl border border-gray-700 shadow-lg mb-6" data-aos="fade-up" data-aos-delay="100">
+            <div class="flex items-center gap-3 mb-5">
+                <svg class="icon text-red-500">
                     <use xlink:href="#icon-user"></use>
                 </svg>
-                <h3 class="text-xl font-bold">Your Profile</h3>
+                <h3 class="text-xl font-bold text-white">Your Profile</h3>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 w-full mt-4">
-                <div class="fitness-card bg-fitness-darkgray">
-                    <div class="flex items-center gap-2 mb-2">
-                        <svg class="icon icon-sm text-fitness-accent">
+            <div class="bg-gray-700/60 p-4 rounded-lg border border-gray-600 shadow-md mb-5">
+                <p class="text-gray-300">
+                    Your training plan has been personalized based on the body metrics and goals you provided. 
+                    This profile information helps us target your specific needs for optimal results.
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 w-full mt-4">
+                <div class="bg-gray-700/80 backdrop-blur-sm p-4 rounded-xl border border-gray-600 shadow-lg">
+                    <div class="flex items-center gap-2 mb-3">
+                        <svg class="icon icon-sm text-blue-400">
                             <use xlink:href="#icon-clipboard"></use>
                         </svg>
-                        <h4 class="font-bold">Training Info</h4>
+                        <h4 class="font-bold text-blue-400">Training Info</h4>
                     </div>
-                    <ul class="text-sm text-fitness-gray">
-                        <li class="flex justify-between items-center border-b border-gray-800 py-2">
+                    <ul class="text-gray-200 space-y-3">
+                        <li class="flex justify-between items-center border-b border-gray-600 pb-2">
                             <span>Experience</span>
-                            <span class="font-medium capitalize">{{ user_info.experience }}</span>
+                            <span class="font-medium capitalize bg-blue-900/40 px-3 py-1 rounded-lg">{{ user_info.experience }}</span>
                         </li>
-                        <li class="flex justify-between items-center border-b border-gray-800 py-2">
+                        <li class="flex justify-between items-center border-b border-gray-600 pb-2">
                             <span>Training Split</span>
-                            <span class="font-medium">Push/Pull/Legs</span>
+                            <span class="font-medium bg-blue-900/40 px-3 py-1 rounded-lg">Push/Pull/Legs</span>
                         </li>
-                        <li class="flex justify-between items-center py-2">
+                        <li class="flex justify-between items-center pt-1">
                             <span>Body Type</span>
-                            <span class="font-medium">{{ traits.body_type.value }}</span>
+                            <span class="font-medium bg-blue-900/40 px-3 py-1 rounded-lg">{{ traits.body_type.value }}</span>
                         </li>
                     </ul>
                 </div>
                 
-                <div class="fitness-card bg-fitness-darkgray">
-                    <div class="flex items-center gap-2 mb-2">
-                        <svg class="icon icon-sm text-fitness-accent">
+                <div class="bg-gray-700/80 backdrop-blur-sm p-4 rounded-xl border border-gray-600 shadow-lg">
+                    <div class="flex items-center gap-2 mb-3">
+                        <svg class="icon icon-sm text-red-400">
                             <use xlink:href="#icon-target"></use>
                         </svg>
-                        <h4 class="font-bold">Body Metrics</h4>
+                        <h4 class="font-bold text-red-400">Body Metrics</h4>
                     </div>
-                    <ul class="text-sm text-fitness-gray">
+                    <ul class="text-gray-200 space-y-3">
                         {% if traits.body_fat_percentage is defined and traits.body_fat_percentage.value is defined %}
-                        <li class="flex justify-between items-center border-b border-gray-800 py-2">
+                        <li class="flex justify-between items-center border-b border-gray-600 pb-2">
                             <span>Body Fat %</span>
-                            <span class="font-medium">{{ format_value('body_fat_percentage', traits.body_fat_percentage.value) }}</span>
+                            <span class="font-medium bg-red-900/40 px-3 py-1 rounded-lg">{{ format_value('body_fat_percentage', traits.body_fat_percentage.value) }}</span>
                         </li>
                         {% endif %}
                         {% if traits.muscle_building_potential is defined and traits.muscle_building_potential.value is defined %}
-                        <li class="flex justify-between items-center border-b border-gray-800 py-2">
+                        <li class="flex justify-between items-center border-b border-gray-600 pb-2">
                             <span>Muscle Potential</span>
-                            <span class="font-medium">{{ format_value('muscle_building_potential', traits.muscle_building_potential.value) }}</span>
+                            <span class="font-medium bg-red-900/40 px-3 py-1 rounded-lg">{{ format_value('muscle_building_potential', traits.muscle_building_potential.value) }}</span>
                         </li>
                         {% endif %}
-                        <li class="flex justify-between items-center py-2">
+                        <li class="flex justify-between items-center pt-1">
                             <span>Training Focus</span>
-                            <span class="font-medium">Weak Point Targeting</span>
+                            <span class="font-medium bg-red-900/40 px-3 py-1 rounded-lg">Weak Point Targeting</span>
                         </li>
                     </ul>
                 </div>
@@ -174,6 +182,18 @@
                 <h3 class="text-xl font-bold text-white">Weekly Schedule</h3>
             </div>
             
+            <div class="bg-gray-700/60 p-4 rounded-lg border border-gray-600 shadow-md mb-5">
+                <div class="flex items-start gap-3">
+                    <svg class="icon text-yellow-500 flex-shrink-0 mt-1">
+                        <use xlink:href="#icon-info"></use>
+                    </svg>
+                    <p class="text-gray-300">
+                        Your weekly training follows the Push/Pull/Legs split for optimal muscle recovery and growth. 
+                        This schedule ensures each muscle group gets trained 2x per week with adequate recovery time.
+                    </p>
+                </div>
+            </div>
+            
             <div class="overflow-x-auto bg-gray-700/60 p-4 rounded-lg border border-gray-600 shadow-md">
                 <table class="w-full">
                     <thead>
@@ -223,6 +243,19 @@
                     <use xlink:href="#icon-list"></use>
                 </svg>
                 <h3 class="text-xl font-bold text-white">Detailed Workout Plans</h3>
+            </div>
+            
+            <div class="bg-gray-700/60 p-4 rounded-lg border border-gray-600 shadow-md mb-5">
+                <div class="flex items-start gap-3">
+                    <svg class="icon text-purple-400 flex-shrink-0 mt-1">
+                        <use xlink:href="#icon-info"></use>
+                    </svg>
+                    <p class="text-gray-300">
+                        Select a day to view your personalized workout routine. Each day is color-coded by muscle group focus 
+                        to enhance your training experience: <span class="text-red-400">Push</span>, <span class="text-blue-400">Pull</span>, 
+                        <span class="text-purple-400">Legs</span>, and <span class="text-green-400">Rest</span>.
+                    </p>
+                </div>
             </div>
             
             <div x-data="{ activeDay: 'Monday' }" class="mb-6">
@@ -302,7 +335,7 @@
                     <p class="text-gray-300 mb-4">Complete all exercises with proper form. Rest 1-2 minutes between sets for compound movements, 30-60 seconds for isolation exercises.</p>
                     
                     <div class="space-y-4">
-                        {% for exercise in detailed_workouts.get('Wednesday', {}).get('exercises', []) %}
+                        {% for exercise in detailed_workouts.get('Tuesday', {}).get('exercises', []) %}
                         <div class="bg-gray-700/80 backdrop-blur-sm p-4 rounded-xl border border-gray-600 shadow-lg hover:bg-gray-700/90 transition-all duration-300">
                             <div class="flex items-start justify-between">
                                 <div>
@@ -326,7 +359,7 @@
                     <p class="text-gray-300 mb-4">Complete all exercises with proper form. Rest 1-2 minutes between sets for compound movements, 30-60 seconds for isolation exercises.</p>
                     
                     <div class="space-y-4">
-                        {% for exercise in detailed_workouts.get('Friday', {}).get('exercises', []) %}
+                        {% for exercise in detailed_workouts.get('Wednesday', {}).get('exercises', []) %}
                         <div class="bg-gray-700/80 backdrop-blur-sm p-4 rounded-xl border border-gray-600 shadow-lg hover:bg-gray-700/90 transition-all duration-300">
                             <div class="flex items-start justify-between">
                                 <div>
