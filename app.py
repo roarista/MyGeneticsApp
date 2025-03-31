@@ -763,22 +763,7 @@ def nutrition(analysis_id):
                 # Put a placeholder so the template doesn't break
                 formatted_traits[trait_name] = trait_data
         
-        # Default recommendations for supplements based on goals
-        supplements = {
-            'essential': [
-                {'name': 'Protein Powder (Whey/Plant-based)', 'purpose': 'Muscle recovery and growth', 'timing': 'Post-workout or between meals', 'dosage': '20-30g per serving'},
-                {'name': 'Creatine Monohydrate', 'purpose': 'Strength and power output', 'timing': 'Daily, timing not critical', 'dosage': '5g daily'},
-                {'name': 'Multivitamin', 'purpose': 'Fill nutritional gaps', 'timing': 'With a meal', 'dosage': 'As directed on label'}
-            ],
-            'optional': [
-                {'name': 'Omega-3 Fatty Acids', 'purpose': 'Joint health and inflammation', 'timing': 'With meals', 'dosage': '1-3g daily'},
-                {'name': 'Vitamin D3', 'purpose': 'Immune function and bone health', 'timing': 'With a meal containing fat', 'dosage': '1000-5000 IU daily'},
-                {'name': 'Pre-Workout', 'purpose': 'Energy and performance', 'timing': '30 minutes before training', 'dosage': 'As directed on label'}
-            ]
-        }
-        
-        # Recommended foods based on body type and goals
-        # Handle both string body type and dict with 'value' key
+        # Determine body type from traits if available
         body_type_data = result['traits'].get('body_type', 'balanced')
         if isinstance(body_type_data, dict):
             body_type = body_type_data.get('value', 'balanced')
@@ -787,43 +772,132 @@ def nutrition(analysis_id):
         
         logger.debug(f"Determined body type: {body_type}")
         
+        # Define supplements based on goals and body type
+        supplements = [
+            {
+                'name': 'Protein Powder',
+                'description': 'Supports muscle recovery and growth, especially when whole food protein sources are limited.',
+                'dosage': '20-30g per serving',
+                'timing': 'Post-workout or between meals'
+            },
+            {
+                'name': 'Creatine Monohydrate',
+                'description': 'Enhances strength, power output, and muscle cell volumization.',
+                'dosage': '5g daily',
+                'timing': 'Any time of day, consistent daily use'
+            },
+            {
+                'name': 'Vitamin D3',
+                'description': 'Supports immune function, bone health, and hormonal regulation.',
+                'dosage': '1000-5000 IU daily',
+                'timing': 'With a meal containing fats'
+            }
+        ]
+        
+        # Add body-type specific supplements
+        if body_type.lower() in ['endomorph', 'mesomorph-endomorph']:
+            supplements.append({
+                'name': 'Green Tea Extract',
+                'description': 'May help with fat metabolism and provide energy without excessive stimulation.',
+                'dosage': '500-1000mg daily',
+                'timing': 'Morning or pre-workout'
+            })
+        elif body_type.lower() in ['ectomorph', 'mesomorph-ectomorph']:
+            supplements.append({
+                'name': 'Mass Gainer',
+                'description': 'Higher calorie supplement to support weight gain and muscle building.',
+                'dosage': '1-2 servings daily',
+                'timing': 'Between meals or before bed'
+            })
+        
+        # Define food recommendations based on body type
         food_recommendations = {
             'protein_sources': [
-                {'name': 'Chicken Breast', 'benefits': 'Lean protein with minimal fat', 'portion': '100-150g per meal'},
-                {'name': 'Lean Beef', 'benefits': 'Protein, iron, zinc, and B vitamins', 'portion': '100-150g per meal'},
-                {'name': 'Eggs', 'benefits': 'Complete protein with healthy fats', 'portion': '2-3 whole eggs'},
-                {'name': 'Greek Yogurt', 'benefits': 'Protein and probiotics', 'portion': '150-200g serving'},
-                {'name': 'Whey/Plant Protein', 'benefits': 'Convenient post-workout option', 'portion': '25-30g protein per shake'}
+                'Chicken Breast (100-150g)',
+                'Lean Beef (100-150g)',
+                'Egg Whites (4-6)',
+                'Greek Yogurt (200-250g)',
+                'White Fish (100-150g)'
             ],
             'carb_sources': [
-                {'name': 'Brown Rice', 'benefits': 'Sustained energy and fiber', 'portion': '50-80g uncooked'},
-                {'name': 'Sweet Potatoes', 'benefits': 'Vitamins and slower-digesting carbs', 'portion': '150-200g'},
-                {'name': 'Oats', 'benefits': 'Fiber and sustained energy', 'portion': '40-60g uncooked'},
-                {'name': 'Fruits', 'benefits': 'Vitamins, minerals, and fiber', 'portion': '1-2 pieces or 100-150g'},
-                {'name': 'Vegetables', 'benefits': 'Micronutrients and fiber', 'portion': 'Unlimited green vegetables'}
+                'Brown Rice (50-75g uncooked)',
+                'Sweet Potatoes (150-200g)',
+                'Oats (40-60g uncooked)',
+                'Fruits (1-2 pieces)',
+                'Vegetables (unlimited greens)'
             ],
             'fat_sources': [
-                {'name': 'Avocado', 'benefits': 'Healthy monounsaturated fats', 'portion': '½ - 1 medium'},
-                {'name': 'Nuts and Seeds', 'benefits': 'Healthy fats and protein', 'portion': '30g or small handful'},
-                {'name': 'Olive Oil', 'benefits': 'Heart-healthy monounsaturated fats', 'portion': '1-2 tablespoons'},
-                {'name': 'Fatty Fish', 'benefits': 'Omega-3 fatty acids', 'portion': '100-150g serving, 2-3x week'},
-                {'name': 'Nut Butters', 'benefits': 'Protein and healthy fats', 'portion': '1-2 tablespoons'}
+                'Avocado (½ - 1 medium)',
+                'Nuts and Seeds (30g)',
+                'Olive Oil (1-2 tablespoons)',
+                'Fatty Fish (100-150g, 2-3x week)',
+                'Nut Butters (1-2 tablespoons)'
             ]
         }
         
-        # Adjust food recommendations based on body type
+        # Define meal timing recommendations
+        meals = [
+            {
+                'name': 'Breakfast',
+                'timing': '7:00 - 8:00 AM',
+                'calories': '25% of daily total',
+                'protein': '25-30g',
+                'carbs': '30-40g',
+                'fats': '10-15g'
+            },
+            {
+                'name': 'Lunch',
+                'timing': '12:00 - 1:00 PM',
+                'calories': '30% of daily total',
+                'protein': '30-35g',
+                'carbs': '40-50g',
+                'fats': '15-20g'
+            },
+            {
+                'name': 'Pre-Workout',
+                'timing': '3:00 - 4:00 PM',
+                'calories': '15% of daily total',
+                'protein': '20g',
+                'carbs': '30-40g',
+                'fats': '5-10g'
+            },
+            {
+                'name': 'Post-Workout',
+                'timing': '5:30 - 6:30 PM',
+                'calories': '20% of daily total',
+                'protein': '25-30g',
+                'carbs': '30-40g',
+                'fats': '5-10g'
+            },
+            {
+                'name': 'Evening Snack',
+                'timing': '8:00 - 9:00 PM',
+                'calories': '10% of daily total',
+                'protein': '15-20g',
+                'carbs': '5-10g',
+                'fats': '5-10g'
+            }
+        ]
+        
+        # Nutrition tips based on body type
+        nutrition_tips = [
+            "Prioritize protein intake with every meal to support muscle recovery and growth.",
+            "Time carbohydrates around your workouts for optimal performance and recovery.",
+            "Include healthy fats throughout the day to support hormone production.",
+            "Stay hydrated by drinking at least 3-4 liters of water daily.",
+            "Aim for 80% whole, minimally processed foods and 20% flexibility for sustainability."
+        ]
+        
+        # Add body-type specific nutrition tips
         if body_type.lower() in ['endomorph', 'mesomorph-endomorph']:
-            # For endomorphs: More protein, less carbs
-            carb_strategy = "Limit high-glycemic carbs. Focus on fiber-rich sources and primarily around workouts."
-            timing_strategy = "Practice carb timing: higher amounts around workouts, minimal on rest days."
+            nutrition_tips.append("As an endomorph, be particularly mindful of carbohydrate intake and focus on fiber-rich options.")
+            nutrition_tips.append("Consider intermittent fasting or time-restricted eating to help manage calorie intake.")
         elif body_type.lower() in ['ectomorph', 'mesomorph-ectomorph']:
-            # For ectomorphs: Higher carbs, moderate protein
-            carb_strategy = "Prioritize regular carb intake throughout the day for consistent energy and muscle building."
-            timing_strategy = "Consume larger meals with balanced macros. Consider adding calorie-dense foods."
+            nutrition_tips.append("As an ectomorph, you need higher calorie intake and carbs to support muscle growth.")
+            nutrition_tips.append("Consider liquid calories (smoothies, shakes) to increase your overall calorie intake.")
         else:
-            # For mesomorphs or balanced types
-            carb_strategy = "Moderate carb intake with a focus on quality sources and timing around workouts."
-            timing_strategy = "Balance macros evenly throughout your meals with slight adjustments based on training schedule."
+            nutrition_tips.append("With your balanced body type, focus on consistency and quality of nutrients.")
+            nutrition_tips.append("Monitor your response to different macro ratios to find your optimal balance.")
         
         # Basic BMR calculation using the Mifflin-St Jeor Equation
         try:
@@ -847,64 +921,88 @@ def nutrition(analysis_id):
             if body_type.lower() in ['endomorph', 'mesomorph-endomorph']:
                 # Slight deficit for fat loss focus
                 target_calories = int(maintenance_calories * 0.9)
-                training_day_calories = int(maintenance_calories * 0.95)
-                rest_day_calories = int(maintenance_calories * 0.85)
             elif body_type.lower() in ['ectomorph', 'mesomorph-ectomorph']:
                 # Surplus for muscle gain focus
                 target_calories = int(maintenance_calories * 1.1)
-                training_day_calories = int(maintenance_calories * 1.15)
-                rest_day_calories = int(maintenance_calories * 1.05)
             else:
                 # Maintenance for recomposition
                 target_calories = maintenance_calories
-                training_day_calories = int(maintenance_calories * 1.05)
-                rest_day_calories = int(maintenance_calories * 0.95)
             
             # Create calorie recommendations structure
-            calorie_recommendations = {
-                'maintenance': maintenance_calories,
-                'target': target_calories,
-                'training_day': training_day_calories,
-                'rest_day': rest_day_calories
+            calories = {
+                'maintenance': f"{maintenance_calories}",
+                'target': f"{target_calories}"
             }
             
-            logger.debug(f"Calculated calorie recommendations: {calorie_recommendations}")
+            logger.debug(f"Calculated calorie recommendations: {calories}")
         except Exception as calc_error:
             logger.error(f"Error calculating calories: {str(calc_error)}")
             # Provide default values if calculation fails
-            calorie_recommendations = {
-                'maintenance': 2200,
-                'target': 2200,
-                'training_day': 2300,
-                'rest_day': 2100
+            calories = {
+                'maintenance': "2200",
+                'target': "2200"
             }
         
-        # Ensure we have the right structure for recommendations
-        if 'recommendations' not in result:
-            result['recommendations'] = {}
+        # Calculate macronutrient percentages and grams
+        protein_percentage = 40
+        carbs_percentage = 40
+        fats_percentage = 20
         
-        # Always save the newly calculated calorie recommendations
-        result['recommendations']['calorie_recommendations'] = calorie_recommendations
-        
+        # Adjust macros based on body type
+        if body_type.lower() in ['endomorph', 'mesomorph-endomorph']:
+            protein_percentage = 45
+            carbs_percentage = 30
+            fats_percentage = 25
+        elif body_type.lower() in ['ectomorph', 'mesomorph-ectomorph']:
+            protein_percentage = 35
+            carbs_percentage = 50
+            fats_percentage = 15
+            
+        # Calculate macros in grams (simple calculation)
+        try:
+            target_cal = int(calories['target'])
+            protein_grams = int((target_cal * (protein_percentage/100)) / 4)  # Protein has 4 calories per gram
+            carbs_grams = int((target_cal * (carbs_percentage/100)) / 4)      # Carbs have 4 calories per gram
+            fats_grams = int((target_cal * (fats_percentage/100)) / 9)        # Fats have 9 calories per gram
+            
+            macros = {
+                'protein': f"{protein_grams}",
+                'protein_percentage': protein_percentage,
+                'carbs': f"{carbs_grams}",
+                'carbs_percentage': carbs_percentage,
+                'fats': f"{fats_grams}",
+                'fats_percentage': fats_percentage
+            }
+        except Exception as macro_error:
+            logger.error(f"Error calculating macros: {str(macro_error)}")
+            # Default values
+            macros = {
+                'protein': "180",
+                'protein_percentage': 40,
+                'carbs': "180",
+                'carbs_percentage': 40,
+                'fats': "40",
+                'fats_percentage': 20
+            }
+            
         # Prepare the context for the template
         context = {
             'analysis_id': analysis_id,
             'traits': formatted_traits,
-            'recommendations': result['recommendations'],
-            'user_info': result['user_info'],
-            'supplements': supplements,
-            'foods': food_recommendations,
-            'carb_strategy': carb_strategy,
-            'timing_strategy': timing_strategy,
             'body_type': body_type,
-            'format_value': format_trait_value
+            'macros': macros,
+            'calories': calories,
+            'supplements': supplements,
+            'meals': meals,
+            'food_recommendations': food_recommendations,
+            'nutrition_tips': nutrition_tips
         }
         
         # Log the key parts of context for debugging
         logger.info(f"Rendering nutrition template for analysis_id: {analysis_id} with calorie recommendations")
         
         # Render the template with the context
-        return render_template('tailwind_nutrition.html', **context)
+        return render_template('tailwind_nutrition_new.html', **context)
         
     except Exception as e:
         # Log the error for debugging
