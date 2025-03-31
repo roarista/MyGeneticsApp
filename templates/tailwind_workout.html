@@ -2,6 +2,28 @@
 
 {% block styles %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/workout-tabs.css') }}">
+<style>
+    /* Custom classes for workout visibility */
+    .workout-hidden {
+        display: none !important;
+    }
+    
+    .workout-visible {
+        display: block !important;
+    }
+    
+    /* Day button styling */
+    .day-tab.active {
+        background: linear-gradient(to right, #ff5858, #ee2c2c);
+        color: white;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    
+    /* Override the default display none for better control */
+    .day-content {
+        display: none;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -706,7 +728,7 @@
         
         // Remove active class from all tabs
         dayTabs.forEach(t => {
-            t.classList.remove('bg-gradient-to-r', 'from-red-600', 'to-red-500', 'text-white', 'shadow-lg');
+            t.classList.remove('bg-gradient-to-r', 'from-red-600', 'to-red-500', 'text-white', 'shadow-lg', 'active');
             t.classList.add('bg-gray-600', 'text-gray-200', 'hover:bg-gray-500');
         });
         
@@ -714,39 +736,89 @@
         dayTabs.forEach(t => {
             if (t.textContent.trim() === day) {
                 t.classList.remove('bg-gray-600', 'text-gray-200', 'hover:bg-gray-500');
-                t.classList.add('bg-gradient-to-r', 'from-red-600', 'to-red-500', 'text-white', 'shadow-lg');
+                t.classList.add('bg-gradient-to-r', 'from-red-600', 'to-red-500', 'text-white', 'shadow-lg', 'active');
             }
         });
         
         // Hide all content sections
         tabContents.forEach(content => {
             content.style.display = 'none';
+            content.classList.add('workout-hidden');
+            content.classList.remove('workout-visible');
         });
         
-        // Show the selected day's content
-        const selectedContent = document.querySelector(`.day-content[data-day="${day}"]`);
+        // Try multiple selectors to find the content
+        let selectedContent = document.querySelector(`.day-content[data-day="${day}"]`);
+        
+        // Log the selector we're looking for
+        console.log(`Looking for .day-content[data-day="${day}"]`);
+        
         if (selectedContent) {
+            console.log('Found content with data-day attribute');
             selectedContent.style.display = 'block';
+            selectedContent.classList.remove('workout-hidden');
+            selectedContent.classList.add('workout-visible');
             selectedContent.scrollIntoView({behavior: 'smooth'});
+        } else {
+            // Try alternate selector
+            console.log('Trying alternate selector');
+            selectedContent = document.getElementById(`workout-${day}`);
+            
+            if (selectedContent) {
+                console.log('Found content with ID');
+                selectedContent.style.display = 'block';
+                selectedContent.classList.remove('workout-hidden');
+                selectedContent.classList.add('workout-visible');
+                selectedContent.scrollIntoView({behavior: 'smooth'});
+            } else {
+                console.error(`Could not find workout element for day: ${day}`);
+            }
         }
     }
 
     // Initialize workout tabs when the page loads
     document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM loaded - initializing workout panels');
+        
         // Get all content sections
         const tabContents = document.querySelectorAll('.day-content');
+        console.log('Found workout panels:', tabContents.length);
         
         // Show Monday content by default
         if (tabContents.length > 0) {
             tabContents.forEach(content => {
                 content.style.display = 'none';
+                content.classList.add('workout-hidden');
+                content.classList.remove('workout-visible');
             });
             
             // Show Monday content
             const mondayContent = document.querySelector('.day-content[data-day="Monday"]');
             if (mondayContent) {
+                console.log('Found Monday content, displaying it');
                 mondayContent.style.display = 'block';
+                mondayContent.classList.remove('workout-hidden');
+                mondayContent.classList.add('workout-visible');
+            } else {
+                console.error('Could not find Monday content');
+                
+                // Try alternate selector
+                const altMondayContent = document.getElementById('workout-Monday');
+                if (altMondayContent) {
+                    console.log('Found Monday content by ID');
+                    altMondayContent.style.display = 'block';
+                    altMondayContent.classList.remove('workout-hidden');
+                    altMondayContent.classList.add('workout-visible');
+                } else {
+                    // Just show the first one if we can't find Monday
+                    console.log('Showing first workout panel as fallback');
+                    tabContents[0].style.display = 'block';
+                    tabContents[0].classList.remove('workout-hidden');
+                    tabContents[0].classList.add('workout-visible');
+                }
             }
+        } else {
+            console.error('No workout panels found on the page');
         }
     });
 </script>

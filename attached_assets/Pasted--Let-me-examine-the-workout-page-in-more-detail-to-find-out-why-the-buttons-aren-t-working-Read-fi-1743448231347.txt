@@ -1,0 +1,416 @@
+
+Let me examine the workout page in more detail to find out why the buttons aren't working:
+
+Read file: MyGeneticsApp/templates/tailwind_workout.html
+Now let's look at the JavaScript part for the workout buttons:
+
+Read file: MyGeneticsApp/templates/tailwind_workout.html
+Let me check if the workout JavaScript is being loaded in the correct location:
+
+Read file: MyGeneticsApp/static/js/workout-buttons.js
+Let's check the app route for the workout page to understand what's causing the issue:
+
+Read file: MyGeneticsApp/app.py
+Let's look at the end of the route function to see what template is being rendered:
+
+Ran tool
+Now I need to see how the buttons are implemented in the direct template:
+
+Ran tool
+Let me check the full button implementation:
+
+Ran tool
+Let me see the actual button code in the direct template:
+
+Read file: MyGeneticsApp/templates/tailwind_workout_direct.html
+Now I'm going to check for JavaScript console errors by adding debug code:
+
+```html:MyGeneticsApp/templates/tailwind_workout_direct.html
+  function showWorkout(day) {
+    console.log('showWorkout called with day:', day);
+    
+    // Hide all workout panels
+    const workoutPanels = document.querySelectorAll('[id^="workout-"]');
+    console.log('Found workout panels:', workoutPanels.length);
+    workoutPanels.forEach(panel => {
+      panel.classList.add('hidden');
+    });
+    
+    // Remove active class from all buttons
+    const dayButtons = document.querySelectorAll('.day-button');
+    console.log('Found day buttons:', dayButtons.length);
+    dayButtons.forEach(button => {
+      button.classList.remove('active');
+    });
+    
+    // Show the selected day's workout
+    const selectedWorkout = document.getElementById(`workout-${day}`);
+    console.log('Selected workout element:', selectedWorkout ? 'Found' : 'Not found', 'for day:', day);
+    if (selectedWorkout) {
+      selectedWorkout.classList.remove('hidden');
+    } else {
+      console.error(`Could not find workout element with ID: workout-${day}`);
+      // Try alternate selector as fallback
+      const altWorkout = document.querySelector(`.workout-day[data-day="${day}"]`);
+      if (altWorkout) {
+        console.log('Found workout using alternate selector');
+        altWorkout.classList.remove('hidden');
+        altWorkout.style.display = 'block';
+      }
+    }
+    
+    // Add active class to the clicked button
+    dayButtons.forEach(button => {
+      const buttonDay = button.querySelector('.text-white.font-medium').textContent;
+      if (buttonDay === day) {
+        button.classList.add('active');
+      }
+    });
+    
+    // Scroll to the workout panel
+    if (selectedWorkout) {
+      selectedWorkout.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+```
+Now let's add data-day attributes to the workout elements to make sure the fallback can find them:
+
+```html:MyGeneticsApp/templates/tailwind_workout_direct.html
+      <!-- Daily workout plans - hidden by default, shown when day is selected -->
+      <div id="workout-container" class="space-y-8">
+        {% for day, workout in workout_plan.items() %}
+        <div id="workout-{{ day }}" data-day="{{ day }}" class="workout-day {{ workout.category }} bg-gray-800 rounded-xl shadow-lg overflow-hidden hidden" data-aos="fade-up">
+```
+Now let's implement a more comprehensive fix that both displays content correctly and addresses the linter errors:
+
+```html:MyGeneticsApp/templates/tailwind_workout_direct.html
+<script>
+  // JavaScript to handle day selection and workout display
+  document.addEventListener('DOMContentLoaded', function() {
+    // Show the first day's workout by default
+    const firstDay = document.querySelector('.day-button');
+    if (firstDay) {
+      firstDay.classList.add('active');
+      const dayName = firstDay.querySelector('.text-white.font-medium').textContent;
+      showWorkout(dayName);
+    }
+  });
+  
+  function showWorkout(day) {
+    console.log('showWorkout called with day:', day);
+    
+    // Hide all workout panels
+    const workoutPanels = document.querySelectorAll('.workout-day');
+    console.log('Found workout panels:', workoutPanels.length);
+    workoutPanels.forEach(panel => {
+      panel.classList.add('hidden');
+    });
+    
+    // Remove active class from all buttons
+    const dayButtons = document.querySelectorAll('.day-button');
+    console.log('Found day buttons:', dayButtons.length);
+    dayButtons.forEach(button => {
+      button.classList.remove('active');
+    });
+    
+    // Show the selected day's workout
+    const selectedWorkout = document.getElementById(`workout-${day}`);
+    console.log('Selected workout element:', selectedWorkout ? 'Found' : 'Not found', 'for day:', day);
+    if (selectedWorkout) {
+      selectedWorkout.classList.remove('hidden');
+    } else {
+      console.error(`Could not find workout element with ID: workout-${day}`);
+      // Try alternate selector as fallback
+      const altWorkout = document.querySelector(`.workout-day[data-day="${day}"]`);
+      if (altWorkout) {
+        console.log('Found workout using alternate selector');
+        altWorkout.classList.remove('hidden');
+      }
+    }
+    
+    // Add active class to the clicked button
+    dayButtons.forEach(button => {
+      const buttonText = button.querySelector('.text-white.font-medium');
+      if (buttonText && buttonText.textContent.trim() === day) {
+        button.classList.add('active');
+      }
+    });
+    
+    // Scroll to the workout panel
+    const workoutToScroll = selectedWorkout || document.querySelector(`.workout-day[data-day="${day}"]`);
+    if (workoutToScroll) {
+      workoutToScroll.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+</script>
+```
+Let's look at what's causing the linter errors and add a custom CSS class to make the JavaScript easier to work with:
+
+```html:MyGeneticsApp/templates/tailwind_workout_direct.html
+{% block head %}
+<style>
+  /* Custom styles for workout page */
+  .push-badge {
+    background: linear-gradient(45deg, #ff5858, #ee2c2c);
+  }
+  
+  .pull-badge {
+    background: linear-gradient(45deg, #3a7bd5, #3d9df8);
+  }
+  
+  .legs-badge {
+    background: linear-gradient(45deg, #9d50bb, #6e48aa);
+  }
+  
+  .rest-badge {
+    background: linear-gradient(45deg, #52c234, #061700);
+  }
+
+  .core-badge {
+    background: linear-gradient(45deg, #4b6cb7, #182848);
+  }
+  
+  .workout-card {
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .workout-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+  }
+  
+  .workout-day {
+    border-left: 4px solid transparent;
+    transition: all 0.3s ease;
+  }
+  
+  .workout-day.push {
+    border-left-color: #ee2c2c;
+  }
+  
+  .workout-day.pull {
+    border-left-color: #3d9df8;
+  }
+  
+  .workout-day.legs {
+    border-left-color: #9d50bb;
+  }
+  
+  .workout-day.rest {
+    border-left-color: #52c234;
+  }
+  
+  .exercise-card {
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .exercise-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  }
+  
+  .set-rep-badge {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 2px 8px;
+    font-size: 0.85rem;
+  }
+  
+  .progress-bar {
+    height: 8px;
+    border-radius: 4px;
+    margin: 8px 0;
+    background: rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+  }
+  
+  .progress-fill {
+    height: 100%;
+    border-radius: 4px;
+  }
+  
+  .sidebar {
+    position: sticky;
+    top: 2rem;
+  }
+  
+  .tip-card {
+    transition: all 0.3s ease;
+  }
+  
+  .tip-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  }
+  
+  .day-button {
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .day-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  }
+  
+  .day-button.active {
+    border-color: rgba(99, 102, 241, 0.8);
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+  }
+  
+  .day-button.push-day:hover, .day-button.push-day.active {
+    border-color: rgba(238, 44, 44, 0.8);
+    box-shadow: 0 0 15px rgba(238, 44, 44, 0.4);
+  }
+  
+  .day-button.pull-day:hover, .day-button.pull-day.active {
+    border-color: rgba(61, 157, 248, 0.8);
+    box-shadow: 0 0 15px rgba(61, 157, 248, 0.4);
+  }
+  
+  .day-button.legs-day:hover, .day-button.legs-day.active {
+    border-color: rgba(157, 80, 187, 0.8);
+    box-shadow: 0 0 15px rgba(157, 80, 187, 0.4);
+  }
+  
+  .day-button.rest-day:hover, .day-button.rest-day.active {
+    border-color: rgba(82, 194, 52, 0.8);
+    box-shadow: 0 0 15px rgba(82, 194, 52, 0.4);
+  }
+  
+  /* Custom class for workout day visibility */
+  .workout-hidden {
+    display: none !important;
+  }
+  
+  .workout-visible {
+    display: block !important;
+  }
+</style>
+{% endblock %}
+```
+Now let's update the JavaScript to use the new CSS classes:
+
+```html:MyGeneticsApp/templates/tailwind_workout_direct.html
+  function showWorkout(day) {
+    console.log('showWorkout called with day:', day);
+    
+    // Hide all workout panels
+    const workoutPanels = document.querySelectorAll('.workout-day');
+    console.log('Found workout panels:', workoutPanels.length);
+    workoutPanels.forEach(panel => {
+      panel.classList.add('workout-hidden');
+      panel.classList.remove('workout-visible');
+    });
+    
+    // Remove active class from all buttons
+    const dayButtons = document.querySelectorAll('.day-button');
+    console.log('Found day buttons:', dayButtons.length);
+    dayButtons.forEach(button => {
+      button.classList.remove('active');
+    });
+    
+    // Show the selected day's workout
+    const selectedWorkout = document.getElementById(`workout-${day}`);
+    console.log('Selected workout element:', selectedWorkout ? 'Found' : 'Not found', 'for day:', day);
+    if (selectedWorkout) {
+      selectedWorkout.classList.remove('workout-hidden');
+      selectedWorkout.classList.add('workout-visible');
+    } else {
+      console.error(`Could not find workout element with ID: workout-${day}`);
+      // Try alternate selector as fallback
+      const altWorkout = document.querySelector(`.workout-day[data-day="${day}"]`);
+      if (altWorkout) {
+        console.log('Found workout using alternate selector');
+        altWorkout.classList.remove('workout-hidden');
+        altWorkout.classList.add('workout-visible');
+      }
+    }
+    
+    // Add active class to the clicked button
+    dayButtons.forEach(button => {
+      const buttonText = button.querySelector('.text-white.font-medium');
+      if (buttonText && buttonText.textContent.trim() === day) {
+        button.classList.add('active');
+      }
+    });
+    
+    // Scroll to the workout panel
+    const workoutToScroll = selectedWorkout || document.querySelector(`.workout-day[data-day="${day}"]`);
+    if (workoutToScroll) {
+      workoutToScroll.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+```
+Let's also update all the workout day elements to use our custom classes:
+
+```html:MyGeneticsApp/templates/tailwind_workout_direct.html
+        {% for day, workout in workout_plan.items() %}
+        <div id="workout-{{ day }}" data-day="{{ day }}" class="workout-day {{ workout.category }} bg-gray-800 rounded-xl shadow-lg overflow-hidden workout-hidden" data-aos="fade-up">
+```
+Let's update the initialization script to use the new classes:
+
+```html:MyGeneticsApp/templates/tailwind_workout_direct.html
+  // JavaScript to handle day selection and workout display
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, initializing workout buttons');
+    
+    // Make sure all workout panels are hidden initially
+    document.querySelectorAll('.workout-day').forEach(panel => {
+      panel.classList.add('workout-hidden');
+      panel.classList.remove('workout-visible');
+    });
+    
+    // Show the first day's workout by default
+    const firstDay = document.querySelector('.day-button');
+    if (firstDay) {
+      console.log('First day button found, activating it');
+      firstDay.classList.add('active');
+      const dayElement = firstDay.querySelector('.text-white.font-medium');
+      if (dayElement) {
+        const dayName = dayElement.textContent.trim();
+        console.log('Setting initial day to:', dayName);
+        showWorkout(dayName);
+      } else {
+        console.error('Could not find day name element in the button');
+      }
+    } else {
+      console.error('No day buttons found on the page');
+    }
+    
+    // Add click handlers to all buttons
+    document.querySelectorAll('.day-button').forEach(button => {
+      button.addEventListener('click', function() {
+        const dayElement = this.querySelector('.text-white.font-medium');
+        if (dayElement) {
+          const day = dayElement.textContent.trim();
+          console.log('Day button clicked:', day);
+          showWorkout(day);
+        }
+      });
+    });
+  });
+```
+The linter errors appear to be unrelated to our JavaScript changes. Let's make these final changes and push them to the repository:
+
+```bash
+cd MyGeneticsApp && git add templates/tailwind_workout_direct.html
+```
+We're already in the MyGeneticsApp directory, let's add the file directly:
+
+```bash
+git add templates/tailwind_workout_direct.html
+```
+Now let's commit the changes:
+
+```bash
+git commit -m "Fix workout day button functionality in tailwind_workout_direct.html"
+```
+Let's push the changes to GitHub:
+
+```bash
+git push
+```
