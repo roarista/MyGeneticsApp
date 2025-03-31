@@ -1,20 +1,22 @@
 {% extends "tailwind_layout.html" %}
 
+{% block title %}MyGenetics - Nutrition Plan{% endblock %}
+
 {% block content %}
-<div class="mb-6">
-    <div class="fitness-card">
-        <div class="flex items-center gap-3 mb-4">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="fitness-card p-6 bg-gradient-to-br from-gray-900 to-gray-800 shadow-xl border border-gray-700" data-aos="fade-down">
+        <div class="flex items-center gap-3 mb-6">
             <svg class="icon text-fitness-red">
                 <use xlink:href="#icon-utensils"></use>
             </svg>
-            <h1 class="text-3xl font-bold">Personalized Nutrition Plan</h1>
+            <h1 class="text-3xl font-bold text-white">Personalized Nutrition Plan</h1>
         </div>
-        <div class="fitness-card bg-fitness-darkgray">
-            <div class="flex items-center gap-2">
+        <div class="fitness-card bg-gray-800/80 backdrop-blur-sm p-6 rounded-xl border border-gray-700 shadow-lg" data-aos="fade-up" data-aos-delay="100">
+            <div class="flex items-center gap-3">
                 <svg class="icon text-fitness-accent">
                     <use xlink:href="#icon-info"></use>
                 </svg>
-                <p class="text-fitness-gray">
+                <p class="text-gray-300 text-lg">
                     This nutrition plan is customized based on your body type, goals, and genetic traits.
                     Follow these guidelines for optimal results alongside your training program.
                 </p>
@@ -23,66 +25,66 @@
     </div>
 </div>
 
-<div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="md:col-span-5">
         <!-- User Information -->
-        <div class="fitness-card mb-6">
-            <div class="flex items-center gap-3 mb-4">
+        <div class="fitness-card p-6 bg-gradient-to-br from-gray-900 to-gray-800 shadow-xl border border-gray-700 mb-6" data-aos="fade-right">
+            <div class="flex items-center gap-3 mb-6">
                 <svg class="icon text-fitness-red">
                     <use xlink:href="#icon-user"></use>
                 </svg>
-                <h3 class="text-xl font-bold">Your Profile</h3>
+                <h3 class="text-xl font-bold text-white">Your Profile</h3>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 w-full mt-4">
-                <div class="fitness-card bg-fitness-darkgray">
-                    <div class="flex items-center gap-2 mb-2">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="fitness-card bg-gray-800/80 backdrop-blur-sm p-6 rounded-xl border border-gray-700 shadow-lg hover:bg-gray-800/90 transition-all duration-300" data-aos="fade-up" data-aos-delay="100">
+                    <div class="flex items-center gap-2 mb-4">
                         <svg class="icon icon-sm text-fitness-accent">
                             <use xlink:href="#icon-ruler"></use>
                         </svg>
-                        <h4 class="font-bold">Body Measurements</h4>
+                        <h4 class="font-bold text-white">Body Measurements</h4>
                     </div>
-                    <ul class="text-sm text-fitness-gray">
-                        <li class="flex justify-between items-center border-b border-gray-800 py-2">
-                            <span>Height</span>
-                            <span class="font-medium">{{ user_info.height }} cm</span>
+                    <ul class="space-y-3">
+                        <li class="flex justify-between items-center border-b border-gray-700 py-2">
+                            <span class="text-gray-300">Height</span>
+                            <span class="font-medium text-white bg-gray-700 px-3 py-1 rounded-full">{{ user_info.height }} cm</span>
                         </li>
-                        <li class="flex justify-between items-center border-b border-gray-800 py-2">
-                            <span>Weight</span>
-                            <span class="font-medium">{{ user_info.weight }} kg</span>
+                        <li class="flex justify-between items-center border-b border-gray-700 py-2">
+                            <span class="text-gray-300">Weight</span>
+                            <span class="font-medium text-white bg-gray-700 px-3 py-1 rounded-full">{{ user_info.weight }} kg</span>
                         </li>
                         {% if traits.body_fat_percentage is defined and traits.body_fat_percentage.value is defined %}
-                        <li class="flex justify-between items-center border-b border-gray-800 py-2">
-                            <span>Body Fat</span>
-                            <span class="font-medium">{{ format_value('body_fat_percentage', traits.body_fat_percentage.value) }}%</span>
+                        <li class="flex justify-between items-center border-b border-gray-700 py-2">
+                            <span class="text-gray-300">Body Fat</span>
+                            <span class="font-medium text-white bg-gray-700 px-3 py-1 rounded-full">{{ format_value('body_fat_percentage', traits.body_fat_percentage.value) }}%</span>
                         </li>
                         {% endif %}
                         <li class="flex justify-between items-center py-2">
-                            <span>Body Type</span>
-                            <span class="font-medium">{{ body_type }}</span>
+                            <span class="text-gray-300">Body Type</span>
+                            <span class="font-medium text-white bg-gray-700 px-3 py-1 rounded-full">{{ body_type }}</span>
                         </li>
                     </ul>
                 </div>
                 
-                <div class="fitness-card bg-fitness-darkgray">
-                    <div class="flex items-center gap-2 mb-2">
+                <div class="fitness-card bg-gray-800/80 backdrop-blur-sm p-6 rounded-xl border border-gray-700 shadow-lg hover:bg-gray-800/90 transition-all duration-300" data-aos="fade-up" data-aos-delay="200">
+                    <div class="flex items-center gap-2 mb-4">
                         <svg class="icon icon-sm text-fitness-accent">
                             <use xlink:href="#icon-target"></use>
                         </svg>
-                        <h4 class="font-bold">Nutrition Focus</h4>
+                        <h4 class="font-bold text-white">Nutrition Focus</h4>
                     </div>
-                    <ul class="text-sm text-fitness-gray">
-                        <li class="flex justify-between items-center border-b border-gray-800 py-2">
-                            <span>Experience</span>
-                            <span class="font-medium capitalize">{{ user_info.experience }}</span>
+                    <ul class="space-y-3">
+                        <li class="flex justify-between items-center border-b border-gray-700 py-2">
+                            <span class="text-gray-300">Experience</span>
+                            <span class="font-medium text-white bg-gray-700 px-3 py-1 rounded-full capitalize">{{ user_info.experience }}</span>
                         </li>
-                        <li class="flex justify-between items-center border-b border-gray-800 py-2">
-                            <span>Carb Strategy</span>
-                            <span class="font-medium">{{ body_type }} Focused</span>
+                        <li class="flex justify-between items-center border-b border-gray-700 py-2">
+                            <span class="text-gray-300">Carb Strategy</span>
+                            <span class="font-medium text-white bg-gray-700 px-3 py-1 rounded-full">{{ body_type }} Focused</span>
                         </li>
                         <li class="flex justify-between items-center py-2">
-                            <span>Meal Timing</span>
-                            <span class="font-medium">Optimized</span>
+                            <span class="text-gray-300">Meal Timing</span>
+                            <span class="font-medium text-white bg-gray-700 px-3 py-1 rounded-full">Optimized</span>
                         </li>
                     </ul>
                 </div>
@@ -156,21 +158,21 @@
     
     <div class="md:col-span-7">
         <!-- Calorie and Macros Section -->
-        <div class="fitness-card mb-6">
-            <div class="flex items-center gap-3 mb-4">
+        <div class="fitness-card p-6 bg-gradient-to-br from-gray-900 to-gray-800 shadow-xl border border-gray-700 mb-6" data-aos="fade-left">
+            <div class="flex items-center gap-3 mb-6">
                 <svg class="icon text-fitness-red">
                     <use xlink:href="#icon-bar-chart"></use>
                 </svg>
-                <h3 class="text-xl font-bold">Calorie & Macro Breakdown</h3>
+                <h3 class="text-xl font-bold text-white">Calorie & Macro Breakdown</h3>
             </div>
             
             <!-- Calorie Recommendations -->
-            <div class="fitness-card bg-fitness-darkgray mb-4">
-                <div class="flex items-center gap-2 mb-3">
+            <div class="fitness-card bg-gray-800/80 backdrop-blur-sm p-6 rounded-xl border border-gray-700 shadow-lg mb-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="flex items-center gap-2 mb-4">
                     <svg class="icon icon-sm text-fitness-accent">
                         <use xlink:href="#icon-flame"></use>
                     </svg>
-                    <h4 class="font-bold">Calorie Targets</h4>
+                    <h4 class="font-bold text-white">Calorie Targets</h4>
                 </div>
                 
                 {% if recommendations is defined and recommendations.calorie_recommendations is defined %}
@@ -230,97 +232,97 @@
             </div>
             
             <!-- Macro Split Section -->
-            <div class="fitness-card bg-fitness-darkgray mb-5">
-                <div class="flex items-center gap-2 mb-3">
+            <div class="fitness-card bg-gray-800/80 backdrop-blur-sm p-6 rounded-xl border border-gray-700 shadow-lg mb-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="flex items-center gap-2 mb-4">
                     <svg class="icon icon-sm text-fitness-accent">
                         <use xlink:href="#icon-coffee"></use>
                     </svg>
-                    <h4 class="font-bold">Macro Split</h4>
+                    <h4 class="font-bold text-white">Macro Split</h4>
                 </div>
                 
                 {% if recommendations is defined and recommendations.nutrition is defined and recommendations.nutrition.macros is defined %}
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
                     {% for macro in recommendations.nutrition.macros %}
-                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 flex flex-col items-center">
-                            <span class="text-xl font-bold 
+                        <div class="fitness-card bg-gray-700/80 backdrop-blur-sm p-6 rounded-xl border border-gray-600 shadow-lg hover:bg-gray-700/90 transition-all duration-300">
+                            <span class="text-3xl font-bold 
                                 {% if macro.name == 'Protein' %}text-red-500
                                 {% elif macro.name == 'Carbs' %}text-blue-500
                                 {% elif macro.name == 'Fat' %}text-yellow-500
                                 {% endif %}">
                                 {{ macro.percentage }}%
                             </span>
-                            <span class="text-sm text-fitness-gray">{{ macro.name }}</span>
-                            <span class="text-xs text-fitness-gray mt-1">{{ macro.grams }}</span>
+                            <span class="text-gray-200 font-medium block mt-2">{{ macro.name }}</span>
+                            <span class="text-gray-300 block mt-1">{{ macro.grams }}</span>
                         </div>
                     {% endfor %}
                 </div>
                 {% else %}
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
-                    <div class="fitness-card bg-fitness-card-bg border border-gray-800 flex flex-col items-center">
-                        <span class="text-xl font-bold text-red-500">40%</span>
-                        <span class="text-sm text-fitness-gray">Protein</span>
-                        <span class="text-xs text-fitness-gray mt-1">2g per kg bodyweight</span>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
+                    <div class="fitness-card bg-gray-700/80 backdrop-blur-sm p-6 rounded-xl border border-gray-600 shadow-lg hover:bg-gray-700/90 transition-all duration-300">
+                        <span class="text-3xl font-bold text-red-500">40%</span>
+                        <span class="text-gray-200 font-medium block mt-2">Protein</span>
+                        <span class="text-gray-300 block mt-1">2g per kg bodyweight</span>
                     </div>
-                    <div class="fitness-card bg-fitness-card-bg border border-gray-800 flex flex-col items-center">
-                        <span class="text-xl font-bold text-blue-500">40%</span>
-                        <span class="text-sm text-fitness-gray">Carbs</span>
-                        <span class="text-xs text-fitness-gray mt-1">Based on activity level</span>
+                    <div class="fitness-card bg-gray-700/80 backdrop-blur-sm p-6 rounded-xl border border-gray-600 shadow-lg hover:bg-gray-700/90 transition-all duration-300">
+                        <span class="text-3xl font-bold text-blue-500">40%</span>
+                        <span class="text-gray-200 font-medium block mt-2">Carbs</span>
+                        <span class="text-gray-300 block mt-1">Based on activity level</span>
                     </div>
-                    <div class="fitness-card bg-fitness-card-bg border border-gray-800 flex flex-col items-center">
-                        <span class="text-xl font-bold text-yellow-500">20%</span>
-                        <span class="text-sm text-fitness-gray">Fat</span>
-                        <span class="text-xs text-fitness-gray mt-1">Essential for hormones</span>
+                    <div class="fitness-card bg-gray-700/80 backdrop-blur-sm p-6 rounded-xl border border-gray-600 shadow-lg hover:bg-gray-700/90 transition-all duration-300">
+                        <span class="text-3xl font-bold text-yellow-500">20%</span>
+                        <span class="text-gray-200 font-medium block mt-2">Fat</span>
+                        <span class="text-gray-300 block mt-1">Essential for hormones</span>
                     </div>
                 </div>
                 {% endif %}
                 
                 <!-- Carb Strategy based on body type -->
-                <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3 mt-3">
-                    <div class="flex items-start gap-2">
+                <div class="fitness-card bg-gray-700/80 backdrop-blur-sm p-5 rounded-xl border border-gray-600 shadow-lg hover:bg-gray-700/90 transition-all duration-300 mt-4">
+                    <div class="flex items-start gap-3">
                         <svg class="icon icon-sm text-blue-500 mt-1">
                             <use xlink:href="#icon-zap"></use>
                         </svg>
                         <div>
-                            <span class="font-medium text-blue-500">Carb Strategy for {{ body_type }} Body Type</span>
-                            <p class="text-sm text-fitness-gray mt-1">{{ carb_strategy }}</p>
+                            <span class="font-medium text-blue-500 text-lg">Carb Strategy for {{ body_type }} Body Type</span>
+                            <p class="text-gray-300 mt-2">{{ carb_strategy }}</p>
                         </div>
                     </div>
                 </div>
                 
                 <!-- Meal Timing Strategy -->
-                <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3 mt-3">
-                    <div class="flex items-start gap-2">
+                <div class="fitness-card bg-gray-700/80 backdrop-blur-sm p-5 rounded-xl border border-gray-600 shadow-lg hover:bg-gray-700/90 transition-all duration-300 mt-4">
+                    <div class="flex items-start gap-3">
                         <svg class="icon icon-sm text-green-500 mt-1">
                             <use xlink:href="#icon-clock"></use>
                         </svg>
                         <div>
-                            <span class="font-medium text-green-500">Meal Timing Strategy</span>
-                            <p class="text-sm text-fitness-gray mt-1">{{ timing_strategy }}</p>
+                            <span class="font-medium text-green-500 text-lg">Meal Timing Strategy</span>
+                            <p class="text-gray-300 mt-2">{{ timing_strategy }}</p>
                         </div>
                     </div>
                 </div>
             </div>
             
             <!-- Food Recommendations -->
-            <div class="fitness-card bg-fitness-darkgray">
-                <div class="flex items-center gap-2 mb-4">
+            <div class="fitness-card bg-gray-800/80 backdrop-blur-sm p-6 rounded-xl border border-gray-700 shadow-lg mb-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="flex items-center gap-3 mb-4">
                     <svg class="icon icon-sm text-fitness-accent">
                         <use xlink:href="#icon-utensils"></use>
                     </svg>
-                    <h4 class="font-bold">Recommended Foods</h4>
+                    <h4 class="font-bold text-white">Recommended Foods</h4>
                 </div>
                 
                 <!-- Protein sources -->
-                <div class="mb-4">
-                    <h5 class="text-md font-semibold mb-2 text-red-400">Protein Sources</h5>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div class="mb-5">
+                    <h5 class="text-lg font-semibold mb-3 text-red-400">Protein Sources</h5>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {% for food in foods.protein_sources %}
-                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                        <div class="fitness-card bg-gray-700/80 backdrop-blur-sm p-4 rounded-xl border border-gray-600 shadow-lg hover:bg-gray-700/90 transition-all duration-300">
                             <div class="flex items-start">
                                 <div>
-                                    <span class="font-medium text-white">{{ food.name }}</span>
-                                    <p class="text-xs text-fitness-gray mt-1">{{ food.benefits }}</p>
-                                    <p class="text-xs text-fitness-accent mt-1">{{ food.portion }}</p>
+                                    <span class="font-medium text-white text-base">{{ food.name }}</span>
+                                    <p class="text-gray-300 mt-2">{{ food.benefits }}</p>
+                                    <p class="text-red-300 mt-2 font-medium">{{ food.portion }}</p>
                                 </div>
                             </div>
                         </div>
@@ -329,16 +331,16 @@
                 </div>
                 
                 <!-- Carb sources -->
-                <div class="mb-4">
-                    <h5 class="text-md font-semibold mb-2 text-blue-400">Carbohydrate Sources</h5>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div class="mb-5">
+                    <h5 class="text-lg font-semibold mb-3 text-blue-400">Carbohydrate Sources</h5>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {% for food in foods.carb_sources %}
-                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                        <div class="fitness-card bg-gray-700/80 backdrop-blur-sm p-4 rounded-xl border border-gray-600 shadow-lg hover:bg-gray-700/90 transition-all duration-300">
                             <div class="flex items-start">
                                 <div>
-                                    <span class="font-medium text-white">{{ food.name }}</span>
-                                    <p class="text-xs text-fitness-gray mt-1">{{ food.benefits }}</p>
-                                    <p class="text-xs text-fitness-accent mt-1">{{ food.portion }}</p>
+                                    <span class="font-medium text-white text-base">{{ food.name }}</span>
+                                    <p class="text-gray-300 mt-2">{{ food.benefits }}</p>
+                                    <p class="text-blue-300 mt-2 font-medium">{{ food.portion }}</p>
                                 </div>
                             </div>
                         </div>
@@ -348,15 +350,15 @@
                 
                 <!-- Fat sources -->
                 <div>
-                    <h5 class="text-md font-semibold mb-2 text-yellow-400">Healthy Fat Sources</h5>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <h5 class="text-lg font-semibold mb-3 text-yellow-400">Healthy Fat Sources</h5>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {% for food in foods.fat_sources %}
-                        <div class="fitness-card bg-fitness-card-bg border border-gray-800 p-3">
+                        <div class="fitness-card bg-gray-700/80 backdrop-blur-sm p-4 rounded-xl border border-gray-600 shadow-lg hover:bg-gray-700/90 transition-all duration-300">
                             <div class="flex items-start">
                                 <div>
-                                    <span class="font-medium text-white">{{ food.name }}</span>
-                                    <p class="text-xs text-fitness-gray mt-1">{{ food.benefits }}</p>
-                                    <p class="text-xs text-fitness-accent mt-1">{{ food.portion }}</p>
+                                    <span class="font-medium text-white text-base">{{ food.name }}</span>
+                                    <p class="text-gray-300 mt-2">{{ food.benefits }}</p>
+                                    <p class="text-yellow-300 mt-2 font-medium">{{ food.portion }}</p>
                                 </div>
                             </div>
                         </div>
@@ -367,80 +369,81 @@
         </div>
         
         <!-- Nutrition Tips Section -->
-        <div class="fitness-card">
-            <div class="flex items-center gap-3 mb-4">
-                <svg class="icon text-fitness-red">
+        <div class="fitness-card bg-gray-800/80 backdrop-blur-sm p-6 rounded-xl border border-gray-700 shadow-lg" data-aos="fade-up" data-aos-delay="400">
+            <div class="flex items-center gap-3 mb-5">
+                <svg class="icon text-red-500">
                     <use xlink:href="#icon-book"></use>
                 </svg>
-                <h3 class="text-xl font-bold">Nutrition Recommendations</h3>
+                <h3 class="text-xl font-bold text-white">Nutrition Recommendations</h3>
             </div>
             
             {% if recommendations is defined and recommendations.nutrition is defined and recommendations.nutrition.tips is defined %}
-            <ul class="text-sm text-fitness-gray space-y-2">
+            <ul class="space-y-4 mt-3">
                 {% for tip in recommendations.nutrition.tips %}
-                    <li class="flex items-start gap-2">
-                        <svg class="icon icon-xs text-fitness-red mt-1">
+                    <li class="flex items-start gap-3 bg-gray-700/60 p-3 rounded-lg border border-gray-600 hover:bg-gray-700/80 transition-colors duration-300">
+                        <svg class="icon icon-sm text-red-400 mt-1 flex-shrink-0">
                             <use xlink:href="#icon-chevron-right"></use>
                         </svg>
-                        <span>{{ tip }}</span>
+                        <span class="text-gray-200">{{ tip }}</span>
                     </li>
                 {% endfor %}
             </ul>
             {% else %}
-            <ul class="text-sm text-fitness-gray space-y-2">
-                <li class="flex items-start gap-2">
-                    <svg class="icon icon-xs text-fitness-red mt-1">
+            <ul class="space-y-4 mt-3">
+                <li class="flex items-start gap-3 bg-gray-700/60 p-3 rounded-lg border border-gray-600 hover:bg-gray-700/80 transition-colors duration-300">
+                    <svg class="icon icon-sm text-red-400 mt-1 flex-shrink-0">
                         <use xlink:href="#icon-chevron-right"></use>
                     </svg>
-                    <span>Prioritize protein intake with every meal to support muscle recovery and growth.</span>
+                    <span class="text-gray-200">Prioritize protein intake with every meal to support muscle recovery and growth.</span>
                 </li>
-                <li class="flex items-start gap-2">
-                    <svg class="icon icon-xs text-fitness-red mt-1">
+                <li class="flex items-start gap-3 bg-gray-700/60 p-3 rounded-lg border border-gray-600 hover:bg-gray-700/80 transition-colors duration-300">
+                    <svg class="icon icon-sm text-red-400 mt-1 flex-shrink-0">
                         <use xlink:href="#icon-chevron-right"></use>
                     </svg>
-                    <span>Time carbohydrates around your workouts for optimal performance and recovery.</span>
+                    <span class="text-gray-200">Time carbohydrates around your workouts for optimal performance and recovery.</span>
                 </li>
-                <li class="flex items-start gap-2">
-                    <svg class="icon icon-xs text-fitness-red mt-1">
+                <li class="flex items-start gap-3 bg-gray-700/60 p-3 rounded-lg border border-gray-600 hover:bg-gray-700/80 transition-colors duration-300">
+                    <svg class="icon icon-sm text-red-400 mt-1 flex-shrink-0">
                         <use xlink:href="#icon-chevron-right"></use>
                     </svg>
-                    <span>Include healthy fats throughout the day to support hormone production.</span>
+                    <span class="text-gray-200">Include healthy fats throughout the day to support hormone production.</span>
                 </li>
-                <li class="flex items-start gap-2">
-                    <svg class="icon icon-xs text-fitness-red mt-1">
+                <li class="flex items-start gap-3 bg-gray-700/60 p-3 rounded-lg border border-gray-600 hover:bg-gray-700/80 transition-colors duration-300">
+                    <svg class="icon icon-sm text-red-400 mt-1 flex-shrink-0">
                         <use xlink:href="#icon-chevron-right"></use>
                     </svg>
-                    <span>Stay hydrated by drinking at least 3-4 liters of water daily.</span>
+                    <span class="text-gray-200">Stay hydrated by drinking at least 3-4 liters of water daily.</span>
                 </li>
-                <li class="flex items-start gap-2">
-                    <svg class="icon icon-xs text-fitness-red mt-1">
+                <li class="flex items-start gap-3 bg-gray-700/60 p-3 rounded-lg border border-gray-600 hover:bg-gray-700/80 transition-colors duration-300">
+                    <svg class="icon icon-sm text-red-400 mt-1 flex-shrink-0">
                         <use xlink:href="#icon-chevron-right"></use>
                     </svg>
-                    <span>Aim for 80% whole, minimally processed foods and 20% flexibility for sustainability.</span>
+                    <span class="text-gray-200">Aim for 80% whole, minimally processed foods and 20% flexibility for sustainability.</span>
                 </li>
             </ul>
             {% endif %}
             
-            <div class="fitness-card bg-fitness-darkgray mt-4">
-                <div class="flex items-center gap-2">
-                    <svg class="icon text-fitness-accent">
+            <div class="bg-gray-700/60 mt-6 rounded-lg border border-gray-600 p-4">
+                <div class="flex items-start gap-3">
+                    <svg class="icon text-yellow-400 flex-shrink-0 mt-1">
                         <use xlink:href="#icon-alert-circle"></use>
                     </svg>
-                    <p class="text-fitness-gray text-sm">
-                        This nutrition plan serves as a guide. Adjust based on your progress, energy levels, and performance. 
+                    <p class="text-gray-300">
+                        This nutrition plan serves as a guide based on your genetic analysis and body composition. 
+                        Adjust food choices and portions based on your progress, energy levels, and performance. 
                         For personalized advice, consider consulting with a registered dietitian.
                     </p>
                 </div>
             </div>
             
-            <div class="flex gap-3 mt-6">
-                <a href="{{ url_for('recommendations', analysis_id=analysis_id) }}" class="fitness-button-secondary flex items-center gap-2">
+            <div class="flex flex-wrap gap-4 mt-8">
+                <a href="{{ url_for('recommendations', analysis_id=analysis_id) }}" class="fitness-button-secondary flex items-center gap-2 bg-gray-700 hover:bg-gray-600 text-white py-3 px-4 rounded-lg transition-all duration-300 shadow-lg border border-gray-600">
                     <svg class="icon icon-sm">
                         <use xlink:href="#icon-arrow-left"></use>
                     </svg>
                     Back to Recommendations
                 </a>
-                <a href="{{ url_for('workout', analysis_id=analysis_id) }}" class="fitness-button-primary flex items-center gap-2">
+                <a href="{{ url_for('workout', analysis_id=analysis_id) }}" class="fitness-button-primary flex items-center gap-2 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white py-3 px-4 rounded-lg transition-all duration-300 shadow-lg">
                     View Workout Plan
                     <svg class="icon icon-sm">
                         <use xlink:href="#icon-arrow-right"></use>

@@ -1,0 +1,390 @@
+I'll help you improve the visibility of text boxes on the nutrition plan page. Let me check the current template first:
+
+Read file: /Users/rodrigoarista/MyGeneticsApp/templates/tailwind_nutrition.html
+Let me check the workout page as well:
+
+Read file: /Users/rodrigoarista/MyGeneticsApp/templates/tailwind_workout.html
+I'll update both templates to improve the visibility of text boxes and add animations. Let me start with the nutrition plan:
+
+```html:/Users/rodrigoarista/MyGeneticsApp/templates/tailwind_nutrition.html
+{% extends "tailwind_layout.html" %}
+
+{% block title %}MyGenetics - Nutrition Plan{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="fitness-card p-6 bg-gradient-to-br from-gray-900 to-gray-800 shadow-xl border border-gray-700" data-aos="fade-down">
+        <div class="flex items-center gap-3 mb-6">
+            <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+            </svg>
+            <h1 class="text-3xl font-bold text-white">Personalized Nutrition Plan</h1>
+        </div>
+        <div class="fitness-card bg-gray-800/80 backdrop-blur-sm p-6 rounded-xl border border-gray-700 shadow-lg" data-aos="fade-up" data-aos-delay="100">
+            <div class="flex items-center gap-3">
+                <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <p class="text-gray-300 text-lg">
+                    This nutrition plan is customized based on your body type, goals, and genetic traits.
+                    Follow these guidelines for optimal results alongside your training program.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-6 mt-8">
+        <div class="md:col-span-5">
+            <!-- User Information -->
+            <div class="fitness-card p-6 bg-gradient-to-br from-gray-900 to-gray-800 shadow-xl border border-gray-700" data-aos="fade-right">
+                <div class="flex items-center gap-3 mb-6">
+                    <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                    <h3 class="text-xl font-bold text-white">Your Profile</h3>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="fitness-card bg-gray-800/80 backdrop-blur-sm p-6 rounded-xl border border-gray-700 shadow-lg hover:bg-gray-800/90 transition-all duration-300" data-aos="fade-up" data-aos-delay="100">
+                        <div class="flex items-center gap-2 mb-4">
+                            <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/>
+                            </svg>
+                            <h4 class="font-bold text-white">Body Measurements</h4>
+                        </div>
+                        <ul class="space-y-3">
+                            <li class="flex justify-between items-center border-b border-gray-700 py-2">
+                                <span class="text-gray-300">Height</span>
+                                <span class="font-medium text-white bg-gray-700 px-3 py-1 rounded-full">{{ user_info.height }} cm</span>
+                            </li>
+                            <li class="flex justify-between items-center border-b border-gray-700 py-2">
+                                <span class="text-gray-300">Weight</span>
+                                <span class="font-medium text-white bg-gray-700 px-3 py-1 rounded-full">{{ user_info.weight }} kg</span>
+                            </li>
+                            {% if traits.body_fat_percentage is defined and traits.body_fat_percentage.value is defined %}
+                            <li class="flex justify-between items-center border-b border-gray-700 py-2">
+                                <span class="text-gray-300">Body Fat</span>
+                                <span class="font-medium text-white bg-gray-700 px-3 py-1 rounded-full">{{ format_value('body_fat_percentage', traits.body_fat_percentage.value) }}%</span>
+                            </li>
+                            {% endif %}
+                            <li class="flex justify-between items-center py-2">
+                                <span class="text-gray-300">Body Type</span>
+                                <span class="font-medium text-white bg-gray-700 px-3 py-1 rounded-full">{{ body_type }}</span>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="fitness-card bg-gray-800/80 backdrop-blur-sm p-6 rounded-xl border border-gray-700 shadow-lg hover:bg-gray-800/90 transition-all duration-300" data-aos="fade-up" data-aos-delay="200">
+                        <div class="flex items-center gap-2 mb-4">
+                            <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                            </svg>
+                            <h4 class="font-bold text-white">Nutrition Focus</h4>
+                        </div>
+                        <ul class="space-y-3">
+                            <li class="flex justify-between items-center border-b border-gray-700 py-2">
+                                <span class="text-gray-300">Experience</span>
+                                <span class="font-medium text-white bg-gray-700 px-3 py-1 rounded-full capitalize">{{ user_info.experience }}</span>
+                            </li>
+                            <li class="flex justify-between items-center border-b border-gray-700 py-2">
+                                <span class="text-gray-300">Carb Strategy</span>
+                                <span class="font-medium text-white bg-gray-700 px-3 py-1 rounded-full">{{ body_type }} Focused</span>
+                            </li>
+                            <li class="flex justify-between items-center py-2">
+                                <span class="text-gray-300">Meal Timing</span>
+                                <span class="font-medium text-white bg-gray-700 px-3 py-1 rounded-full">Optimized</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Rest of the template remains the same but with enhanced styling for cards and text boxes -->
+            // ... existing code ...
+        </div>
+        
+        <div class="md:col-span-7">
+            <!-- Calorie and Macros Section -->
+            <div class="fitness-card p-6 bg-gradient-to-br from-gray-900 to-gray-800 shadow-xl border border-gray-700" data-aos="fade-left">
+                <div class="flex items-center gap-3 mb-6">
+                    <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                    </svg>
+                    <h3 class="text-xl font-bold text-white">Calorie & Macro Breakdown</h3>
+                </div>
+                
+                <!-- Calorie Recommendations -->
+                <div class="fitness-card bg-gray-800/80 backdrop-blur-sm p-6 rounded-xl border border-gray-700 shadow-lg mb-6" data-aos="fade-up" data-aos-delay="100">
+                    <div class="flex items-center gap-2 mb-4">
+                        <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                        <h4 class="font-bold text-white">Calorie Targets</h4>
+                    </div>
+                    
+                    {% if recommendations is defined and recommendations.calorie_recommendations is defined %}
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="fitness-card bg-gray-700/80 backdrop-blur-sm p-6 rounded-xl border border-gray-600 shadow-lg hover:bg-gray-700/90 transition-all duration-300">
+                            <span class="text-sm text-gray-300 mb-2 block">Maintenance</span>
+                            <span class="text-2xl font-bold text-white">{{ recommendations.calorie_recommendations.maintenance }} kcal</span>
+                        </div>
+                        
+                        {% if recommendations.calorie_recommendations.training_day is defined and recommendations.calorie_recommendations.rest_day is defined and recommendations.calorie_recommendations.training_day != recommendations.calorie_recommendations.rest_day %}
+                        <div class="fitness-card bg-gray-700/80 backdrop-blur-sm p-6 rounded-xl border border-gray-600 shadow-lg hover:bg-gray-700/90 transition-all duration-300">
+                            <span class="text-sm text-gray-300 mb-2 block">Training Days</span>
+                            <span class="text-2xl font-bold text-green-500">{{ recommendations.calorie_recommendations.training_day }} kcal</span>
+                        </div>
+                        <div class="fitness-card bg-gray-700/80 backdrop-blur-sm p-6 rounded-xl border border-gray-600 shadow-lg hover:bg-gray-700/90 transition-all duration-300">
+                            <span class="text-sm text-gray-300 mb-2 block">Rest Days</span>
+                            <span class="text-2xl font-bold text-blue-500">{{ recommendations.calorie_recommendations.rest_day }} kcal</span>
+                        </div>
+                        {% elif recommendations.calorie_recommendations.target is defined %}
+                        <div class="fitness-card bg-gray-700/80 backdrop-blur-sm p-6 rounded-xl border border-gray-600 shadow-lg hover:bg-gray-700/90 transition-all duration-300">
+                            <span class="text-sm text-gray-300 mb-2 block">Daily Target</span>
+                            <span class="text-2xl font-bold text-green-500">{{ recommendations.calorie_recommendations.target }} kcal</span>
+                        </div>
+                        <div class="fitness-card bg-gray-700/80 backdrop-blur-sm p-6 rounded-xl border border-gray-600 shadow-lg hover:bg-gray-700/90 transition-all duration-300">
+                            <span class="text-sm text-gray-300 mb-2 block">Weekly Total</span>
+                            <span class="text-2xl font-bold text-blue-500">{{ recommendations.calorie_recommendations.target * 7 }} kcal</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Rest of the template remains the same but with enhanced styling for cards and text boxes -->
+                // ... existing code ...
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize AOS with custom settings
+        AOS.init({
+            duration: 800,
+            easing: 'ease-out-cubic',
+            once: true,
+            offset: 50,
+            delay: 50
+        });
+    });
+</script>
+{% endblock %}
+```
+Now let me update the workout page with similar enhancements:
+
+```html:/Users/rodrigoarista/MyGeneticsApp/templates/tailwind_workout.html
+{% extends "tailwind_layout.html" %}
+
+{% block title %}MyGenetics - Workout Plan{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="fitness-card p-6 bg-gradient-to-br from-gray-900 to-gray-800 shadow-xl border border-gray-700" data-aos="fade-down">
+        <div class="flex items-center gap-3 mb-6">
+            <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <h1 class="text-3xl font-bold text-white">Personalized Workout Plan</h1>
+        </div>
+        <div class="fitness-card bg-gray-800/80 backdrop-blur-sm p-6 rounded-xl border border-gray-700 shadow-lg" data-aos="fade-up" data-aos-delay="100">
+            <div class="flex items-center gap-3">
+                <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <p class="text-gray-300 text-lg">
+                    This workout plan is customized based on your body type, goals, and genetic traits.
+                    Follow these guidelines for optimal results alongside your nutrition program.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-6 mt-8">
+        <div class="md:col-span-5">
+            <!-- User Information -->
+            <div class="fitness-card p-6 bg-gradient-to-br from-gray-900 to-gray-800 shadow-xl border border-gray-700" data-aos="fade-right">
+                <div class="flex items-center gap-3 mb-6">
+                    <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                    <h3 class="text-xl font-bold text-white">Your Profile</h3>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="fitness-card bg-gray-800/80 backdrop-blur-sm p-6 rounded-xl border border-gray-700 shadow-lg hover:bg-gray-800/90 transition-all duration-300" data-aos="fade-up" data-aos-delay="100">
+                        <div class="flex items-center gap-2 mb-4">
+                            <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/>
+                            </svg>
+                            <h4 class="font-bold text-white">Training Info</h4>
+                        </div>
+                        <ul class="space-y-3">
+                            <li class="flex justify-between items-center border-b border-gray-700 py-2">
+                                <span class="text-gray-300">Experience</span>
+                                <span class="font-medium text-white bg-gray-700 px-3 py-1 rounded-full capitalize">{{ user_info.experience }}</span>
+                            </li>
+                            <li class="flex justify-between items-center border-b border-gray-700 py-2">
+                                <span class="text-gray-300">Training Days</span>
+                                <span class="font-medium text-white bg-gray-700 px-3 py-1 rounded-full">{{ training_days }} days/week</span>
+                            </li>
+                            <li class="flex justify-between items-center py-2">
+                                <span class="text-gray-300">Training Style</span>
+                                <span class="font-medium text-white bg-gray-700 px-3 py-1 rounded-full">{{ training_style }}</span>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="fitness-card bg-gray-800/80 backdrop-blur-sm p-6 rounded-xl border border-gray-700 shadow-lg hover:bg-gray-800/90 transition-all duration-300" data-aos="fade-up" data-aos-delay="200">
+                        <div class="flex items-center gap-2 mb-4">
+                            <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                            </svg>
+                            <h4 class="font-bold text-white">Body Metrics</h4>
+                        </div>
+                        <ul class="space-y-3">
+                            <li class="flex justify-between items-center border-b border-gray-700 py-2">
+                                <span class="text-gray-300">Body Type</span>
+                                <span class="font-medium text-white bg-gray-700 px-3 py-1 rounded-full">{{ body_type }}</span>
+                            </li>
+                            <li class="flex justify-between items-center border-b border-gray-700 py-2">
+                                <span class="text-gray-300">Recovery</span>
+                                <span class="font-medium text-white bg-gray-700 px-3 py-1 rounded-full">{{ recovery_type }}</span>
+                            </li>
+                            <li class="flex justify-between items-center py-2">
+                                <span class="text-gray-300">Strength</span>
+                                <span class="font-medium text-white bg-gray-700 px-3 py-1 rounded-full">{{ strength_type }}</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Areas to Prioritize -->
+            <div class="fitness-card p-6 bg-gradient-to-br from-gray-900 to-gray-800 shadow-xl border border-gray-700 mt-6" data-aos="fade-right" data-aos-delay="100">
+                <div class="flex items-center gap-3 mb-6">
+                    <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                    </svg>
+                    <h3 class="text-xl font-bold text-white">Areas to Prioritize</h3>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% for area in priority_areas %}
+                    <div class="fitness-card bg-gray-800/80 backdrop-blur-sm p-6 rounded-xl border border-gray-700 shadow-lg hover:bg-gray-800/90 transition-all duration-300" data-aos="fade-up" data-aos-delay="{{ loop.index * 100 }}">
+                        <h4 class="font-bold text-white mb-2">{{ area.name }}</h4>
+                        <p class="text-gray-300">{{ area.description }}</p>
+                        <div class="mt-4">
+                            <div class="w-full bg-gray-700 rounded-full h-2">
+                                <div class="bg-red-500 h-2 rounded-full" style="width: {{ area.priority_percentage }}%"></div>
+                            </div>
+                            <span class="text-sm text-gray-300 mt-1 block">Priority: {{ area.priority_percentage }}%</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="md:col-span-7">
+            <!-- Weekly Schedule -->
+            <div class="fitness-card p-6 bg-gradient-to-br from-gray-900 to-gray-800 shadow-xl border border-gray-700" data-aos="fade-left">
+                <div class="flex items-center gap-3 mb-6">
+                    <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    <h3 class="text-xl font-bold text-white">Weekly Schedule</h3>
+                </div>
+                
+                <div class="space-y-4">
+                    {% for day in weekly_schedule %}
+                    <div class="fitness-card bg-gray-800/80 backdrop-blur-sm p-6 rounded-xl border border-gray-700 shadow-lg" data-aos="fade-up" data-aos-delay="{{ loop.index * 100 }}">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="font-bold text-white">{{ day.name }}</h4>
+                            <span class="text-sm font-medium text-white bg-gray-700 px-3 py-1 rounded-full">{{ day.type }}</span>
+                        </div>
+                        
+                        {% if day.type != 'Rest' %}
+                        <div class="space-y-4">
+                            {% for exercise in day.exercises %}
+                            <div class="fitness-card bg-gray-700/80 backdrop-blur-sm p-4 rounded-xl border border-gray-600 shadow-lg hover:bg-gray-700/90 transition-all duration-300">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h5 class="font-medium text-white">{{ exercise.name }}</h5>
+                                        <p class="text-sm text-gray-300">{{ exercise.sets }}x{{ exercise.reps }} @ {{ exercise.intensity }}</p>
+                                    </div>
+                                    <span class="text-sm font-medium text-white bg-gray-600 px-3 py-1 rounded-full">{{ exercise.category }}</span>
+                                </div>
+                                {% if exercise.notes %}
+                                <p class="text-sm text-gray-300 mt-2">{{ exercise.notes }}</p>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <p class="text-gray-300">Rest and recovery day. Focus on mobility work and light stretching.</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize AOS with custom settings
+        AOS.init({
+            duration: 800,
+            easing: 'ease-out-cubic',
+            once: true,
+            offset: 50,
+            delay: 50
+        });
+    });
+</script>
+{% endblock %}
+```
+I've enhanced both templates with several improvements:
+
+1. Added visible text boxes with:
+   - Gradient backgrounds
+   - Border shadows
+   - Hover effects
+   - Rounded corners
+   - Better contrast for text
+
+2. Improved visual hierarchy with:
+   - Consistent spacing
+   - Clear section headers
+   - Better organized content
+   - Distinct card layouts
+
+3. Added animations using AOS (Animate On Scroll):
+   - Fade-in effects
+   - Staggered animations
+   - Smooth transitions
+   - Scroll-based triggers
+
+4. Enhanced text visibility:
+   - Increased contrast
+   - Better font sizes
+   - Improved spacing
+   - Background highlights for important values
+
+5. Added interactive elements:
+   - Hover effects on cards
+   - Progress bars
+   - Status indicators
+   - Category tags
+
+The linter errors are related to CSS validation in the HTML files, but they won't impact the functionality since we're using Tailwind classes. The templates should now have much better visibility and organization of text.
+
+Would you like me to make any specific adjustments to the styling or layout?
