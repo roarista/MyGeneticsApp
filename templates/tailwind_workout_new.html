@@ -332,22 +332,37 @@
 
 <script>
   // JavaScript to handle day selection and workout display
-  window.onload = function() {
-    console.log('Window loaded - initializing workout selector');
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM Content Loaded - initializing workout selector');
     initWorkoutSelector();
-  };
+    
+    // Initialize AOS animations
+    if (typeof AOS !== 'undefined') {
+      AOS.init({
+        duration: 800,
+        easing: 'ease-out-cubic',
+        once: true,
+        offset: 50,
+        delay: 50
+      });
+    }
+  });
 
   function initWorkoutSelector() {
+    // Debug information
+    console.log('Workout plan days:', document.querySelectorAll('.day-button').length);
+    console.log('Workout panels:', document.querySelectorAll('[id^="workout-"]').length);
+    
     // Show the first day's workout by default
     const firstDay = document.querySelector('.day-button');
     if (firstDay) {
-      console.log('First day found:', firstDay);
+      console.log('First day found:', firstDay.dataset.day);
       firstDay.classList.add('active');
-      const dayName = firstDay.dataset.day || firstDay.querySelector('.text-white.font-medium').textContent;
+      const dayName = firstDay.dataset.day;
       console.log('Setting active day:', dayName);
       showWorkout(dayName);
     } else {
-      console.log('No day buttons found');
+      console.error('No day buttons found - check template rendering');
     }
     
     // Add click event listeners to all day buttons
@@ -355,52 +370,68 @@
     console.log('Total day buttons found:', allDayButtons.length);
     
     allDayButtons.forEach(button => {
-      button.style.cursor = 'pointer'; // Ensure cursor shows it's clickable
+      // Ensure styling shows it's clickable
+      button.style.cursor = 'pointer';
       
-      button.addEventListener('click', function(e) {
-        e.preventDefault();
+      // Remove any existing event listeners (prevent duplicates)
+      const newButton = button.cloneNode(true);
+      button.parentNode.replaceChild(newButton, button);
+      
+      // Add click event listener
+      newButton.addEventListener('click', function(e) {
+        e.stopPropagation();
         const day = this.dataset.day;
         console.log('Button clicked for day:', day);
         showWorkout(day);
-        return false;
       });
     });
   }
   
   function showWorkout(day) {
-    console.log('showWorkout called for day:', day);
-    
-    // Hide all workout panels
-    const workoutPanels = document.querySelectorAll('[id^="workout-"]');
-    console.log('Found workout panels:', workoutPanels.length);
-    workoutPanels.forEach(panel => {
-      panel.classList.add('hidden');
-    });
-    
-    // Remove active class from all buttons
-    const dayButtons = document.querySelectorAll('.day-button');
-    dayButtons.forEach(button => {
-      button.classList.remove('active');
-    });
-    
-    // Show the selected day's workout
-    const selectedWorkout = document.getElementById(`workout-${day}`);
-    console.log('Selected workout element:', selectedWorkout ? 'found' : 'not found');
-    if (selectedWorkout) {
-      selectedWorkout.classList.remove('hidden');
+    if (!day) {
+      console.error('No day specified for showWorkout');
+      return;
     }
     
-    // Add active class to the clicked button
-    dayButtons.forEach(button => {
-      const buttonDay = button.dataset.day;
-      if (buttonDay === day) {
-        button.classList.add('active');
-      }
-    });
+    console.log('showWorkout called for day:', day);
     
-    // Scroll to the workout panel
-    if (selectedWorkout) {
-      selectedWorkout.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    try {
+      // Hide all workout panels
+      const workoutPanels = document.querySelectorAll('[id^="workout-"]');
+      console.log('Found workout panels:', workoutPanels.length);
+      workoutPanels.forEach(panel => {
+        panel.classList.add('hidden');
+      });
+      
+      // Remove active class from all buttons
+      const dayButtons = document.querySelectorAll('.day-button');
+      dayButtons.forEach(button => {
+        button.classList.remove('active');
+      });
+      
+      // Show the selected day's workout
+      const selectedWorkout = document.getElementById(`workout-${day}`);
+      console.log('Selected workout element:', selectedWorkout ? 'found' : 'not found');
+      if (selectedWorkout) {
+        selectedWorkout.classList.remove('hidden');
+        
+        // Scroll to the workout panel with a small delay to ensure animations complete
+        setTimeout(() => {
+          selectedWorkout.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+      } else {
+        console.error(`Workout panel not found for day: ${day}`);
+      }
+      
+      // Add active class to the clicked button
+      dayButtons.forEach(button => {
+        const buttonDay = button.dataset.day;
+        if (buttonDay === day) {
+          button.classList.add('active');
+        }
+      });
+    } catch (error) {
+      console.error('Error in showWorkout function:', error);
     }
   }
 </script>
