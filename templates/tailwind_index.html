@@ -139,46 +139,86 @@
         </div>
         
         <div id="analyze" class="border border-gray-700 rounded-lg p-6 mb-6 hover:border-red-500 transition-all">
-          <form action="{{ url_for('analyze') }}" method="POST" enctype="multipart/form-data">
-            <div class="mb-4">
-              <label for="file" class="block mb-2 font-medium">Upload a full body photo:</label>
-              <input type="file" name="file" id="file" accept=".jpg,.jpeg,.png" class="w-full p-2 border border-gray-700 rounded bg-gray-800 text-white" required>
-              <p class="text-sm text-gray-400 mt-2">Please upload a clear, full-body photo in good lighting</p>
+          <form id="analysisForm" action="{{ url_for('analyze') }}" method="post" enctype="multipart/form-data">
+            <!-- Photo Upload Section -->
+            <div class="mb-6">
+              <label for="file" class="block mb-2 font-medium">Upload Your Photo</label>
+              <div class="p-6 border-2 border-dashed border-gray-700 rounded-lg bg-gray-800/50 hover:bg-gray-800 hover:border-red-500 transition-all text-center cursor-pointer" id="drop-area">
+                <input type="file" name="file" id="file" class="hidden" accept="image/png, image/jpeg, image/jpg" required>
+                <div class="flex flex-col items-center justify-center">
+                  <i class="fas fa-camera text-3xl text-gray-500 mb-3"></i>
+                  <p class="text-gray-400 mb-2">Drag and drop your photo here or</p>
+                  <button type="button" id="browse-button" class="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-white text-sm font-medium transition-colors">
+                    Browse Files
+                  </button>
+                  <p class="text-sm text-gray-500 mt-3" id="file-name">No file selected</p>
+                  <div id="preview-container" class="hidden mt-4">
+                    <img id="preview-image" class="max-h-48 mx-auto rounded" src="#" alt="Your uploaded image">
+                  </div>
+                </div>
+              </div>
+              <p class="text-sm text-gray-400 mt-2">Upload a clear, full-body photo in a neutral standing position.</p>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <div>
-                <label for="height" class="block mb-2 font-medium">Height (cm):</label>
-                <input type="number" name="height" id="height" min="120" max="220" class="w-full p-2 border border-gray-700 rounded bg-gray-800 text-white" placeholder="170">
+            <!-- Personal Information Section -->
+            <div class="mb-6 bg-gray-800 p-4 rounded-lg">
+              <div class="flex items-center gap-2 mb-4">
+                <i class="fas fa-ruler text-red-500"></i>
+                <h4 class="font-bold">Body Measurements</h4>
               </div>
-              <div>
-                <label for="weight" class="block mb-2 font-medium">Weight (kg):</label>
-                <input type="number" name="weight" id="weight" min="40" max="180" class="w-full p-2 border border-gray-700 rounded bg-gray-800 text-white" placeholder="70">
+              <p class="text-gray-400 mb-4">Providing your measurements enables advanced analysis including body composition estimates and genetic potential assessment.</p>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label for="height" class="block text-gray-300 mb-2">Height (cm)</label>
+                  <input type="number" name="height" id="height" min="120" max="220" class="w-full p-2 border border-gray-700 rounded bg-gray-800/50 text-white" placeholder="170" required>
+                </div>
+                <div>
+                  <label for="weight" class="block text-gray-300 mb-2">Weight (kg)</label>
+                  <input type="number" name="weight" id="weight" min="40" max="180" class="w-full p-2 border border-gray-700 rounded bg-gray-800/50 text-white" placeholder="70" required>
+                </div>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div>
+                  <label for="gender" class="block text-gray-300 mb-2">Gender</label>
+                  <select name="gender" id="gender" class="w-full p-2 border border-gray-700 rounded bg-gray-800/50 text-white" required>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="experience" class="block text-gray-300 mb-2">Experience Level</label>
+                  <select name="experience" id="experience" class="w-full p-2 border border-gray-700 rounded bg-gray-800/50 text-white" required>
+                    <option value="beginner">Beginner (0-1 years)</option>
+                    <option value="intermediate">Intermediate (1-3 years)</option>
+                    <option value="advanced">Advanced (3-5 years)</option>
+                    <option value="expert">Expert (5+ years)</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div class="mt-4">
+                <fieldset>
+                  <legend class="block text-gray-300 mb-2">Measurement System</legend>
+                  <div class="flex space-x-6">
+                    <div class="flex items-center">
+                      <input id="metric" name="measurement_system" type="radio" value="metric" checked
+                             class="focus:ring-red-500 h-4 w-4 text-red-600 border-gray-300">
+                      <label for="metric" class="ml-2 block text-sm text-gray-300">Metric (cm/kg)</label>
+                    </div>
+                    <div class="flex items-center">
+                      <input id="imperial" name="measurement_system" type="radio" value="imperial"
+                             class="focus:ring-red-500 h-4 w-4 text-red-600 border-gray-300">
+                      <label for="imperial" class="ml-2 block text-sm text-gray-300">Imperial (in/lbs)</label>
+                    </div>
+                  </div>
+                </fieldset>
               </div>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <div>
-                <label for="gender" class="block mb-2 font-medium">Gender:</label>
-                <select name="gender" id="gender" class="w-full p-2 border border-gray-700 rounded bg-gray-800 text-white">
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                </select>
-              </div>
-              <div>
-                <label for="experience" class="block mb-2 font-medium">Training Experience:</label>
-                <select name="experience" id="experience" class="w-full p-2 border border-gray-700 rounded bg-gray-800 text-white">
-                  <option value="beginner">Beginner (0-1 years)</option>
-                  <option value="intermediate">Intermediate (1-3 years)</option>
-                  <option value="advanced">Advanced (3-5 years)</option>
-                  <option value="expert">Expert (5+ years)</option>
-                </select>
-              </div>
-            </div>
-            
-            <button type="submit" class="btn-primary w-full">
+            <button type="submit" class="btn-primary w-full py-3 flex items-center justify-center gap-2">
               <i class="fas fa-dna mr-2"></i>
-              Analyze My Genetics
+              <span>Analyze My Genetics</span>
             </button>
           </form>
         </div>
@@ -260,4 +300,169 @@
     </div>
   </div>
 </section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialize AOS animations
+    AOS.init({
+      duration: 1000,
+      once: true,
+      offset: 50
+    });
+    
+    // File upload functionality
+    const fileInput = document.getElementById('file');
+    const dropArea = document.getElementById('drop-area');
+    const browseButton = document.getElementById('browse-button');
+    const fileNameDisplay = document.getElementById('file-name');
+    const previewContainer = document.getElementById('preview-container');
+    const previewImage = document.getElementById('preview-image');
+    
+    // Trigger file input when browse button is clicked
+    if (browseButton) {
+      browseButton.addEventListener('click', function() {
+        fileInput.click();
+      });
+    }
+    
+    // Update filename display and show preview when file is selected
+    if (fileInput) {
+      fileInput.addEventListener('change', function() {
+        if (fileInput.files.length > 0) {
+          const file = fileInput.files[0];
+          fileNameDisplay.textContent = file.name;
+          fileNameDisplay.classList.add('text-red-500');
+          dropArea.classList.add('border-red-500');
+          
+          // Show image preview
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            previewImage.src = e.target.result;
+            previewContainer.classList.remove('hidden');
+          }
+          reader.readAsDataURL(file);
+        } else {
+          fileNameDisplay.textContent = 'No file selected';
+          fileNameDisplay.classList.remove('text-red-500');
+          dropArea.classList.remove('border-red-500');
+          previewContainer.classList.add('hidden');
+        }
+      });
+    }
+    
+    // Drag and drop functionality
+    if (dropArea) {
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, preventDefaults, false);
+      });
+      
+      function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      
+      ['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, highlight, false);
+      });
+      
+      ['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, unhighlight, false);
+      });
+      
+      function highlight() {
+        dropArea.classList.add('bg-gray-800', 'border-red-500');
+      }
+      
+      function unhighlight() {
+        dropArea.classList.remove('bg-gray-800');
+        if (!fileInput.files.length) {
+          dropArea.classList.remove('border-red-500');
+        }
+      }
+      
+      dropArea.addEventListener('drop', handleDrop, false);
+      
+      function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        
+        if (files.length > 0) {
+          fileInput.files = files;
+          fileNameDisplay.textContent = files[0].name;
+          fileNameDisplay.classList.add('text-red-500');
+          
+          // Show image preview
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            previewImage.src = e.target.result;
+            previewContainer.classList.remove('hidden');
+          }
+          reader.readAsDataURL(files[0]);
+        }
+      }
+    }
+    
+    // Unit conversion for measurement system
+    const metricRadio = document.getElementById('metric');
+    const imperialRadio = document.getElementById('imperial');
+    const heightInput = document.getElementById('height');
+    const weightInput = document.getElementById('weight');
+    
+    if (metricRadio && imperialRadio && heightInput && weightInput) {
+      function updateLabels() {
+        const heightLabel = document.querySelector('label[for="height"]');
+        const weightLabel = document.querySelector('label[for="weight"]');
+        
+        if (metricRadio.checked) {
+          heightLabel.textContent = 'Height (cm)';
+          weightLabel.textContent = 'Weight (kg)';
+          heightInput.placeholder = '170';
+          weightInput.placeholder = '70';
+          heightInput.min = '120';
+          heightInput.max = '220';
+          weightInput.min = '40';
+          weightInput.max = '180';
+        } else {
+          heightLabel.textContent = 'Height (in)';
+          weightLabel.textContent = 'Weight (lbs)';
+          heightInput.placeholder = '67';
+          weightInput.placeholder = '154';
+          heightInput.min = '48';
+          heightInput.max = '87';
+          weightInput.min = '88';
+          weightInput.max = '400';
+        }
+      }
+      
+      // Add event listeners for unit change
+      metricRadio.addEventListener('change', updateLabels);
+      imperialRadio.addEventListener('change', updateLabels);
+      
+      // Initialize with correct units
+      updateLabels();
+      
+      // Handle form submission to convert imperial to metric if needed
+      const analysisForm = document.getElementById('analysisForm');
+      if (analysisForm) {
+        analysisForm.addEventListener('submit', function(e) {
+          if (imperialRadio.checked) {
+            // Convert height from inches to cm
+            const heightInches = parseFloat(heightInput.value);
+            if (!isNaN(heightInches)) {
+              heightInput.value = (heightInches * 2.54).toFixed(1);
+            }
+            
+            // Convert weight from lbs to kg
+            const weightLbs = parseFloat(weightInput.value);
+            if (!isNaN(weightLbs)) {
+              weightInput.value = (weightLbs * 0.453592).toFixed(1);
+            }
+          }
+        });
+      }
+    }
+  });
+</script>
 {% endblock %}

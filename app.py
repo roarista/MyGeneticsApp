@@ -123,7 +123,7 @@ def analyze():
     if 'file' not in request.files:
         logger.error("No file in request.files")
         flash('No file selected', 'danger')
-        return redirect(url_for('analyze_form'))
+        return redirect(url_for('index'))
     
     file = request.files['file']
     logger.debug(f"File object: {file}, filename: {file.filename}")
@@ -131,7 +131,7 @@ def analyze():
     if file.filename == '':
         logger.error("Empty filename")
         flash('No file selected', 'danger')
-        return redirect(url_for('analyze_form'))
+        return redirect(url_for('index'))
     
     if file and allowed_file(file.filename):
         try:
@@ -149,17 +149,29 @@ def analyze():
             image = cv2.imread(filepath)
             if image is None:
                 flash('Failed to process image', 'danger')
-                return redirect(url_for('analyze_form'))
+                return redirect(url_for('index'))
             
             # Get user-provided information
             height = request.form.get('height', 0)
             weight = request.form.get('weight', 0)
             gender = request.form.get('gender', 'male')  # Default to male if not specified
             experience = request.form.get('experience', 'beginner')
+            measurement_system = request.form.get('measurement_system', 'metric')
             
             # Convert to float for calculations
             height_cm = float(height) if height else 0
             weight_kg = float(weight) if weight else 0
+            
+            # Convert measurements if they were submitted in imperial units
+            # JavaScript should handle this but we'll check on server side too
+            if measurement_system == 'imperial':
+                # Convert height from inches to cm if needed
+                if height_cm > 0 and height_cm < 100:  # Likely in inches
+                    height_cm = height_cm * 2.54
+                
+                # Convert weight from lbs to kg if needed
+                if weight_kg > 0 and weight_kg > 200:  # Likely in pounds
+                    weight_kg = weight_kg * 0.453592
             
             logger.debug(f"User inputs - Height: {height_cm}, Weight: {weight_kg}, Gender: {gender}, Experience: {experience}")
             
@@ -168,7 +180,7 @@ def analyze():
             
             if landmarks is None:
                 flash('No body detected in image. Please try again with a clearer full-body image.', 'warning')
-                return redirect(url_for('analyze_form'))
+                return redirect(url_for('index'))
             
             # Analyze body traits - pass the original image for AI analysis
             traits = analyze_body_traits(
@@ -243,17 +255,17 @@ def analyze():
         except Exception as e:
             logger.error(f"Error during analysis: {str(e)}")
             flash(f'Error during analysis: {str(e)}', 'danger')
-            return redirect(url_for('analyze_form'))
+            return redirect(url_for('index'))
     else:
         flash('Invalid file type. Please upload PNG or JPG images.', 'warning')
-        return redirect(url_for('analyze_form'))
+        return redirect(url_for('index'))
 
 @app.route('/results/<analysis_id>')
 def results(analysis_id):
     """Display analysis results"""
     if analysis_id not in analysis_results:
         flash('Analysis not found', 'danger')
-        return redirect(url_for('analyze_form'))
+        return redirect(url_for('index'))
     
     result = analysis_results[analysis_id]
     
