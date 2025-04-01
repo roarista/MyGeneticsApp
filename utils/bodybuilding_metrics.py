@@ -11,6 +11,228 @@ import logging
 # Set up logging
 logger = logging.getLogger(__name__)
 
+# Function to complete bodybuilding analysis
+def complete_bodybuilding_analysis(user_data):
+    """
+    Complete bodybuilding analysis using provided user data and measurements
+    
+    Args:
+        user_data: Dictionary containing user information and measurements:
+            - height_cm: Height in centimeters
+            - weight_kg: Weight in kilograms
+            - gender: 'male' or 'female'
+            - neck_cm: Neck circumference in cm
+            - chest_cm: Chest circumference in cm
+            - shoulders_cm: Shoulder circumference in cm
+            - waist_cm: Waist circumference in cm
+            - hips_cm: Hip circumference in cm
+            - left_arm_cm: Left arm circumference in cm
+            - right_arm_cm: Right arm circumference in cm
+            - left_thigh_cm: Left thigh circumference in cm
+            - right_thigh_cm: Right thigh circumference in cm
+            - left_calf_cm: Left calf circumference in cm
+            - right_calf_cm: Right calf circumference in cm
+            - wrist_cm: Wrist circumference in cm
+            - ankle_cm: Ankle circumference in cm
+            - experience: Training experience level
+            
+    Returns:
+        Dictionary with bodybuilding analysis results
+    """
+    try:
+        # Extract user data
+        height_cm = float(user_data.get('height_cm', 0))
+        weight_kg = float(user_data.get('weight_kg', 0))
+        gender = user_data.get('gender', 'male')
+        experience = user_data.get('experience', 'beginner')
+        
+        # Extract body measurements
+        neck_cm = float(user_data.get('neck_cm', 0))
+        shoulders_cm = float(user_data.get('shoulders_cm', 0))
+        chest_cm = float(user_data.get('chest_cm', 0))
+        waist_cm = float(user_data.get('waist_cm', 0))
+        hips_cm = float(user_data.get('hips_cm', 0))
+        left_arm_cm = float(user_data.get('left_arm_cm', 0))
+        right_arm_cm = float(user_data.get('right_arm_cm', 0))
+        left_thigh_cm = float(user_data.get('left_thigh_cm', 0))
+        right_thigh_cm = float(user_data.get('right_thigh_cm', 0))
+        left_calf_cm = float(user_data.get('left_calf_cm', 0))
+        right_calf_cm = float(user_data.get('right_calf_cm', 0))
+        wrist_cm = float(user_data.get('wrist_cm', 0))
+        ankle_cm = float(user_data.get('ankle_cm', 0))
+        
+        # Create a measurements dictionary for analysis functions
+        measurements = {
+            'neck': neck_cm,
+            'shoulders': shoulders_cm,
+            'chest': chest_cm,
+            'waist': waist_cm,
+            'hips': hips_cm,
+            'left_arm': left_arm_cm,
+            'right_arm': right_arm_cm,
+            'left_thigh': left_thigh_cm,
+            'right_thigh': right_thigh_cm,
+            'left_calf': left_calf_cm,
+            'right_calf': right_calf_cm,
+            'wrist': wrist_cm,
+            'ankle': ankle_cm
+        }
+        
+        # Calculate body fat percentage
+        if neck_cm > 0 and waist_cm > 0:
+            if gender.lower() == 'male':
+                body_fat_percentage = estimate_bodyfat_from_measurements(
+                    gender, waist_cm, neck_cm, height_cm)
+            else:
+                body_fat_percentage = estimate_bodyfat_from_measurements(
+                    gender, waist_cm, neck_cm, height_cm, hips_cm)
+        else:
+            # Default to estimate based on BMI
+            bmi = weight_kg / ((height_cm / 100) ** 2) if height_cm > 0 else 0
+            if gender.lower() == 'male':
+                body_fat_percentage = 1.20 * bmi + 0.23 * 30 - 16.2  # Assume age 30 by default
+            else:
+                body_fat_percentage = 1.20 * bmi + 0.23 * 30 - 5.4
+                
+            # Ensure reasonable bounds
+            body_fat_percentage = max(5 if gender.lower() == 'male' else 10, 
+                                       min(body_fat_percentage, 40))
+        
+        # Categorize body fat percentage
+        if gender.lower() == 'male':
+            if body_fat_percentage < 8:
+                bf_category = "Very Lean (Competition)"
+            elif body_fat_percentage < 12:
+                bf_category = "Lean (Athletic)"
+            elif body_fat_percentage < 18:
+                bf_category = "Fit"
+            elif body_fat_percentage < 25:
+                bf_category = "Average"
+            else:
+                bf_category = "Above Average"
+        else:
+            if body_fat_percentage < 15:
+                bf_category = "Very Lean (Competition)"
+            elif body_fat_percentage < 20:
+                bf_category = "Lean (Athletic)"
+            elif body_fat_percentage < 25:
+                bf_category = "Fit"
+            elif body_fat_percentage < 32:
+                bf_category = "Average"
+            else:
+                bf_category = "Above Average"
+        
+        # Calculate lean body mass
+        lbm = calculate_lean_body_mass(weight_kg, body_fat_percentage)
+        
+        # Calculate FFMI (Fat-Free Mass Index)
+        ffmi = calculate_fat_free_mass_index(lbm, height_cm)
+        
+        # Calculate normalized FFMI
+        norm_ffmi = calculate_normalized_ffmi(ffmi, height_cm)
+        
+        # Categorize FFMI
+        if gender.lower() == 'male':
+            if norm_ffmi < 18:
+                ffmi_category = "Below Average"
+            elif norm_ffmi < 20:
+                ffmi_category = "Average"
+            elif norm_ffmi < 22:
+                ffmi_category = "Above Average"
+            elif norm_ffmi < 24:
+                ffmi_category = "Excellent"
+            elif norm_ffmi < 26:
+                ffmi_category = "Superior"
+            else:
+                ffmi_category = "Exceptional"
+        else:
+            if norm_ffmi < 16:
+                ffmi_category = "Below Average"
+            elif norm_ffmi < 18:
+                ffmi_category = "Average"
+            elif norm_ffmi < 20:
+                ffmi_category = "Above Average"
+            elif norm_ffmi < 22:
+                ffmi_category = "Excellent"
+            elif norm_ffmi < 24:
+                ffmi_category = "Superior"
+            else:
+                ffmi_category = "Exceptional"
+        
+        # Analyze muscle balance
+        muscle_balance = analyze_muscle_balance(measurements)
+        
+        # Analyze arm and leg symmetry
+        arm_symmetry = analyze_arm_symmetry(left_arm_cm, right_arm_cm)
+        leg_symmetry = analyze_arm_symmetry(left_thigh_cm, right_thigh_cm)
+        
+        # Analyze shoulder-to-waist ratio
+        shoulder_to_waist = analyze_shoulder_to_waist_ratio(shoulders_cm, waist_cm)
+        
+        # Analyze genetic potential if we have wrist and ankle measurements
+        if wrist_cm > 0 and ankle_cm > 0:
+            genetic_potential = analyze_bodybuilding_potential(height_cm, wrist_cm, ankle_cm, gender)
+        else:
+            genetic_potential = None
+        
+        # Create user data dictionary for recommendations
+        user_data = {
+            'gender': gender,
+            'height': height_cm,
+            'weight': weight_kg,
+            'body_fat': body_fat_percentage,
+            'experience': experience,
+            'goal': user_data.get('goal', 'build_muscle')
+        }
+        
+        # Generate recommendations
+        recommendations = formulate_bodybuilding_recommendations(
+            {
+                'body_fat_percentage': body_fat_percentage,
+                'muscle_balance': muscle_balance if muscle_balance else {},
+                'genetic_potential': genetic_potential['genetic_potential'] if genetic_potential else {'rating': 'average'}
+            }, 
+            user_data
+        )
+        
+        # Organize results
+        results = {
+            'body_composition': {
+                'body_fat_percentage': body_fat_percentage,
+                'body_fat_category': bf_category,
+                'lean_body_mass': lbm,
+                'ffmi': norm_ffmi,
+                'ffmi_category': ffmi_category
+            },
+            'muscle_balance': muscle_balance if muscle_balance else {},
+            'symmetry': {
+                'arm_symmetry': arm_symmetry if arm_symmetry else {},
+                'leg_symmetry': leg_symmetry if leg_symmetry else {}
+            },
+            'proportions': {
+                'shoulder_to_waist': shoulder_to_waist if shoulder_to_waist else {},
+            },
+            'genetic_potential': genetic_potential['genetic_potential'] if genetic_potential else {},
+            'max_measurements': genetic_potential['max_measurements'] if genetic_potential and 'max_measurements' in genetic_potential else {},
+            'recommendations': recommendations,
+            'measurements': measurements
+        }
+        
+        return results
+        
+    except Exception as e:
+        logger.error(f"Error in complete bodybuilding analysis: {str(e)}")
+        return {
+            'error': f"Failed to complete bodybuilding analysis: {str(e)}",
+            'body_composition': {
+                'body_fat_percentage': 0,
+                'body_fat_category': 'Unknown',
+                'lean_body_mass': 0,
+                'ffmi': 0,
+                'ffmi_category': 'Unknown'
+            }
+        }
+
 # Constants for ideal bodybuilding proportions
 # Based on classical bodybuilding aesthetics like the Golden Ratio
 IDEAL_SHOULDER_WAIST_RATIO = 1.618  # Golden ratio

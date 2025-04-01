@@ -2,6 +2,7 @@ import os
 import logging
 import uuid
 import tempfile
+import base64
 from datetime import datetime
 from flask import Flask, render_template, request, jsonify, redirect, url_for, session, flash
 from flask_login import LoginManager, current_user, login_user, logout_user, login_required
@@ -48,6 +49,8 @@ from utils.image_processing import process_image, extract_body_landmarks
 from utils.body_analysis import analyze_body_traits
 from utils.recommendations import generate_recommendations
 from utils.units import format_trait_value, get_unit
+from utils.measurement_estimator import estimate_measurements
+from utils.bodybuilding_metrics import complete_bodybuilding_analysis
 from utils.bodybuilding_metrics import (
     calculate_body_fat_percentage, 
     calculate_lean_body_mass, 
@@ -57,7 +60,8 @@ from utils.bodybuilding_metrics import (
     analyze_arm_symmetry,
     analyze_muscle_balance,
     analyze_bodybuilding_potential,
-    formulate_bodybuilding_recommendations
+    formulate_bodybuilding_recommendations,
+    estimate_bodyfat_from_measurements
 )
 from utils.body_scan_3d import process_3d_scan, is_valid_3d_scan_file
 
@@ -153,7 +157,11 @@ def analyze():
             gender = request.form.get('gender', 'male')  # Default to male if not specified
             experience = request.form.get('experience', 'beginner')
             
-            logger.debug(f"User inputs - Height: {height}, Weight: {weight}, Gender: {gender}, Experience: {experience}")
+            # Convert to float for calculations
+            height_cm = float(height) if height else 0
+            weight_kg = float(weight) if weight else 0
+            
+            logger.debug(f"User inputs - Height: {height_cm}, Weight: {weight_kg}, Gender: {gender}, Experience: {experience}")
             
             # Extract landmarks from image
             processed_image, landmarks = extract_body_landmarks(image)
@@ -166,19 +174,53 @@ def analyze():
             traits = analyze_body_traits(
                 landmarks=landmarks, 
                 original_image=image,
-                height_cm=float(height) if height else 0, 
-                weight_kg=float(weight) if weight else 0,
-                gender=gender,  # Pass gender to the analysis function
-                experience=experience  # Pass training experience level
+                height_cm=height_cm, 
+                weight_kg=weight_kg,
+                gender=gender,  
+                experience=experience  
             )
             
             # Generate recommendations
             recommendations = generate_recommendations(traits, experience)
             
-            # Store results
+            # Store the processed image
             image_path = os.path.join(TEMP_UPLOAD_FOLDER, f"processed_{analysis_id}.jpg")
             cv2.imwrite(image_path, processed_image)
             
+            # Prepare base64 image for processing
+            with open(filepath, "rb") as image_file:
+                image_data = base64.b64encode(image_file.read()).decode('utf-8')
+            
+            # Estimate body measurements from the image
+            logger.debug("Estimating body measurements from image...")
+            estimated_measurements = estimate_measurements(
+                image_data=image_data, 
+                height_cm=height_cm, 
+                weight_kg=weight_kg, 
+                gender=gender, 
+                experience=experience
+            )
+            logger.debug(f"Estimated measurements: {estimated_measurements}")
+            
+            # Prepare user data for bodybuilding analysis
+            user_data = {
+                "height_cm": height_cm,
+                "weight_kg": weight_kg,
+                "gender": gender,
+                "experience": experience
+            }
+            
+            # Add estimated measurements to user data
+            if estimated_measurements:
+                for key, value in estimated_measurements.items():
+                    user_data[key] = value
+            
+            # Complete bodybuilding analysis
+            logger.debug("Performing bodybuilding analysis...")
+            bodybuilding_analysis = complete_bodybuilding_analysis(user_data)
+            logger.debug("Bodybuilding analysis completed")
+            
+            # Store all results
             analysis_results[analysis_id] = {
                 'image_path': image_path,
                 'traits': traits,
@@ -188,7 +230,9 @@ def analyze():
                     'weight': weight,
                     'gender': gender,
                     'experience': experience
-                }
+                },
+                'estimated_measurements': estimated_measurements,
+                'bodybuilding_analysis': bodybuilding_analysis
             }
             
             # Clean up original upload
@@ -218,7 +262,6 @@ def results(analysis_id):
         img_data = f.read()
     
     # Convert image to base64 for embedding in HTML
-    import base64
     img_b64 = base64.b64encode(img_data).decode('utf-8')
     
     # Process traits to include their units
@@ -244,7 +287,9 @@ def results(analysis_id):
         user_info=result['user_info'],
         image_data=img_b64,
         format_value=format_trait_value,  # Pass the formatter to the template
-        is_3d_scan=False  # Flag to indicate this is not a 3D scan analysis
+        is_3d_scan=False,  # Flag to indicate this is not a 3D scan analysis
+        bodybuilding=result.get('bodybuilding_analysis', {}),  # Add bodybuilding metrics
+        estimated_measurements=result.get('estimated_measurements', {})  # Add estimated measurements
     )
 
 @app.route('/education')

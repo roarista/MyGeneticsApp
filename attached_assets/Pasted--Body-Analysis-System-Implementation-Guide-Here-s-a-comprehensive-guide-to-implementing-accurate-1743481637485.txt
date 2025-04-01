@@ -1,0 +1,770 @@
+
+# Body Analysis System: Implementation Guide
+
+Here's a comprehensive guide to implementing accurate body analysis from user photos:
+
+## Solution Overview
+
+1. **Image Processing Pipeline** - Process uploaded images for consistency and quality
+2. **Pose & Landmark Detection** - Detect body keypoints and landmarks 
+3. **Measurement Estimation** - Convert visual data to anthropometric measurements
+4. **Body Composition Analysis** - Calculate body fat percentage, muscle mass, etc.
+5. **Results Visualization** - Present analysis in user-friendly UI
+
+## 1. Required Dependencies
+
+```bash
+# Install in Replit using the Shell
+pip install opencv-python tensorflow mediapipe scikit-learn pillow
+pip install flask-cors requests numpy scipy matplotlib
+```
+
+## 2. Image Processing Utility
+
+Create `utils/image_processor.py`:
+
+```python
+import cv2
+import numpy as np
+import base64
+import io
+from PIL import Image
+
+def decode_image(base64_string):
+    """Convert base64 image to numpy array"""
+    if ',' in base64_string:
+        base64_string = base64_string.split(',')[1]
+    
+    image_bytes = base64.b64decode(base64_string)
+    image = Image.open(io.BytesIO(image_bytes))
+    return np.array(image)
+
+def preprocess_image(image, target_size=(512, 512)):
+    """Preprocess image for analysis"""
+    if isinstance(image, str):
+        image = decode_image(image)
+    
+    # Ensure RGB format
+    if len(image.shape) == 2:
+        image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
+    elif image.shape[2] == 4:
+        image = cv2.cvtColor(image, cv2.COLOR_RGBA2RGB)
+    
+    # Resize for consistent processing
+    image = cv2.resize(image, target_size)
+    
+    # Normalize pixel values
+    image_normalized = image.astype(np.float32) / 255.0
+    
+    return image, image_normalized
+```
+
+## 3. Body Landmark Detection System
+
+Create `utils/body_landmarks.py`:
+
+```python
+import mediapipe as mp
+import numpy as np
+import cv2
+import logging
+
+logger = logging.getLogger(__name__)
+
+class BodyLandmarkDetector:
+    def __init__(self):
+        self.mp_pose = mp.solutions.pose
+        self.pose = self.mp_pose.Pose(
+            static_image_mode=True,
+            model_complexity=2,
+            enable_segmentation=True,
+            min_detection_confidence=0.5
+        )
+    
+    def detect_landmarks(self, image):
+        """Detect body landmarks in an image"""
+        try:
+            # Convert to RGB if needed
+            if len(image.shape) == 3 and image.shape[2] == 3:
+                image_rgb = image
+            else:
+                image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            
+            # Process image to find landmarks
+            results = self.pose.process(image_rgb)
+            
+            if not results.pose_landmarks:
+                logger.warning("No pose landmarks detected in image")
+                return None
+                
+            # Extract landmarks as numpy array
+            landmarks = []
+            for landmark in results.pose_landmarks.landmark:
+                landmarks.append([landmark.x, landmark.y, landmark.z, landmark.visibility])
+            
+            return np.array(landmarks)
+        
+        except Exception as e:
+            logger.error(f"Error detecting landmarks: {str(e)}")
+            return None
+    
+    def calculate_body_segments(self, landmarks, image_height, image_width):
+        """Calculate body segment lengths and proportions"""
+        if landmarks is None:
+            return {}
+        
+        # Define key body segments
+        segments = {
+            # Torso
+            "neck_to_hip": self._calculate_distance(landmarks, 
+                self.mp_pose.PoseLandmark.LEFT_SHOULDER.value,
+                self.mp_pose.PoseLandmark.LEFT_HIP.value),
+            
+            # Arms
+            "left_arm": self._calculate_distance(landmarks, 
+                self.mp_pose.PoseLandmark.LEFT_SHOULDER.value,
+                self.mp_pose.PoseLandmark.LEFT_WRIST.value),
+            "right_arm": self._calculate_distance(landmarks, 
+                self.mp_pose.PoseLandmark.RIGHT_SHOULDER.value,
+                self.mp_pose.PoseLandmark.RIGHT_WRIST.value),
+            
+            # Legs
+            "left_leg": self._calculate_distance(landmarks, 
+                self.mp_pose.PoseLandmark.LEFT_HIP.value,
+                self.mp_pose.PoseLandmark.LEFT_ANKLE.value),
+            "right_leg": self._calculate_distance(landmarks, 
+                self.mp_pose.PoseLandmark.RIGHT_HIP.value,
+                self.mp_pose.PoseLandmark.RIGHT_ANKLE.value),
+            
+            # Shoulders
+            "shoulder_width": self._calculate_distance(landmarks, 
+                self.mp_pose.PoseLandmark.LEFT_SHOULDER.value,
+                self.mp_pose.PoseLandmark.RIGHT_SHOULDER.value),
+            
+            # Hips
+            "hip_width": self._calculate_distance(landmarks, 
+                self.mp_pose.PoseLandmark.LEFT_HIP.value,
+                self.mp_pose.PoseLandmark.RIGHT_HIP.value),
+        }
+        
+        # Calculate additional body proportions
+        segments["shoulder_to_hip_ratio"] = segments["shoulder_width"] / segments["hip_width"] if segments["hip_width"] > 0 else 0
+        
+        # Scale by image dimensions to get pixel distances
+        for key in segments:
+            if isinstance(segments[key], float) and "ratio" not in key:
+                segments[key] *= max(image_height, image_width)
+        
+        return segments
+    
+    def _calculate_distance(self, landmarks, idx1, idx2):
+        """Calculate distance between two landmarks"""
+        try:
+            x1, y1 = landmarks[idx1][0], landmarks[idx1][1]
+            x2, y2 = landmarks[idx2][0], landmarks[idx2][1]
+            return np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+        except Exception as e:
+            logger.error(f"Error calculating distance: {str(e)}")
+            return 0
+```
+
+## 4. Body Measurement Estimator
+
+Create `utils/measurement_estimator.py`:
+
+```python
+import numpy as np
+import logging
+from .body_landmarks import BodyLandmarkDetector
+from .image_processor import preprocess_image
+
+logger = logging.getLogger(__name__)
+
+class BodyMeasurementEstimator:
+    def __init__(self):
+        self.landmark_detector = BodyLandmarkDetector()
+    
+    def estimate_measurements(self, image_data, height_cm, weight_kg, gender, experience="beginner"):
+        """Estimate body measurements from image and basic info"""
+        # Process image
+        original_image, processed_image = preprocess_image(image_data)
+        h, w = original_image.shape[:2]
+        
+        # Detect landmarks
+        landmarks = self.landmark_detector.detect_landmarks(processed_image)
+        
+        # Calculate pixel-based segments
+        segments = self.landmark_detector.calculate_body_segments(landmarks, h, w) if landmarks is not None else {}
+        
+        # Convert to real-world measurements using height as reference
+        measurements = self._convert_to_measurements(segments, height_cm, weight_kg, gender, experience)
+        
+        return measurements
+    
+    def _convert_to_measurements(self, segments, height_cm, weight_kg, gender, experience):
+        """Convert pixel-based measurements to cm using height as reference"""
+        # If we have no segments, use statistical estimation
+        if not segments:
+            return self._estimate_from_statistics(height_cm, weight_kg, gender)
+        
+        # Calculate BMI for additional adjustment
+        bmi = weight_kg / ((height_cm / 100) ** 2)
+        bmi_factor = self._calculate_bmi_adjustment(bmi, gender)
+        
+        # Reference values
+        if gender.lower() == 'male':
+            reference = {
+                'neck_ratio': 0.24,         # Neck circumference relative to height
+                'chest_ratio': 0.52,        # Chest circumference relative to height
+                'waist_ratio': 0.45,        # Waist circumference relative to height
+                'hip_ratio': 0.48,          # Hip circumference relative to height
+                'arm_ratio': 0.18,          # Arm circumference relative to height
+                'thigh_ratio': 0.28,        # Thigh circumference relative to height
+                'calf_ratio': 0.20,         # Calf circumference relative to height
+                'wrist_ratio': 0.11,        # Wrist circumference relative to height
+                'ankle_ratio': 0.13,        # Ankle circumference relative to height
+            }
+        else:
+            reference = {
+                'neck_ratio': 0.20,
+                'chest_ratio': 0.49,
+                'waist_ratio': 0.41, 
+                'hip_ratio': 0.53,
+                'arm_ratio': 0.16,
+                'thigh_ratio': 0.30,
+                'calf_ratio': 0.19,
+                'wrist_ratio': 0.10,
+                'ankle_ratio': 0.12,
+            }
+        
+        # Use segments to adjust reference values
+        measurements = {}
+        
+        # Shoulders and waist
+        if 'shoulder_to_hip_ratio' in segments:
+            shoulder_hip_deviation = segments['shoulder_to_hip_ratio'] - 1.4 if gender.lower() == 'male' else segments['shoulder_to_hip_ratio'] - 1.2
+            
+            # Adjust shoulder and waist based on detected ratio
+            reference['chest_ratio'] *= (1 + 0.1 * shoulder_hip_deviation)
+            reference['waist_ratio'] *= (1 - 0.1 * shoulder_hip_deviation)
+        
+        # Apply BMI adjustments to circumference estimates
+        reference['waist_ratio'] *= bmi_factor
+        reference['hip_ratio'] *= (bmi_factor * 0.8)
+        reference['thigh_ratio'] *= (bmi_factor * 0.7)
+        reference['arm_ratio'] *= (bmi_factor * 0.6)
+        reference['chest_ratio'] *= (bmi_factor * 0.5)
+        
+        # Experience adjustments (more experienced = more muscle)
+        muscle_factor = 1.0
+        if experience == "intermediate":
+            muscle_factor = 1.05
+        elif experience == "advanced":
+            muscle_factor = 1.1
+        
+        reference['arm_ratio'] *= muscle_factor
+        reference['chest_ratio'] *= muscle_factor
+        reference['thigh_ratio'] *= muscle_factor
+        reference['calf_ratio'] *= muscle_factor
+        
+        # Calculate final measurements
+        measurements = {
+            "neck_cm": round(height_cm * reference['neck_ratio'], 1),
+            "chest_cm": round(height_cm * reference['chest_ratio'], 1),
+            "shoulders_cm": round(height_cm * reference['chest_ratio'] * 1.2, 1),
+            "waist_cm": round(height_cm * reference['waist_ratio'], 1),
+            "hips_cm": round(height_cm * reference['hip_ratio'], 1),
+            "left_arm_cm": round(height_cm * reference['arm_ratio'], 1),
+            "right_arm_cm": round(height_cm * reference['arm_ratio'], 1),
+            "left_thigh_cm": round(height_cm * reference['thigh_ratio'], 1),
+            "right_thigh_cm": round(height_cm * reference['thigh_ratio'], 1),
+            "left_calf_cm": round(height_cm * reference['calf_ratio'], 1),
+            "right_calf_cm": round(height_cm * reference['calf_ratio'], 1),
+            "wrist_cm": round(height_cm * reference['wrist_ratio'], 1),
+            "ankle_cm": round(height_cm * reference['ankle_ratio'], 1),
+            "estimation_method": "ai_enhanced",
+            "segments": segments
+        }
+        
+        return measurements
+    
+    def _estimate_from_statistics(self, height_cm, weight_kg, gender):
+        """Fallback method to estimate using statistical averages"""
+        # Calculate BMI
+        bmi = weight_kg / ((height_cm / 100) ** 2)
+        bmi_factor = self._calculate_bmi_adjustment(bmi, gender)
+        
+        # Base ratios (height-based)
+        if gender.lower() == 'male':
+            neck_ratio = 0.24
+            chest_ratio = 0.52
+            shoulders_ratio = 0.62
+            waist_ratio = 0.45
+            hip_ratio = 0.48
+            arm_ratio = 0.18
+            thigh_ratio = 0.28
+            calf_ratio = 0.20
+            wrist_ratio = 0.11
+            ankle_ratio = 0.13
+        else:
+            neck_ratio = 0.20
+            chest_ratio = 0.49
+            shoulders_ratio = 0.54
+            waist_ratio = 0.41
+            hip_ratio = 0.53
+            arm_ratio = 0.16
+            thigh_ratio = 0.30
+            calf_ratio = 0.19
+            wrist_ratio = 0.10
+            ankle_ratio = 0.12
+        
+        # Apply BMI adjustment
+        waist_ratio *= bmi_factor
+        hip_ratio *= (bmi_factor * 0.8)
+        thigh_ratio *= (bmi_factor * 0.7)
+        arm_ratio *= (bmi_factor * 0.6)
+        chest_ratio *= (bmi_factor * 0.5)
+        
+        # Calculate measurements
+        measurements = {
+            "neck_cm": round(height_cm * neck_ratio, 1),
+            "chest_cm": round(height_cm * chest_ratio, 1),
+            "shoulders_cm": round(height_cm * shoulders_ratio, 1),
+            "waist_cm": round(height_cm * waist_ratio, 1),
+            "hips_cm": round(height_cm * hip_ratio, 1),
+            "left_arm_cm": round(height_cm * arm_ratio, 1),
+            "right_arm_cm": round(height_cm * arm_ratio, 1),
+            "left_thigh_cm": round(height_cm * thigh_ratio, 1),
+            "right_thigh_cm": round(height_cm * thigh_ratio, 1),
+            "left_calf_cm": round(height_cm * calf_ratio, 1),
+            "right_calf_cm": round(height_cm * calf_ratio, 1),
+            "wrist_cm": round(height_cm * wrist_ratio, 1),
+            "ankle_cm": round(height_cm * ankle_ratio, 1),
+            "estimation_method": "statistical"
+        }
+        
+        return measurements
+    
+    def _calculate_bmi_adjustment(self, bmi, gender):
+        """Calculate adjustment factor based on BMI"""
+        # Normal BMI reference
+        normal_bmi = 22 if gender.lower() == 'male' else 21
+        
+        # Calculate adjustment factor
+        if bmi <= normal_bmi:
+            # Underweight: linear decrease down to 0.9 at BMI 16
+            return max(0.9, 1.0 - 0.025 * (normal_bmi - bmi))
+        else:
+            # Overweight: linear increase up to 1.3 at BMI 35
+            return min(1.3, 1.0 + 0.023 * (bmi - normal_bmi))
+```
+
+## 5. Body Composition Analyzer
+
+Create `utils/body_composition.py`:
+
+```python
+import numpy as np
+import logging
+
+logger = logging.getLogger(__name__)
+
+class BodyCompositionAnalyzer:
+    def __init__(self):
+        pass
+    
+    def analyze_composition(self, height_cm, weight_kg, gender, measurements, age=30):
+        """
+        Calculate body composition metrics
+        
+        Args:
+            height_cm: Height in centimeters
+            weight_kg: Weight in kilograms
+            gender: 'male' or 'female'
+            measurements: Dictionary with body measurements in cm
+            age: Age in years (default 30)
+            
+        Returns:
+            Dictionary with body composition metrics
+        """
+        try:
+            # Calculate BMI
+            bmi = weight_kg / ((height_cm / 100) ** 2)
+            
+            # Estimate body fat percentage
+            if 'neck_cm' in measurements and 'waist_cm' in measurements:
+                # Using Navy method if we have proper measurements
+                if gender.lower() == 'male':
+                    # Men: %BF = 495 / (1.0324 - 0.19077 * log10(waist-neck) + 0.15456 * log10(height)) - 450
+                    waist = measurements['waist_cm']
+                    neck = measurements['neck_cm']
+                    body_fat = 495 / (1.0324 - 0.19077 * np.log10(waist - neck) + 0.15456 * np.log10(height_cm)) - 450
+                else:
+                    # Women: %BF = 495 / (1.29579 - 0.35004 * log10(waist+hip-neck) + 0.22100 * log10(height)) - 450
+                    waist = measurements['waist_cm']
+                    hip = measurements.get('hips_cm', waist * 1.05)  # Estimate if missing
+                    neck = measurements['neck_cm']
+                    body_fat = 495 / (1.29579 - 0.35004 * np.log10(waist + hip - neck) + 0.22100 * np.log10(height_cm)) - 450
+            else:
+                # Fallback to BMI-based method
+                if gender.lower() == 'male':
+                    body_fat = 1.20 * bmi + 0.23 * age - 16.2
+                else:
+                    body_fat = 1.20 * bmi + 0.23 * age - 5.4
+            
+            # Ensure reasonable bounds
+            body_fat = max(5 if gender.lower() == 'male' else 10, min(body_fat, 45))
+            
+            # Calculate lean body mass
+            lean_mass = weight_kg * (1 - (body_fat / 100))
+            
+            # Calculate FFMI (Fat-Free Mass Index)
+            ffmi = lean_mass / ((height_cm / 100) ** 2)
+            
+            # Calculate normalized FFMI (adjusted to height of 1.8m)
+            normalized_ffmi = ffmi + (6.1 * (1.8 - (height_cm / 100)))
+            
+            # Calculate waist-to-height ratio
+            waist_height_ratio = measurements.get('waist_cm', 0) / height_cm if height_cm > 0 else 0
+            
+            # Calculate shoulder-to-waist ratio
+            shoulder_waist_ratio = measurements.get('shoulders_cm', 0) / measurements.get('waist_cm', 1) if measurements.get('waist_cm', 0) > 0 else 0
+            
+            # Analyze symmetry
+            symmetry = {}
+            if 'left_arm_cm' in measurements and 'right_arm_cm' in measurements:
+                left = measurements['left_arm_cm']
+                right = measurements['right_arm_cm']
+                diff = abs(left - right)
+                diff_percent = (diff / max(left, right)) * 100
+                symmetry['arms'] = {
+                    'difference_cm': round(diff, 1),
+                    'difference_percent': round(diff_percent, 1),
+                    'dominant': 'left' if left > right else 'right',
+                    'description': self._get_symmetry_description(diff_percent)
+                }
+            
+            if 'left_thigh_cm' in measurements and 'right_thigh_cm' in measurements:
+                left = measurements['left_thigh_cm']
+                right = measurements['right_thigh_cm']
+                diff = abs(left - right)
+                diff_percent = (diff / max(left, right)) * 100
+                symmetry['thighs'] = {
+                    'difference_cm': round(diff, 1),
+                    'difference_percent': round(diff_percent, 1),
+                    'dominant': 'left' if left > right else 'right',
+                    'description': self._get_symmetry_description(diff_percent)
+                }
+            
+            # Compile results
+            composition = {
+                'bmi': round(bmi, 1),
+                'body_fat_percentage': round(body_fat, 1),
+                'lean_body_mass_kg': round(lean_mass, 1),
+                'ffmi': round(ffmi, 1),
+                'normalized_ffmi': round(normalized_ffmi, 1),
+                'waist_height_ratio': round(waist_height_ratio, 2),
+                'shoulder_waist_ratio': round(shoulder_waist_ratio, 2),
+                'symmetry': symmetry,
+                'assessment': self._get_composition_assessment(body_fat, gender, normalized_ffmi)
+            }
+            
+            return composition
+            
+        except Exception as e:
+            logger.error(f"Error analyzing body composition: {str(e)}")
+            return {
+                'bmi': round(bmi, 1) if 'bmi' in locals() else 0,
+                'error': str(e)
+            }
+    
+    def _get_symmetry_description(self, difference_percent):
+        """Get description based on symmetry difference percentage"""
+        if difference_percent < 3:
+            return "Excellent symmetry"
+        elif difference_percent < 5:
+            return "Good symmetry"
+        elif difference_percent < 10:
+            return "Moderate asymmetry"
+        else:
+            return "Significant asymmetry"
+    
+    def _get_composition_assessment(self, body_fat, gender, ffmi):
+        """Get overall assessment based on metrics"""
+        assessment = {}
+        
+        # Body fat classification
+        if gender.lower() == 'male':
+            if body_fat < 8:
+                assessment['body_fat'] = "Very lean (competition level)"
+            elif body_fat < 12:
+                assessment['body_fat'] = "Lean (athletic)"
+            elif body_fat < 18:
+                assessment['body_fat'] = "Fit"
+            elif body_fat < 25:
+                assessment['body_fat'] = "Average"
+            else:
+                assessment['body_fat'] = "Above average"
+        else:
+            if body_fat < 15:
+                assessment['body_fat'] = "Very lean (competition level)"
+            elif body_fat < 20:
+                assessment['body_fat'] = "Lean (athletic)"
+            elif body_fat < 25:
+                assessment['body_fat'] = "Fit"
+            elif body_fat < 32:
+                assessment['body_fat'] = "Average"
+            else:
+                assessment['body_fat'] = "Above average"
+        
+        # FFMI assessment
+        if ffmi < 18:
+            assessment['muscularity'] = "Below average"
+        elif ffmi < 20:
+            assessment['muscularity'] = "Average"
+        elif ffmi < 22:
+            assessment['muscularity'] = "Above average"
+        elif ffmi < 24:
+            assessment['muscularity'] = "Excellent"
+        elif ffmi < 26:
+            assessment['muscularity'] = "Superior"
+        else:
+            assessment['muscularity'] = "Exceptional"
+        
+        return assessment
+```
+
+## 6. Update the Main Analysis Route
+
+Update the main analysis route in `app.py`:
+
+```python
+# Add these imports
+from utils.measurement_estimator import BodyMeasurementEstimator
+from utils.body_composition import BodyCompositionAnalyzer
+from utils.bodybuilding_metrics import complete_bodybuilding_analysis
+
+# Initialize the estimators
+measurement_estimator = BodyMeasurementEstimator()
+composition_analyzer = BodyCompositionAnalyzer()
+
+@app.route('/analyze', methods=['POST'])
+def analyze():
+    if request.method == 'POST':
+        try:
+            # Extract form data
+            height = request.form.get('height', type=float)
+            weight = request.form.get('weight', type=float)
+            gender = request.form.get('gender', 'male')
+            age = request.form.get('age', type=int, default=30)
+            experience = request.form.get('experience', 'beginner')
+            measurement_system = request.form.get('measurement_system', 'metric')
+            
+            # Convert to metric if needed
+            if measurement_system == 'imperial':
+                height_cm = height * 2.54 if height else None
+                weight_kg = weight * 0.453592 if weight else None
+            else:
+                height_cm = height
+                weight_kg = weight
+            
+            # Process uploaded image
+            image_data = None
+            if 'image' in request.files:
+                file = request.files['image']
+                if file and file.filename != '' and allowed_file(file.filename):
+                    # Save the file
+                    filename = secure_filename(file.filename)
+                    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                    file.save(filepath)
+                    
+                    # Read the image for processing
+                    with open(filepath, "rb") as image_file:
+                        image_data = base64.b64encode(image_file.read()).decode('utf-8')
+                    
+                    # Estimate body measurements from the image
+                    estimated_measurements = measurement_estimator.estimate_measurements(
+                        image_data, height_cm, weight_kg, gender, experience
+                    )
+                    
+                    # Analyze body composition
+                    body_composition = composition_analyzer.analyze_composition(
+                        height_cm, weight_kg, gender, estimated_measurements, age
+                    )
+                    
+                    # Generate bodybuilding analysis
+                    user_data = {
+                        "height_cm": height_cm,
+                        "weight_kg": weight_kg,
+                        "gender": gender,
+                        "experience": experience
+                    }
+                    
+                    # Add estimated measurements to user data
+                    if estimated_measurements:
+                        user_data.update(estimated_measurements)
+                    
+                    # Complete bodybuilding analysis using estimated measurements
+                    bodybuilding_analysis = complete_bodybuilding_analysis(user_data)
+                    
+                    # Add body composition to bodybuilding analysis
+                    if bodybuilding_analysis and body_composition:
+                        bodybuilding_analysis['body_composition'] = body_composition
+                    
+                    # Continue with existing analysis code...
+                    
+                    # Return the results including bodybuilding analysis
+                    return render_template(
+                        'tailwind_results.html',
+                        analysis_id=analysis_id,
+                        traits=traits,
+                        recommendations=recommendations,
+                        user_info={
+                            'height': height,
+                            'weight': weight,
+                            'gender': gender,
+                            'experience': experience
+                        },
+                        image_data=image_data,
+                        format_value=format_trait_value,
+                        is_3d_scan=False,
+                        bodybuilding=bodybuilding_analysis,
+                        estimated_measurements=estimated_measurements
+                    )
+            
+            # ... existing code for handling no image ...
+            
+        except Exception as e:
+            logger.error(f"Error in analysis: {str(e)}")
+            # ... error handling ...
+```
+
+## 7. Add Explanation to Results Template
+
+Update `tailwind_results.html` to include explanation about AI measurement estimation:
+
+```html
+<!-- Add before the bodybuilding metrics section -->
+{% if bodybuilding and not bodybuilding.error %}
+<div class="mt-10 mb-4">
+    <div class="bg-blue-50 border-l-4 border-blue-400 p-4">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                </svg>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm text-blue-700">
+                    <span class="font-medium">AI-Enhanced Analysis:</span> Your body measurements have been automatically estimated based on your photo, height, weight, and gender using computer vision technology.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+```
+
+## Advanced Implementation Options
+
+For improved accuracy, consider these production-grade additions:
+
+### 1. Front/Side View Requirements
+
+Add instructions for users to upload both front and side view photos for more accurate analysis:
+
+```html
+<!-- Add to the image upload section in home.html -->
+<div class="mt-2">
+    <p class="text-sm text-gray-500">For best results:</p>
+    <ul class="list-disc ml-5 text-sm text-gray-500">
+        <li>Stand straight facing the camera</li>
+        <li>Wear form-fitting clothing</li>
+        <li>Ensure good lighting</li>
+        <li>Include your whole body in the frame</li>
+    </ul>
+</div>
+```
+
+### 2. Integrate Advanced AI Services
+
+For production-grade accuracy, consider integrating these services:
+
+1. **Google Cloud Vision API**
+```python
+# Example implementation
+from google.cloud import vision
+
+def detect_landmarks_with_gcp(image_bytes):
+    client = vision.ImageAnnotatorClient()
+    image = vision.Image(content=image_bytes)
+    response = client.face_detection(image=image)
+    # Process response
+    return landmarks
+```
+
+2. **Azure Computer Vision**
+```python
+# Example implementation
+import azure.ai.vision as computervision
+
+def analyze_body_with_azure(image_url):
+    client = computervision.ComputerVisionClient(
+        endpoint="your-endpoint",
+        credentials=CognitiveServicesCredentials("your-key")
+    )
+    analysis = client.analyze_image(image_url, visual_features=[
+        VisualFeatureTypes.objects,
+        VisualFeatureTypes.people
+    ])
+    # Process results
+    return body_data
+```
+
+### 3. Model Training
+
+For the most accurate results, train a custom model using TensorFlow:
+
+```python
+# Basic structure for a custom measurement prediction model
+import tensorflow as tf
+
+def build_measurement_model():
+    model = tf.keras.Sequential([
+        tf.keras.layers.Conv2D(32, (3, 3), activation='relu', input_shape=(224, 224, 3)),
+        tf.keras.layers.MaxPooling2D((2, 2)),
+        tf.keras.layers.Conv2D(64, (3, 3), activation='relu'),
+        tf.keras.layers.MaxPooling2D((2, 2)),
+        tf.keras.layers.Conv2D(128, (3, 3), activation='relu'),
+        tf.keras.layers.MaxPooling2D((2, 2)),
+        tf.keras.layers.Flatten(),
+        tf.keras.layers.Dense(128, activation='relu'),
+        tf.keras.layers.Dense(13)  # 13 measurements
+    ])
+    
+    model.compile(
+        optimizer='adam',
+        loss='mean_squared_error',
+        metrics=['mae']
+    )
+    
+    return model
+```
+
+## Implementation Notes
+
+1. This solution uses MediaPipe for pose estimation, which is free, open-source, and works well on Replit
+
+2. For production use, integrating with cloud AI services will provide higher accuracy 
+
+3. The current implementation provides reasonable estimates based on:
+   - Detected body landmarks
+   - Statistical anthropometric data
+   - BMI adjustment factors
+   - Gender-specific body proportions
+
+4. Consider adding a calibration feature allowing users to manually correct measurements
+
+5. Remember to handle the case where no image is uploaded by providing reasonable measurement estimates based on height, weight, and gender
+
+This implementation combines computer vision with statistical models to provide a comprehensive body analysis system that requires minimal user input while delivering accurate and helpful results.
