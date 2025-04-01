@@ -156,9 +156,6 @@
           <a href="{{ url_for('scan3d') }}" class="nav-link {% if request.endpoint == 'scan3d' %}active{% endif %}">
             3D Scanning
           </a>
-          <a href="{{ url_for('bodybuilding_metrics') }}" class="nav-link {% if request.endpoint == 'bodybuilding_metrics' %}active{% endif %}">
-            Bodybuilding Metrics
-          </a>
           <a href="{{ url_for('education') }}" class="nav-link {% if request.endpoint == 'education' %}active{% endif %}">
             Learn
           </a>
@@ -199,9 +196,6 @@
         </a>
         <a href="{{ url_for('scan3d') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800">
           3D Scanning
-        </a>
-        <a href="{{ url_for('bodybuilding_metrics') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800">
-          Bodybuilding Metrics
         </a>
         <a href="{{ url_for('education') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800">
           Learn
