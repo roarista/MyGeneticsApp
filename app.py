@@ -107,14 +107,12 @@ def tailwind_index():
     """Render the Tailwind-inspired UI main page"""
     return render_template('tailwind_index.html')
 
-@app.route('/analyze', methods=['GET'])
-def analyze_form():
-    """Display the photo upload form for body analysis"""
-    return render_template('tailwind_analyze.html')
-
-@app.route('/analyze', methods=['POST'])
+@app.route('/analyze', methods=['GET', 'POST'])
 def analyze():
     """Process uploaded image and analyze body traits"""
+    # If it's a GET request, redirect to the home page
+    if request.method == 'GET':
+        return redirect(url_for('index'))
     logger.debug("Received analyze request")
     
     # Ensure temp directory exists
