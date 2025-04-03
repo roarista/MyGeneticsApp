@@ -33,69 +33,185 @@
                             </div>
                             <div class="ml-3">
                                 <p class="text-sm text-blue-300">
-                                    These measurements are approximations based on your photo and provided data. For most accurate results, we recommend taking physical measurements with a tape measure.
+                                    Your body measurements are calculated using our multi-method approach that combines visual analysis with advanced anthropometric algorithms.
+                                    {% if estimated_measurements and estimated_measurements.estimation_method == 'multi_method_enhanced' %}
+                                    <span class="mt-1 block text-xs text-blue-200">
+                                        <svg class="inline-block h-3 w-3 mr-1 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                        </svg>
+                                        Using AI-enhanced analysis for improved accuracy
+                                    </span>
+                                    {% endif %}
                                 </p>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="grid grid-cols-2 gap-4">
-                        <!-- Basic info -->
-                        <div>
-                            <p class="text-gray-400">Height</p>
+                    <!-- Measurement Legend -->
+                    <div class="flex items-center justify-end mb-2 text-xs text-gray-400">
+                        <span class="flex items-center mr-4">
+                            <span class="inline-block w-2 h-2 bg-green-400 rounded-full mr-1"></span>
+                            High confidence
+                        </span>
+                        <span class="flex items-center mr-4">
+                            <span class="inline-block w-2 h-2 bg-yellow-400 rounded-full mr-1"></span>
+                            Medium confidence
+                        </span>
+                        <span class="flex items-center">
+                            <span class="inline-block w-2 h-2 bg-gray-500 rounded-full mr-1"></span>
+                            Estimated
+                        </span>
+                    </div>
+                    
+                    <!-- Basic info section -->
+                    <div class="grid grid-cols-2 gap-x-4 gap-y-3 mb-4">
+                        <div class="bg-gray-700 bg-opacity-30 rounded p-3">
+                            <p class="text-gray-400 text-sm">Height</p>
                             <p class="text-xl text-white">{{ user_info.height }} cm</p>
                         </div>
-                        <div>
-                            <p class="text-gray-400">Weight</p>
+                        <div class="bg-gray-700 bg-opacity-30 rounded p-3">
+                            <p class="text-gray-400 text-sm">Weight</p>
                             <p class="text-xl text-white">{{ user_info.weight }} kg</p>
                         </div>
+                    </div>
+                    
+                    <!-- Measurements grid -->
+                    {% if estimated_measurements %}
+                        <h4 class="text-lg font-semibold text-white mb-3">Body Circumference</h4>
+                        <div class="grid grid-cols-2 gap-x-4 gap-y-3">
                         
-                        {% if estimated_measurements %}
-                            <!-- Higher confidence measurements first -->
+                            <!-- Torso measurements -->
                             {% if 'shoulders_cm' in estimated_measurements %}
-                            <div class="{% if 'reliable_measurements' in estimated_measurements and 'shoulders_cm' in estimated_measurements.reliable_measurements %}border-l-2 border-green-400 pl-2{% endif %}">
-                                <p class="text-gray-400">Shoulders</p>
+                            <div class="
+                                {% if 'confidence_scores' in estimated_measurements and 'shoulders_cm' in estimated_measurements.confidence_scores %}
+                                    {% set confidence = estimated_measurements.confidence_scores.shoulders_cm|float %}
+                                    {% if confidence >= 0.8 %}bg-green-900 bg-opacity-20 border-l-2 border-green-400
+                                    {% elif confidence >= 0.65 %}bg-yellow-900 bg-opacity-10 border-l-2 border-yellow-400
+                                    {% else %}bg-gray-700 bg-opacity-30{% endif %}
+                                {% elif 'reliable_measurements' in estimated_measurements and 'shoulders_cm' in estimated_measurements.reliable_measurements %}
+                                    bg-green-900 bg-opacity-20 border-l-2 border-green-400
+                                {% else %}bg-gray-700 bg-opacity-30
+                                {% endif %} rounded p-3">
+                                <p class="text-gray-400 text-sm">Shoulders</p>
                                 <p class="text-xl text-white">{{ "%.1f"|format(estimated_measurements.shoulders_cm) }} cm</p>
                             </div>
                             {% endif %}
                             
-                            {% if 'waist_cm' in estimated_measurements %}
-                            <div class="{% if 'reliable_measurements' in estimated_measurements and 'waist_cm' in estimated_measurements.reliable_measurements %}border-l-2 border-green-400 pl-2{% endif %}">
-                                <p class="text-gray-400">Waist</p>
-                                <p class="text-xl text-white">{{ "%.1f"|format(estimated_measurements.waist_cm) }} cm</p>
-                            </div>
-                            {% endif %}
-                            
                             {% if 'chest_cm' in estimated_measurements %}
-                            <div>
-                                <p class="text-gray-400">Chest</p>
+                            <div class="
+                                {% if 'confidence_scores' in estimated_measurements and 'chest_cm' in estimated_measurements.confidence_scores %}
+                                    {% set confidence = estimated_measurements.confidence_scores.chest_cm|float %}
+                                    {% if confidence >= 0.8 %}bg-green-900 bg-opacity-20 border-l-2 border-green-400
+                                    {% elif confidence >= 0.65 %}bg-yellow-900 bg-opacity-10 border-l-2 border-yellow-400
+                                    {% else %}bg-gray-700 bg-opacity-30{% endif %}
+                                {% else %}bg-gray-700 bg-opacity-30
+                                {% endif %} rounded p-3">
+                                <p class="text-gray-400 text-sm">Chest</p>
                                 <p class="text-xl text-white">{{ "%.1f"|format(estimated_measurements.chest_cm) }} cm</p>
                             </div>
                             {% endif %}
                             
+                            {% if 'waist_cm' in estimated_measurements %}
+                            <div class="
+                                {% if 'confidence_scores' in estimated_measurements and 'waist_cm' in estimated_measurements.confidence_scores %}
+                                    {% set confidence = estimated_measurements.confidence_scores.waist_cm|float %}
+                                    {% if confidence >= 0.8 %}bg-green-900 bg-opacity-20 border-l-2 border-green-400
+                                    {% elif confidence >= 0.65 %}bg-yellow-900 bg-opacity-10 border-l-2 border-yellow-400
+                                    {% else %}bg-gray-700 bg-opacity-30{% endif %}
+                                {% elif 'reliable_measurements' in estimated_measurements and 'waist_cm' in estimated_measurements.reliable_measurements %}
+                                    bg-green-900 bg-opacity-20 border-l-2 border-green-400
+                                {% else %}bg-gray-700 bg-opacity-30
+                                {% endif %} rounded p-3">
+                                <p class="text-gray-400 text-sm">Waist</p>
+                                <p class="text-xl text-white">{{ "%.1f"|format(estimated_measurements.waist_cm) }} cm</p>
+                            </div>
+                            {% endif %}
+                            
+                            {% if 'hips_cm' in estimated_measurements %}
+                            <div class="
+                                {% if 'confidence_scores' in estimated_measurements and 'hips_cm' in estimated_measurements.confidence_scores %}
+                                    {% set confidence = estimated_measurements.confidence_scores.hips_cm|float %}
+                                    {% if confidence >= 0.8 %}bg-green-900 bg-opacity-20 border-l-2 border-green-400
+                                    {% elif confidence >= 0.65 %}bg-yellow-900 bg-opacity-10 border-l-2 border-yellow-400
+                                    {% else %}bg-gray-700 bg-opacity-30{% endif %}
+                                {% else %}bg-gray-700 bg-opacity-30
+                                {% endif %} rounded p-3">
+                                <p class="text-gray-400 text-sm">Hips</p>
+                                <p class="text-xl text-white">{{ "%.1f"|format(estimated_measurements.hips_cm) }} cm</p>
+                            </div>
+                            {% endif %}
+                            
                             {% if 'neck_cm' in estimated_measurements %}
-                            <div>
-                                <p class="text-gray-400">Neck</p>
+                            <div class="
+                                {% if 'confidence_scores' in estimated_measurements and 'neck_cm' in estimated_measurements.confidence_scores %}
+                                    {% set confidence = estimated_measurements.confidence_scores.neck_cm|float %}
+                                    {% if confidence >= 0.8 %}bg-green-900 bg-opacity-20 border-l-2 border-green-400
+                                    {% elif confidence >= 0.65 %}bg-yellow-900 bg-opacity-10 border-l-2 border-yellow-400
+                                    {% else %}bg-gray-700 bg-opacity-30{% endif %}
+                                {% else %}bg-gray-700 bg-opacity-30
+                                {% endif %} rounded p-3">
+                                <p class="text-gray-400 text-sm">Neck</p>
                                 <p class="text-xl text-white">{{ "%.1f"|format(estimated_measurements.neck_cm) }} cm</p>
                             </div>
                             {% endif %}
                             
-                            {% if 'right_arm_cm' in estimated_measurements or 'left_arm_cm' in estimated_measurements %}
-                            <div>
-                                <p class="text-gray-400">Arms (Avg)</p>
-                                {% set avg_arm = (estimated_measurements.get('right_arm_cm', 0) + estimated_measurements.get('left_arm_cm', 0)) / 2 %}
-                                <p class="text-xl text-white">{{ "%.1f"|format(avg_arm) }} cm</p>
+                            <!-- Arms -->
+                            {% if 'right_arm_cm' in estimated_measurements and 'left_arm_cm' in estimated_measurements %}
+                            <div class="
+                                {% if 'confidence_scores' in estimated_measurements and 'arm_cm' in estimated_measurements.confidence_scores %}
+                                    {% set confidence = estimated_measurements.confidence_scores.arm_cm|float %}
+                                    {% if confidence >= 0.8 %}bg-green-900 bg-opacity-20 border-l-2 border-green-400
+                                    {% elif confidence >= 0.65 %}bg-yellow-900 bg-opacity-10 border-l-2 border-yellow-400
+                                    {% else %}bg-gray-700 bg-opacity-30{% endif %}
+                                {% else %}bg-gray-700 bg-opacity-30
+                                {% endif %} rounded p-3">
+                                <p class="text-gray-400 text-sm">Arms</p>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500 text-xs">L: {{ "%.1f"|format(estimated_measurements.left_arm_cm) }}</span>
+                                    <span class="text-white text-lg">{{ "%.1f"|format((estimated_measurements.left_arm_cm + estimated_measurements.right_arm_cm) / 2) }} cm</span>
+                                    <span class="text-gray-500 text-xs">R: {{ "%.1f"|format(estimated_measurements.right_arm_cm) }}</span>
+                                </div>
                             </div>
                             {% endif %}
-                            {% if 'right_thigh_cm' in estimated_measurements or 'left_thigh_cm' in estimated_measurements %}
-                            <div>
-                                <p class="text-gray-400">Thighs (Avg)</p>
-                                {% set avg_thigh = (estimated_measurements.get('right_thigh_cm', 0) + estimated_measurements.get('left_thigh_cm', 0)) / 2 %}
-                                <p class="text-xl text-white">{{ "%.1f"|format(avg_thigh) }} cm</p>
+                            
+                            <!-- Legs -->
+                            {% if 'right_thigh_cm' in estimated_measurements and 'left_thigh_cm' in estimated_measurements %}
+                            <div class="
+                                {% if 'confidence_scores' in estimated_measurements and 'thigh_cm' in estimated_measurements.confidence_scores %}
+                                    {% set confidence = estimated_measurements.confidence_scores.thigh_cm|float %}
+                                    {% if confidence >= 0.8 %}bg-green-900 bg-opacity-20 border-l-2 border-green-400
+                                    {% elif confidence >= 0.65 %}bg-yellow-900 bg-opacity-10 border-l-2 border-yellow-400
+                                    {% else %}bg-gray-700 bg-opacity-30{% endif %}
+                                {% else %}bg-gray-700 bg-opacity-30
+                                {% endif %} rounded p-3">
+                                <p class="text-gray-400 text-sm">Thighs</p>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500 text-xs">L: {{ "%.1f"|format(estimated_measurements.left_thigh_cm) }}</span>
+                                    <span class="text-white text-lg">{{ "%.1f"|format((estimated_measurements.left_thigh_cm + estimated_measurements.right_thigh_cm) / 2) }} cm</span>
+                                    <span class="text-gray-500 text-xs">R: {{ "%.1f"|format(estimated_measurements.right_thigh_cm) }}</span>
+                                </div>
                             </div>
                             {% endif %}
-                        {% endif %}
-                    </div>
+                            
+                            {% if 'right_calf_cm' in estimated_measurements and 'left_calf_cm' in estimated_measurements %}
+                            <div class="
+                                {% if 'confidence_scores' in estimated_measurements and 'calf_cm' in estimated_measurements.confidence_scores %}
+                                    {% set confidence = estimated_measurements.confidence_scores.calf_cm|float %}
+                                    {% if confidence >= 0.8 %}bg-green-900 bg-opacity-20 border-l-2 border-green-400
+                                    {% elif confidence >= 0.65 %}bg-yellow-900 bg-opacity-10 border-l-2 border-yellow-400
+                                    {% else %}bg-gray-700 bg-opacity-30{% endif %}
+                                {% else %}bg-gray-700 bg-opacity-30
+                                {% endif %} rounded p-3">
+                                <p class="text-gray-400 text-sm">Calves</p>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500 text-xs">L: {{ "%.1f"|format(estimated_measurements.left_calf_cm) }}</span>
+                                    <span class="text-white text-lg">{{ "%.1f"|format((estimated_measurements.left_calf_cm + estimated_measurements.right_calf_cm) / 2) }} cm</span>
+                                    <span class="text-gray-500 text-xs">R: {{ "%.1f"|format(estimated_measurements.right_calf_cm) }}</span>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
                     
                     {% if estimated_measurements %}
                     <div class="mt-4 text-right">

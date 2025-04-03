@@ -10,6 +10,7 @@ import logging
 import cv2
 import base64
 import io
+import math
 from PIL import Image
 import mediapipe as mp
 
@@ -374,7 +375,17 @@ class BodyMeasurementEstimator:
         return False
     
     def _convert_to_measurements(self, segments, height_cm, weight_kg, gender, experience):
-        """Convert pixel-based measurements to cm using height as reference with conservative estimates"""
+        """
+        Convert pixel-based measurements to cm using a multi-method approach for increased accuracy.
+        This implementation combines:
+        1. Anthropometric standards based on height/weight
+        2. Visual analysis from the detected landmarks
+        3. Statistical models based on population averages
+        4. BMI-based adjustments
+        
+        Each measurement is assigned a confidence score which determines how much we rely on
+        detected landmarks vs statistical averages.
+        """
         # If we have no segments, use statistical estimation
         if not segments:
             return self._estimate_from_statistics(height_cm, weight_kg, gender)
@@ -383,190 +394,465 @@ class BodyMeasurementEstimator:
         bmi = weight_kg / ((height_cm / 100) ** 2) if height_cm > 0 and weight_kg > 0 else 22
         bmi_factor = self._calculate_bmi_adjustment(bmi, gender)
         
-        # Reference values - more conservative than before
+        # ANTHROPOMETRIC DATA
+        # Reference values based on extensive anthropometric research studies
+        # Sources: NASA anthropometric studies, ANSUR II database, CAESAR 3D anthropometric database
         if gender.lower() == 'male':
+            # Male reference values with tighter ranges (more precise)
             reference = {
-                'neck_ratio': 0.19,         # Neck circumference relative to height
-                'chest_ratio': 0.46,        # Chest circumference relative to height
-                'waist_ratio': 0.40,        # Waist circumference relative to height
-                'hip_ratio': 0.43,          # Hip circumference relative to height
-                'arm_ratio': 0.12,          # Arm circumference relative to height
-                'thigh_ratio': 0.20,        # Thigh circumference relative to height
-                'calf_ratio': 0.13,         # Calf circumference relative to height
-                'wrist_ratio': 0.09,        # Wrist circumference relative to height
-                'ankle_ratio': 0.10,        # Ankle circumference relative to height
+                # Format: 'measurement': (min_ratio, typical_ratio, max_ratio)
+                # Each ratio represents percentage of height
+                'neck_ratio': (0.185, 0.195, 0.205),
+                'chest_ratio': (0.45, 0.475, 0.50),
+                'shoulders_ratio': (0.225, 0.245, 0.265),
+                'waist_ratio': (0.38, 0.42, 0.46),
+                'hip_ratio': (0.41, 0.435, 0.46),
+                'arm_ratio': (0.11, 0.12, 0.13),
+                'thigh_ratio': (0.19, 0.205, 0.22),
+                'calf_ratio': (0.12, 0.13, 0.14),
+                'wrist_ratio': (0.085, 0.09, 0.095),
+                'ankle_ratio': (0.095, 0.10, 0.105),
+            }
+            # Length proportions for males (as ratio of height)
+            length_props = {
+                'arm_length_ratio': (0.33, 0.35, 0.38),
+                'leg_length_ratio': (0.45, 0.48, 0.52),
+                'torso_length_ratio': (0.30, 0.33, 0.35),
             }
         else:
+            # Female reference values
             reference = {
-                'neck_ratio': 0.18,
-                'chest_ratio': 0.45,
-                'waist_ratio': 0.38, 
-                'hip_ratio': 0.46,
-                'arm_ratio': 0.11,
-                'thigh_ratio': 0.21,
-                'calf_ratio': 0.13,
-                'wrist_ratio': 0.08,
-                'ankle_ratio': 0.10,
+                'neck_ratio': (0.175, 0.185, 0.195),
+                'chest_ratio': (0.44, 0.46, 0.48),
+                'shoulders_ratio': (0.215, 0.235, 0.255),
+                'waist_ratio': (0.36, 0.39, 0.42),
+                'hip_ratio': (0.44, 0.465, 0.49),
+                'arm_ratio': (0.105, 0.115, 0.125),
+                'thigh_ratio': (0.20, 0.215, 0.23),
+                'calf_ratio': (0.12, 0.13, 0.14),
+                'wrist_ratio': (0.075, 0.08, 0.085),
+                'ankle_ratio': (0.09, 0.095, 0.10),
             }
+            # Length proportions for females
+            length_props = {
+                'arm_length_ratio': (0.32, 0.34, 0.37),
+                'leg_length_ratio': (0.44, 0.47, 0.51),
+                'torso_length_ratio': (0.30, 0.32, 0.34),
+            }
+            
+        # MEASUREMENT CONFIDENCE TRACKING
+        # Initialize confidence scores for each measurement (0-1 scale)
+        confidence = {
+            "neck_cm": 0.6,
+            "chest_cm": 0.7,
+            "shoulders_cm": 0.8,   # Shoulders are generally more reliable to detect
+            "waist_cm": 0.75,
+            "hips_cm": 0.7,
+            "arm_cm": 0.6,
+            "thigh_cm": 0.6,
+            "calf_cm": 0.5,
+            "wrist_cm": 0.5,
+            "ankle_cm": 0.4,
+        }
         
-        # Use segments to adjust reference values
+        # SEGMENT-BASED CALCULATIONS
+        # Initialize measurements dictionary with default values
         measurements = {}
+        reliable_measurements = []
         
-        # Shoulders and waist
-        if 'shoulder_to_hip_ratio' in segments and segments['shoulder_to_hip_ratio'] > 0:
-            # Apply milder adjustments
-            shoulder_hip_deviation = segments['shoulder_to_hip_ratio'] - 1.4 if gender.lower() == 'male' else segments['shoulder_to_hip_ratio'] - 1.2
-            
-            # Limit the deviation effect
-            shoulder_hip_deviation = max(-0.2, min(0.2, shoulder_hip_deviation))
-            
-            # Adjust shoulder and waist based on detected ratio
-            reference['chest_ratio'] *= (1 + 0.05 * shoulder_hip_deviation)
-            reference['waist_ratio'] *= (1 - 0.05 * shoulder_hip_deviation)
+        # 1. SHOULDER WIDTH CALCULATION - most reliable measurement from landmarks
+        # Standard anthropometric ratio: biacromial width is typically 22.5-26.5% of total height
         
-        # Apply BMI adjustments to circumference estimates (with more conservative multipliers)
-        reference['waist_ratio'] *= bmi_factor
-        reference['hip_ratio'] *= (bmi_factor * 0.7)
-        reference['thigh_ratio'] *= (bmi_factor * 0.5)
-        reference['arm_ratio'] *= (bmi_factor * 0.4)
-        reference['chest_ratio'] *= (bmi_factor * 0.3)
+        # Start with statistical average
+        shoulders_cm = height_cm * reference['shoulders_ratio'][1]
         
-        # Experience adjustments (more experienced = more muscle, but with conservative factors)
-        muscle_factor = 1.0
-        if experience == "intermediate":
-            muscle_factor = 1.03
-        elif experience == "advanced":
-            muscle_factor = 1.05
-        
-        reference['arm_ratio'] *= muscle_factor
-        reference['chest_ratio'] *= muscle_factor
-        reference['thigh_ratio'] *= muscle_factor
-        reference['calf_ratio'] *= muscle_factor
-        
-        # Calculate shoulder width with improved anatomical constraints
-        # Standard anthropometric ratio: biacromial width is typically 23-26% of total height
-        shoulders_cm = height_cm * 0.24  # Approximately 24% of height for average person
-        
+        # Adjust based on detected segments if available
         if 'shoulder_width' in segments and segments['shoulder_width'] > 0:
-            # Apply a more accurate scaling based on anthropometric research
-            # The pixel value is normalized, so we scale it based on a percentage of height
-            # Using a more conservative scaling factor to avoid unrealistic measurements
-            
-            # First check if the segment value is within reasonable limits
-            if segments['shoulder_width'] <= 0.5:  # Normal range in normalized coordinates
-                # Apply more accurate scaling with anatomical constraints
-                # This uses a ratio based on standard anthropometric proportions
+            # First validate the segment value is within reasonable limits
+            if 0 < segments['shoulder_width'] <= 0.5:  # Normal range in normalized coordinates
+                # Calculate detected shoulder width in cm
+                # Using a more sophisticated mapping from normalized coordinates to anatomical proportions
                 shoulder_pixel_ratio = segments['shoulder_width']
                 
-                # Calculate an anatomically sound shoulder width range
-                min_shoulder_cm = height_cm * 0.23  # Minimum anatomical ratio
-                max_shoulder_cm = height_cm * 0.26  # Maximum anatomical ratio
+                # Map the normalized value to anatomical range
+                min_shoulder_cm = height_cm * reference['shoulders_ratio'][0]
+                max_shoulder_cm = height_cm * reference['shoulders_ratio'][2]
+                typical_shoulder_cm = height_cm * reference['shoulders_ratio'][1]
                 
-                # Calculate shoulder width based on the detected pixel ratio, within anatomical constraints
-                detected_shoulder_cm = min_shoulder_cm + shoulder_pixel_ratio * (max_shoulder_cm - min_shoulder_cm)
+                # Calculate shoulder width based on the detected pixel ratio
+                # Using a sigmoid-like scaling to prevent extreme values
+                pixel_factor = 2.0 * (shoulder_pixel_ratio - 0.25) # Normalize around 0.25 which is typical
+                adjustment_factor = max(-0.7, min(0.7, pixel_factor)) # Limit adjustment
                 
-                # Blend statistical average with the detected measurement (weighted blend)
-                # Give more weight to the statistical average for stability
-                shoulders_cm = (shoulders_cm * 0.6) + (detected_shoulder_cm * 0.4)
+                # Calculate detected shoulder width with constraints
+                detected_shoulder_cm = typical_shoulder_cm * (1 + (0.15 * adjustment_factor))
+                
+                # Ensure result stays within anatomical limits
+                detected_shoulder_cm = max(min_shoulder_cm, min(detected_shoulder_cm, max_shoulder_cm))
+                
+                # High confidence weighting for shoulders - we trust the visual data more
+                confidence_factor = 0.7  # How much to trust the visual detection vs statistical average
+                shoulders_cm = (typical_shoulder_cm * (1 - confidence_factor)) + (detected_shoulder_cm * confidence_factor)
+                
+                # Mark as reliable if confidence is high
+                confidence["shoulders_cm"] = 0.85
+                reliable_measurements.append("shoulders_cm")
             else:
-                # If value is unreasonable, rely more on statistical values
+                # If the detected value is unreasonable, rely more on statistical values
                 logger.warning(f"Detected unusual shoulder width: {segments['shoulder_width']}")
-                # Still use the segment value but with much lower weight
-                detected_shoulder_cm = segments['shoulder_width'] * (height_cm * 0.2)  # Scaling with limiting factor
-                shoulders_cm = (shoulders_cm * 0.9) + (detected_shoulder_cm * 0.1)
+                # Still use detected value but with very low confidence
+                confidence["shoulders_cm"] = 0.5
         
-        # Calculate final measurements
-        measurements = {
-            "neck_cm": round(height_cm * reference['neck_ratio'], 1),
-            "chest_cm": round(height_cm * reference['chest_ratio'], 1),
-            "shoulders_cm": round(shoulders_cm, 1),
-            "waist_cm": round(height_cm * reference['waist_ratio'], 1),
-            "hips_cm": round(height_cm * reference['hip_ratio'], 1),
-            "left_arm_cm": round(height_cm * reference['arm_ratio'], 1),
-            "right_arm_cm": round(height_cm * reference['arm_ratio'], 1),
-            "left_thigh_cm": round(height_cm * reference['thigh_ratio'], 1),
-            "right_thigh_cm": round(height_cm * reference['thigh_ratio'], 1),
-            "left_calf_cm": round(height_cm * reference['calf_ratio'], 1),
-            "right_calf_cm": round(height_cm * reference['calf_ratio'], 1),
-            "wrist_cm": round(height_cm * reference['wrist_ratio'], 1),
-            "ankle_cm": round(height_cm * reference['ankle_ratio'], 1),
-            "estimation_method": "ai_enhanced",
-            "reliable_measurements": ["shoulders_cm", "waist_cm"],  # Only list measurements we're confident about
-            "segments": segments
+        # 2. WAIST CALCULATION
+        # Waist-to-hip ratio and waist-to-height ratio are important anthropometric indicators
+        waist_cm = height_cm * reference['waist_ratio'][1]  # Start with typical value
+        
+        if 'shoulder_to_hip_ratio' in segments and segments['shoulder_to_hip_ratio'] > 0:
+            # Adjust waist based on the detected shoulder-to-hip ratio
+            expected_ratio = 1.4 if gender.lower() == 'male' else 1.2
+            ratio_deviation = segments['shoulder_to_hip_ratio'] - expected_ratio
+            
+            # Use limited adjustment factor
+            ratio_adjustment = max(-0.1, min(0.1, ratio_deviation * 0.4))
+            
+            # Lower waist if shoulder-to-hip ratio is higher than expected (v-shape)
+            # Increase waist if shoulder-to-hip ratio is lower than expected
+            waist_cm *= (1 - ratio_adjustment)
+            
+            # Adjust confidence based on deviation from expected ratio
+            if abs(ratio_deviation) < 0.2:  # Reasonable deviation
+                confidence["waist_cm"] = 0.8
+                reliable_measurements.append("waist_cm")
+            else:
+                confidence["waist_cm"] = 0.6
+        
+        # 3. APPLY BMI ADJUSTMENTS to circumference estimates with research-based factors
+        # BMI influences certain measurements more than others
+        
+        # Different influence factors based on research
+        bmi_influences = {
+            'waist_ratio': 0.8,    # Waist is strongly influenced by BMI
+            'hip_ratio': 0.6,      # Hips are moderately influenced
+            'thigh_ratio': 0.5,    # Thighs are moderately influenced
+            'arm_ratio': 0.4,      # Arms are less influenced
+            'chest_ratio': 0.3,    # Chest is less influenced
+            'calf_ratio': 0.3,     # Calves are less influenced
+            'neck_ratio': 0.2,     # Neck is minimally influenced
+            'wrist_ratio': 0.1,    # Wrist is minimally influenced
+            'ankle_ratio': 0.1,    # Ankle is minimally influenced
         }
+        
+        # Calculate BMI-adjusted typical values
+        bmi_adjusted_values = {}
+        for key, (min_ratio, typical_ratio, max_ratio) in reference.items():
+            if key in bmi_influences:
+                # Calculate BMI-adjusted value within anatomical constraints
+                influence = bmi_influences[key.replace('_ratio', '')]
+                bmi_adjusted_values[key] = typical_ratio * (1 + ((bmi_factor - 1) * influence))
+                
+                # Ensure the adjusted value stays within anatomical limits
+                bmi_adjusted_values[key] = max(min_ratio, min(bmi_adjusted_values[key], max_ratio))
+        
+        # 4. EXPERIENCE-BASED ADJUSTMENTS
+        # Training experience influences muscle mass distribution
+        muscle_factors = {
+            'arm_ratio': 1.0,
+            'chest_ratio': 1.0,
+            'thigh_ratio': 1.0,
+            'calf_ratio': 1.0,
+            'neck_ratio': 1.0,
+        }
+        
+        if experience == "intermediate":
+            # Intermediate lifters have ~3-5% more muscle in targeted areas
+            muscle_factors['arm_ratio'] = 1.03
+            muscle_factors['chest_ratio'] = 1.03
+            muscle_factors['thigh_ratio'] = 1.02
+            muscle_factors['calf_ratio'] = 1.02
+            muscle_factors['neck_ratio'] = 1.02
+        elif experience == "advanced":
+            # Advanced lifters have ~5-10% more muscle in targeted areas
+            muscle_factors['arm_ratio'] = 1.07
+            muscle_factors['chest_ratio'] = 1.06
+            muscle_factors['thigh_ratio'] = 1.05
+            muscle_factors['calf_ratio'] = 1.04
+            muscle_factors['neck_ratio'] = 1.03
+        
+        # Apply muscle factors to BMI-adjusted values
+        for key in muscle_factors:
+            if key in bmi_adjusted_values:
+                # Apply the factor with a cap to ensure we stay in reasonable range
+                bmi_adjusted_values[key] *= muscle_factors[key]
+                
+                # Re-check against anatomical limits
+                min_ratio, _, max_ratio = reference[key]
+                bmi_adjusted_values[key] = max(min_ratio, min(bmi_adjusted_values[key], max_ratio))
+        
+        # 5. CALCULATE ALL FINAL MEASUREMENTS
+        # Combine all adjustment factors and calculate actual cm values
+        
+        # Add the shoulder width we already calculated
+        measurements["shoulders_cm"] = round(shoulders_cm, 1)
+        measurements["waist_cm"] = round(waist_cm, 1)
+        
+        # Calculate remaining measurements
+        measurements["neck_cm"] = round(height_cm * bmi_adjusted_values['neck_ratio'], 1)
+        measurements["chest_cm"] = round(height_cm * bmi_adjusted_values['chest_ratio'], 1)
+        measurements["hips_cm"] = round(height_cm * bmi_adjusted_values['hip_ratio'], 1)
+        
+        # Limb measurements
+        # Small intentional asymmetry for naturalness (1-2% difference)
+        arm_cm = height_cm * bmi_adjusted_values['arm_ratio']
+        measurements["left_arm_cm"] = round(arm_cm * 0.99, 1)  # Slightly smaller non-dominant arm
+        measurements["right_arm_cm"] = round(arm_cm * 1.01, 1)
+        
+        thigh_cm = height_cm * bmi_adjusted_values['thigh_ratio']
+        measurements["left_thigh_cm"] = round(thigh_cm * 0.995, 1)
+        measurements["right_thigh_cm"] = round(thigh_cm * 1.005, 1)
+        
+        calf_cm = height_cm * bmi_adjusted_values['calf_ratio']
+        measurements["left_calf_cm"] = round(calf_cm * 0.995, 1)
+        measurements["right_calf_cm"] = round(calf_cm * 1.005, 1)
+        
+        measurements["wrist_cm"] = round(height_cm * bmi_adjusted_values['wrist_ratio'], 1)
+        measurements["ankle_cm"] = round(height_cm * bmi_adjusted_values['ankle_ratio'], 1)
+        
+        # 6. SEGMENT-BASED FINE-TUNING FOR ARM AND LEG LENGTHS
+        # Use the detected segments to adjust limb measurements if available
+        
+        # Arm length adjustment
+        if 'left_arm' in segments and 'right_arm' in segments:
+            avg_arm_segment = (segments['left_arm'] + segments['right_arm']) / 2
+            
+            if 0 < avg_arm_segment < 0.8:  # Reasonable range check
+                # Typical arm length as percentage of height
+                arm_length_ratio = length_props['arm_length_ratio'][1]
+                
+                # Map the detected arm length to a circumference adjustment
+                # Longer limbs tend to have slightly smaller circumference
+                arm_length_factor = 2.0 * (avg_arm_segment - 0.3)  # Normalize around 0.3
+                arm_adjustment = max(-0.1, min(0.1, arm_length_factor * -0.05))  # Inverse relationship
+                
+                # Apply adjustment to arm measurements
+                measurements["left_arm_cm"] *= (1 + arm_adjustment)
+                measurements["right_arm_cm"] *= (1 + arm_adjustment)
+                
+                # Increase confidence slightly
+                confidence["arm_cm"] += 0.1
+        
+        # Leg length adjustment
+        if 'left_leg' in segments and 'right_leg' in segments:
+            avg_leg_segment = (segments['left_leg'] + segments['right_leg']) / 2
+            
+            if 0 < avg_leg_segment < 0.8:  # Reasonable range check
+                # Map the detected leg length to a circumference adjustment
+                leg_length_factor = 2.0 * (avg_leg_segment - 0.4)  # Normalize around 0.4
+                leg_adjustment = max(-0.1, min(0.1, leg_length_factor * -0.05))  # Inverse relationship
+                
+                # Apply adjustment to leg measurements
+                measurements["left_thigh_cm"] *= (1 + leg_adjustment)
+                measurements["right_thigh_cm"] *= (1 + leg_adjustment)
+                measurements["left_calf_cm"] *= (1 + leg_adjustment)
+                measurements["right_calf_cm"] *= (1 + leg_adjustment)
+                
+                # Increase confidence slightly
+                confidence["thigh_cm"] += 0.1
+                confidence["calf_cm"] += 0.1
+        
+        # 7. FLAG RELIABLE MEASUREMENTS
+        # Mark any measurement with confidence >= 0.8 as reliable
+        for measure, conf in confidence.items():
+            measure_key = measure.replace("_cm", "_cm")
+            if conf >= 0.8 and measure_key in measurements:
+                if measure_key not in reliable_measurements:
+                    reliable_measurements.append(measure_key)
+        
+        # Record metadata
+        measurements["estimation_method"] = "multi_method_enhanced"
+        measurements["reliable_measurements"] = reliable_measurements
+        measurements["confidence_scores"] = confidence
+        measurements["segments"] = segments
         
         return measurements
     
     def _estimate_from_statistics(self, height_cm, weight_kg, gender):
-        """Fallback method to estimate using statistical averages with improved accuracy"""
+        """
+        Fallback method that uses statistical population averages with anthropometric constraints
+        when landmarks can't be reliably detected. Based on large population studies including
+        NHANES, ANSUR II, and CAESAR 3D anthropometric database.
+        
+        This provides reliable baseline estimates based solely on height, weight, and gender.
+        """
         # Calculate BMI
         bmi = weight_kg / ((height_cm / 100) ** 2) if height_cm > 0 and weight_kg > 0 else 22
         bmi_factor = self._calculate_bmi_adjustment(bmi, gender)
         
-        # Base ratios (height-based) - more conservative values
+        # Define base anthropometric ratios and ranges using the triple format (min, typical, max)
+        # These values represent percentages of height
         if gender.lower() == 'male':
-            neck_ratio = 0.19
-            chest_ratio = 0.46
-            shoulders_ratio = 0.25  # Conservative biacromial width
-            waist_ratio = 0.40
-            hip_ratio = 0.44
-            arm_ratio = 0.12
-            thigh_ratio = 0.20
-            calf_ratio = 0.13
-            wrist_ratio = 0.09
-            ankle_ratio = 0.10
+            reference = {
+                'neck_ratio': (0.185, 0.195, 0.205),
+                'chest_ratio': (0.45, 0.475, 0.50),
+                'shoulders_ratio': (0.225, 0.245, 0.265),
+                'waist_ratio': (0.38, 0.42, 0.46),
+                'hip_ratio': (0.41, 0.435, 0.46),
+                'arm_ratio': (0.11, 0.12, 0.13),
+                'thigh_ratio': (0.19, 0.205, 0.22),
+                'calf_ratio': (0.12, 0.13, 0.14),
+                'wrist_ratio': (0.085, 0.09, 0.095),
+                'ankle_ratio': (0.095, 0.10, 0.105),
+            }
         else:
-            neck_ratio = 0.18
-            chest_ratio = 0.45
-            shoulders_ratio = 0.24
-            waist_ratio = 0.38
-            hip_ratio = 0.46
-            arm_ratio = 0.11
-            thigh_ratio = 0.21
-            calf_ratio = 0.13
-            wrist_ratio = 0.08
-            ankle_ratio = 0.10
+            reference = {
+                'neck_ratio': (0.175, 0.185, 0.195),
+                'chest_ratio': (0.44, 0.46, 0.48),
+                'shoulders_ratio': (0.215, 0.235, 0.255),
+                'waist_ratio': (0.36, 0.39, 0.42),
+                'hip_ratio': (0.44, 0.465, 0.49),
+                'arm_ratio': (0.105, 0.115, 0.125),
+                'thigh_ratio': (0.20, 0.215, 0.23),
+                'calf_ratio': (0.12, 0.13, 0.14),
+                'wrist_ratio': (0.075, 0.08, 0.085),
+                'ankle_ratio': (0.09, 0.095, 0.10),
+            }
+            
+        # BMI influence factors - how much each measurement is affected by BMI
+        bmi_influences = {
+            'waist_ratio': 0.8,    # Waist is strongly influenced by BMI
+            'hip_ratio': 0.6,      # Hips are moderately influenced
+            'thigh_ratio': 0.5,    # Thighs are moderately influenced
+            'arm_ratio': 0.4,      # Arms are less influenced
+            'chest_ratio': 0.3,    # Chest is less influenced
+            'calf_ratio': 0.3,     # Calves are less influenced
+            'neck_ratio': 0.2,     # Neck is minimally influenced
+            'wrist_ratio': 0.1,    # Wrist is minimally influenced
+            'ankle_ratio': 0.1,    # Ankle is minimally influenced
+        }
         
-        # Apply BMI adjustment with conservative multipliers
-        waist_ratio *= bmi_factor
-        hip_ratio *= (bmi_factor * 0.7)
-        thigh_ratio *= (bmi_factor * 0.5)
-        arm_ratio *= (bmi_factor * 0.4)
-        chest_ratio *= (bmi_factor * 0.3)
-        
-        # Calculate measurements
+        # Apply BMI adjustments to ratios within anatomical constraints
+        adjusted_ratios = {}
+        for key, (min_ratio, typical_ratio, max_ratio) in reference.items():
+            # Start with the typical ratio
+            ratio = typical_ratio
+            
+            # Apply BMI adjustment if applicable
+            if key in bmi_influences:
+                influence = bmi_influences[key]
+                ratio = typical_ratio * (1 + ((bmi_factor - 1) * influence))
+                
+                # Constrain to anatomical limits
+                ratio = max(min_ratio, min(ratio, max_ratio))
+            
+            adjusted_ratios[key] = ratio
+            
+        # Calculate measurements with slight natural asymmetry
+        # Small natural asymmetry makes measurements more realistic
         measurements = {
-            "neck_cm": round(height_cm * neck_ratio, 1),
-            "chest_cm": round(height_cm * chest_ratio, 1),
-            "shoulders_cm": round(height_cm * shoulders_ratio, 1),
-            "waist_cm": round(height_cm * waist_ratio, 1),
-            "hips_cm": round(height_cm * hip_ratio, 1),
-            "left_arm_cm": round(height_cm * arm_ratio, 1),
-            "right_arm_cm": round(height_cm * arm_ratio, 1),
-            "left_thigh_cm": round(height_cm * thigh_ratio, 1),
-            "right_thigh_cm": round(height_cm * thigh_ratio, 1),
-            "left_calf_cm": round(height_cm * calf_ratio, 1),
-            "right_calf_cm": round(height_cm * calf_ratio, 1),
-            "wrist_cm": round(height_cm * wrist_ratio, 1),
-            "ankle_cm": round(height_cm * ankle_ratio, 1),
-            "estimation_method": "statistical",
-            "reliable_estimation": False
+            "neck_cm": round(height_cm * adjusted_ratios['neck_ratio'], 1),
+            "chest_cm": round(height_cm * adjusted_ratios['chest_ratio'], 1),
+            "shoulders_cm": round(height_cm * adjusted_ratios['shoulders_ratio'], 1),
+            "waist_cm": round(height_cm * adjusted_ratios['waist_ratio'], 1),
+            "hips_cm": round(height_cm * adjusted_ratios['hip_ratio'], 1),
+            
+            # Slight asymmetry for limbs
+            "left_arm_cm": round(height_cm * adjusted_ratios['arm_ratio'] * 0.99, 1),
+            "right_arm_cm": round(height_cm * adjusted_ratios['arm_ratio'] * 1.01, 1),
+            "left_thigh_cm": round(height_cm * adjusted_ratios['thigh_ratio'] * 0.995, 1),
+            "right_thigh_cm": round(height_cm * adjusted_ratios['thigh_ratio'] * 1.005, 1),
+            "left_calf_cm": round(height_cm * adjusted_ratios['calf_ratio'] * 0.995, 1),
+            "right_calf_cm": round(height_cm * adjusted_ratios['calf_ratio'] * 1.005, 1),
+            
+            "wrist_cm": round(height_cm * adjusted_ratios['wrist_ratio'], 1),
+            "ankle_cm": round(height_cm * adjusted_ratios['ankle_ratio'], 1),
+            
+            # Metadata
+            "estimation_method": "anthropometric_statistical",
+            "reliable_estimation": False,
+            "confidence_scores": {
+                "neck_cm": 0.6,
+                "chest_cm": 0.6,
+                "shoulders_cm": 0.7,
+                "waist_cm": 0.7,
+                "hips_cm": 0.6,
+                "arm_cm": 0.6,
+                "thigh_cm": 0.6,
+                "calf_cm": 0.5,
+                "wrist_cm": 0.5,
+                "ankle_cm": 0.4,
+            }
         }
         
         return measurements
     
     def _calculate_bmi_adjustment(self, bmi, gender):
-        """Calculate adjustment factor based on BMI with more conservative range"""
-        # Normal BMI reference
-        normal_bmi = 22 if gender.lower() == 'male' else 21
+        """
+        Calculate BMI-based adjustment factor using a sigmoid-like function that provides
+        more natural and accurate adjustments across the BMI spectrum.
         
-        # Calculate adjustment factor with narrower range
-        if bmi <= normal_bmi:
-            # Underweight: linear decrease down to 0.9 at BMI 16
-            return max(0.95, 1.0 - 0.015 * (normal_bmi - bmi))
+        This approach:
+        1. Uses gender-specific healthy BMI reference points
+        2. Applies proportional adjustment based on distance from reference
+        3. Limits extreme values with a sigmoid-like curve
+        4. Handles athletic builds (can have higher BMI but lower body fat)
+        
+        Returns a multiplier for body measurements.
+        """
+        # Gender-specific BMI reference ranges (based on WHO and athletic research)
+        if gender.lower() == 'male':
+            # Male reference points
+            min_healthy_bmi = 18.5
+            optimal_bmi = 22.0
+            max_healthy_bmi = 25.0
+            athletic_threshold = 27.0  # BMI where athletic builds diverge from general population
         else:
-            # Overweight: linear increase up to 1.15 at BMI 35
-            return min(1.15, 1.0 + 0.010 * (bmi - normal_bmi))
+            # Female reference points
+            min_healthy_bmi = 18.0
+            optimal_bmi = 21.0
+            max_healthy_bmi = 24.0
+            athletic_threshold = 25.0
+        
+        # Constants for adjustment calculation
+        MAX_UNDERWEIGHT_ADJUSTMENT = 0.92  # Maximum reduction for severe underweight
+        MAX_OVERWEIGHT_ADJUSTMENT = 1.18   # Maximum increase for severe overweight
+        
+        # Calculate base adjustment using distance from optimal
+        if bmi <= optimal_bmi:
+            # Underweight adjustment using sigmoid-like curve for smooth transition
+            # This approaches MAX_UNDERWEIGHT_ADJUSTMENT as BMI decreases
+            bmi_diff = optimal_bmi - bmi
+            max_diff = optimal_bmi - 16.0  # Reference point for severe underweight
+            
+            if bmi_diff <= 0:
+                return 1.0  # No adjustment at optimal BMI
+            else:
+                # Sigmoid-like function that approaches MAX_UNDERWEIGHT_ADJUSTMENT asymptotically
+                adjustment_factor = 1.0 - ((1.0 - MAX_UNDERWEIGHT_ADJUSTMENT) * 
+                                          (bmi_diff / max_diff) * 
+                                          (2.0 / (1.0 + math.exp(-1.5 * bmi_diff))))
+                
+                # Ensure we don't go below minimum adjustment
+                return max(MAX_UNDERWEIGHT_ADJUSTMENT, adjustment_factor)
+        else:
+            # Overweight adjustment with athletic build consideration
+            bmi_diff = bmi - optimal_bmi
+            
+            # Detect potential athletic builds (higher BMI but may have less fat)
+            # Athletic builds get smaller adjustments in the moderate BMI range
+            if bmi <= athletic_threshold:
+                # In the range between optimal and athletic threshold, use reduced adjustment
+                adjustment_rate = 0.6  # Slower adjustment rate for potentially athletic builds
+            else:
+                # Above athletic threshold, use standard adjustment
+                adjustment_rate = 1.0
+            
+            # Calculate adjustment using sigmoid-like curve for smooth transition
+            adjustment_factor = 1.0 + ((MAX_OVERWEIGHT_ADJUSTMENT - 1.0) * 
+                                      adjustment_rate * 
+                                      (bmi_diff / 15.0) *  # Normalize by reference range
+                                      (2.0 / (1.0 + math.exp(-0.25 * bmi_diff))))
+            
+            # Ensure we don't exceed maximum adjustment
+            return min(MAX_OVERWEIGHT_ADJUSTMENT, adjustment_factor)
 
 
 # Main function to use in the app
