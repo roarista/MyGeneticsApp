@@ -151,12 +151,88 @@ def preprocess_image(image_data, target_size=(512, 512)):
         return None, None
 
 
+class MeasurementValidator:
+    """Validates body measurements against anatomical constraints"""
+    
+    # Anatomically possible ranges as percentages of height
+    ANATOMICAL_RATIOS = {
+        'neck_cm': (0.17, 0.22),         # 17-22% of height
+        'chest_cm': (0.45, 0.52),        # 45-52% of height
+        'shoulders_cm': (0.23, 0.28),    # 23-28% of height (biacromial width)
+        'waist_cm': (0.35, 0.45),        # 35-45% of height
+        'hips_cm': (0.40, 0.48),         # 40-48% of height
+        'arm_cm': (0.1, 0.14),           # 10-14% of height (arm circumference)
+        'thigh_cm': (0.18, 0.22),        # 18-22% of height (thigh circumference)
+        'calf_cm': (0.12, 0.15),         # 12-15% of height
+        'wrist_cm': (0.08, 0.11),        # 8-11% of height
+        'ankle_cm': (0.09, 0.12),        # 9-12% of height
+    }
+    
+    @staticmethod
+    def validate_and_adjust(measurements: dict, height_cm: float) -> dict:
+        """
+        Validates measurements against anatomical constraints and adjusts if needed
+        """
+        if not height_cm or height_cm <= 0:
+            return measurements  # Can't validate without height
+            
+        validated = {}
+        
+        # Map measurement keys to validation keys
+        validation_map = {
+            'neck_cm': 'neck_cm',
+            'chest_cm': 'chest_cm',
+            'shoulders_cm': 'shoulders_cm',
+            'waist_cm': 'waist_cm',
+            'hips_cm': 'hips_cm',
+            'left_arm_cm': 'arm_cm',
+            'right_arm_cm': 'arm_cm',
+            'left_thigh_cm': 'thigh_cm',
+            'right_thigh_cm': 'thigh_cm',
+            'left_calf_cm': 'calf_cm',
+            'right_calf_cm': 'calf_cm',
+            'wrist_cm': 'wrist_cm',
+            'ankle_cm': 'ankle_cm',
+        }
+        
+        for measure, value in measurements.items():
+            # Skip non-measurement fields like method or segments
+            if measure in validation_map and isinstance(value, (int, float)):
+                validation_key = validation_map[measure]
+                
+                if validation_key in MeasurementValidator.ANATOMICAL_RATIOS:
+                    min_ratio, max_ratio = MeasurementValidator.ANATOMICAL_RATIOS[validation_key]
+                    min_value = height_cm * min_ratio
+                    max_value = height_cm * max_ratio
+                    
+                    if value < min_value:
+                        # If too small, set to minimum
+                        validated[measure] = round(min_value, 1)
+                    elif value > max_value:
+                        # If too large, set to maximum
+                        validated[measure] = round(max_value, 1)
+                    else:
+                        # Within range, keep as is
+                        validated[measure] = value
+                else:
+                    validated[measure] = value
+            else:
+                # Keep non-measurement values (like estimation_method)
+                validated[measure] = value
+                
+        # Add a flag indicating validation was performed
+        validated["validation_performed"] = True
+        
+        return validated
+
+
 class BodyMeasurementEstimator:
     def __init__(self):
         self.landmark_detector = BodyLandmarkDetector()
+        self.validator = MeasurementValidator()
     
     def estimate_measurements(self, image_data, height_cm, weight_kg, gender, experience="beginner"):
-        """Estimate body measurements from image and basic info"""
+        """Estimate body measurements from image and basic info with improved validation"""
         try:
             # Process image
             original_image, processed_image = preprocess_image(image_data)
@@ -173,85 +249,120 @@ class BodyMeasurementEstimator:
             segments = self.landmark_detector.calculate_body_segments(landmarks, h, w) if landmarks is not None else {}
             
             # Convert to real-world measurements using height as reference
-            measurements = self._convert_to_measurements(segments, height_cm, weight_kg, gender, experience)
+            raw_measurements = self._convert_to_measurements(segments, height_cm, weight_kg, gender, experience)
             
-            return measurements
+            # Validate and adjust measurements
+            validated_measurements = self.validator.validate_and_adjust(raw_measurements, height_cm)
+            
+            # Add reliable flag based on landmark quality
+            if landmarks is not None and self._has_reliable_landmarks(landmarks):
+                validated_measurements["reliable_estimation"] = True
+            else:
+                validated_measurements["reliable_estimation"] = False
+            
+            return validated_measurements
         
         except Exception as e:
             logger.error(f"Error estimating measurements: {str(e)}")
-            return self._estimate_from_statistics(height_cm, weight_kg, gender)
+            # Get statistical estimates and validate them too
+            raw_measurements = self._estimate_from_statistics(height_cm, weight_kg, gender)
+            validated_measurements = self.validator.validate_and_adjust(raw_measurements, height_cm)
+            validated_measurements["reliable_estimation"] = False
+            return validated_measurements
+    
+    def _has_reliable_landmarks(self, landmarks):
+        """Check if landmarks have good visibility and quality"""
+        # Check if landmarks contain visibility information
+        if landmarks.size > 0 and landmarks.shape[1] >= 4:
+            # Get visibility values (4th column)
+            visibilities = landmarks[:, 3]
+            # Consider landmarks reliable if average visibility is above threshold
+            return np.mean(visibilities) > 0.7
+        return False
     
     def _convert_to_measurements(self, segments, height_cm, weight_kg, gender, experience):
-        """Convert pixel-based measurements to cm using height as reference"""
+        """Convert pixel-based measurements to cm using height as reference with conservative estimates"""
         # If we have no segments, use statistical estimation
         if not segments:
             return self._estimate_from_statistics(height_cm, weight_kg, gender)
         
         # Calculate BMI for additional adjustment
-        bmi = weight_kg / ((height_cm / 100) ** 2)
+        bmi = weight_kg / ((height_cm / 100) ** 2) if height_cm > 0 and weight_kg > 0 else 22
         bmi_factor = self._calculate_bmi_adjustment(bmi, gender)
         
-        # Reference values
+        # Reference values - more conservative than before
         if gender.lower() == 'male':
             reference = {
-                'neck_ratio': 0.24,         # Neck circumference relative to height
-                'chest_ratio': 0.52,        # Chest circumference relative to height
-                'waist_ratio': 0.45,        # Waist circumference relative to height
-                'hip_ratio': 0.48,          # Hip circumference relative to height
-                'arm_ratio': 0.18,          # Arm circumference relative to height
-                'thigh_ratio': 0.28,        # Thigh circumference relative to height
-                'calf_ratio': 0.20,         # Calf circumference relative to height
-                'wrist_ratio': 0.11,        # Wrist circumference relative to height
-                'ankle_ratio': 0.13,        # Ankle circumference relative to height
+                'neck_ratio': 0.19,         # Neck circumference relative to height
+                'chest_ratio': 0.46,        # Chest circumference relative to height
+                'waist_ratio': 0.40,        # Waist circumference relative to height
+                'hip_ratio': 0.43,          # Hip circumference relative to height
+                'arm_ratio': 0.12,          # Arm circumference relative to height
+                'thigh_ratio': 0.20,        # Thigh circumference relative to height
+                'calf_ratio': 0.13,         # Calf circumference relative to height
+                'wrist_ratio': 0.09,        # Wrist circumference relative to height
+                'ankle_ratio': 0.10,        # Ankle circumference relative to height
             }
         else:
             reference = {
-                'neck_ratio': 0.20,
-                'chest_ratio': 0.49,
-                'waist_ratio': 0.41, 
-                'hip_ratio': 0.53,
-                'arm_ratio': 0.16,
-                'thigh_ratio': 0.30,
-                'calf_ratio': 0.19,
-                'wrist_ratio': 0.10,
-                'ankle_ratio': 0.12,
+                'neck_ratio': 0.18,
+                'chest_ratio': 0.45,
+                'waist_ratio': 0.38, 
+                'hip_ratio': 0.46,
+                'arm_ratio': 0.11,
+                'thigh_ratio': 0.21,
+                'calf_ratio': 0.13,
+                'wrist_ratio': 0.08,
+                'ankle_ratio': 0.10,
             }
         
         # Use segments to adjust reference values
         measurements = {}
         
         # Shoulders and waist
-        if 'shoulder_to_hip_ratio' in segments:
+        if 'shoulder_to_hip_ratio' in segments and segments['shoulder_to_hip_ratio'] > 0:
+            # Apply milder adjustments
             shoulder_hip_deviation = segments['shoulder_to_hip_ratio'] - 1.4 if gender.lower() == 'male' else segments['shoulder_to_hip_ratio'] - 1.2
             
+            # Limit the deviation effect
+            shoulder_hip_deviation = max(-0.2, min(0.2, shoulder_hip_deviation))
+            
             # Adjust shoulder and waist based on detected ratio
-            reference['chest_ratio'] *= (1 + 0.1 * shoulder_hip_deviation)
-            reference['waist_ratio'] *= (1 - 0.1 * shoulder_hip_deviation)
+            reference['chest_ratio'] *= (1 + 0.05 * shoulder_hip_deviation)
+            reference['waist_ratio'] *= (1 - 0.05 * shoulder_hip_deviation)
         
-        # Apply BMI adjustments to circumference estimates
+        # Apply BMI adjustments to circumference estimates (with more conservative multipliers)
         reference['waist_ratio'] *= bmi_factor
-        reference['hip_ratio'] *= (bmi_factor * 0.8)
-        reference['thigh_ratio'] *= (bmi_factor * 0.7)
-        reference['arm_ratio'] *= (bmi_factor * 0.6)
-        reference['chest_ratio'] *= (bmi_factor * 0.5)
+        reference['hip_ratio'] *= (bmi_factor * 0.7)
+        reference['thigh_ratio'] *= (bmi_factor * 0.5)
+        reference['arm_ratio'] *= (bmi_factor * 0.4)
+        reference['chest_ratio'] *= (bmi_factor * 0.3)
         
-        # Experience adjustments (more experienced = more muscle)
+        # Experience adjustments (more experienced = more muscle, but with conservative factors)
         muscle_factor = 1.0
         if experience == "intermediate":
-            muscle_factor = 1.05
+            muscle_factor = 1.03
         elif experience == "advanced":
-            muscle_factor = 1.1
+            muscle_factor = 1.05
         
         reference['arm_ratio'] *= muscle_factor
         reference['chest_ratio'] *= muscle_factor
         reference['thigh_ratio'] *= muscle_factor
         reference['calf_ratio'] *= muscle_factor
         
+        # Calculate shoulder width specifically - more conservative estimate
+        shoulders_cm = height_cm * 0.24  # Approximately 24% of height for average person
+        if 'shoulder_width' in segments and segments['shoulder_width'] > 0:
+            # Use the segment but scale appropriately
+            relative_shoulder_width = segments['shoulder_width'] * (height_cm / 4)  # Scaling factor
+            # Blend the statistical estimate with the measured value
+            shoulders_cm = (shoulders_cm + relative_shoulder_width) / 2
+        
         # Calculate final measurements
         measurements = {
             "neck_cm": round(height_cm * reference['neck_ratio'], 1),
             "chest_cm": round(height_cm * reference['chest_ratio'], 1),
-            "shoulders_cm": round(height_cm * reference['chest_ratio'] * 1.2, 1),
+            "shoulders_cm": round(shoulders_cm, 1),
             "waist_cm": round(height_cm * reference['waist_ratio'], 1),
             "hips_cm": round(height_cm * reference['hip_ratio'], 1),
             "left_arm_cm": round(height_cm * reference['arm_ratio'], 1),
@@ -263,47 +374,48 @@ class BodyMeasurementEstimator:
             "wrist_cm": round(height_cm * reference['wrist_ratio'], 1),
             "ankle_cm": round(height_cm * reference['ankle_ratio'], 1),
             "estimation_method": "ai_enhanced",
+            "reliable_measurements": ["shoulders_cm", "waist_cm"],  # Only list measurements we're confident about
             "segments": segments
         }
         
         return measurements
     
     def _estimate_from_statistics(self, height_cm, weight_kg, gender):
-        """Fallback method to estimate using statistical averages"""
+        """Fallback method to estimate using statistical averages with improved accuracy"""
         # Calculate BMI
-        bmi = weight_kg / ((height_cm / 100) ** 2)
+        bmi = weight_kg / ((height_cm / 100) ** 2) if height_cm > 0 and weight_kg > 0 else 22
         bmi_factor = self._calculate_bmi_adjustment(bmi, gender)
         
-        # Base ratios (height-based)
+        # Base ratios (height-based) - more conservative values
         if gender.lower() == 'male':
-            neck_ratio = 0.24
-            chest_ratio = 0.52
-            shoulders_ratio = 0.62
-            waist_ratio = 0.45
-            hip_ratio = 0.48
-            arm_ratio = 0.18
-            thigh_ratio = 0.28
-            calf_ratio = 0.20
-            wrist_ratio = 0.11
-            ankle_ratio = 0.13
+            neck_ratio = 0.19
+            chest_ratio = 0.46
+            shoulders_ratio = 0.25  # Conservative biacromial width
+            waist_ratio = 0.40
+            hip_ratio = 0.44
+            arm_ratio = 0.12
+            thigh_ratio = 0.20
+            calf_ratio = 0.13
+            wrist_ratio = 0.09
+            ankle_ratio = 0.10
         else:
-            neck_ratio = 0.20
-            chest_ratio = 0.49
-            shoulders_ratio = 0.54
-            waist_ratio = 0.41
-            hip_ratio = 0.53
-            arm_ratio = 0.16
-            thigh_ratio = 0.30
-            calf_ratio = 0.19
-            wrist_ratio = 0.10
-            ankle_ratio = 0.12
+            neck_ratio = 0.18
+            chest_ratio = 0.45
+            shoulders_ratio = 0.24
+            waist_ratio = 0.38
+            hip_ratio = 0.46
+            arm_ratio = 0.11
+            thigh_ratio = 0.21
+            calf_ratio = 0.13
+            wrist_ratio = 0.08
+            ankle_ratio = 0.10
         
-        # Apply BMI adjustment
+        # Apply BMI adjustment with conservative multipliers
         waist_ratio *= bmi_factor
-        hip_ratio *= (bmi_factor * 0.8)
-        thigh_ratio *= (bmi_factor * 0.7)
-        arm_ratio *= (bmi_factor * 0.6)
-        chest_ratio *= (bmi_factor * 0.5)
+        hip_ratio *= (bmi_factor * 0.7)
+        thigh_ratio *= (bmi_factor * 0.5)
+        arm_ratio *= (bmi_factor * 0.4)
+        chest_ratio *= (bmi_factor * 0.3)
         
         # Calculate measurements
         measurements = {
@@ -320,23 +432,24 @@ class BodyMeasurementEstimator:
             "right_calf_cm": round(height_cm * calf_ratio, 1),
             "wrist_cm": round(height_cm * wrist_ratio, 1),
             "ankle_cm": round(height_cm * ankle_ratio, 1),
-            "estimation_method": "statistical"
+            "estimation_method": "statistical",
+            "reliable_estimation": False
         }
         
         return measurements
     
     def _calculate_bmi_adjustment(self, bmi, gender):
-        """Calculate adjustment factor based on BMI"""
+        """Calculate adjustment factor based on BMI with more conservative range"""
         # Normal BMI reference
         normal_bmi = 22 if gender.lower() == 'male' else 21
         
-        # Calculate adjustment factor
+        # Calculate adjustment factor with narrower range
         if bmi <= normal_bmi:
             # Underweight: linear decrease down to 0.9 at BMI 16
-            return max(0.9, 1.0 - 0.025 * (normal_bmi - bmi))
+            return max(0.95, 1.0 - 0.015 * (normal_bmi - bmi))
         else:
-            # Overweight: linear increase up to 1.3 at BMI 35
-            return min(1.3, 1.0 + 0.023 * (bmi - normal_bmi))
+            # Overweight: linear increase up to 1.15 at BMI 35
+            return min(1.15, 1.0 + 0.010 * (bmi - normal_bmi))
 
 
 # Main function to use in the app

@@ -99,81 +99,91 @@ def complete_bodybuilding_analysis(user_data):
                                        min(body_fat_percentage, 40))
         
         # Categorize body fat percentage
-        if gender.lower() == 'male':
-            if body_fat_percentage < 8:
-                bf_category = "Very Lean (Competition)"
-            elif body_fat_percentage < 12:
-                bf_category = "Lean (Athletic)"
-            elif body_fat_percentage < 18:
-                bf_category = "Fit"
-            elif body_fat_percentage < 25:
-                bf_category = "Average"
+        bf_category = "Not Available"
+        if body_fat_percentage is not None:
+            if gender.lower() == 'male':
+                if body_fat_percentage < 8:
+                    bf_category = "Very Lean (Competition)"
+                elif body_fat_percentage < 12:
+                    bf_category = "Lean (Athletic)"
+                elif body_fat_percentage < 18:
+                    bf_category = "Fit"
+                elif body_fat_percentage < 25:
+                    bf_category = "Average"
+                else:
+                    bf_category = "Above Average"
             else:
-                bf_category = "Above Average"
-        else:
-            if body_fat_percentage < 15:
-                bf_category = "Very Lean (Competition)"
-            elif body_fat_percentage < 20:
-                bf_category = "Lean (Athletic)"
-            elif body_fat_percentage < 25:
-                bf_category = "Fit"
-            elif body_fat_percentage < 32:
-                bf_category = "Average"
-            else:
-                bf_category = "Above Average"
+                if body_fat_percentage < 15:
+                    bf_category = "Very Lean (Competition)"
+                elif body_fat_percentage < 20:
+                    bf_category = "Lean (Athletic)"
+                elif body_fat_percentage < 25:
+                    bf_category = "Fit"
+                elif body_fat_percentage < 32:
+                    bf_category = "Average"
+                else:
+                    bf_category = "Above Average"
         
         # Calculate lean body mass
         lbm = calculate_lean_body_mass(weight_kg, body_fat_percentage)
         
         # Calculate FFMI (Fat-Free Mass Index)
-        ffmi = calculate_fat_free_mass_index(lbm, height_cm)
+        ffmi = calculate_fat_free_mass_index(lbm, height_cm) if lbm is not None else None
         
         # Calculate normalized FFMI
-        norm_ffmi = calculate_normalized_ffmi(ffmi, height_cm)
+        norm_ffmi = calculate_normalized_ffmi(ffmi, height_cm) if ffmi is not None else None
         
         # Categorize FFMI
-        if gender.lower() == 'male':
-            if norm_ffmi < 18:
-                ffmi_category = "Below Average"
-            elif norm_ffmi < 20:
-                ffmi_category = "Average"
-            elif norm_ffmi < 22:
-                ffmi_category = "Above Average"
-            elif norm_ffmi < 24:
-                ffmi_category = "Excellent"
-            elif norm_ffmi < 26:
-                ffmi_category = "Superior"
+        ffmi_category = "Not Available"
+        if norm_ffmi is not None:
+            if gender.lower() == 'male':
+                if norm_ffmi < 18:
+                    ffmi_category = "Below Average"
+                elif norm_ffmi < 20:
+                    ffmi_category = "Average"
+                elif norm_ffmi < 22:
+                    ffmi_category = "Above Average"
+                elif norm_ffmi < 24:
+                    ffmi_category = "Excellent"
+                elif norm_ffmi < 26:
+                    ffmi_category = "Superior"
+                else:
+                    ffmi_category = "Exceptional"
             else:
-                ffmi_category = "Exceptional"
-        else:
-            if norm_ffmi < 16:
-                ffmi_category = "Below Average"
-            elif norm_ffmi < 18:
-                ffmi_category = "Average"
-            elif norm_ffmi < 20:
-                ffmi_category = "Above Average"
-            elif norm_ffmi < 22:
-                ffmi_category = "Excellent"
-            elif norm_ffmi < 24:
-                ffmi_category = "Superior"
-            else:
-                ffmi_category = "Exceptional"
+                if norm_ffmi < 16:
+                    ffmi_category = "Below Average"
+                elif norm_ffmi < 18:
+                    ffmi_category = "Average"
+                elif norm_ffmi < 20:
+                    ffmi_category = "Above Average"
+                elif norm_ffmi < 22:
+                    ffmi_category = "Excellent"
+                elif norm_ffmi < 24:
+                    ffmi_category = "Superior"
+                else:
+                    ffmi_category = "Exceptional"
         
         # Analyze muscle balance
         muscle_balance = analyze_muscle_balance(measurements)
         
         # Analyze arm and leg symmetry
-        arm_symmetry = analyze_arm_symmetry(left_arm_cm, right_arm_cm)
-        leg_symmetry = analyze_arm_symmetry(left_thigh_cm, right_thigh_cm)
+        arm_symmetry = None
+        if left_arm_cm is not None and right_arm_cm is not None and left_arm_cm > 0 and right_arm_cm > 0:
+            arm_symmetry = analyze_arm_symmetry(left_arm_cm, right_arm_cm)
+            
+        leg_symmetry = None
+        if left_thigh_cm is not None and right_thigh_cm is not None and left_thigh_cm > 0 and right_thigh_cm > 0:
+            leg_symmetry = analyze_arm_symmetry(left_thigh_cm, right_thigh_cm)
         
         # Analyze shoulder-to-waist ratio
-        shoulder_to_waist = analyze_shoulder_to_waist_ratio(shoulders_cm, waist_cm)
+        shoulder_to_waist = None
+        if shoulders_cm is not None and waist_cm is not None and shoulders_cm > 0 and waist_cm > 0:
+            shoulder_to_waist = analyze_shoulder_to_waist_ratio(shoulders_cm, waist_cm)
         
         # Analyze genetic potential if we have wrist and ankle measurements
-        if wrist_cm > 0 and ankle_cm > 0:
+        genetic_potential = None
+        if wrist_cm is not None and ankle_cm is not None and wrist_cm > 0 and ankle_cm > 0:
             genetic_potential = analyze_bodybuilding_potential(height_cm, wrist_cm, ankle_cm, gender)
-        else:
-            genetic_potential = None
         
         # Create user data dictionary for recommendations
         user_data = {
@@ -186,14 +196,17 @@ def complete_bodybuilding_analysis(user_data):
         }
         
         # Generate recommendations
-        recommendations = formulate_bodybuilding_recommendations(
-            {
-                'body_fat_percentage': body_fat_percentage,
-                'muscle_balance': muscle_balance if muscle_balance else {},
-                'genetic_potential': genetic_potential['genetic_potential'] if genetic_potential else {'rating': 'average'}
-            }, 
-            user_data
-        )
+        recommendation_data = {
+            'body_fat_percentage': body_fat_percentage,
+            'muscle_balance': muscle_balance if muscle_balance else {},
+            'genetic_potential': {'rating': 'average'}  # Default value
+        }
+        
+        # Add genetic potential data if available
+        if genetic_potential is not None and 'genetic_potential' in genetic_potential:
+            recommendation_data['genetic_potential'] = genetic_potential['genetic_potential']
+            
+        recommendations = formulate_bodybuilding_recommendations(recommendation_data, user_data)
         
         # Organize results
         results = {
@@ -212,8 +225,8 @@ def complete_bodybuilding_analysis(user_data):
             'proportions': {
                 'shoulder_to_waist': shoulder_to_waist if shoulder_to_waist else {},
             },
-            'genetic_potential': genetic_potential['genetic_potential'] if genetic_potential else {},
-            'max_measurements': genetic_potential['max_measurements'] if genetic_potential and 'max_measurements' in genetic_potential else {},
+            'genetic_potential': genetic_potential.get('genetic_potential', {}) if genetic_potential else {},
+            'max_measurements': genetic_potential.get('max_measurements', {}) if genetic_potential else {},
             'recommendations': recommendations,
             'measurements': measurements
         }
@@ -680,6 +693,15 @@ def analyze_bodybuilding_potential(height_cm, wrist_cm, ankle_cm, gender):
         Dictionary with genetic potential assessment and estimated maximum muscular measurements
     """
     try:
+        # Validate inputs
+        if not height_cm or not wrist_cm or not ankle_cm or not gender:
+            logger.error("Missing required measurements for genetic potential analysis")
+            return None
+            
+        if height_cm <= 0 or wrist_cm <= 0 or ankle_cm <= 0:
+            logger.error("Invalid measurements (must be positive values)")
+            return None
+        
         # Calculate frame size indicators
         height_m = height_cm / 100
         wrist_height_ratio = wrist_cm / height_cm
@@ -792,11 +814,40 @@ def formulate_bodybuilding_recommendations(analysis_results, user_data):
     recommendations = {}
     
     try:
-        # Extract relevant data
+        # Validate inputs
+        if not analysis_results or not isinstance(analysis_results, dict):
+            logger.warning("Invalid analysis results provided to recommendations engine")
+            analysis_results = {}
+            
+        if not user_data or not isinstance(user_data, dict):
+            logger.warning("Invalid user data provided to recommendations engine")
+            user_data = {}
+    
+        # Extract relevant data with safe fallbacks for all values
         body_fat = analysis_results.get('body_fat_percentage', 18)
-        genetic_potential = analysis_results.get('genetic_potential', {}).get('rating', 'average')
+        
+        # Convert body_fat to float if it's not None, otherwise use default
+        if body_fat is not None:
+            try:
+                body_fat = float(body_fat)
+            except (ValueError, TypeError):
+                body_fat = 18.0
+        else:
+            body_fat = 18.0
+            
+        genetic_potential = analysis_results.get('genetic_potential', {})
+        if not isinstance(genetic_potential, dict):
+            genetic_potential = {}
+        genetic_rating = genetic_potential.get('rating', 'average')
+        
         muscle_balance = analysis_results.get('muscle_balance', {})
+        if not isinstance(muscle_balance, dict):
+            muscle_balance = {}
+            
         weak_points = muscle_balance.get('weak_points', [])
+        if not isinstance(weak_points, list):
+            weak_points = []
+            
         experience = user_data.get('experience', 'beginner')
         gender = user_data.get('gender', 'male')
         goal = user_data.get('goal', 'build_muscle')
@@ -882,7 +933,7 @@ def formulate_bodybuilding_recommendations(analysis_results, user_data):
             
         # Determine nutrition recommendations
         if goal == "build_muscle":
-            if genetic_potential in ["below_average", "average"]:
+            if genetic_rating in ["below_average", "average"]:
                 caloric_surplus = "250-350 calories above maintenance"
             else:
                 caloric_surplus = "350-500 calories above maintenance"
