@@ -40,8 +40,52 @@ def calculate_muscle_potential(years_training, gender):
     return max(0.0, potential)
 
 def calculate_distance(p1, p2):
-    """Calculate Euclidean distance between two points"""
-    return math.sqrt((p2['x'] - p1['x'])**2 + (p2['y'] - p1['y'])**2)
+    """
+    Calculate Euclidean distance between two points with validation
+    to prevent unrealistic measurements.
+    
+    Args:
+        p1: First point as dictionary with 'x' and 'y' keys
+        p2: Second point as dictionary with 'x' and 'y' keys
+        
+    Returns:
+        Float representing the validated distance between points
+    """
+    try:
+        # Validate that points have required coordinates
+        if 'x' not in p1 or 'y' not in p1 or 'x' not in p2 or 'y' not in p2:
+            logger.warning("Points missing x or y coordinates")
+            return 0.0
+            
+        # Get coordinates
+        x1, y1 = p1['x'], p1['y']
+        x2, y2 = p2['x'], p2['y']
+        
+        # Validate coordinates are in expected normalized range (0-1)
+        # MediaPipe typically provides normalized coordinates
+        if not (0 <= x1 <= 1 and 0 <= y1 <= 1 and 0 <= x2 <= 1 and 0 <= y2 <= 1):
+            logger.warning(f"Point coordinates out of expected range: ({x1}, {y1}), ({x2}, {y2})")
+            # Clamp coordinates to valid range
+            x1 = max(0, min(1, x1))
+            y1 = max(0, min(1, y1))
+            x2 = max(0, min(1, x2))
+            y2 = max(0, min(1, y2))
+        
+        # Calculate Euclidean distance
+        distance = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+        
+        # Apply a maximum threshold for normalized coordinates
+        # Most body part distances shouldn't exceed 0.7-0.8 in normalized space
+        MAX_NORMALIZED_DISTANCE = 0.8
+        if distance > MAX_NORMALIZED_DISTANCE:
+            logger.warning(f"Excessive distance detected: {distance:.4f} - capping to {MAX_NORMALIZED_DISTANCE}")
+            distance = MAX_NORMALIZED_DISTANCE
+            
+        return distance
+        
+    except Exception as e:
+        logger.error(f"Error calculating distance: {str(e)}")
+        return 0.0
 
 def calculate_angle(p1, p2, p3):
     """Calculate angle between three points"""
@@ -118,27 +162,94 @@ def analyze_body_traits(landmarks, original_image=None, height_cm=0.0, weight_kg
         right_torso = calculate_distance(landmarks[RIGHT_SHOULDER], landmarks[RIGHT_HIP])
         torso_length = (left_torso + right_torso) / 2
         
-        # 4. Calculate arm length (average of left and right arms)
+        # 4. Calculate arm length (average of left and right arms) with anatomical validation
         left_upper_arm = calculate_distance(landmarks[LEFT_SHOULDER], landmarks[LEFT_ELBOW])
         left_forearm = calculate_distance(landmarks[LEFT_ELBOW], landmarks[LEFT_WRIST])
+        
+        # Apply anatomical constraints - typical upper arm to forearm ratio is around 1.2:1
+        # Validate upper arm length (shouldn't be more than 60% of total arm)
+        if left_upper_arm > 0 and left_forearm > 0:
+            if left_upper_arm / (left_upper_arm + left_forearm) > 0.65:
+                left_upper_arm = left_forearm * 1.2  # Adjust to typical ratio
+            elif left_upper_arm / (left_upper_arm + left_forearm) < 0.45:
+                left_upper_arm = left_forearm * 1.0  # Adjust to typical ratio
+        
         left_arm = left_upper_arm + left_forearm
         
         right_upper_arm = calculate_distance(landmarks[RIGHT_SHOULDER], landmarks[RIGHT_ELBOW])
         right_forearm = calculate_distance(landmarks[RIGHT_ELBOW], landmarks[RIGHT_WRIST])
+        
+        # Apply same anatomical constraints to right arm
+        if right_upper_arm > 0 and right_forearm > 0:
+            if right_upper_arm / (right_upper_arm + right_forearm) > 0.65:
+                right_upper_arm = right_forearm * 1.2
+            elif right_upper_arm / (right_upper_arm + right_forearm) < 0.45:
+                right_upper_arm = right_forearm * 1.0
+        
         right_arm = right_upper_arm + right_forearm
+        
+        # Ensure arm lengths are roughly symmetrical (within 15%)
+        if left_arm > 0 and right_arm > 0:
+            avg_arm = (left_arm + right_arm) / 2
+            if left_arm > right_arm * 1.15:
+                left_arm = avg_arm * 1.05  # Allow slight natural asymmetry
+                right_arm = avg_arm * 0.95
+            elif right_arm > left_arm * 1.15:
+                right_arm = avg_arm * 1.05
+                left_arm = avg_arm * 0.95
         
         arm_length = (left_arm + right_arm) / 2
         
-        # 5. Calculate leg length (average of left and right legs)
+        # 5. Calculate leg length (average of left and right legs) with anatomical validation
         left_upper_leg = calculate_distance(landmarks[LEFT_HIP], landmarks[LEFT_KNEE])
         left_lower_leg = calculate_distance(landmarks[LEFT_KNEE], landmarks[LEFT_ANKLE])
+        
+        # Apply anatomical constraints - typical upper leg to lower leg ratio is around 1.1:1
+        if left_upper_leg > 0 and left_lower_leg > 0:
+            if left_upper_leg / (left_upper_leg + left_lower_leg) > 0.6:
+                left_upper_leg = left_lower_leg * 1.1  # Adjust to typical ratio
+            elif left_upper_leg / (left_upper_leg + left_lower_leg) < 0.45:
+                left_upper_leg = left_lower_leg * 1.0  # Adjust to typical ratio
+        
         left_leg = left_upper_leg + left_lower_leg
         
         right_upper_leg = calculate_distance(landmarks[RIGHT_HIP], landmarks[RIGHT_KNEE])
         right_lower_leg = calculate_distance(landmarks[RIGHT_KNEE], landmarks[RIGHT_ANKLE])
+        
+        # Apply same anatomical constraints to right leg
+        if right_upper_leg > 0 and right_lower_leg > 0:
+            if right_upper_leg / (right_upper_leg + right_lower_leg) > 0.6:
+                right_upper_leg = right_lower_leg * 1.1
+            elif right_upper_leg / (right_upper_leg + right_lower_leg) < 0.45:
+                right_upper_leg = right_lower_leg * 1.0
+        
         right_leg = right_upper_leg + right_lower_leg
         
+        # Ensure leg lengths are roughly symmetrical (within 10%)
+        if left_leg > 0 and right_leg > 0:
+            avg_leg = (left_leg + right_leg) / 2
+            if left_leg > right_leg * 1.1:
+                left_leg = avg_leg * 1.03  # Allow slight natural asymmetry
+                right_leg = avg_leg * 0.97
+            elif right_leg > left_leg * 1.1:
+                right_leg = avg_leg * 1.03
+                left_leg = avg_leg * 0.97
+        
         leg_length = (left_leg + right_leg) / 2
+        
+        # Apply height-based constraints if height is provided
+        if height_cm > 0:
+            # Typical arm-to-height ratio: 0.35-0.38
+            if arm_length / height_cm > 0.38:
+                arm_length = height_cm * 0.38
+            elif arm_length / height_cm < 0.35:
+                arm_length = height_cm * 0.35
+                
+            # Typical leg-to-height ratio: 0.48-0.52
+            if leg_length / height_cm > 0.52:
+                leg_length = height_cm * 0.52
+            elif leg_length / height_cm < 0.48:
+                leg_length = height_cm * 0.48
         
         # 6. Calculate shoulder-to-hip ratio
         shoulder_hip_ratio = shoulder_width / hip_width if hip_width > 0 else 0

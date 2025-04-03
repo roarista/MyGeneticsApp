@@ -95,19 +95,47 @@ class BodyLandmarkDetector:
         # Calculate additional body proportions
         segments["shoulder_to_hip_ratio"] = segments["shoulder_width"] / segments["hip_width"] if segments["hip_width"] > 0 else 0
         
-        # Scale by image dimensions to get pixel distances
+        # Scale by image dimensions to get pixel distances, but with improved scaling
+        # Use a more conservative approach to avoid exaggeration
+        scaling_factor = min(image_height, image_width) * 0.8  # More conservative scaling
+        
         for key in segments:
             if isinstance(segments[key], float) and "ratio" not in key:
-                segments[key] *= max(image_height, image_width)
+                # Use a more appropriate scaling factor instead of max dimension
+                segments[key] *= scaling_factor
         
         return segments
     
     def _calculate_distance(self, landmarks, idx1, idx2):
-        """Calculate distance between two landmarks"""
+        """
+        Calculate distance between two landmarks with improved validation to avoid extreme values.
+        This prevents the detection of anatomically impossible limb lengths.
+        """
         try:
+            # Extract landmark coordinates
             x1, y1 = landmarks[idx1][0], landmarks[idx1][1]
             x2, y2 = landmarks[idx2][0], landmarks[idx2][1]
-            return np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+            
+            # Validate coordinates are in expected range (normalized coordinates should be 0-1)
+            if not (0 <= x1 <= 1 and 0 <= y1 <= 1 and 0 <= x2 <= 1 and 0 <= y2 <= 1):
+                logger.warning(f"Landmark coordinates out of expected range: ({x1}, {y1}), ({x2}, {y2})")
+                # Clamp values to valid range
+                x1 = max(0, min(1, x1))
+                y1 = max(0, min(1, y1))
+                x2 = max(0, min(1, x2))
+                y2 = max(0, min(1, y2))
+            
+            # Calculate Euclidean distance
+            distance = np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+            
+            # Check for unrealistic distances
+            # In normalized coordinates, most body part distances should not exceed 0.8
+            if distance > 0.8:
+                logger.warning(f"Detected unusual distance {distance} between landmarks {idx1} and {idx2}")
+                # Cap the distance to a reasonable maximum
+                distance = 0.8
+                
+            return distance
         except Exception as e:
             logger.error(f"Error calculating distance: {str(e)}")
             return 0
@@ -154,24 +182,34 @@ def preprocess_image(image_data, target_size=(512, 512)):
 class MeasurementValidator:
     """Validates body measurements against anatomical constraints"""
     
-    # Anatomically possible ranges as percentages of height
+    # Stricter anatomically possible ranges as percentages of height
+    # Based on anthropometric studies and standard human proportions
     ANATOMICAL_RATIOS = {
-        'neck_cm': (0.17, 0.22),         # 17-22% of height
-        'chest_cm': (0.45, 0.52),        # 45-52% of height
-        'shoulders_cm': (0.23, 0.28),    # 23-28% of height (biacromial width)
-        'waist_cm': (0.35, 0.45),        # 35-45% of height
-        'hips_cm': (0.40, 0.48),         # 40-48% of height
-        'arm_cm': (0.1, 0.14),           # 10-14% of height (arm circumference)
-        'thigh_cm': (0.18, 0.22),        # 18-22% of height (thigh circumference)
-        'calf_cm': (0.12, 0.15),         # 12-15% of height
-        'wrist_cm': (0.08, 0.11),        # 8-11% of height
-        'ankle_cm': (0.09, 0.12),        # 9-12% of height
+        'neck_cm': (0.17, 0.20),         # 17-20% of height
+        'chest_cm': (0.45, 0.50),        # 45-50% of height
+        'shoulders_cm': (0.23, 0.26),    # 23-26% of height (biacromial width)
+        'waist_cm': (0.35, 0.43),        # 35-43% of height
+        'hips_cm': (0.40, 0.46),         # 40-46% of height
+        'arm_cm': (0.1, 0.13),           # 10-13% of height (arm circumference)
+        'thigh_cm': (0.18, 0.21),        # 18-21% of height (thigh circumference)
+        'calf_cm': (0.12, 0.14),         # 12-14% of height
+        'wrist_cm': (0.08, 0.10),        # 8-10% of height
+        'ankle_cm': (0.09, 0.11),        # 9-11% of height
+    }
+    
+    # Additional constraints for length measurements
+    # These will be used to validate length ratios
+    LENGTH_RATIOS = {
+        'arm_length': (0.33, 0.38),      # 33-38% of height
+        'leg_length': (0.45, 0.52),      # 45-52% of height
+        'torso_length': (0.30, 0.35),    # 30-35% of height
     }
     
     @staticmethod
     def validate_and_adjust(measurements: dict, height_cm: float) -> dict:
         """
-        Validates measurements against anatomical constraints and adjusts if needed
+        Validates measurements against anatomical constraints and adjusts if needed.
+        Now includes validation for limb lengths and other key body proportions.
         """
         if not height_cm or height_cm <= 0:
             return measurements  # Can't validate without height
@@ -195,6 +233,7 @@ class MeasurementValidator:
             'ankle_cm': 'ankle_cm',
         }
         
+        # First pass: validate circumference measurements
         for measure, value in measurements.items():
             # Skip non-measurement fields like method or segments
             if measure in validation_map and isinstance(value, (int, float)):
@@ -219,9 +258,63 @@ class MeasurementValidator:
             else:
                 # Keep non-measurement values (like estimation_method)
                 validated[measure] = value
+        
+        # Second pass: validate length measurements if present in segments
+        if 'segments' in measurements:
+            segments = measurements['segments']
+            
+            # Validate arm length
+            if 'left_arm' in segments and 'right_arm' in segments:
+                arm_length = (segments['left_arm'] + segments['right_arm']) / 2
+                
+                # Convert to cm based on height
+                arm_length_cm = arm_length * height_cm
+                
+                if 'arm_length' in MeasurementValidator.LENGTH_RATIOS:
+                    min_ratio, max_ratio = MeasurementValidator.LENGTH_RATIOS['arm_length']
+                    min_value = height_cm * min_ratio
+                    max_value = height_cm * max_ratio
+                    
+                    if arm_length_cm < min_value:
+                        # Scale arm segments proportionally
+                        scale_factor = min_value / arm_length_cm if arm_length_cm > 0 else 1.0
+                        segments['left_arm'] *= scale_factor
+                        segments['right_arm'] *= scale_factor
+                    elif arm_length_cm > max_value:
+                        # Scale arm segments proportionally
+                        scale_factor = max_value / arm_length_cm
+                        segments['left_arm'] *= scale_factor
+                        segments['right_arm'] *= scale_factor
+            
+            # Validate leg length
+            if 'left_leg' in segments and 'right_leg' in segments:
+                leg_length = (segments['left_leg'] + segments['right_leg']) / 2
+                
+                # Convert to cm based on height
+                leg_length_cm = leg_length * height_cm
+                
+                if 'leg_length' in MeasurementValidator.LENGTH_RATIOS:
+                    min_ratio, max_ratio = MeasurementValidator.LENGTH_RATIOS['leg_length']
+                    min_value = height_cm * min_ratio
+                    max_value = height_cm * max_ratio
+                    
+                    if leg_length_cm < min_value:
+                        # Scale leg segments proportionally
+                        scale_factor = min_value / leg_length_cm if leg_length_cm > 0 else 1.0
+                        segments['left_leg'] *= scale_factor
+                        segments['right_leg'] *= scale_factor
+                    elif leg_length_cm > max_value:
+                        # Scale leg segments proportionally
+                        scale_factor = max_value / leg_length_cm
+                        segments['left_leg'] *= scale_factor
+                        segments['right_leg'] *= scale_factor
+            
+            # Update segments in validated measurements
+            validated['segments'] = segments
                 
         # Add a flag indicating validation was performed
         validated["validation_performed"] = True
+        validated["anatomical_validation"] = True
         
         return validated
 
@@ -350,13 +443,37 @@ class BodyMeasurementEstimator:
         reference['thigh_ratio'] *= muscle_factor
         reference['calf_ratio'] *= muscle_factor
         
-        # Calculate shoulder width specifically - more conservative estimate
+        # Calculate shoulder width with improved anatomical constraints
+        # Standard anthropometric ratio: biacromial width is typically 23-26% of total height
         shoulders_cm = height_cm * 0.24  # Approximately 24% of height for average person
+        
         if 'shoulder_width' in segments and segments['shoulder_width'] > 0:
-            # Use the segment but scale appropriately
-            relative_shoulder_width = segments['shoulder_width'] * (height_cm / 4)  # Scaling factor
-            # Blend the statistical estimate with the measured value
-            shoulders_cm = (shoulders_cm + relative_shoulder_width) / 2
+            # Apply a more accurate scaling based on anthropometric research
+            # The pixel value is normalized, so we scale it based on a percentage of height
+            # Using a more conservative scaling factor to avoid unrealistic measurements
+            
+            # First check if the segment value is within reasonable limits
+            if segments['shoulder_width'] <= 0.5:  # Normal range in normalized coordinates
+                # Apply more accurate scaling with anatomical constraints
+                # This uses a ratio based on standard anthropometric proportions
+                shoulder_pixel_ratio = segments['shoulder_width']
+                
+                # Calculate an anatomically sound shoulder width range
+                min_shoulder_cm = height_cm * 0.23  # Minimum anatomical ratio
+                max_shoulder_cm = height_cm * 0.26  # Maximum anatomical ratio
+                
+                # Calculate shoulder width based on the detected pixel ratio, within anatomical constraints
+                detected_shoulder_cm = min_shoulder_cm + shoulder_pixel_ratio * (max_shoulder_cm - min_shoulder_cm)
+                
+                # Blend statistical average with the detected measurement (weighted blend)
+                # Give more weight to the statistical average for stability
+                shoulders_cm = (shoulders_cm * 0.6) + (detected_shoulder_cm * 0.4)
+            else:
+                # If value is unreasonable, rely more on statistical values
+                logger.warning(f"Detected unusual shoulder width: {segments['shoulder_width']}")
+                # Still use the segment value but with much lower weight
+                detected_shoulder_cm = segments['shoulder_width'] * (height_cm * 0.2)  # Scaling with limiting factor
+                shoulders_cm = (shoulders_cm * 0.9) + (detected_shoulder_cm * 0.1)
         
         # Calculate final measurements
         measurements = {
