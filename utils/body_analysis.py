@@ -2,6 +2,7 @@ import logging
 import numpy as np
 import math
 from mediapipe import solutions
+from .measurement_validator import MeasurementValidator
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -109,9 +110,20 @@ def analyze_body_traits(landmarks, original_image=None, height_cm=0.0, weight_kg
         Dictionary of body traits and measurements
     """
     try:
-        if not landmarks:
-            logger.error("No landmarks provided for analysis")
+        if not landmarks or not original_image or height_cm <= 0:
+            logger.error("Missing required data for analysis")
             return {}
+            
+        # Initialize measurement validator
+        validator = MeasurementValidator()
+        
+        # Get image dimensions
+        image_height, image_width = original_image.shape[:2]
+        
+        # Normalize landmarks to real-world measurements
+        normalized_landmarks = validator.normalize_coordinates(
+            landmarks, image_height, image_width, height_cm
+        )
         
         # Initialize traits dictionary
         traits = {
@@ -151,20 +163,21 @@ def analyze_body_traits(landmarks, original_image=None, height_cm=0.0, weight_kg
         LEFT_FOOT_INDEX = 31
         RIGHT_FOOT_INDEX = 32
         
+        # Use normalized landmarks for more accurate measurements
         # 1. Calculate shoulder width
-        shoulder_width = calculate_distance(landmarks[LEFT_SHOULDER], landmarks[RIGHT_SHOULDER])
+        shoulder_width = calculate_distance(normalized_landmarks[LEFT_SHOULDER], normalized_landmarks[RIGHT_SHOULDER])
         
         # 2. Calculate hip width
-        hip_width = calculate_distance(landmarks[LEFT_HIP], landmarks[RIGHT_HIP])
+        hip_width = calculate_distance(normalized_landmarks[LEFT_HIP], normalized_landmarks[RIGHT_HIP])
         
         # 3. Calculate torso length (average of left and right sides)
-        left_torso = calculate_distance(landmarks[LEFT_SHOULDER], landmarks[LEFT_HIP])
-        right_torso = calculate_distance(landmarks[RIGHT_SHOULDER], landmarks[RIGHT_HIP])
+        left_torso = calculate_distance(normalized_landmarks[LEFT_SHOULDER], normalized_landmarks[LEFT_HIP])
+        right_torso = calculate_distance(normalized_landmarks[RIGHT_SHOULDER], normalized_landmarks[RIGHT_HIP])
         torso_length = (left_torso + right_torso) / 2
         
         # 4. Calculate arm length (average of left and right arms) with anatomical validation
-        left_upper_arm = calculate_distance(landmarks[LEFT_SHOULDER], landmarks[LEFT_ELBOW])
-        left_forearm = calculate_distance(landmarks[LEFT_ELBOW], landmarks[LEFT_WRIST])
+        left_upper_arm = calculate_distance(normalized_landmarks[LEFT_SHOULDER], normalized_landmarks[LEFT_ELBOW])
+        left_forearm = calculate_distance(normalized_landmarks[LEFT_ELBOW], normalized_landmarks[LEFT_WRIST])
         
         # Apply anatomical constraints - typical upper arm to forearm ratio is around 1.2:1
         # Validate upper arm length (shouldn't be more than 60% of total arm)
@@ -176,8 +189,8 @@ def analyze_body_traits(landmarks, original_image=None, height_cm=0.0, weight_kg
         
         left_arm = left_upper_arm + left_forearm
         
-        right_upper_arm = calculate_distance(landmarks[RIGHT_SHOULDER], landmarks[RIGHT_ELBOW])
-        right_forearm = calculate_distance(landmarks[RIGHT_ELBOW], landmarks[RIGHT_WRIST])
+        right_upper_arm = calculate_distance(normalized_landmarks[RIGHT_SHOULDER], normalized_landmarks[RIGHT_ELBOW])
+        right_forearm = calculate_distance(normalized_landmarks[RIGHT_ELBOW], normalized_landmarks[RIGHT_WRIST])
         
         # Apply same anatomical constraints to right arm
         if right_upper_arm > 0 and right_forearm > 0:

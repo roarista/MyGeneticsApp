@@ -173,12 +173,22 @@ def analyze():
             
             logger.debug(f"User inputs - Height: {height_cm}, Weight: {weight_kg}, Gender: {gender}, Experience: {experience}")
             
-            # Extract landmarks from image
-            processed_image, landmarks = extract_body_landmarks(image)
+            # Extract landmarks from image with height information for accurate scaling
+            processed_image, landmarks, confidence_scores = extract_body_landmarks(
+                image=image,
+                height_cm=height_cm
+            )
             
             if landmarks is None:
                 flash('No body detected in image. Please try again with a clearer full-body image.', 'warning')
                 return redirect(url_for('index'))
+            
+            # Create an analysis metadata to store confidence information
+            analysis_metadata = {
+                'confidence_scores': confidence_scores,
+                'measurement_system': measurement_system,
+                'processing_timestamp': datetime.now().isoformat()
+            }
             
             # Analyze body traits - pass the original image for AI analysis
             traits = analyze_body_traits(
@@ -189,6 +199,9 @@ def analyze():
                 gender=gender,  
                 experience=experience  
             )
+            
+            # Add confidence metadata to traits for display
+            traits['metadata'] = analysis_metadata
             
             # Generate recommendations
             recommendations = generate_recommendations(traits, experience)

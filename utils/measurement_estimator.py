@@ -13,6 +13,7 @@ import io
 import math
 from PIL import Image
 import mediapipe as mp
+from .measurement_validator import MeasurementValidator as ExternalMeasurementValidator
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -240,8 +241,8 @@ class MeasurementValidator:
             if measure in validation_map and isinstance(value, (int, float)):
                 validation_key = validation_map[measure]
                 
-                if validation_key in MeasurementValidator.ANATOMICAL_RATIOS:
-                    min_ratio, max_ratio = MeasurementValidator.ANATOMICAL_RATIOS[validation_key]
+                if validation_key in ExternalMeasurementValidator.ANATOMICAL_RATIOS:
+                    min_ratio, max_ratio = ExternalMeasurementValidator.ANATOMICAL_RATIOS[validation_key]
                     min_value = height_cm * min_ratio
                     max_value = height_cm * max_ratio
                     
@@ -271,8 +272,8 @@ class MeasurementValidator:
                 # Convert to cm based on height
                 arm_length_cm = arm_length * height_cm
                 
-                if 'arm_length' in MeasurementValidator.LENGTH_RATIOS:
-                    min_ratio, max_ratio = MeasurementValidator.LENGTH_RATIOS['arm_length']
+                if 'arm_length' in ExternalMeasurementValidator.LENGTH_RATIOS:
+                    min_ratio, max_ratio = ExternalMeasurementValidator.LENGTH_RATIOS['arm_length']
                     min_value = height_cm * min_ratio
                     max_value = height_cm * max_ratio
                     
@@ -294,8 +295,8 @@ class MeasurementValidator:
                 # Convert to cm based on height
                 leg_length_cm = leg_length * height_cm
                 
-                if 'leg_length' in MeasurementValidator.LENGTH_RATIOS:
-                    min_ratio, max_ratio = MeasurementValidator.LENGTH_RATIOS['leg_length']
+                if 'leg_length' in ExternalMeasurementValidator.LENGTH_RATIOS:
+                    min_ratio, max_ratio = ExternalMeasurementValidator.LENGTH_RATIOS['leg_length']
                     min_value = height_cm * min_ratio
                     max_value = height_cm * max_ratio
                     
@@ -323,7 +324,8 @@ class MeasurementValidator:
 class BodyMeasurementEstimator:
     def __init__(self):
         self.landmark_detector = BodyLandmarkDetector()
-        self.validator = MeasurementValidator()
+        # Use the improved MeasurementValidator from measurement_validator.py
+        self.validator = ExternalMeasurementValidator()
     
     def estimate_measurements(self, image_data, height_cm, weight_kg, gender, experience="beginner"):
         """Estimate body measurements from image and basic info with improved validation"""
