@@ -55,6 +55,27 @@ class MeasurementValidator:
         """Initialize the validator with anatomical constraints"""
         self.constraints = AnatomicalConstraints()
     
+    def validate_and_adjust(self, measurements: Dict[str, float], height_cm: float, gender: str = 'male') -> Dict[str, float]:
+        """
+        Validates and adjusts measurements to be anatomically correct
+        
+        Args:
+            measurements: Dictionary of body measurements in cm
+            height_cm: Height in centimeters
+            gender: 'male' or 'female'
+            
+        Returns:
+            Dictionary of validated and adjusted measurements
+        """
+        # First validate the measurements
+        validated, _ = self.validate_measurements(measurements, height_cm, gender)
+        
+        # Add a flag indicating validation was performed
+        validated["validation_performed"] = True
+        validated["anatomical_validation"] = True
+        
+        return validated
+    
     def validate_measurements(self, 
                             measurements: Dict[str, float], 
                             height_cm: float,
