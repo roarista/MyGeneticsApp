@@ -112,17 +112,12 @@ def tailwind_index():
     """Render the Tailwind-inspired UI main page"""
     return render_template('tailwind_index.html')
 
-@app.route('/analyze_form')
-def analyze_form():
-    """Display the photo upload form for body analysis"""
-    return render_template('tailwind_analyze.html')
-
 @app.route('/analyze', methods=['GET', 'POST'])
 def analyze():
     """Process uploaded front and back photos for comprehensive body analysis"""
-    # If it's a GET request, redirect to the analyze form
+    # If it's a GET request, redirect to the homepage
     if request.method == 'GET':
-        return redirect(url_for('analyze_form'))
+        return redirect(url_for('index'))
     
     logger.debug("Received analyze request")
     
@@ -133,7 +128,7 @@ def analyze():
     if 'front_photo' not in request.files or 'back_photo' not in request.files:
         logger.error("Missing front or back photo in request.files")
         flash('Both front and back photos are required', 'danger')
-        return redirect(url_for('analyze_form'))
+        return redirect(url_for('index'))
     
     front_file = request.files['front_photo']
     back_file = request.files['back_photo']
@@ -144,12 +139,12 @@ def analyze():
     if front_file.filename == '' or back_file.filename == '':
         logger.error("Empty filename for one or both photos")
         flash('Both front and back photos are required', 'danger')
-        return redirect(url_for('analyze_form'))
+        return redirect(url_for('index'))
     
     # Validate file types
     if not (allowed_file(front_file.filename) and allowed_file(back_file.filename)):
         flash('Invalid file type. Please upload PNG or JPG images.', 'warning')
-        return redirect(url_for('analyze_form'))
+        return redirect(url_for('index'))
     
     try:
         # Create a unique ID for this analysis
@@ -171,13 +166,13 @@ def analyze():
         front_image = cv2.imread(front_filepath)
         if front_image is None:
             flash('Failed to process front image', 'danger')
-            return redirect(url_for('analyze_form'))
+            return redirect(url_for('index'))
         
         # Process back image to get landmarks
         back_image = cv2.imread(back_filepath)
         if back_image is None:
             flash('Failed to process back image', 'danger')
-            return redirect(url_for('analyze_form'))
+            return redirect(url_for('index'))
         
         # Get user-provided information
         height = request.form.get('height', 0)
@@ -199,7 +194,7 @@ def analyze():
         
         if front_landmarks is None:
             flash('No body detected in front image. Please try again with a clearer full-body image.', 'warning')
-            return redirect(url_for('analyze_form'))
+            return redirect(url_for('index'))
         
         # Extract landmarks from back image
         processed_back_image, back_landmarks, back_confidence_scores = extract_body_landmarks(
@@ -209,7 +204,7 @@ def analyze():
         
         if back_landmarks is None:
             flash('No body detected in back image. Please try again with a clearer full-body image.', 'warning')
-            return redirect(url_for('analyze_form'))
+            return redirect(url_for('index'))
         
         # Create an analysis metadata to store confidence information
         analysis_metadata = {
@@ -376,7 +371,7 @@ def analyze():
     except Exception as e:
         logger.error(f"Error during analysis: {str(e)}")
         flash(f'Error during analysis: {str(e)}', 'danger')
-        return redirect(url_for('analyze_form'))
+        return redirect(url_for('index'))
 
 @app.route('/results/<analysis_id>')
 def results(analysis_id):
