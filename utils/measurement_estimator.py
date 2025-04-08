@@ -325,10 +325,34 @@ class BodyMeasurementEstimator:
     def __init__(self):
         self.landmark_detector = BodyLandmarkDetector()
         # Use the improved MeasurementValidator from measurement_validator.py
-        self.validator = ExternalMeasurementValidator()
+        from utils.measurement_validator import MeasurementValidator
+        self.validator = MeasurementValidator()
+        # Store view parameter
+        self.view = "front"  # Default to front view
     
-    def estimate_measurements(self, image_data, height_cm, weight_kg, gender, experience="beginner"):
-        """Estimate body measurements from image and basic info with improved validation"""
+    def estimate_measurements(self, image_data, height_cm, weight_kg, gender, experience="beginner", view="front"):
+        """Estimate body measurements from image and basic info with improved validation
+        
+        Parameters:
+        -----------
+        image_data : str
+            Base64 encoded image data
+        height_cm : float
+            User's height in centimeters
+        weight_kg : float
+            User's weight in kilograms
+        gender : str
+            User's gender ('male' or 'female')
+        experience : str, optional
+            User's fitness experience level (default: 'beginner')
+        view : str, optional
+            Perspective of the image ('front' or 'back') to adjust measurements accordingly
+            
+        Returns:
+        --------
+        dict
+            Dictionary containing estimated measurements with confidence scores
+        """
         try:
             # Process image
             original_image, processed_image = preprocess_image(image_data)
@@ -337,6 +361,9 @@ class BodyMeasurementEstimator:
                 return self._estimate_from_statistics(height_cm, weight_kg, gender)
             
             h, w = original_image.shape[:2]
+            
+            # Set view mode for measurement calculations
+            self.view = view
             
             # Detect landmarks
             landmarks = self.landmark_detector.detect_landmarks(processed_image)
@@ -348,13 +375,20 @@ class BodyMeasurementEstimator:
             raw_measurements = self._convert_to_measurements(segments, height_cm, weight_kg, gender, experience)
             
             # Validate and adjust measurements
-            validated_measurements = self.validator.validate_and_adjust(raw_measurements, height_cm)
+            validated_measurements = self.validator.validate_and_adjust(
+                raw_measurements, 
+                height_cm,
+                gender=gender
+            )
             
             # Add reliable flag based on landmark quality
             if landmarks is not None and self._has_reliable_landmarks(landmarks):
                 validated_measurements["reliable_estimation"] = True
             else:
                 validated_measurements["reliable_estimation"] = False
+                
+            # Add view information to help with front/back specific processing
+            validated_measurements["view"] = self.view
             
             return validated_measurements
         
@@ -362,8 +396,13 @@ class BodyMeasurementEstimator:
             logger.error(f"Error estimating measurements: {str(e)}")
             # Get statistical estimates and validate them too
             raw_measurements = self._estimate_from_statistics(height_cm, weight_kg, gender)
-            validated_measurements = self.validator.validate_and_adjust(raw_measurements, height_cm)
+            validated_measurements = self.validator.validate_and_adjust(
+                raw_measurements, 
+                height_cm,
+                gender=gender
+            )
             validated_measurements["reliable_estimation"] = False
+            validated_measurements["view"] = self.view  # Add view information
             return validated_measurements
     
     def _has_reliable_landmarks(self, landmarks):
@@ -858,7 +897,28 @@ class BodyMeasurementEstimator:
 
 
 # Main function to use in the app
-def estimate_measurements(image_data, height_cm, weight_kg, gender, experience="beginner"):
-    """Top-level function to estimate body measurements from an image"""
+def estimate_measurements(image_data, height_cm, weight_kg, gender, experience="beginner", view="front"):
+    """Top-level function to estimate body measurements from an image
+    
+    Parameters:
+    -----------
+    image_data : str
+        Base64 encoded image data
+    height_cm : float
+        User's height in centimeters
+    weight_kg : float
+        User's weight in kilograms
+    gender : str
+        User's gender ('male' or 'female')
+    experience : str, optional
+        User's fitness experience level (default: 'beginner')
+    view : str, optional
+        Perspective of the image ('front' or 'back') to adjust measurements accordingly
+    
+    Returns:
+    --------
+    dict
+        Dictionary containing estimated measurements with confidence scores
+    """
     estimator = BodyMeasurementEstimator()
-    return estimator.estimate_measurements(image_data, height_cm, weight_kg, gender, experience)
+    return estimator.estimate_measurements(image_data, height_cm, weight_kg, gender, experience, view)
