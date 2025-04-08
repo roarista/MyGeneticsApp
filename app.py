@@ -435,9 +435,18 @@ def results(analysis_id):
     elif 'estimated_measurements' in result:
         measurements = result.get('estimated_measurements', {})
     
+    # Create analysis object for template compatibility
+    analysis = {
+        'id': analysis_id,
+        'body_fat_percentage': result.get('bodybuilding_analysis', {}).get('body_fat_percentage', 0),
+        'body_type': result.get('bodybuilding_analysis', {}).get('body_type', 'Unknown'),
+        'muscle_building_potential': result.get('bodybuilding_analysis', {}).get('muscle_building_potential', 0)
+    }
+    
     # Template data
     template_data = {
         'analysis_id': analysis_id,
+        'analysis': analysis,  # Add analysis object for template compatibility
         'traits': formatted_traits,
         'recommendations': result['recommendations'],
         'user_info': result['user_info'],
@@ -597,9 +606,18 @@ def scan3d_results(analysis_id):
             # For other types of traits
             formatted_traits[trait_name] = trait_data
     
+    # Create analysis object for template compatibility
+    analysis = {
+        'id': analysis_id,
+        'body_fat_percentage': result.get('traits', {}).get('body_fat_percentage', 0),
+        'body_type': result.get('traits', {}).get('body_type', 'Unknown'),
+        'muscle_building_potential': result.get('traits', {}).get('muscle_building_potential', 0)
+    }
+    
     return render_template(
         'tailwind_results.html',
         analysis_id=analysis_id,
+        analysis=analysis,  # Add analysis object for template compatibility
         traits=formatted_traits,
         recommendations=result['recommendations'],
         user_info=result['user_info'],
@@ -806,7 +824,7 @@ def logout():
     """Process user logout"""
     logout_user()
     flash('You have been logged out.', 'info')
-    return redirect(url_for('analyze_form'))
+    return redirect(url_for('index'))
 
 @app.route('/profile')
 @login_required
@@ -917,9 +935,18 @@ def recommendations(analysis_id):
             # For other types of traits
             formatted_traits[trait_name] = trait_data
     
+    # Create analysis object for template compatibility
+    analysis = {
+        'id': analysis_id,
+        'body_fat_percentage': result.get('bodybuilding_analysis', {}).get('body_fat_percentage', 0),
+        'body_type': result.get('bodybuilding_analysis', {}).get('body_type', 'Unknown'),
+        'muscle_building_potential': result.get('bodybuilding_analysis', {}).get('muscle_building_potential', 0)
+    }
+    
     return render_template(
         'tailwind_results.html',
         analysis_id=analysis_id,
+        analysis=analysis,  # Add analysis object for template compatibility
         traits=formatted_traits,
         recommendations=result['recommendations'],
         user_info=result['user_info'],
@@ -1207,9 +1234,18 @@ def nutrition(analysis_id):
                 'fats_percentage': 20
             }
             
+        # Create analysis object for template compatibility
+        analysis = {
+            'id': analysis_id,
+            'body_fat_percentage': body_fat,
+            'body_type': body_type,
+            'muscle_building_potential': result.get('bodybuilding_analysis', {}).get('muscle_building_potential', 0)
+        }
+        
         # Prepare the context for the template
         context = {
             'analysis_id': analysis_id,
+            'analysis': analysis,  # Add analysis object for template compatibility
             'traits': formatted_traits,
             'body_type': body_type,
             'macros': macros,
@@ -1529,9 +1565,34 @@ def workout(analysis_id):
                 "Increase time under tension"
             ])
             
+        # Get body fat and determine body type if available
+        body_fat = 15  # Default value
+        if 'body_fat_percentage' in result['traits']:
+            trait_data = result['traits']['body_fat_percentage']
+            if isinstance(trait_data, dict) and 'value' in trait_data:
+                body_fat = trait_data['value']
+            elif isinstance(trait_data, (int, float)):
+                body_fat = trait_data
+                
+        # Determine body type from traits if available
+        body_type_data = result['traits'].get('body_type', 'balanced')
+        if isinstance(body_type_data, dict):
+            body_type = body_type_data.get('value', 'balanced')
+        else:
+            body_type = body_type_data
+        
+        # Create analysis object for template compatibility
+        analysis = {
+            'id': analysis_id,
+            'body_fat_percentage': body_fat,
+            'body_type': body_type,
+            'muscle_building_potential': result.get('bodybuilding_analysis', {}).get('muscle_building_potential', 0)
+        }
+        
         # Prepare the context for the template
         context = {
             'analysis_id': analysis_id,
+            'analysis': analysis,  # Add analysis object for template compatibility
             'traits': formatted_traits,
             'weak_points': weak_points,
             'workout_plan': workout_plan,
