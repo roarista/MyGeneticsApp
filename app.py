@@ -48,6 +48,11 @@ def load_user(user_id):
 from utils.image_processing import process_image, extract_body_landmarks
 from utils.body_analysis import analyze_body_traits
 from utils.recommendations import generate_recommendations
+from utils.measurement_validator import MeasurementValidator
+
+# Define upload folder
+TEMP_UPLOAD_FOLDER = '/tmp'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 from utils.units import format_trait_value, get_unit
 from utils.measurement_estimator import estimate_measurements
 from utils.bodybuilding_metrics import complete_bodybuilding_analysis
@@ -107,169 +112,270 @@ def tailwind_index():
     """Render the Tailwind-inspired UI main page"""
     return render_template('tailwind_index.html')
 
+@app.route('/analyze_form')
+def analyze_form():
+    """Display the photo upload form for body analysis"""
+    return render_template('tailwind_analyze.html')
+
 @app.route('/analyze', methods=['GET', 'POST'])
 def analyze():
-    """Process uploaded image and analyze body traits"""
-    # If it's a GET request, redirect to the home page
+    """Process uploaded front and back photos for comprehensive body analysis"""
+    # If it's a GET request, redirect to the analyze form
     if request.method == 'GET':
-        return redirect(url_for('index'))
+        return redirect(url_for('analyze_form'))
+    
     logger.debug("Received analyze request")
     
     # Ensure temp directory exists
     os.makedirs(TEMP_UPLOAD_FOLDER, exist_ok=True)
     
-    if 'file' not in request.files:
-        logger.error("No file in request.files")
-        flash('No file selected', 'danger')
-        return redirect(url_for('index'))
+    # Check if required files are present
+    if 'front_photo' not in request.files or 'back_photo' not in request.files:
+        logger.error("Missing front or back photo in request.files")
+        flash('Both front and back photos are required', 'danger')
+        return redirect(url_for('analyze_form'))
     
-    file = request.files['file']
-    logger.debug(f"File object: {file}, filename: {file.filename}")
+    front_file = request.files['front_photo']
+    back_file = request.files['back_photo']
     
-    if file.filename == '':
-        logger.error("Empty filename")
-        flash('No file selected', 'danger')
-        return redirect(url_for('index'))
+    logger.debug(f"Front file: {front_file.filename}, Back file: {back_file.filename}")
     
-    if file and allowed_file(file.filename):
-        try:
-            # Create a unique ID for this analysis
-            analysis_id = str(uuid.uuid4())
-            logger.debug(f"Created analysis ID: {analysis_id}")
-            
-            # Save file temporarily
-            filename = secure_filename(file.filename)
-            filepath = os.path.join(TEMP_UPLOAD_FOLDER, filename)
-            logger.debug(f"Saving file to: {filepath}")
-            file.save(filepath)
-            
-            # Process image to get landmarks
-            image = cv2.imread(filepath)
-            if image is None:
-                flash('Failed to process image', 'danger')
-                return redirect(url_for('index'))
-            
-            # Get user-provided information
-            height = request.form.get('height', 0)
-            weight = request.form.get('weight', 0)
-            gender = request.form.get('gender', 'male')  # Default to male if not specified
-            experience = request.form.get('experience', 'beginner')
-            measurement_system = request.form.get('measurement_system', 'metric')
-            
-            # Convert to float for calculations
-            height_cm = float(height) if height else 0
-            weight_kg = float(weight) if weight else 0
-            
-            # Convert measurements if they were submitted in imperial units
-            # JavaScript should handle this but we'll check on server side too
-            if measurement_system == 'imperial':
-                # Convert height from inches to cm if needed
-                if height_cm > 0 and height_cm < 100:  # Likely in inches
-                    height_cm = height_cm * 2.54
-                
-                # Convert weight from lbs to kg if needed
-                if weight_kg > 0 and weight_kg > 200:  # Likely in pounds
-                    weight_kg = weight_kg * 0.453592
-            
-            logger.debug(f"User inputs - Height: {height_cm}, Weight: {weight_kg}, Gender: {gender}, Experience: {experience}")
-            
-            # Extract landmarks from image with height information for accurate scaling
-            processed_image, landmarks, confidence_scores = extract_body_landmarks(
-                image=image,
-                height_cm=height_cm
-            )
-            
-            if landmarks is None:
-                flash('No body detected in image. Please try again with a clearer full-body image.', 'warning')
-                return redirect(url_for('index'))
-            
-            # Create an analysis metadata to store confidence information
-            analysis_metadata = {
-                'confidence_scores': confidence_scores,
-                'measurement_system': measurement_system,
-                'processing_timestamp': datetime.now().isoformat()
-            }
-            
-            # Analyze body traits - pass the original image for AI analysis
-            traits = analyze_body_traits(
-                landmarks=landmarks, 
-                original_image=image,
-                height_cm=height_cm, 
-                weight_kg=weight_kg,
-                gender=gender,  
-                experience=experience  
-            )
-            
-            # Add confidence metadata to traits for display
-            traits['metadata'] = analysis_metadata
-            
-            # Generate recommendations
-            recommendations = generate_recommendations(traits, experience)
-            
-            # Store the processed image
-            image_path = os.path.join(TEMP_UPLOAD_FOLDER, f"processed_{analysis_id}.jpg")
-            cv2.imwrite(image_path, processed_image)
-            
-            # Prepare base64 image for processing
-            with open(filepath, "rb") as image_file:
-                image_data = base64.b64encode(image_file.read()).decode('utf-8')
-            
-            # Estimate body measurements from the image
-            logger.debug("Estimating body measurements from image...")
-            estimated_measurements = estimate_measurements(
-                image_data=image_data, 
-                height_cm=height_cm, 
-                weight_kg=weight_kg, 
-                gender=gender, 
-                experience=experience
-            )
-            logger.debug(f"Estimated measurements: {estimated_measurements}")
-            
-            # Prepare user data for bodybuilding analysis
-            user_data = {
-                "height_cm": height_cm,
-                "weight_kg": weight_kg,
-                "gender": gender,
-                "experience": experience
-            }
-            
-            # Add estimated measurements to user data
-            if estimated_measurements:
-                for key, value in estimated_measurements.items():
-                    user_data[key] = value
-            
-            # Complete bodybuilding analysis
-            logger.debug("Performing bodybuilding analysis...")
-            bodybuilding_analysis = complete_bodybuilding_analysis(user_data)
-            logger.debug("Bodybuilding analysis completed")
-            
-            # Store all results
-            analysis_results[analysis_id] = {
-                'image_path': image_path,
-                'traits': traits,
-                'recommendations': recommendations,
-                'user_info': {
-                    'height': height,
-                    'weight': weight,
-                    'gender': gender,
-                    'experience': experience
-                },
-                'estimated_measurements': estimated_measurements,
-                'bodybuilding_analysis': bodybuilding_analysis
-            }
-            
-            # Clean up original upload
-            os.remove(filepath)
-            
-            return redirect(url_for('results', analysis_id=analysis_id))
-            
-        except Exception as e:
-            logger.error(f"Error during analysis: {str(e)}")
-            flash(f'Error during analysis: {str(e)}', 'danger')
-            return redirect(url_for('index'))
-    else:
+    # Check for empty file names
+    if front_file.filename == '' or back_file.filename == '':
+        logger.error("Empty filename for one or both photos")
+        flash('Both front and back photos are required', 'danger')
+        return redirect(url_for('analyze_form'))
+    
+    # Validate file types
+    if not (allowed_file(front_file.filename) and allowed_file(back_file.filename)):
         flash('Invalid file type. Please upload PNG or JPG images.', 'warning')
-        return redirect(url_for('index'))
+        return redirect(url_for('analyze_form'))
+    
+    try:
+        # Create a unique ID for this analysis
+        analysis_id = str(uuid.uuid4())
+        logger.debug(f"Created analysis ID: {analysis_id}")
+        
+        # Save files temporarily
+        front_filename = secure_filename(front_file.filename)
+        front_filepath = os.path.join(TEMP_UPLOAD_FOLDER, f"front_{analysis_id}_{front_filename}")
+        logger.debug(f"Saving front photo to: {front_filepath}")
+        front_file.save(front_filepath)
+        
+        back_filename = secure_filename(back_file.filename)
+        back_filepath = os.path.join(TEMP_UPLOAD_FOLDER, f"back_{analysis_id}_{back_filename}")
+        logger.debug(f"Saving back photo to: {back_filepath}")
+        back_file.save(back_filepath)
+        
+        # Process front image to get landmarks
+        front_image = cv2.imread(front_filepath)
+        if front_image is None:
+            flash('Failed to process front image', 'danger')
+            return redirect(url_for('analyze_form'))
+        
+        # Process back image to get landmarks
+        back_image = cv2.imread(back_filepath)
+        if back_image is None:
+            flash('Failed to process back image', 'danger')
+            return redirect(url_for('analyze_form'))
+        
+        # Get user-provided information
+        height = request.form.get('height', 0)
+        weight = request.form.get('weight', 0)
+        gender = request.form.get('gender', 'male')  # Default to male if not specified
+        experience = request.form.get('experience', 'beginner')
+        
+        # Convert to float for calculations
+        height_cm = float(height) if height else 0
+        weight_kg = float(weight) if weight else 0
+        
+        logger.debug(f"User inputs - Height: {height_cm}, Weight: {weight_kg}, Gender: {gender}, Experience: {experience}")
+        
+        # Extract landmarks from front image
+        processed_front_image, front_landmarks, front_confidence_scores = extract_body_landmarks(
+            image=front_image,
+            height_cm=int(height_cm)  # Convert to int to match the function signature
+        )
+        
+        if front_landmarks is None:
+            flash('No body detected in front image. Please try again with a clearer full-body image.', 'warning')
+            return redirect(url_for('analyze_form'))
+        
+        # Extract landmarks from back image
+        processed_back_image, back_landmarks, back_confidence_scores = extract_body_landmarks(
+            image=back_image,
+            height_cm=int(height_cm)  # Convert to int to match the function signature
+        )
+        
+        if back_landmarks is None:
+            flash('No body detected in back image. Please try again with a clearer full-body image.', 'warning')
+            return redirect(url_for('analyze_form'))
+        
+        # Create an analysis metadata to store confidence information
+        analysis_metadata = {
+            'front_confidence_scores': front_confidence_scores,
+            'back_confidence_scores': back_confidence_scores,
+            'measurement_system': 'metric',
+            'processing_timestamp': datetime.now().isoformat(),
+            'dual_photo_analysis': True
+        }
+        
+        # Analyze body traits from front image
+        front_traits = analyze_body_traits(
+            landmarks=front_landmarks, 
+            original_image=front_image,
+            height_cm=height_cm, 
+            weight_kg=weight_kg,
+            gender=gender,  
+            experience=experience  
+        )
+        
+        # Analyze body traits from back image
+        back_traits = analyze_body_traits(
+            landmarks=back_landmarks, 
+            original_image=back_image,
+            height_cm=height_cm, 
+            weight_kg=weight_kg,
+            gender=gender,  
+            experience=experience,
+            is_back_view=True  # Indicate this is a back view analysis
+        )
+        
+        # Combine traits from both views
+        combined_traits = {**front_traits}
+        for key, value in back_traits.items():
+            if key in combined_traits:
+                # If the same trait exists in both, take the one with higher confidence or average them
+                if isinstance(value, dict) and isinstance(combined_traits[key], dict):
+                    if 'confidence' in value and 'confidence' in combined_traits[key]:
+                        if value['confidence'] > combined_traits[key]['confidence']:
+                            combined_traits[key] = value
+                    else:
+                        # If no confidence scores, average the values if they are numeric
+                        if 'value' in value and 'value' in combined_traits[key]:
+                            try:
+                                combined_value = (float(value['value']) + float(combined_traits[key]['value'])) / 2
+                                combined_traits[key]['value'] = combined_value
+                            except (ValueError, TypeError):
+                                # Not numeric, keep the front view value
+                                pass
+            else:
+                # Unique trait from back view
+                combined_traits[key] = value
+        
+        # Add metadata to traits for display
+        combined_traits['metadata'] = analysis_metadata
+        
+        # Generate recommendations based on combined traits
+        recommendations = generate_recommendations(combined_traits, experience)
+        
+        # Store the processed images
+        front_image_path = os.path.join(TEMP_UPLOAD_FOLDER, f"processed_front_{analysis_id}.jpg")
+        cv2.imwrite(front_image_path, processed_front_image)
+        
+        back_image_path = os.path.join(TEMP_UPLOAD_FOLDER, f"processed_back_{analysis_id}.jpg")
+        cv2.imwrite(back_image_path, processed_back_image)
+        
+        # Prepare base64 images for processing
+        with open(front_filepath, "rb") as image_file:
+            front_image_data = base64.b64encode(image_file.read()).decode('utf-8')
+        
+        with open(back_filepath, "rb") as image_file:
+            back_image_data = base64.b64encode(image_file.read()).decode('utf-8')
+        
+        # Estimate body measurements from both images
+        logger.debug("Estimating body measurements from front and back images...")
+        front_measurements = estimate_measurements(
+            image_data=front_image_data, 
+            height_cm=height_cm, 
+            weight_kg=weight_kg, 
+            gender=gender, 
+            experience=experience,
+            view='front'
+        )
+        
+        back_measurements = estimate_measurements(
+            image_data=back_image_data, 
+            height_cm=height_cm, 
+            weight_kg=weight_kg, 
+            gender=gender, 
+            experience=experience,
+            view='back'
+        )
+        
+        # Combine measurements
+        combined_measurements = {**front_measurements}
+        for key, value in back_measurements.items():
+            if key in combined_measurements:
+                # For measurements that appear in both, use the more confident one or average
+                if isinstance(value, dict) and isinstance(combined_measurements[key], dict):
+                    if 'confidence' in value and 'confidence' in combined_measurements[key]:
+                        if value['confidence'] > combined_measurements[key]['confidence']:
+                            combined_measurements[key] = value
+                    else:
+                        # Average the values
+                        if 'value' in value and 'value' in combined_measurements[key]:
+                            try:
+                                combined_value = (float(value['value']) + float(combined_measurements[key]['value'])) / 2
+                                combined_measurements[key]['value'] = combined_value
+                            except (ValueError, TypeError):
+                                pass
+            else:
+                # Measurements only in back view
+                combined_measurements[key] = value
+        
+        logger.debug(f"Combined measurements: {combined_measurements}")
+        
+        # Prepare user data for bodybuilding analysis
+        user_data = {
+            "height_cm": height_cm,
+            "weight_kg": weight_kg,
+            "gender": gender,
+            "experience": experience
+        }
+        
+        # Add estimated measurements to user data
+        if combined_measurements:
+            for key, value in combined_measurements.items():
+                if isinstance(value, dict) and 'value' in value:
+                    user_data[key] = value['value']
+                else:
+                    user_data[key] = value
+        
+        # Complete bodybuilding analysis
+        logger.debug("Performing bodybuilding analysis...")
+        bodybuilding_analysis = complete_bodybuilding_analysis(user_data)
+        logger.debug("Bodybuilding analysis completed")
+        
+        # Store all results
+        analysis_results[analysis_id] = {
+            'front_image_path': front_image_path,
+            'back_image_path': back_image_path,
+            'traits': combined_traits,
+            'recommendations': recommendations,
+            'user_info': {
+                'height': height,
+                'weight': weight,
+                'gender': gender,
+                'experience': experience
+            },
+            'front_measurements': front_measurements,
+            'back_measurements': back_measurements,
+            'combined_measurements': combined_measurements,
+            'bodybuilding_analysis': bodybuilding_analysis,
+            'analysis_type': 'dual_photo'  # Flag to indicate this is a dual photo analysis
+        }
+        
+        # Clean up original uploads
+        os.remove(front_filepath)
+        os.remove(back_filepath)
+        
+        return redirect(url_for('results', analysis_id=analysis_id))
+        
+    except Exception as e:
+        logger.error(f"Error during analysis: {str(e)}")
+        flash(f'Error during analysis: {str(e)}', 'danger')
+        return redirect(url_for('analyze_form'))
 
 @app.route('/results/<analysis_id>')
 def results(analysis_id):
@@ -280,16 +386,40 @@ def results(analysis_id):
     
     result = analysis_results[analysis_id]
     
-    # Read the processed image for display
-    with open(result['image_path'], 'rb') as f:
-        img_data = f.read()
+    # Check what type of analysis this is
+    analysis_type = result.get('analysis_type', 'single_photo')
     
-    # Convert image to base64 for embedding in HTML
-    img_b64 = base64.b64encode(img_data).decode('utf-8')
+    # Handle different types of analysis
+    if analysis_type == 'dual_photo':
+        # Read the processed front image
+        with open(result['front_image_path'], 'rb') as f:
+            front_img_data = f.read()
+        front_img_b64 = base64.b64encode(front_img_data).decode('utf-8')
+        
+        # Read the processed back image
+        with open(result['back_image_path'], 'rb') as f:
+            back_img_data = f.read()
+        back_img_b64 = base64.b64encode(back_img_data).decode('utf-8')
+        
+        # Use front image as main image, provide back image separately
+        img_b64 = front_img_b64
+    elif analysis_type == '3d_scan':
+        # For 3D scan analysis, we might not have an image
+        img_b64 = None
+    else:
+        # For single photo analysis (legacy mode)
+        with open(result['image_path'], 'rb') as f:
+            img_data = f.read()
+        img_b64 = base64.b64encode(img_data).decode('utf-8')
     
     # Process traits to include their units
     formatted_traits = {}
     for trait_name, trait_data in result['traits'].items():
+        # Skip metadata
+        if trait_name == 'metadata':
+            formatted_traits[trait_name] = trait_data
+            continue
+            
         # For traits that are dictionaries with value keys
         if isinstance(trait_data, dict) and 'value' in trait_data:
             # Copy the trait data
@@ -302,18 +432,35 @@ def results(analysis_id):
             # For other types of traits
             formatted_traits[trait_name] = trait_data
     
-    return render_template(
-        'tailwind_results.html',
-        analysis_id=analysis_id,
-        traits=formatted_traits,
-        recommendations=result['recommendations'],
-        user_info=result['user_info'],
-        image_data=img_b64,
-        format_value=format_trait_value,  # Pass the formatter to the template
-        is_3d_scan=False,  # Flag to indicate this is not a 3D scan analysis
-        bodybuilding=result.get('bodybuilding_analysis', {}),  # Add bodybuilding metrics
-        estimated_measurements=result.get('estimated_measurements', {})  # Add estimated measurements
-    )
+    # Determine which measurements to display
+    measurements = {}
+    if analysis_type == 'dual_photo':
+        measurements = result.get('combined_measurements', {})
+    elif 'estimated_measurements' in result:
+        measurements = result.get('estimated_measurements', {})
+    
+    # Template data
+    template_data = {
+        'analysis_id': analysis_id,
+        'traits': formatted_traits,
+        'recommendations': result['recommendations'],
+        'user_info': result['user_info'],
+        'image_data': img_b64,
+        'format_value': format_trait_value,  # Pass the formatter to the template
+        'is_3d_scan': analysis_type == '3d_scan',  # Flag for 3D scan analysis
+        'is_dual_photo': analysis_type == 'dual_photo',  # Flag for dual photo analysis
+        'bodybuilding': result.get('bodybuilding_analysis', {}),  # Bodybuilding metrics
+        'estimated_measurements': measurements  # Measurements (combined for dual photo)
+    }
+    
+    # Add additional data for dual photo analysis
+    if analysis_type == 'dual_photo':
+        template_data['front_image'] = front_img_b64
+        template_data['back_image'] = back_img_b64
+        template_data['front_measurements'] = result.get('front_measurements', {})
+        template_data['back_measurements'] = result.get('back_measurements', {})
+    
+    return render_template('tailwind_results.html', **template_data)
 
 @app.route('/education')
 def education():

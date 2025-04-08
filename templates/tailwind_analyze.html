@@ -1,237 +1,193 @@
 {% extends "tailwind_layout.html" %}
 
-{% block content %}
-<div class="grid grid-cols-1 md:grid-cols-12 gap-6">
-    <div class="md:col-span-7">
-        <div class="fitness-card">
-            <div class="mb-6">
-                <div class="flex items-center gap-3 mb-4">
-                    <svg class="icon text-fitness-red">
-                        <use xlink:href="#icon-dna"></use>
-                    </svg>
-                    <h1 class="text-3xl font-bold">Discover Your Genetic Potential</h1>
-                </div>
-                <p class="text-lg mb-6">
-                    Optimize your fitness routine based on your unique body structure. Upload a photo to analyze your genetic traits and get personalized workout recommendations.
-                </p>
-                <hr class="border-gray-800 my-6">
-                
-                <div class="flex items-center gap-3 mb-4">
-                    <svg class="icon text-fitness-accent">
-                        <use xlink:href="#icon-check"></use>
-                    </svg>
-                    <h3 class="text-xl font-bold">How It Works</h3>
-                </div>
-                
-                <ol class="list-decimal ml-6 mb-6 text-fitness-gray">
-                    <li class="mb-2">Upload a full-body photo in neutral standing position</li>
-                    <li class="mb-2">Our AI analyzes your body's structural traits</li>
-                    <li class="mb-2">Get customized training recommendations based on your genetics</li>
-                    <li>Focus your training effort where it matters most</li>
-                </ol>
+{% block title %}MyGenetics - Upload Photos for Analysis{% endblock %}
 
-                <div class="fitness-card bg-fitness-darkgray mb-6">
-                    <div class="flex items-center gap-2 mb-3">
-                        <svg class="icon text-fitness-accent">
-                            <use xlink:href="#icon-bulb"></use>
-                        </svg>
-                        <h4 class="text-lg font-bold">Optimal Photo Tips</h4>
-                    </div>
-                    <ul class="list-disc ml-6 text-fitness-gray">
-                        <li class="mb-2">Wear form-fitting clothing or activewear</li>
-                        <li class="mb-2">Stand in a neutral pose, arms at sides, legs shoulder-width apart</li>
-                        <li class="mb-2">Ensure good lighting and a plain background</li>
-                        <li>Face the camera directly with your entire body visible</li>
-                    </ul>
-                </div>
-                
-                <div class="fitness-card bg-fitness-darkgray">
-                    <div class="flex items-center gap-2 mb-3">
-                        <svg class="icon text-fitness-red">
-                            <use xlink:href="#icon-shield"></use>
-                        </svg>
-                        <h4 class="text-lg font-bold">Privacy Protection</h4>
-                    </div>
-                    <p class="text-fitness-gray mb-3">Your photos and data are processed with the highest security standards:</p>
-                    <ul class="list-disc ml-6 text-fitness-gray">
-                        <li class="mb-2">Images processed locally when possible</li>
-                        <li class="mb-2">Data is never shared with third parties</li>
-                        <li>You control how long your data is stored</li>
-                    </ul>
-                </div>
-            </div>
+{% block content %}
+<!-- Photo Upload Section -->
+<section class="py-16">
+  <div class="container mx-auto px-4">
+    <div class="max-w-4xl mx-auto">
+      <div class="text-center mb-12" data-aos="fade-up">
+        <h1 class="text-3xl md:text-4xl font-bold mb-4">Complete Body Analysis</h1>
+        <p class="text-gray-300 text-lg">Upload front and back view photos for comprehensive measurement analysis</p>
+      </div>
+      
+      <div class="bg-gray-800/50 border border-gray-700 rounded-xl p-8 shadow-lg" data-aos="fade-up">
+        {% if error %}
+        <div class="bg-red-500/20 border border-red-500 text-red-500 p-4 rounded-lg mb-6">
+          {{ error }}
         </div>
-    </div>
-    
-    <div class="md:col-span-5">
-        <div class="fitness-card">
-            <div class="flex items-center gap-3 mb-4">
-                <svg class="icon text-fitness-red">
-                    <use xlink:href="#icon-camera"></use>
-                </svg>
-                <h3 class="text-xl font-bold">Upload Your Photo</h3>
-            </div>
-            
-            <form action="{{ url_for('analyze') }}" method="post" enctype="multipart/form-data" class="mb-4">
-                <div class="mb-4">
-                    <label for="file" class="block text-fitness-gray mb-2">Photo Upload</label>
-                    <div class="fitness-card bg-fitness-darkgray p-8 text-center cursor-pointer" id="drop-area">
-                        <input type="file" name="file" id="file" class="hidden" accept="image/png, image/jpeg, image/jpg">
-                        <svg class="icon icon-lg text-fitness-gray mx-auto mb-3">
-                            <use xlink:href="#icon-camera"></use>
-                        </svg>
-                        <p class="text-fitness-gray mb-2">Drag and drop your photo here or</p>
-                        <button type="button" id="browse-button" class="btn btn-outline">
-                            Browse Files
-                        </button>
-                        <p class="text-sm text-fitness-gray mt-3" id="file-name">No file selected</p>
-                    </div>
-                    <p class="text-sm text-fitness-gray mt-2">Upload a clear, full-body photo in a neutral standing position.</p>
+        {% endif %}
+        
+        <form action="{{ url_for('analyze') }}" method="post" enctype="multipart/form-data" class="space-y-6">
+          <div class="space-y-4">
+            <!-- Front Photo Upload -->
+            <div class="border border-gray-700 rounded-lg p-6">
+              <h3 class="text-xl font-bold mb-4 flex items-center">
+                <span class="w-8 h-8 bg-red-500/20 rounded-full flex items-center justify-center mr-3">
+                  <i class="fas fa-user text-red-500"></i>
+                </span>
+                Front View Photo
+              </h3>
+              
+              <div class="p-6 border-2 border-dashed border-gray-700 rounded-lg bg-gray-800/50 hover:bg-gray-800 hover:border-red-500 transition-all text-center cursor-pointer" id="front-drop-area">
+                <input type="file" name="front_photo" id="front_photo" class="hidden" accept="image/png, image/jpeg, image/jpg" required>
+                <div class="flex flex-col items-center justify-center">
+                  <i class="fas fa-camera text-3xl text-gray-500 mb-3"></i>
+                  <p class="text-gray-400 mb-2">Drag and drop your front view photo here or</p>
+                  <button type="button" id="front-browse-button" class="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-white text-sm font-medium transition-colors">
+                    Browse Files
+                  </button>
+                  <p class="text-sm text-gray-500 mt-3" id="front-file-name">No file selected</p>
+                  <div id="front-preview-container" class="hidden mt-4">
+                    <img id="front-preview-image" class="max-h-48 mx-auto rounded" src="#" alt="Front view image">
+                  </div>
                 </div>
-                
-                <div class="fitness-card bg-fitness-darkgray mb-6">
-                    <div class="flex items-center gap-2 mb-4">
-                        <svg class="icon text-fitness-accent">
-                            <use xlink:href="#icon-ruler"></use>
-                        </svg>
-                        <h4 class="text-lg font-bold">Advanced Body Metrics</h4>
-                    </div>
-                    <p class="text-fitness-gray mb-4">Providing your measurements enables advanced analysis including body composition estimates and frame size assessment.</p>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label for="height" class="block text-fitness-gray mb-2">Height (cm)</label>
-                            <input type="number" name="height" id="height" class="fitness-input" required>
-                        </div>
-                        <div>
-                            <label for="weight" class="block text-fitness-gray mb-2">Weight (kg)</label>
-                            <input type="number" name="weight" id="weight" class="fitness-input" required>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                        <div>
-                            <label for="gender" class="block text-fitness-gray mb-2">Gender</label>
-                            <select name="gender" id="gender" class="fitness-select" required>
-                                <option value="male">Male</option>
-                                <option value="female">Female</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="experience" class="block text-fitness-gray mb-2">Experience Level</label>
-                            <select name="experience" id="experience" class="fitness-select" required>
-                                <option value="beginner">Beginner (0-1 years)</option>
-                                <option value="intermediate">Intermediate (1-3 years)</option>
-                                <option value="advanced">Advanced (3+ years)</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                
-                <button type="submit" class="btn btn-primary w-full flex items-center justify-center gap-2">
-                    <svg class="icon icon-sm">
-                        <use xlink:href="#icon-zap"></use>
-                    </svg>
-                    <span>Analyze My Genetics</span>
-                </button>
-            </form>
-            
-            <div class="flex justify-center">
-                <a href="{{ url_for('scan3d') }}" class="text-fitness-accent flex items-center gap-2">
-                    <svg class="icon icon-sm">
-                        <use xlink:href="#icon-box"></use>
-                    </svg>
-                    <span>Or use 3D body scan instead</span>
-                </a>
+              </div>
+              <p class="text-sm text-gray-400 mt-2">Upload a clear, full-body front view photo in a neutral standing position with arms slightly away from body.</p>
             </div>
-        </div>
+
+            <!-- Back Photo Upload -->
+            <div class="border border-gray-700 rounded-lg p-6">
+              <h3 class="text-xl font-bold mb-4 flex items-center">
+                <span class="w-8 h-8 bg-red-500/20 rounded-full flex items-center justify-center mr-3">
+                  <i class="fas fa-user text-red-500 transform rotate-180"></i>
+                </span>
+                Back View Photo
+              </h3>
+              
+              <div class="p-6 border-2 border-dashed border-gray-700 rounded-lg bg-gray-800/50 hover:bg-gray-800 hover:border-red-500 transition-all text-center cursor-pointer" id="back-drop-area">
+                <input type="file" name="back_photo" id="back_photo" class="hidden" accept="image/png, image/jpeg, image/jpg" required>
+                <div class="flex flex-col items-center justify-center">
+                  <i class="fas fa-camera text-3xl text-gray-500 mb-3"></i>
+                  <p class="text-gray-400 mb-2">Drag and drop your back view photo here or</p>
+                  <button type="button" id="back-browse-button" class="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-white text-sm font-medium transition-colors">
+                    Browse Files
+                  </button>
+                  <p class="text-sm text-gray-500 mt-3" id="back-file-name">No file selected</p>
+                  <div id="back-preview-container" class="hidden mt-4">
+                    <img id="back-preview-image" class="max-h-48 mx-auto rounded" src="#" alt="Back view image">
+                  </div>
+                </div>
+              </div>
+              <p class="text-sm text-gray-400 mt-2">Upload a clear, full-body back view photo in a neutral standing position with arms slightly away from body.</p>
+            </div>
+
+            <!-- User Information -->
+            <div class="border border-gray-700 rounded-lg p-6">
+              <h3 class="text-xl font-bold mb-4 flex items-center">
+                <span class="w-8 h-8 bg-red-500/20 rounded-full flex items-center justify-center mr-3">
+                  <i class="fas fa-ruler text-red-500"></i>
+                </span>
+                Body Information
+              </h3>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label for="height" class="block text-sm font-medium text-gray-300 mb-2">Height (cm)</label>
+                  <input type="number" step="0.1" id="height" name="height" required min="100" max="250"
+                      class="w-full p-2 border border-gray-700 rounded bg-gray-800/50 text-white">
+                </div>
+                <div>
+                  <label for="weight" class="block text-sm font-medium text-gray-300 mb-2">Weight (kg)</label>
+                  <input type="number" step="0.1" id="weight" name="weight" required min="30" max="200"
+                      class="w-full p-2 border border-gray-700 rounded bg-gray-800/50 text-white">
+                </div>
+                <div>
+                  <label for="gender" class="block text-sm font-medium text-gray-300 mb-2">Gender</label>
+                  <select id="gender" name="gender" required
+                      class="w-full p-2 border border-gray-700 rounded bg-gray-800/50 text-white">
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="experience" class="block text-sm font-medium text-gray-300 mb-2">Training Experience</label>
+                  <select id="experience" name="experience" required
+                      class="w-full p-2 border border-gray-700 rounded bg-gray-800/50 text-white">
+                      <option value="beginner">Beginner (0-2 years)</option>
+                      <option value="intermediate">Intermediate (2-5 years)</option>
+                      <option value="advanced">Advanced (5+ years)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex justify-center">
+            <button type="submit"
+                class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                <i class="fas fa-dna mr-2"></i>
+                Analyze My Genetics
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
-</div>
+  </div>
+</section>
+
+<!-- Why Two Photos Section -->
+<section class="py-16 bg-gray-900/30">
+  <div class="container mx-auto px-4">
+    <div class="text-center max-w-2xl mx-auto mb-12" data-aos="fade-up">
+      <h2 class="text-3xl font-bold mb-4">Why We Need Both Views</h2>
+      <p class="text-gray-300">Analyzing front and back photos gives us a complete picture of your physique and potential</p>
+    </div>
+  </div>
+</section>
 {% endblock %}
 
 {% block scripts %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const fileInput = document.getElementById('file');
-        const dropArea = document.getElementById('drop-area');
-        const browseButton = document.getElementById('browse-button');
-        const fileNameDisplay = document.getElementById('file-name');
-
-        // Trigger file input when browse button is clicked
-        browseButton.addEventListener('click', function() {
-            fileInput.click();
-        });
-
-        // Update filename display when file is selected
-        fileInput.addEventListener('change', function() {
-            if (fileInput.files.length > 0) {
-                fileNameDisplay.textContent = fileInput.files[0].name;
-                fileNameDisplay.classList.add('text-fitness-accent');
-                dropArea.classList.add('border', 'border-fitness-accent');
-            } else {
-                fileNameDisplay.textContent = 'No file selected';
-                fileNameDisplay.classList.remove('text-fitness-accent');
-                dropArea.classList.remove('border', 'border-fitness-accent');
-            }
-        });
-
-        // Handle drag and drop
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            dropArea.addEventListener(eventName, preventDefaults, false);
-        });
-
-        function preventDefaults(e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dropArea.addEventListener(eventName, highlight, false);
-        });
-
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropArea.addEventListener(eventName, unhighlight, false);
-        });
-
-        function highlight() {
-            dropArea.classList.add('bg-fitness-card-bg', 'border', 'border-fitness-accent');
-        }
-
-        function unhighlight() {
-            dropArea.classList.remove('bg-fitness-card-bg', 'border', 'border-fitness-accent');
-        }
-
-        dropArea.addEventListener('drop', handleDrop, false);
-
-        function handleDrop(e) {
-            const dt = e.dataTransfer;
-            const files = dt.files;
-            fileInput.files = files;
-            
-            if (files.length > 0) {
-                fileNameDisplay.textContent = files[0].name;
-                fileNameDisplay.classList.add('text-fitness-accent');
-            }
-        }
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialize AOS animations
+    AOS.init({
+      duration: 1000,
+      once: true,
+      offset: 50
     });
+    
+    // Front photo upload functionality
+    setupFileUpload('front_photo', 'front-drop-area', 'front-browse-button', 
+                   'front-file-name', 'front-preview-container', 'front-preview-image');
+    
+    // Back photo upload functionality
+    setupFileUpload('back_photo', 'back-drop-area', 'back-browse-button', 
+                   'back-file-name', 'back-preview-container', 'back-preview-image');
+    
+    function setupFileUpload(inputId, dropAreaId, browseButtonId, fileNameId, previewContainerId, previewImageId) {
+      const fileInput = document.getElementById(inputId);
+      const dropArea = document.getElementById(dropAreaId);
+      const browseButton = document.getElementById(browseButtonId);
+      const fileNameDisplay = document.getElementById(fileNameId);
+      const previewContainer = document.getElementById(previewContainerId);
+      const previewImage = document.getElementById(previewImageId);
+      
+      if (browseButton) {
+        browseButton.addEventListener('click', function() {
+          fileInput.click();
+        });
+      }
+      
+      if (fileInput) {
+        fileInput.addEventListener('change', function() {
+          if (fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            fileNameDisplay.textContent = file.name;
+            fileNameDisplay.classList.add('text-red-500');
+            
+            // Show image preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              previewImage.src = e.target.result;
+              previewContainer.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+      }
+    }
+  });
 </script>
-{% endblock %}
-
-{% block styles %}
-<style>
-    .fitness-card {
-        background-color: var(--fitness-card-bg);
-        border-radius: 0.5rem;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        padding: 1.5rem;
-        border: 1px solid rgba(255, 255, 255, 0.05);
-    }
-    
-    #drop-area {
-        transition: all 0.3s ease;
-    }
-    
-    #drop-area:hover {
-        background-color: var(--fitness-darkgray);
-    }
-</style>
 {% endblock %}
