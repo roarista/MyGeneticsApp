@@ -1,0 +1,163 @@
+Based on the Internal Server Error message and the code I can see, I'll help identify and fix the issue. The error likely occurs in the `/analyze` route when processing the uploaded photos and trying to store them in the session.
+
+Let's fix this with the following steps:
+
+1. First, I'll check the image processing and session handling in the `/analyze` route:
+
+```python:/Users/rodrigoarista/Desktop/AI project/MyGeneticsApp/app.py
+@app.route('/analyze', methods=['POST'])
+def analyze():
+    try:
+        # Get form data
+        height = float(request.form.get('height', 0))
+        weight = float(request.form.get('weight', 0))
+        gender = request.form.get('gender', '')
+        experience = request.form.get('experience', '')
+        
+        # Validate inputs
+        if not all([height, weight, gender, experience]):
+            flash('Please fill in all required fields', 'error')
+            return redirect(url_for('index'))
+            
+        # Process front photo
+        front_photo = request.files.get('front_photo')
+        if not front_photo or not allowed_file(front_photo.filename):
+            flash('Please upload a valid front view photo', 'error')
+            return redirect(url_for('index'))
+            
+        # Process back photo
+        back_photo = request.files.get('back_photo')
+        if not back_photo or not allowed_file(back_photo.filename):
+            flash('Please upload a valid back view photo', 'error')
+            return redirect(url_for('index'))
+            
+        # Create temp directory if it doesn't exist
+        os.makedirs(TEMP_UPLOAD_FOLDER, exist_ok=True)
+            
+        # Save and process front photo
+        front_filename = secure_filename(front_photo.filename)
+        front_path = os.path.join(TEMP_UPLOAD_FOLDER, front_filename)
+        front_photo.save(front_path)
+        
+        # Save and process back photo
+        back_filename = secure_filename(back_photo.filename)
+        back_path = os.path.join(TEMP_UPLOAD_FOLDER, back_filename)
+        back_photo.save(back_path)
+        
+        # Process front image
+        front_img = cv2.imread(front_path)
+        if front_img is None:
+            raise ValueError("Could not read front image")
+        front_img, front_dims = process_image(front_img)
+        front_landmarks, front_annotated, front_messages = extract_body_landmarks(front_img, height)
+        
+        # Process back image
+        back_img = cv2.imread(back_path)
+        if back_img is None:
+            raise ValueError("Could not read back image")
+        back_img, back_dims = process_image(back_img)
+        back_landmarks, back_annotated, back_messages = extract_body_landmarks(back_img, height)
+        
+        # Convert annotated images to base64 for storage in session
+        _, front_buffer = cv2.imencode('.jpg', front_annotated)
+        _, back_buffer = cv2.imencode('.jpg', back_annotated)
+        front_b64 = base64.b64encode(front_buffer).decode('utf-8')
+        back_b64 = base64.b64encode(back_buffer).decode('utf-8')
+        
+        # Analyze body traits using both sets of landmarks
+        analysis_results = analyze_body_traits(
+            front_landmarks=front_landmarks,
+            back_landmarks=back_landmarks,
+            height=height,
+            weight=weight,
+            gender=gender,
+            experience=experience,
+            front_image=front_img,
+            back_image=back_img
+        )
+        
+        # Add validation messages to results
+        analysis_results['validation_messages'] = front_messages + back_messages
+        
+        # Save results and encoded images to session
+        session['analysis_results'] = analysis_results
+        session['front_photo'] = front_b64
+        session['back_photo'] = back_b64
+        
+        # Clean up temporary files
+        try:
+            os.remove(front_path)
+            os.remove(back_path)
+        except Exception as e:
+            logger.warning(f"Error cleaning up temporary files: {str(e)}")
+        
+        return redirect(url_for('results'))
+        
+    except Exception as e:
+        logger.error(f"Analysis error: {str(e)}")
+        flash('An error occurred during analysis. Please try again.', 'error')
+        return redirect(url_for('index'))
+
+# Add missing import at the top of the file
+import base64
+```
+The changes I made fix several issues:
+
+1. Added proper image encoding using base64 for session storage
+2. Added error checking for image loading
+3. Created the temp directory if it doesn't exist
+4. Fixed redirect URLs (changed from 'home' to 'index')
+5. Improved error handling and cleanup of temporary files
+6. Added proper image validation before processing
+
+Now let's update the results template to properly display the base64-encoded images:
+
+```html:/Users/rodrigoarista/Desktop/AI project/MyGeneticsApp/templates/tailwind_results.html
+<!-- Photos Section -->
+<div class="mb-8">
+    <h2 class="text-2xl font-semibold mb-4">Analysis Photos</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {% if front_photo %}
+        <div>
+            <h3 class="text-lg font-medium mb-2">Front View</h3>
+            <img src="data:image/jpeg;base64,{{ front_photo }}" alt="Front View Analysis" class="w-full rounded-lg shadow-lg">
+        </div>
+        {% endif %}
+        {% if back_photo %}
+        <div>
+            <h3 class="text-lg font-medium mb-2">Back View</h3>
+            <img src="data:image/jpeg;base64,{{ back_photo }}" alt="Back View Analysis" class="w-full rounded-lg shadow-lg">
+        </div>
+        {% endif %}
+    </div>
+</div>
+// ... existing code ...
+```
+These changes should fix the Internal Server Error. Here's a summary of what was fixed:
+
+1. **Image Processing and Storage**:
+   - Now properly encoding images to base64 before storing in session
+   - Added validation to ensure images are loaded correctly
+   - Improved error handling for image processing
+
+2. **Session Handling**:
+   - Storing base64-encoded images directly in the session
+   - Removed dependency on temporary files for image storage
+   - Added proper cleanup of temporary files
+
+3. **Template Updates**:
+   - Added conditional rendering for images
+   - Properly handling base64-encoded images in the template
+
+4. **Error Handling**:
+   - Added better error messages
+   - Improved logging
+   - Fixed redirect URLs
+
+To test the fix:
+1. Make sure you have all required dependencies installed
+2. Restart the Flask application
+3. Try uploading front and back photos again through the form
+4. The analysis should now complete successfully and display the results page with your photos
+
+If you encounter any other issues, please let me know and I'll help you resolve them.

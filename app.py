@@ -443,6 +443,15 @@ def results(analysis_id):
         'muscle_building_potential': result.get('bodybuilding_analysis', {}).get('muscle_building_potential', 0)
     }
     
+    # Get basic measurements for measurements panel
+    basic_measurements = {}
+    if measurements:
+        # Extract key measurements for the basic measurements panel
+        basic_keys = ['height', 'weight', 'chest', 'waist', 'hips', 'shoulders']
+        for key in basic_keys:
+            if key in measurements:
+                basic_measurements[key.capitalize()] = measurements[key]
+    
     # Template data
     template_data = {
         'analysis_id': analysis_id,
@@ -455,7 +464,8 @@ def results(analysis_id):
         'is_3d_scan': analysis_type == '3d_scan',  # Flag for 3D scan analysis
         'is_dual_photo': analysis_type == 'dual_photo',  # Flag for dual photo analysis
         'bodybuilding': result.get('bodybuilding_analysis', {}),  # Bodybuilding metrics
-        'estimated_measurements': measurements  # Measurements (combined for dual photo)
+        'estimated_measurements': measurements,  # Measurements (combined for dual photo)
+        'basic_measurements': basic_measurements  # Basic measurements for the template
     }
     
     # Add additional data for dual photo analysis
@@ -614,6 +624,16 @@ def scan3d_results(analysis_id):
         'muscle_building_potential': result.get('traits', {}).get('muscle_building_potential', 0)
     }
     
+    # Extract measurements for display in the basic measurements panel
+    measurements = result['traits']
+    basic_measurements = {}
+    if measurements:
+        # Extract key measurements for the basic measurements panel
+        basic_keys = ['height', 'weight', 'chest', 'waist', 'hips', 'shoulders']
+        for key in basic_keys:
+            if key in measurements:
+                basic_measurements[key.capitalize()] = measurements[key]
+    
     return render_template(
         'tailwind_results.html',
         analysis_id=analysis_id,
@@ -624,7 +644,9 @@ def scan3d_results(analysis_id):
         image_data=img_b64,
         scan_data=result.get('scan_data', {}),
         format_value=format_trait_value,  # Pass the formatter to the template
-        is_3d_scan=True  # Flag to indicate this is a 3D scan analysis
+        is_3d_scan=True,  # Flag to indicate this is a 3D scan analysis
+        basic_measurements=basic_measurements,  # Basic measurements for the template
+        estimated_measurements=measurements  # All measurements
     )
 
 @app.route('/api/traits/<analysis_id>')
@@ -943,6 +965,21 @@ def recommendations(analysis_id):
         'muscle_building_potential': result.get('bodybuilding_analysis', {}).get('muscle_building_potential', 0)
     }
     
+    # Extract measurements from traits if available
+    measurements = {}
+    for trait_name, trait_data in result['traits'].items():
+        if isinstance(trait_data, dict) and 'value' in trait_data:
+            measurements[trait_name] = trait_data
+            
+    # Create basic measurements for display
+    basic_measurements = {}
+    if measurements:
+        # Extract key measurements for the basic measurements panel
+        basic_keys = ['height', 'weight', 'chest', 'waist', 'hips', 'shoulders']
+        for key in basic_keys:
+            if key in measurements:
+                basic_measurements[key.capitalize()] = measurements[key]
+    
     return render_template(
         'tailwind_results.html',
         analysis_id=analysis_id,
@@ -953,7 +990,9 @@ def recommendations(analysis_id):
         image_data=None,
         format_value=format_trait_value,  # Pass the formatter to the template
         recommendations_view=True,  # Flag to indicate this is just recommendations view
-        is_3d_scan=False  # Flag to indicate this is not a 3D scan
+        is_3d_scan=False,  # Flag to indicate this is not a 3D scan
+        basic_measurements=basic_measurements,  # Basic measurements for the template
+        estimated_measurements=measurements  # All measurements
     )
 
 @app.route('/nutrition/<analysis_id>')
@@ -1242,6 +1281,21 @@ def nutrition(analysis_id):
             'muscle_building_potential': result.get('bodybuilding_analysis', {}).get('muscle_building_potential', 0)
         }
         
+        # Extract measurements from traits if available
+        measurements = {}
+        for trait_name, trait_data in result['traits'].items():
+            if isinstance(trait_data, dict) and 'value' in trait_data:
+                measurements[trait_name] = trait_data
+        
+        # Create basic measurements for display
+        basic_measurements = {}
+        if measurements:
+            # Extract key measurements for the basic measurements panel
+            basic_keys = ['height', 'weight', 'chest', 'waist', 'hips', 'shoulders']
+            for key in basic_keys:
+                if key in measurements:
+                    basic_measurements[key.capitalize()] = measurements[key]
+        
         # Prepare the context for the template
         context = {
             'analysis_id': analysis_id,
@@ -1253,7 +1307,9 @@ def nutrition(analysis_id):
             'supplements': supplements,
             'meals': meals,
             'food_recommendations': food_recommendations,
-            'nutrition_tips': nutrition_tips
+            'nutrition_tips': nutrition_tips,
+            'basic_measurements': basic_measurements,  # Basic measurements for the template
+            'estimated_measurements': measurements  # All measurements
         }
         
         # Log the key parts of context for debugging
@@ -1589,6 +1645,21 @@ def workout(analysis_id):
             'muscle_building_potential': result.get('bodybuilding_analysis', {}).get('muscle_building_potential', 0)
         }
         
+        # Extract measurements from traits if available
+        measurements = {}
+        for trait_name, trait_data in result['traits'].items():
+            if isinstance(trait_data, dict) and 'value' in trait_data:
+                measurements[trait_name] = trait_data
+        
+        # Create basic measurements for display
+        basic_measurements = {}
+        if measurements:
+            # Extract key measurements for the basic measurements panel
+            basic_keys = ['height', 'weight', 'chest', 'waist', 'hips', 'shoulders']
+            for key in basic_keys:
+                if key in measurements:
+                    basic_measurements[key.capitalize()] = measurements[key]
+        
         # Prepare the context for the template
         context = {
             'analysis_id': analysis_id,
@@ -1600,7 +1671,9 @@ def workout(analysis_id):
             'equipment': equipment,
             'progression_methods': progression_methods,
             'experience': experience,
-            'split_type': 'Push/Pull/Legs'
+            'split_type': 'Push/Pull/Legs',
+            'basic_measurements': basic_measurements,  # Basic measurements for the template
+            'estimated_measurements': measurements  # All measurements
         }
         
         # Log the key parts of context for debugging
