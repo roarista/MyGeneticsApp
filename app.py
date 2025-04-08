@@ -452,6 +452,15 @@ def results(analysis_id):
             if key in measurements:
                 basic_measurements[key.capitalize()] = measurements[key]
     
+    # Get proportion measurements for the proportions panel
+    proportion_measurements = {}
+    if measurements:
+        # Extract proportion metrics for display
+        proportion_keys = ['shoulder_hip_ratio', 'waist_hip_ratio', 'arm_torso_ratio', 'leg_torso_ratio']
+        for key in proportion_keys:
+            if key in measurements:
+                proportion_measurements[key.replace('_', ' ').title()] = measurements[key]
+    
     # Template data
     template_data = {
         'analysis_id': analysis_id,
@@ -465,7 +474,8 @@ def results(analysis_id):
         'is_dual_photo': analysis_type == 'dual_photo',  # Flag for dual photo analysis
         'bodybuilding': result.get('bodybuilding_analysis', {}),  # Bodybuilding metrics
         'estimated_measurements': measurements,  # Measurements (combined for dual photo)
-        'basic_measurements': basic_measurements  # Basic measurements for the template
+        'basic_measurements': basic_measurements,  # Basic measurements for the template
+        'proportion_measurements': proportion_measurements  # Proportion measurements for the template
     }
     
     # Add additional data for dual photo analysis
@@ -634,6 +644,15 @@ def scan3d_results(analysis_id):
             if key in measurements:
                 basic_measurements[key.capitalize()] = measurements[key]
     
+    # Get proportion measurements for the proportions panel
+    proportion_measurements = {}
+    if measurements:
+        # Extract proportion metrics for display
+        proportion_keys = ['shoulder_hip_ratio', 'waist_hip_ratio', 'arm_torso_ratio', 'leg_torso_ratio']
+        for key in proportion_keys:
+            if key in measurements:
+                proportion_measurements[key.replace('_', ' ').title()] = measurements[key]
+    
     return render_template(
         'tailwind_results.html',
         analysis_id=analysis_id,
@@ -646,7 +665,8 @@ def scan3d_results(analysis_id):
         format_value=format_trait_value,  # Pass the formatter to the template
         is_3d_scan=True,  # Flag to indicate this is a 3D scan analysis
         basic_measurements=basic_measurements,  # Basic measurements for the template
-        estimated_measurements=measurements  # All measurements
+        estimated_measurements=measurements,  # All measurements
+        proportion_measurements=proportion_measurements  # Proportion measurements for the template
     )
 
 @app.route('/api/traits/<analysis_id>')
@@ -980,6 +1000,15 @@ def recommendations(analysis_id):
             if key in measurements:
                 basic_measurements[key.capitalize()] = measurements[key]
     
+    # Get proportion measurements for the proportions panel
+    proportion_measurements = {}
+    if measurements:
+        # Extract proportion metrics for display
+        proportion_keys = ['shoulder_hip_ratio', 'waist_hip_ratio', 'arm_torso_ratio', 'leg_torso_ratio']
+        for key in proportion_keys:
+            if key in measurements:
+                proportion_measurements[key.replace('_', ' ').title()] = measurements[key]
+    
     return render_template(
         'tailwind_results.html',
         analysis_id=analysis_id,
@@ -992,7 +1021,8 @@ def recommendations(analysis_id):
         recommendations_view=True,  # Flag to indicate this is just recommendations view
         is_3d_scan=False,  # Flag to indicate this is not a 3D scan
         basic_measurements=basic_measurements,  # Basic measurements for the template
-        estimated_measurements=measurements  # All measurements
+        estimated_measurements=measurements,  # All measurements
+        proportion_measurements=proportion_measurements  # Proportion measurements for the template
     )
 
 @app.route('/nutrition/<analysis_id>')
@@ -1295,6 +1325,15 @@ def nutrition(analysis_id):
             for key in basic_keys:
                 if key in measurements:
                     basic_measurements[key.capitalize()] = measurements[key]
+                    
+        # Get proportion measurements for the proportions panel
+        proportion_measurements = {}
+        if measurements:
+            # Extract proportion metrics for display
+            proportion_keys = ['shoulder_hip_ratio', 'waist_hip_ratio', 'arm_torso_ratio', 'leg_torso_ratio']
+            for key in proportion_keys:
+                if key in measurements:
+                    proportion_measurements[key.replace('_', ' ').title()] = measurements[key]
         
         # Prepare the context for the template
         context = {
@@ -1309,7 +1348,8 @@ def nutrition(analysis_id):
             'food_recommendations': food_recommendations,
             'nutrition_tips': nutrition_tips,
             'basic_measurements': basic_measurements,  # Basic measurements for the template
-            'estimated_measurements': measurements  # All measurements
+            'estimated_measurements': measurements,  # All measurements
+            'proportion_measurements': proportion_measurements  # Proportion measurements for the template
         }
         
         # Log the key parts of context for debugging
@@ -1659,6 +1699,15 @@ def workout(analysis_id):
             for key in basic_keys:
                 if key in measurements:
                     basic_measurements[key.capitalize()] = measurements[key]
+                    
+        # Get proportion measurements for the proportions panel
+        proportion_measurements = {}
+        if measurements:
+            # Extract proportion metrics for display
+            proportion_keys = ['shoulder_hip_ratio', 'waist_hip_ratio', 'arm_torso_ratio', 'leg_torso_ratio']
+            for key in proportion_keys:
+                if key in measurements:
+                    proportion_measurements[key.replace('_', ' ').title()] = measurements[key]
         
         # Prepare the context for the template
         context = {
@@ -1673,7 +1722,8 @@ def workout(analysis_id):
             'experience': experience,
             'split_type': 'Push/Pull/Legs',
             'basic_measurements': basic_measurements,  # Basic measurements for the template
-            'estimated_measurements': measurements  # All measurements
+            'estimated_measurements': measurements,  # All measurements
+            'proportion_measurements': proportion_measurements  # Proportion measurements for the template
         }
         
         # Log the key parts of context for debugging
