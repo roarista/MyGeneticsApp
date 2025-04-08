@@ -94,7 +94,7 @@ def calculate_angle(p1, p2, p3):
                          math.atan2(p1['y'] - p2['y'], p1['x'] - p2['x']))
     return angle + 360 if angle < 0 else angle
 
-def analyze_body_traits(landmarks, original_image=None, height_cm=0.0, weight_kg=0.0, gender='male', experience='beginner'):
+def analyze_body_traits(landmarks, original_image=None, height_cm=0.0, weight_kg=0.0, gender='male', experience='beginner', is_back_view=False):
     """
     Analyze body landmarks to identify genetic traits including muscle insertions
     
@@ -105,6 +105,7 @@ def analyze_body_traits(landmarks, original_image=None, height_cm=0.0, weight_kg
         weight_kg: User's weight in kg (optional, float)
         gender: User's gender ('male' or 'female', default is 'male')
         experience: User's training experience level ('beginner', 'intermediate', 'advanced')
+        is_back_view: Whether this image is a back view (default: False)
         
     Returns:
         Dictionary of body traits and measurements
@@ -132,7 +133,9 @@ def analyze_body_traits(landmarks, original_image=None, height_cm=0.0, weight_kg
                 'lats': {'value': None, 'description': None},
                 'biceps': {'value': None, 'description': None},
                 'abdominals': {'value': None, 'description': None}
-            }
+            },
+            # Track view information
+            'view': 'back' if is_back_view else 'front'
         }
         
         # Track whether we have enough data for advanced calculations
@@ -661,19 +664,68 @@ def analyze_body_traits(landmarks, original_image=None, height_cm=0.0, weight_kg
         # Add description of what these measurements mean
         traits['description'] = get_trait_descriptions(traits['body_type'])
         
-        # Analyze muscle insertions
-        # We've already analyzed abdominals earlier, so reuse that result
-        traits['muscle_insertions']['lats'] = analyze_lat_insertion(landmarks)
-        traits['muscle_insertions']['biceps'] = analyze_bicep_insertion(landmarks)
-        
-        # Store full abdominal analysis for reference
-        ab_definition_traits = {
-            'value': ab_analysis.get('value', 'medium'),
-            'definition': ab_analysis.get('definition', 'undefined'),
-            'definition_score': ab_analysis.get('definition_score', 0),
-            'description': ab_analysis.get('description', '')
-        }
-        traits['muscle_insertions']['abdominals'] = ab_definition_traits
+        # Analyze muscle insertions based on view
+        if is_back_view:
+            # Back view specific measurements
+            traits['muscle_insertions']['lats'] = analyze_lat_insertion(landmarks)
+            
+            # If we have these traits from a front view, don't override them
+            if 'biceps' not in traits['muscle_insertions'] or not traits['muscle_insertions']['biceps']['value']:
+                traits['muscle_insertions']['biceps'] = {
+                    'value': 'unknown',
+                    'description': 'Cannot analyze bicep insertion from back view'
+                }
+            
+            if 'abdominals' not in traits['muscle_insertions'] or not traits['muscle_insertions']['abdominals']['value']:
+                traits['muscle_insertions']['abdominals'] = {
+                    'value': 'unknown',
+                    'description': 'Cannot analyze abdominal definition from back view'
+                }
+                
+            # Add back-specific measurements
+            # (These would typically be specific to back view analysis)
+            traits['back_shoulder_width'] = {
+                'value': shoulder_width,
+                'confidence': 0.9
+            }
+        else:
+            # Front view specific measurements
+            traits['muscle_insertions']['biceps'] = analyze_bicep_insertion(landmarks)
+            
+            # Get the abdominal analysis result
+            try:
+                ab_analysis = analyze_abdominal_insertion(landmarks)
+                
+                # Ensure we have a valid dictionary
+                if ab_analysis and isinstance(ab_analysis, dict):
+                    ab_definition_traits = {
+                        'value': ab_analysis.get('value', 'medium'),
+                        'definition': ab_analysis.get('definition', 'undefined'),
+                        'definition_score': ab_analysis.get('definition_score', 0),
+                        'description': ab_analysis.get('description', '')
+                    }
+                    traits['muscle_insertions']['abdominals'] = ab_definition_traits
+                else:
+                    # Set default values if analysis failed
+                    traits['muscle_insertions']['abdominals'] = {
+                        'value': 'medium',
+                        'definition': 'undefined',
+                        'definition_score': 0,
+                        'description': 'Unable to analyze abdominal definition from this image.'
+                    }
+            except Exception as e:
+                logger.error(f"Error analyzing abdominals: {str(e)}")
+                # Set default values if analysis failed
+                traits['muscle_insertions']['abdominals'] = {
+                    'value': 'medium',
+                    'definition': 'undefined',
+                    'definition_score': 0,
+                    'description': 'Error analyzing abdominal definition.'
+                }
+                
+            # If back view already analyzed lats better, don't override
+            if 'lats' not in traits['muscle_insertions'] or not traits['muscle_insertions']['lats']['value']:
+                traits['muscle_insertions']['lats'] = analyze_lat_insertion(landmarks)
         
         return traits
         

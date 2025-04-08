@@ -227,7 +227,8 @@ def analyze():
             height_cm=height_cm, 
             weight_kg=weight_kg,
             gender=gender,  
-            experience=experience  
+            experience=experience,
+            is_back_view=False  # Explicitly set to front view
         )
         
         # Analyze body traits from back image
