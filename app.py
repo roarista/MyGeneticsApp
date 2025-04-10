@@ -446,38 +446,113 @@ def results(analysis_id):
     # Get basic measurements for measurements panel
     basic_measurements = {}
     if measurements:
+        confidence_scores = measurements.get('confidence_scores', {})
+        
         # Extract key measurements for the basic measurements panel
         basic_keys = ['height', 'weight', 'chest', 'waist', 'hips', 'shoulders']
         for key in basic_keys:
             if key in measurements:
-                basic_measurements[key.capitalize()] = measurements[key]
+                confidence_key = key.replace('_cm', '')
+                
+                # Get confidence level based on score
+                score = confidence_scores.get(confidence_key, 0.6)
+                if score >= 0.7:
+                    confidence = 'high'
+                elif score >= 0.4:
+                    confidence = 'medium'
+                else:
+                    confidence = 'low'
+                
+                # Format with proper unit based on measurement type
+                if key == 'height' or key == 'weight':
+                    unit = 'cm' if key == 'height' else 'kg'
+                    value_str = f"{measurements[key]:.1f} {unit}"
+                else:
+                    value_str = f"{measurements[key]:.1f} cm"
+                
+                basic_measurements[key.capitalize()] = {
+                    'value': value_str,
+                    'confidence': confidence
+                }
     
     # Get proportion measurements for the proportions panel
     proportion_measurements = {}
     if measurements:
+        confidence_scores = measurements.get('confidence_scores', {})
+        
         # Extract proportion metrics for display
         proportion_keys = ['shoulder_hip_ratio', 'waist_hip_ratio', 'arm_torso_ratio', 'leg_torso_ratio']
         for key in proportion_keys:
             if key in measurements:
-                proportion_measurements[key.replace('_', ' ').title()] = measurements[key]
+                confidence_key = key.replace('_ratio', '')
+                
+                # Get confidence level based on score
+                score = confidence_scores.get(confidence_key, 0.6)
+                if score >= 0.7:
+                    confidence = 'high'
+                elif score >= 0.4:
+                    confidence = 'medium'
+                else:
+                    confidence = 'low'
+                
+                # Format ratio without unit
+                value_str = f"{measurements[key]:.2f}"
+                
+                proportion_measurements[key.replace('_', ' ').title()] = {
+                    'value': value_str,
+                    'confidence': confidence
+                }
     
     # Prepare circumference measurements (left and right)
     circumference_measurements_left = {}
     circumference_measurements_right = {}
     if measurements:
+        # Use confidence scores from measurements or default to medium confidence
+        confidence_scores = measurements.get('confidence_scores', {})
+        
         # Left side measurements
         left_keys = ['left_arm_cm', 'left_thigh_cm', 'left_calf_cm']
         for key in left_keys:
             if key in measurements:
                 display_key = key.replace('left_', '').replace('_cm', '').capitalize()
-                circumference_measurements_left[display_key] = measurements[key]
+                confidence_key = key.replace('left_', '').replace('right_', '').replace('_cm', '')
+                
+                # Get confidence level based on score
+                score = confidence_scores.get(confidence_key, 0.5)
+                if score >= 0.7:
+                    confidence = 'high'
+                elif score >= 0.4:
+                    confidence = 'medium'
+                else:
+                    confidence = 'low'
+                
+                # Format with value and confidence level
+                circumference_measurements_left[display_key] = {
+                    'value': f"{measurements[key]:.1f} cm",
+                    'confidence': confidence
+                }
         
         # Right side measurements
         right_keys = ['right_arm_cm', 'right_thigh_cm', 'right_calf_cm']
         for key in right_keys:
             if key in measurements:
                 display_key = key.replace('right_', '').replace('_cm', '').capitalize()
-                circumference_measurements_right[display_key] = measurements[key]
+                confidence_key = key.replace('left_', '').replace('right_', '').replace('_cm', '')
+                
+                # Get confidence level based on score
+                score = confidence_scores.get(confidence_key, 0.5)
+                if score >= 0.7:
+                    confidence = 'high'
+                elif score >= 0.4:
+                    confidence = 'medium'
+                else:
+                    confidence = 'low'
+                
+                # Format with value and confidence level
+                circumference_measurements_right[display_key] = {
+                    'value': f"{measurements[key]:.1f} cm",
+                    'confidence': confidence
+                }
     
     # Template data
     template_data = {
@@ -658,38 +733,113 @@ def scan3d_results(analysis_id):
     measurements = result['traits']
     basic_measurements = {}
     if measurements:
+        confidence_scores = measurements.get('confidence_scores', {})
+        
         # Extract key measurements for the basic measurements panel
         basic_keys = ['height', 'weight', 'chest', 'waist', 'hips', 'shoulders']
         for key in basic_keys:
             if key in measurements:
-                basic_measurements[key.capitalize()] = measurements[key]
+                confidence_key = key.replace('_cm', '')
+                
+                # Get confidence level based on score
+                score = confidence_scores.get(confidence_key, 0.6)
+                if score >= 0.7:
+                    confidence = 'high'
+                elif score >= 0.4:
+                    confidence = 'medium'
+                else:
+                    confidence = 'low'
+                
+                # Format with proper unit based on measurement type
+                if key == 'height' or key == 'weight':
+                    unit = 'cm' if key == 'height' else 'kg'
+                    value_str = f"{measurements[key]:.1f} {unit}"
+                else:
+                    value_str = f"{measurements[key]:.1f} cm"
+                
+                basic_measurements[key.capitalize()] = {
+                    'value': value_str,
+                    'confidence': confidence
+                }
     
     # Get proportion measurements for the proportions panel
     proportion_measurements = {}
     if measurements:
+        confidence_scores = measurements.get('confidence_scores', {})
+        
         # Extract proportion metrics for display
         proportion_keys = ['shoulder_hip_ratio', 'waist_hip_ratio', 'arm_torso_ratio', 'leg_torso_ratio']
         for key in proportion_keys:
             if key in measurements:
-                proportion_measurements[key.replace('_', ' ').title()] = measurements[key]
+                confidence_key = key.replace('_ratio', '')
+                
+                # Get confidence level based on score
+                score = confidence_scores.get(confidence_key, 0.6)
+                if score >= 0.7:
+                    confidence = 'high'
+                elif score >= 0.4:
+                    confidence = 'medium'
+                else:
+                    confidence = 'low'
+                
+                # Format ratio without unit
+                value_str = f"{measurements[key]:.2f}"
+                
+                proportion_measurements[key.replace('_', ' ').title()] = {
+                    'value': value_str,
+                    'confidence': confidence
+                }
     
     # Prepare circumference measurements (left and right)
     circumference_measurements_left = {}
     circumference_measurements_right = {}
     if measurements:
+        # Use confidence scores from measurements or default to medium confidence
+        confidence_scores = measurements.get('confidence_scores', {})
+        
         # Left side measurements
         left_keys = ['left_arm_cm', 'left_thigh_cm', 'left_calf_cm']
         for key in left_keys:
             if key in measurements:
                 display_key = key.replace('left_', '').replace('_cm', '').capitalize()
-                circumference_measurements_left[display_key] = measurements[key]
+                confidence_key = key.replace('left_', '').replace('right_', '').replace('_cm', '')
+                
+                # Get confidence level based on score
+                score = confidence_scores.get(confidence_key, 0.5)
+                if score >= 0.7:
+                    confidence = 'high'
+                elif score >= 0.4:
+                    confidence = 'medium'
+                else:
+                    confidence = 'low'
+                
+                # Format with value and confidence level
+                circumference_measurements_left[display_key] = {
+                    'value': f"{measurements[key]:.1f} cm",
+                    'confidence': confidence
+                }
         
         # Right side measurements
         right_keys = ['right_arm_cm', 'right_thigh_cm', 'right_calf_cm']
         for key in right_keys:
             if key in measurements:
                 display_key = key.replace('right_', '').replace('_cm', '').capitalize()
-                circumference_measurements_right[display_key] = measurements[key]
+                confidence_key = key.replace('left_', '').replace('right_', '').replace('_cm', '')
+                
+                # Get confidence level based on score
+                score = confidence_scores.get(confidence_key, 0.5)
+                if score >= 0.7:
+                    confidence = 'high'
+                elif score >= 0.4:
+                    confidence = 'medium'
+                else:
+                    confidence = 'low'
+                
+                # Format with value and confidence level
+                circumference_measurements_right[display_key] = {
+                    'value': f"{measurements[key]:.1f} cm",
+                    'confidence': confidence
+                }
     
     return render_template(
         'tailwind_results.html',
