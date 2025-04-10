@@ -4,11 +4,114 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MyGenetics - Analysis Results</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind_styles.css') }}">
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@2.8.2/dist/alpine.min.js" defer></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/fitness-tailwind.css') }}">
+    
+    <!-- Alpine.js for interactivity -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+    
+    <!-- AOS - Animate On Scroll -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Modern Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap">
+    
+    <script>
+        tailwind.config = {
+          theme: {
+            extend: {
+              colors: {
+                red: {
+                  500: '#ff4b6e',
+                  600: '#ff3356',
+                  700: '#e01e3c',
+                }
+              }
+            }
+          }
+        }
+    </script>
+    
+    <style>
+        /* Custom animations */
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+    
+        @keyframes slideIn {
+          from { transform: translateX(-100%); }
+          to { transform: translateX(0); }
+        }
+    
+        .animate-fade-in {
+          animation: fadeIn 0.6s ease-out forwards;
+        }
+    
+        .animate-slide-in {
+          animation: slideIn 0.3s ease-out forwards;
+        }
+    
+        /* Text gradient effect */
+        .text-gradient {
+          background: linear-gradient(to right, #ffffff, #ff4b6e);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
+    
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+          width: 8px;
+        }
+    
+        ::-webkit-scrollbar-track {
+          background: #1a1a1a;
+        }
+    
+        ::-webkit-scrollbar-thumb {
+          background: #ff4b6e;
+          border-radius: 4px;
+        }
+    
+        ::-webkit-scrollbar-thumb:hover {
+          background: #ff3356;
+        }
+    
+        /* Base styles */
+        body {
+          font-family: 'Inter', sans-serif;
+          background-color: #000000;
+          color: #ffffff;
+        }
+    
+        h1, h2, h3, h4, h5, h6 {
+          font-family: 'Montserrat', sans-serif;
+          font-weight: 800;
+        }
+        
+        /* Measurement confidence indicators */
+        .confidence-high {
+            color: #10B981;
+        }
+        
+        .confidence-medium {
+            color: #FBBF24;
+        }
+        
+        .confidence-low {
+            color: #6B7280;
+        }
+    </style>
 </head>
 <body class="bg-gray-900 font-sans text-gray-200">
     <!-- Navigation -->
