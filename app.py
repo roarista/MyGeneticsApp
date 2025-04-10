@@ -1789,6 +1789,24 @@ def workout(analysis_id):
                 if key in measurements:
                     proportion_measurements[key.replace('_', ' ').title()] = measurements[key]
         
+        # Prepare circumference measurements (left and right)
+        circumference_measurements_left = {}
+        circumference_measurements_right = {}
+        if measurements:
+            # Left side measurements
+            left_keys = ['left_arm_cm', 'left_thigh_cm', 'left_calf_cm']
+            for key in left_keys:
+                if key in measurements:
+                    display_key = key.replace('left_', '').replace('_cm', '').capitalize()
+                    circumference_measurements_left[display_key] = measurements[key]
+            
+            # Right side measurements
+            right_keys = ['right_arm_cm', 'right_thigh_cm', 'right_calf_cm']
+            for key in right_keys:
+                if key in measurements:
+                    display_key = key.replace('right_', '').replace('_cm', '').capitalize()
+                    circumference_measurements_right[display_key] = measurements[key]
+        
         # Prepare the context for the template
         context = {
             'analysis_id': analysis_id,
@@ -1803,7 +1821,9 @@ def workout(analysis_id):
             'split_type': 'Push/Pull/Legs',
             'basic_measurements': basic_measurements,  # Basic measurements for the template
             'estimated_measurements': measurements,  # All measurements
-            'proportion_measurements': proportion_measurements  # Proportion measurements for the template
+            'proportion_measurements': proportion_measurements,  # Proportion measurements for the template
+            'circumference_measurements_left': circumference_measurements_left,  # Left side measurements
+            'circumference_measurements_right': circumference_measurements_right  # Right side measurements
         }
         
         # Log the key parts of context for debugging
