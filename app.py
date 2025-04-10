@@ -461,6 +461,24 @@ def results(analysis_id):
             if key in measurements:
                 proportion_measurements[key.replace('_', ' ').title()] = measurements[key]
     
+    # Prepare circumference measurements (left and right)
+    circumference_measurements_left = {}
+    circumference_measurements_right = {}
+    if measurements:
+        # Left side measurements
+        left_keys = ['left_arm_cm', 'left_thigh_cm', 'left_calf_cm']
+        for key in left_keys:
+            if key in measurements:
+                display_key = key.replace('left_', '').replace('_cm', '').capitalize()
+                circumference_measurements_left[display_key] = measurements[key]
+        
+        # Right side measurements
+        right_keys = ['right_arm_cm', 'right_thigh_cm', 'right_calf_cm']
+        for key in right_keys:
+            if key in measurements:
+                display_key = key.replace('right_', '').replace('_cm', '').capitalize()
+                circumference_measurements_right[display_key] = measurements[key]
+    
     # Template data
     template_data = {
         'analysis_id': analysis_id,
@@ -475,7 +493,9 @@ def results(analysis_id):
         'bodybuilding': result.get('bodybuilding_analysis', {}),  # Bodybuilding metrics
         'estimated_measurements': measurements,  # Measurements (combined for dual photo)
         'basic_measurements': basic_measurements,  # Basic measurements for the template
-        'proportion_measurements': proportion_measurements  # Proportion measurements for the template
+        'proportion_measurements': proportion_measurements,  # Proportion measurements for the template
+        'circumference_measurements_left': circumference_measurements_left,  # Left side measurements
+        'circumference_measurements_right': circumference_measurements_right  # Right side measurements
     }
     
     # Add additional data for dual photo analysis
@@ -653,6 +673,24 @@ def scan3d_results(analysis_id):
             if key in measurements:
                 proportion_measurements[key.replace('_', ' ').title()] = measurements[key]
     
+    # Prepare circumference measurements (left and right)
+    circumference_measurements_left = {}
+    circumference_measurements_right = {}
+    if measurements:
+        # Left side measurements
+        left_keys = ['left_arm_cm', 'left_thigh_cm', 'left_calf_cm']
+        for key in left_keys:
+            if key in measurements:
+                display_key = key.replace('left_', '').replace('_cm', '').capitalize()
+                circumference_measurements_left[display_key] = measurements[key]
+        
+        # Right side measurements
+        right_keys = ['right_arm_cm', 'right_thigh_cm', 'right_calf_cm']
+        for key in right_keys:
+            if key in measurements:
+                display_key = key.replace('right_', '').replace('_cm', '').capitalize()
+                circumference_measurements_right[display_key] = measurements[key]
+    
     return render_template(
         'tailwind_results.html',
         analysis_id=analysis_id,
@@ -666,7 +704,9 @@ def scan3d_results(analysis_id):
         is_3d_scan=True,  # Flag to indicate this is a 3D scan analysis
         basic_measurements=basic_measurements,  # Basic measurements for the template
         estimated_measurements=measurements,  # All measurements
-        proportion_measurements=proportion_measurements  # Proportion measurements for the template
+        proportion_measurements=proportion_measurements,  # Proportion measurements for the template
+        circumference_measurements_left=circumference_measurements_left,  # Left side measurements
+        circumference_measurements_right=circumference_measurements_right  # Right side measurements
     )
 
 @app.route('/api/traits/<analysis_id>')
@@ -1009,6 +1049,24 @@ def recommendations(analysis_id):
             if key in measurements:
                 proportion_measurements[key.replace('_', ' ').title()] = measurements[key]
     
+    # Prepare circumference measurements (left and right)
+    circumference_measurements_left = {}
+    circumference_measurements_right = {}
+    if measurements:
+        # Left side measurements
+        left_keys = ['left_arm_cm', 'left_thigh_cm', 'left_calf_cm']
+        for key in left_keys:
+            if key in measurements:
+                display_key = key.replace('left_', '').replace('_cm', '').capitalize()
+                circumference_measurements_left[display_key] = measurements[key]
+        
+        # Right side measurements
+        right_keys = ['right_arm_cm', 'right_thigh_cm', 'right_calf_cm']
+        for key in right_keys:
+            if key in measurements:
+                display_key = key.replace('right_', '').replace('_cm', '').capitalize()
+                circumference_measurements_right[display_key] = measurements[key]
+    
     return render_template(
         'tailwind_results.html',
         analysis_id=analysis_id,
@@ -1022,7 +1080,9 @@ def recommendations(analysis_id):
         is_3d_scan=False,  # Flag to indicate this is not a 3D scan
         basic_measurements=basic_measurements,  # Basic measurements for the template
         estimated_measurements=measurements,  # All measurements
-        proportion_measurements=proportion_measurements  # Proportion measurements for the template
+        proportion_measurements=proportion_measurements,  # Proportion measurements for the template
+        circumference_measurements_left=circumference_measurements_left,  # Left side measurements
+        circumference_measurements_right=circumference_measurements_right  # Right side measurements
     )
 
 @app.route('/nutrition/<analysis_id>')
@@ -1336,6 +1396,24 @@ def nutrition(analysis_id):
                     proportion_measurements[key.replace('_', ' ').title()] = measurements[key]
         
         # Prepare the context for the template
+        # Prepare circumference measurements (left and right)
+        circumference_measurements_left = {}
+        circumference_measurements_right = {}
+        if measurements:
+            # Left side measurements
+            left_keys = ['left_arm_cm', 'left_thigh_cm', 'left_calf_cm']
+            for key in left_keys:
+                if key in measurements:
+                    display_key = key.replace('left_', '').replace('_cm', '').capitalize()
+                    circumference_measurements_left[display_key] = measurements[key]
+            
+            # Right side measurements
+            right_keys = ['right_arm_cm', 'right_thigh_cm', 'right_calf_cm']
+            for key in right_keys:
+                if key in measurements:
+                    display_key = key.replace('right_', '').replace('_cm', '').capitalize()
+                    circumference_measurements_right[display_key] = measurements[key]
+
         context = {
             'analysis_id': analysis_id,
             'analysis': analysis,  # Add analysis object for template compatibility
@@ -1349,7 +1427,9 @@ def nutrition(analysis_id):
             'nutrition_tips': nutrition_tips,
             'basic_measurements': basic_measurements,  # Basic measurements for the template
             'estimated_measurements': measurements,  # All measurements
-            'proportion_measurements': proportion_measurements  # Proportion measurements for the template
+            'proportion_measurements': proportion_measurements,  # Proportion measurements for the template
+            'circumference_measurements_left': circumference_measurements_left,  # Left side measurements
+            'circumference_measurements_right': circumference_measurements_right  # Right side measurements
         }
         
         # Log the key parts of context for debugging
