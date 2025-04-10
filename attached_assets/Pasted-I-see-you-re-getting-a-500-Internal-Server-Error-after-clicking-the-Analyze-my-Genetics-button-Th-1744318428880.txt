@@ -1,0 +1,116 @@
+I see you're getting a 500 Internal Server Error after clicking the "Analyze my Genetics" button. This typically means there's an error in the server-side code handling the analysis request. Let me check the relevant code sections.
+
+Read file: app.py
+Let me check the utility modules that are being imported:
+
+Ran tool
+I can see several potential issues that could be causing the 500 Internal Server Error:
+
+1. The code is trying to use OpenCV (cv2) for image processing, but it might not be properly installed
+2. The temporary upload folder might not have proper permissions
+3. Some of the utility modules might have missing dependencies
+4. The error handling in the analyze route could be improved
+
+Here's a set of instructions to fix these issues:
+
+```
+Instructions for fixing the Internal Server Error:
+
+1. First, ensure all required packages are installed:
+   - Add these to your pyproject.toml:
+     [tool.poetry.dependencies]
+     python = "^3.8"
+     opencv-python-headless = "^4.8.0"
+     numpy = "^1.24.0"
+     mediapipe = "^0.10.0"
+     flask = "^2.0.0"
+     flask-login = "^0.6.0"
+     flask-sqlalchemy = "^3.0.0"
+     pillow = "^10.0.0"
+     werkzeug = "^2.0.0"
+
+2. Fix the temporary upload folder:
+   - In app.py, replace:
+     TEMP_UPLOAD_FOLDER = tempfile.gettempdir()
+   - With:
+     TEMP_UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'temp_uploads')
+     os.makedirs(TEMP_UPLOAD_FOLDER, exist_ok=True)
+
+3. Add better error handling in the analyze route:
+   - Wrap the image processing code in try-except blocks
+   - Add logging for debugging
+   - Add the following at the start of app.py:
+     import logging
+     logging.basicConfig(level=logging.DEBUG)
+     logger = logging.getLogger(__name__)
+
+4. Modify the image processing function calls:
+   - In utils/image_processing.py, ensure extract_body_landmarks handles image loading errors
+   - Add error checking for image dimensions and format
+   - Add memory management for large images
+
+5. Update the database configuration:
+   - Ensure SQLAlchemy is properly configured with:
+     app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///app.db")
+     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+6. Add cleanup for temporary files:
+   - Add a cleanup function to remove temporary files after processing
+   - Add it to the analyze route:
+     try:
+         # ... existing code ...
+     finally:
+         # Cleanup temporary files
+         for filepath in [front_filepath, back_filepath]:
+             if os.path.exists(filepath):
+                 os.remove(filepath)
+
+7. Improve form data validation:
+   - Add validation for height and weight inputs
+   - Add the following helper function:
+     def validate_measurements(height, weight):
+         try:
+             height_cm = float(height)
+             weight_kg = float(weight)
+             return height_cm > 0 and weight_kg > 0
+         except (ValueError, TypeError):
+             return False
+
+8. Add memory management:
+   - Add image size limits
+   - Add the following before image processing:
+     def check_image_size(image):
+         max_size = 1024  # pixels
+         height, width = image.shape[:2]
+         if height > max_size or width > max_size:
+             scale = max_size / max(height, width)
+             return cv2.resize(image, None, fx=scale, fy=scale)
+         return image
+
+9. Update the requirements installation:
+   - Run:
+     poetry install
+   - Or if using pip:
+     pip install -r requirements.txt
+
+10. Add environment variable checks:
+    - Add at the start of app.py:
+        required_env_vars = [
+            "SESSION_SECRET",
+            "DATABASE_URL",
+        ]
+        for var in required_env_vars:
+            if not os.environ.get(var):
+                raise EnvironmentError(f"Missing required environment variable: {var}")
+```
+
+These changes should help resolve the Internal Server Error by:
+1. Ensuring all dependencies are properly installed
+2. Adding proper error handling
+3. Managing file uploads better
+4. Adding validation for user inputs
+5. Improving memory management for image processing
+6. Adding cleanup for temporary files
+7. Ensuring proper configuration
+
+Would you like me to help you implement any of these changes? We can start with the most critical ones first.
