@@ -656,9 +656,9 @@
                                 <span class="text-lg font-bold text-white">Chest Development</span>
                             </div>
                             
-                            {% if basic_measurements.get('Chest') %}
-                                {% set chest = basic_measurements.get('Chest').value|float %}
-                                {% set waist = basic_measurements.get('Waist', {'value': 100}).value|float %}
+                            {% if enhanced_measurements.get('chest_circumference_cm') or basic_measurements.get('Chest') %}
+                                {% set chest = enhanced_measurements.get('chest_circumference_cm', basic_measurements.get('Chest', {'value': 0}).value)|float %}
+                                {% set waist = enhanced_measurements.get('waist_circumference_cm', basic_measurements.get('Waist', {'value': 100}).value)|float %}
                                 {% set chest_waist_ratio = ((chest / waist) * 100 - 100)|int %}
                                 {% set score = chest_waist_ratio * 4 %}
                                 {% set status = "Needs Growth" %}
@@ -678,7 +678,7 @@
                             {% endif %}
                         </div>
                         
-                        {% if basic_measurements.get('Chest') %}
+                        {% if enhanced_measurements.get('chest_circumference_cm') or basic_measurements.get('Chest') %}
                             <div class="flex items-center space-x-1 mb-1">
                                 {% set blocks = 5 %}
                                 {% set filled_blocks = (score / 20)|int %}
@@ -702,7 +702,9 @@
                                     <span class="ml-2 text-green-500">🟢</span>
                                 {% endif %}
                             </div>
-                            <p class="text-sm text-gray-400">Chest size: {{ basic_measurements.get('Chest').value }}</p>
+                            <p class="text-sm text-gray-400">Chest size: {{ 
+                                '{:.1f}'.format(enhanced_measurements.get('chest_circumference_cm', basic_measurements.get('Chest', {'value': 0}).value)|float) 
+                            }} cm</p>
                         {% else %}
                             <div class="flex items-center space-x-1 mb-1">
                                 {% for i in range(5) %}
@@ -722,9 +724,9 @@
                                 <span class="text-lg font-bold text-white">Shoulder Development</span>
                             </div>
                             
-                            {% if basic_measurements.get('Shoulders') %}
-                                {% set shoulders = basic_measurements.get('Shoulders').value|float %}
-                                {% set waist = basic_measurements.get('Waist', {'value': 100}).value|float %}
+                            {% if enhanced_measurements.get('shoulder_width_cm') or basic_measurements.get('Shoulders') %}
+                                {% set shoulders = enhanced_measurements.get('shoulder_width_cm', basic_measurements.get('Shoulders', {'value': 0}).value)|float %}
+                                {% set waist = enhanced_measurements.get('waist_circumference_cm', basic_measurements.get('Waist', {'value': 100}).value)|float %}
                                 {% set shoulder_waist_ratio = ((shoulders / waist) * 100 - 100)|int %}
                                 {% set score = shoulder_waist_ratio * 2 %}
                                 {% set status = "Needs Growth" %}
@@ -777,6 +779,72 @@
                                 <span class="ml-2 text-gray-500">⚪</span>
                             </div>
                             <p class="text-sm text-gray-400">No shoulder measurements available</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Back Development -->
+                    <div class="p-3 bg-gray-800 rounded-lg shadow">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center">
+                                <i class="fas fa-arrows-alt-v text-blue-400 mr-2"></i>
+                                <span class="text-lg font-bold text-white">Back Development</span>
+                            </div>
+                            
+                            {% if enhanced_measurements.get('back_width_cm') or enhanced_measurements.get('lat_spread_cm') %}
+                                {% set back_width = enhanced_measurements.get('back_width_cm', enhanced_measurements.get('lat_spread_cm', 0))|float %}
+                                {% set waist = enhanced_measurements.get('waist_circumference_cm', basic_measurements.get('Waist', {'value': 100}).value)|float %}
+                                {% set back_waist_ratio = ((back_width / waist) * 100)|int %}
+                                {% set score = back_waist_ratio %}
+                                {% set status = "Needs Growth" %}
+                                {% set color = "red" %}
+                                
+                                {% if score > 60 %}
+                                    {% set status = "Well Developed" %}
+                                    {% set color = "green" %}
+                                {% elif score > 40 %}
+                                    {% set status = "Average" %}
+                                    {% set color = "yellow" %}
+                                {% endif %}
+                                
+                                <span class="text-md font-medium text-{{ color }}-400">{{ status }}</span>
+                            {% else %}
+                                <span class="text-md font-medium text-gray-400">No Data</span>
+                            {% endif %}
+                        </div>
+                        
+                        {% if enhanced_measurements.get('back_width_cm') or enhanced_measurements.get('lat_spread_cm') %}
+                            <div class="flex items-center space-x-1 mb-1">
+                                {% set blocks = 5 %}
+                                {% set filled_blocks = (score / 20)|int %}
+                                {% if filled_blocks > blocks %}
+                                    {% set filled_blocks = blocks %}
+                                {% endif %}
+                                
+                                {% for i in range(filled_blocks) %}
+                                    <div class="flex-1 h-4 bg-{{ color }}-500 rounded"></div>
+                                {% endfor %}
+                                
+                                {% for i in range(blocks - filled_blocks) %}
+                                    <div class="flex-1 h-4 bg-gray-700 rounded"></div>
+                                {% endfor %}
+                                
+                                {% if color == "red" %}
+                                    <span class="ml-2 text-red-500">🔴</span>
+                                {% elif color == "yellow" %}
+                                    <span class="ml-2 text-yellow-500">🟡</span>
+                                {% else %}
+                                    <span class="ml-2 text-green-500">🟢</span>
+                                {% endif %}
+                            </div>
+                            <p class="text-sm text-gray-400">Back Width: {{ '{:.1f}'.format(back_width) }} cm</p>
+                        {% else %}
+                            <div class="flex items-center space-x-1 mb-1">
+                                {% for i in range(5) %}
+                                    <div class="flex-1 h-4 bg-gray-700 rounded"></div>
+                                {% endfor %}
+                                <span class="ml-2 text-gray-500">⚪</span>
+                            </div>
+                            <p class="text-sm text-gray-400">No back development measurements available</p>
                         {% endif %}
                     </div>
                     
