@@ -37,7 +37,7 @@
             </div>
 
             <div class="navbar-auth">
-                {% if current_user.is_authenticated %}
+                {% if is_authenticated() %}
                 <a href="{{ url_for('profile') }}" class="button button-outline">
                     <i class="fas fa-user"></i> Profile
                 </a>
@@ -70,7 +70,7 @@
                     <span>Learn</span>
                 </a>
                 <div class="flex flex-col gap-2 mt-2">
-                    {% if current_user.is_authenticated %}
+                    {% if is_authenticated() %}
                     <a href="{{ url_for('profile') }}" class="button button-outline w-full">
                         <i class="fas fa-user"></i> Profile
                     </a>
@@ -107,7 +107,7 @@
                 
                 <div class="footer-link-group">
                     <h3 class="footer-link-title">Account</h3>
-                    {% if current_user.is_authenticated %}
+                    {% if is_authenticated() %}
                     <a href="{{ url_for('profile') }}" class="footer-link">Profile</a>
                     <a href="{{ url_for('account_settings') }}" class="footer-link">Settings</a>
                     <a href="{{ url_for('logout') }}" class="footer-link">Logout</a>

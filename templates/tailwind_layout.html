@@ -159,7 +159,7 @@
           <a href="{{ url_for('education') }}" class="nav-link {% if request.endpoint == 'education' %}active{% endif %}">
             Learn
           </a>
-          {% if current_user.is_authenticated %}
+          {% if is_authenticated() %}
           <a href="{{ url_for('profile') }}" class="nav-link {% if request.endpoint == 'profile' %}active{% endif %}">
             Profile
           </a>
@@ -168,7 +168,7 @@
 
         <!-- Auth Buttons -->
         <div class="hidden md:flex items-center space-x-4">
-          {% if current_user.is_authenticated %}
+          {% if is_authenticated() %}
           <a href="{{ url_for('logout') }}" class="btn-outline">Logout</a>
           {% else %}
           <a href="{{ url_for('signup', ui='tailwind') }}" class="btn-primary">Sign Up</a>
@@ -200,12 +200,12 @@
         <a href="{{ url_for('education') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800">
           Learn
         </a>
-        {% if current_user.is_authenticated %}
+        {% if is_authenticated() %}
         <a href="{{ url_for('profile') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800">
           Profile
         </a>
         {% endif %}
-        {% if current_user.is_authenticated %}
+        {% if is_authenticated() %}
         <a href="{{ url_for('logout') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800">
           Logout
         </a>

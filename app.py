@@ -5,13 +5,13 @@ import tempfile
 import base64
 from datetime import datetime
 from flask import Flask, render_template, request, jsonify, redirect, url_for, session, flash
-from flask_login import LoginManager, current_user, login_user, logout_user, login_required
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
 import numpy as np
 import cv2
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
+from replit.web import auth  # Import Replit Web Authentication
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -20,6 +20,11 @@ logger = logging.getLogger(__name__)
 # Initialize Flask app
 app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "dev_secret_key")
+
+# Make Replit Auth available to templates
+@app.context_processor
+def inject_auth():
+    return {'auth': auth, 'is_authenticated': is_authenticated}
 
 # Database configuration
 class Base(DeclarativeBase):
@@ -33,16 +38,22 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
 }
 db.init_app(app)
 
-# Flask-Login configuration
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = 'login'
-login_manager.login_message_category = 'info'
+# Initialize Replit Authentication
+# The traditional Flask-Login is being replaced with Replit Auth
 
-@login_manager.user_loader
-def load_user(user_id):
-    from models import User
-    return User.query.get(int(user_id))
+# Define a function to check if user is authenticated with Replit Auth
+def is_authenticated():
+    return auth.is_authenticated
+
+# Define our own login_required decorator using Replit Auth
+def login_required(f):
+    from functools import wraps
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not auth.is_authenticated:
+            return redirect(auth.login_url())
+        return f(*args, **kwargs)
+    return decorated_function
 
 # Import custom utility modules
 from utils.image_processing import process_image, extract_body_landmarks
@@ -1028,37 +1039,11 @@ def get_traits_data(analysis_id):
     return jsonify(chart_data)
 
 # User authentication and profile routes
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/login')
 def login():
-    """Display login page and process login form submissions"""
-    # Redirect if user is already logged in
-    if current_user.is_authenticated:
-        return redirect(url_for('profile'))
-        
-    if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
-        remember = 'remember' in request.form
-        
-        # Query the database for the user
-        from models import User
-        user = User.query.filter_by(email=email).first()
-        
-        if user and user.check_password(password):
-            # Login the user with Flask-Login
-            login_user(user, remember=remember)
-            flash('Login successful!', 'success')
-            
-            # Redirect to the page the user was trying to access
-            next_page = request.args.get('next')
-            if not next_page or not next_page.startswith('/'):
-                next_page = url_for('profile')
-            return redirect(next_page)
-        else:
-            flash('Invalid email or password. Please try again.', 'danger')
-    
-    # Default to the Tailwind template
-    return render_template('tailwind_login.html')
+    """Redirect to Replit Auth login"""
+    return redirect(auth.login_url())
+
 
 # Route to redirect to our Google auth blueprint
 @app.route('/google_login')
@@ -1071,59 +1056,43 @@ def google_login():
         flash('Google login is currently unavailable. Please try again later or use email login.', 'warning')
         return redirect(url_for('login'))
 
-@app.route('/signup', methods=['GET', 'POST'])
+@app.route('/signup')
 def signup():
-    """Display signup page and process signup form submissions"""
-    # Redirect if user is already logged in
-    if current_user.is_authenticated:
-        return redirect(url_for('profile'))
-        
-    if request.method == 'POST':
-        fullname = request.form.get('fullname')
-        email = request.form.get('email')
-        password = request.form.get('password')
-        
-        # Check if user already exists
-        from models import User
-        existing_user = User.query.filter_by(email=email).first()
-        
-        if existing_user:
-            flash('Email already registered. Please log in.', 'warning')
-            return redirect(url_for('login'))
-        
-        # Create new user
-        new_user = User(username=fullname, email=email)
-        new_user.set_password(password)
-        
-        # Add to database
-        db.session.add(new_user)
-        db.session.commit()
-        
-        # Log in the new user
-        login_user(new_user)
-        flash('Account created successfully!', 'success')
-        return redirect(url_for('profile'))
-    
-    # Default to the Tailwind template
-    return render_template('tailwind_signup.html')
+    """Redirect to Replit Auth login (same as login for Replit Auth)"""
+    return redirect(auth.login_url())
 
 @app.route('/logout')
-@login_required
 def logout():
-    """Process user logout"""
-    logout_user()
-    flash('You have been logged out.', 'info')
-    return redirect(url_for('index'))
+    """Redirect to Replit Auth logout"""
+    return redirect(auth.logout_url())
 
 @app.route('/profile')
 @login_required
 def profile():
     """Display user profile page"""
     # Get the current user and their analyses from the database
-    from models import Analysis
+    from models import Analysis, User
+    
+    # Get the Replit Auth user ID
+    replit_user_id = auth.user.id if auth.user else None
+    
+    # Find or create user in our database
+    user = User.query.filter_by(username=f"replit_{replit_user_id}").first()
+    if not user and replit_user_id:
+        # Create a new user record for this Replit user
+        user = User(
+            username=f"replit_{replit_user_id}",
+            email=auth.user.email or f"{replit_user_id}@replit.user"
+        )
+        db.session.add(user)
+        db.session.commit()
+    
+    if not user:
+        flash('User not found. Please log in again.', 'danger')
+        return redirect(auth.login_url())
     
     # Get user's analyses
-    analyses = Analysis.query.filter_by(user_id=current_user.id).order_by(Analysis.analysis_date.desc()).all()
+    analyses = Analysis.query.filter_by(user_id=user.id).order_by(Analysis.analysis_date.desc()).all()
     
     # Format analyses for the template
     formatted_analyses = []
@@ -1136,13 +1105,13 @@ def profile():
     
     # Construct user data for the template
     user_data = {
-        'fullname': current_user.username,
-        'email': current_user.email,
-        'joined': current_user.created_at.strftime("%B %Y"),
-        'height': current_user.height_cm or 0,
-        'weight': current_user.weight_kg or 0,
-        'gender': current_user.gender or 'male',
-        'experience': current_user.experience_level or 'beginner',
+        'fullname': auth.user.name if auth.user else user.username,
+        'email': auth.user.email if auth.user else user.email,
+        'joined': user.created_at.strftime("%B %Y") if user.created_at else 'N/A',
+        'height': user.height_cm or 0,
+        'weight': user.weight_kg or 0,
+        'gender': user.gender or 'male',
+        'experience': user.experience_level or 'beginner',
         'analyses': formatted_analyses
     }
     
@@ -1159,15 +1128,33 @@ def update_body_info():
     gender = request.form.get('gender', 'male')
     experience = request.form.get('experience', 'beginner')
     
-    # Update user in database
-    current_user.height_cm = float(height) if height else None
-    current_user.weight_kg = float(weight) if weight else None
-    current_user.gender = gender
-    current_user.experience_level = experience
+    # Get the Replit Auth user ID
+    from models import User
+    replit_user_id = auth.user.id if auth.user else None
     
-    db.session.commit()
+    # Find the user in our database
+    user = User.query.filter_by(username=f"replit_{replit_user_id}").first()
+    if not user and replit_user_id:
+        # Create a new user record for this Replit user
+        user = User(
+            username=f"replit_{replit_user_id}",
+            email=auth.user.email or f"{replit_user_id}@replit.user"
+        )
+        db.session.add(user)
     
-    flash('Body information updated successfully!', 'success')
+    if user:
+        # Update user in database
+        user.height_cm = float(height) if height else None
+        user.weight_kg = float(weight) if weight else None
+        user.gender = gender
+        user.experience_level = experience
+        
+        db.session.commit()
+        
+        flash('Body information updated successfully!', 'success')
+    else:
+        flash('User not found. Please log in again.', 'danger')
+    
     return redirect(url_for('profile'))
 
 @app.route('/account_settings')
@@ -1175,26 +1162,56 @@ def update_body_info():
 def account_settings():
     """Display account settings page"""
     # Get any notification or privacy settings
-    from models import NotificationSetting, PrivacySetting
+    from models import NotificationSetting, PrivacySetting, User
+    
+    # Get the Replit Auth user ID
+    replit_user_id = auth.user.id if auth.user else None
+    
+    # Find or create user in our database
+    user = User.query.filter_by(username=f"replit_{replit_user_id}").first()
+    if not user and replit_user_id:
+        # Create a new user record for this Replit user
+        user = User(
+            username=f"replit_{replit_user_id}",
+            email=auth.user.email or f"{replit_user_id}@replit.user"
+        )
+        db.session.add(user)
+        db.session.commit()
+        
+    if not user:
+        flash('User not found. Please log in again.', 'danger')
+        return redirect(auth.login_url())
     
     # Get or create notification settings
-    notification_settings = NotificationSetting.query.filter_by(user_id=current_user.id).first()
+    notification_settings = NotificationSetting.query.filter_by(user_id=user.id).first()
     if not notification_settings:
-        notification_settings = NotificationSetting(user_id=current_user.id)
+        notification_settings = NotificationSetting(user_id=user.id)
         db.session.add(notification_settings)
         db.session.commit()
     
     # Get or create privacy settings
-    privacy_settings = PrivacySetting.query.filter_by(user_id=current_user.id).first()
+    privacy_settings = PrivacySetting.query.filter_by(user_id=user.id).first()
     if not privacy_settings:
-        privacy_settings = PrivacySetting(user_id=current_user.id)
+        privacy_settings = PrivacySetting(user_id=user.id)
         db.session.add(privacy_settings)
         db.session.commit()
+    
+    # Construct user data for the template
+    user_data = {
+        'fullname': auth.user.name if auth.user else user.username,
+        'email': auth.user.email if auth.user else user.email,
+        'joined': user.created_at.strftime("%B %Y") if user.created_at else 'N/A',
+        'height': user.height_cm or 0,
+        'weight': user.weight_kg or 0,
+        'gender': user.gender or 'male',
+        'experience': user.experience_level or 'beginner',
+        'id': user.id
+    }
     
     # Use the Tailwind template version
     return render_template(
         'tailwind_account_settings.html',
-        user=current_user,
+        user=user_data,
         notification_settings=notification_settings,
         privacy_settings=privacy_settings
     )
