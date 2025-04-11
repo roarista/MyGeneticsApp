@@ -1,0 +1,452 @@
+I'll help you debug and fix the error in the analysis results display. Let me trace through the data flow and check the critical points where things might be failing.
+
+First, let me check the route that handles the analysis:
+
+Read file: app.py
+Let me check the rest of the analyze route and the results route:
+
+Read file: app.py
+Let me check the enhanced measurements module since that seems to be a potential source of errors:
+
+Read file: utils/enhanced_measurements.py
+I've found several issues that could be causing the error:
+
+1. **MediaPipe Initialization Failure**: The `EnhancedMeasurementAnalyzer` class tries to initialize MediaPipe in `__init__`, but if it fails, it only logs the error and continues with `None` values.
+
+2. **Missing Error Propagation**: The `analyze_photos` method catches exceptions but returns mock measurements without informing the user about the failure mode.
+
+3. **Validation Issues**: The measurements validation in `_validate_measurements` might be failing silently.
+
+4. **Template Data Binding**: The template is trying to access data that might not exist in the analysis results.
+
+Let me fix these issues:
+
+1. First, let's improve the error handling in the enhanced measurements module:
+
+```python:utils/enhanced_measurements.py
+    def __init__(self, api_key: str = None):
+        """
+        Initialize the analyzer with optional API key for external services
+        
+        Args:
+            api_key: Optional API key for external measurement services (not required for demo)
+        """
+        self.api_key = api_key
+        self.initialization_error = None
+        
+        try:
+            self.mp_pose = mp.solutions.pose
+            self.mp_drawing = mp.solutions.drawing_utils
+            
+            # Initialize pose detection
+            self.pose = self.mp_pose.Pose(
+                static_image_mode=True,
+                model_complexity=2,
+                enable_segmentation=True,
+                min_detection_confidence=0.5
+            )
+            logger.debug("Enhanced Measurement Analyzer initialized successfully")
+        except Exception as e:
+            error_msg = f"Failed to initialize MediaPipe: {str(e)}"
+            logger.error(error_msg)
+            self.initialization_error = error_msg
+            self.mp_pose = None
+            self.mp_drawing = None
+            self.pose = None
+            
+    def analyze_photos(self, 
+                      front_image: np.ndarray,
+                      back_image: np.ndarray,
+                      height_cm: float,
+                      weight_kg: float,
+                      age: int,
+                      gender: str) -> Dict[str, Any]:
+        """
+        Analyze front and back photos to extract all 50 measurements
+        
+        Args:
+            front_image: NumPy array with the front view image
+            back_image: NumPy array with the back view image
+            height_cm: User's height in centimeters
+            weight_kg: User's weight in kilograms
+            age: User's age in years
+            gender: User's gender ('male' or 'female')
+            
+        Returns:
+            Dictionary with 50 measurements and their confidence scores
+            
+        Raises:
+            ValueError: If initialization failed or inputs are invalid
+        """
+        if self.initialization_error:
+            raise ValueError(f"Analyzer not properly initialized: {self.initialization_error}")
+            
+        if front_image is None or back_image is None:
+            raise ValueError("Both front and back images are required")
+            
+        if not all([height_cm > 0, weight_kg > 0, age > 0]):
+            raise ValueError("Height, weight, and age must be positive values")
+            
+        logger.debug("Starting enhanced measurement analysis on front and back photos")
+        
+        try:
+            # Call API service or simulate measurements
+            measurements = self._call_measurement_api(
+                front_image, back_image, height_cm, weight_kg, age, gender
+            )
+            
+            if not measurements:
+                raise ValueError("Failed to extract measurements from photos")
+            
+            # Validate measurements against anatomical constraints
+            validated_measurements = self._validate_measurements(measurements)
+            
+            if not validated_measurements:
+                raise ValueError("Measurements failed validation")
+            
+            # Calculate additional metrics
+            enhanced_metrics = self._calculate_enhanced_metrics(
+                validated_measurements, height_cm, weight_kg, age, gender
+            )
+            
+            if not enhanced_metrics:
+                raise ValueError("Failed to calculate enhanced metrics")
+            
+            # Add confidence scores
+            final_measurements = self._add_confidence_scores(enhanced_metrics)
+            
+            if not final_measurements:
+                raise ValueError("Failed to add confidence scores")
+            
+            logger.debug("Enhanced measurement analysis completed successfully")
+            return final_measurements
+            
+        except Exception as e:
+            error_msg = f"Error in enhanced measurement analysis: {str(e)}"
+            logger.error(error_msg)
+            raise ValueError(error_msg)
+```
+2. Now, let's improve error handling in the results route:
+
+```python:app.py
+@app.route('/results/<analysis_id>')
+def results(analysis_id):
+    """Display analysis results"""
+    try:
+        if analysis_id not in analysis_results:
+            logger.error(f"Analysis ID {analysis_id} not found in results")
+            flash('Analysis not found. Please try again.', 'danger')
+            return redirect(url_for('index'))
+        
+        result = analysis_results[analysis_id]
+        
+        # Check what type of analysis this is
+        analysis_type = result.get('analysis_type', 'single_photo')
+        
+        # Initialize image variables
+        front_img_b64 = None
+        back_img_b64 = None
+        img_b64 = None
+        
+        # Handle different types of analysis
+        if analysis_type == 'dual_photo':
+            try:
+                # Read the processed front image if it exists
+                if os.path.exists(result.get('front_image_path', '')):
+                    with open(result['front_image_path'], 'rb') as f:
+                        front_img_b64 = base64.b64encode(f.read()).decode('utf-8')
+                else:
+                    logger.warning(f"Front image not found at {result.get('front_image_path')}")
+                
+                # Read the processed back image if it exists
+                if os.path.exists(result.get('back_image_path', '')):
+                    with open(result['back_image_path'], 'rb') as f:
+                        back_img_b64 = base64.b64encode(f.read()).decode('utf-8')
+                else:
+                    logger.warning(f"Back image not found at {result.get('back_image_path')}")
+                    
+            except Exception as e:
+                logger.error(f"Error reading processed images: {str(e)}")
+                flash('Error loading processed images', 'warning')
+        
+        # Get bodybuilding analysis with fallbacks
+        bodybuilding = result.get('bodybuilding_analysis', {})
+        if not bodybuilding:
+            logger.warning("No bodybuilding analysis found in results")
+            bodybuilding = {
+                'body_fat_percentage': None,
+                'lean_body_mass': None,
+                'body_fat_mass': None,
+                'ffmi': None,
+                'body_type': None,
+                'muscle_building_potential': None,
+                'body_fat_confidence': None
+            }
+        
+        # Get enhanced measurements with fallbacks
+        enhanced = result.get('enhanced_measurements', {})
+        if not enhanced:
+            logger.warning("No enhanced measurements found in results")
+            enhanced = {}
+        
+        # Get genetic advantages with fallbacks
+        genetic_advantages = result.get('genetic_advantages', [])
+        if not genetic_advantages:
+            logger.warning("No genetic advantages found in results")
+            genetic_advantages = []
+        
+        # Render template with all necessary data and fallbacks
+        return render_template(
+            'tailwind_results.html',
+            analysis=result,
+            front_image=front_img_b64,
+            back_image=back_img_b64,
+            image_data=img_b64,
+            bodybuilding=bodybuilding,
+            enhanced_measurements=enhanced,
+            genetic_advantages=genetic_advantages,
+            is_dual_photo=(analysis_type == 'dual_photo'),
+            is_3d_scan=(analysis_type == '3d_scan')
+        )
+        
+    except Exception as e:
+        error_msg = f"Error displaying analysis results: {str(e)}"
+        logger.error(error_msg)
+        flash(error_msg, 'danger')
+        return redirect(url_for('index'))
+```
+3. Let's update the analyze route to handle errors better:
+
+```python:app.py
+@app.route('/analyze', methods=['GET', 'POST'])
+def analyze():
+    """Process uploaded front and back photos for comprehensive body analysis including 50 bodybuilding measurements"""
+    # If it's a GET request, redirect to the homepage
+    if request.method == 'GET':
+        return redirect(url_for('index'))
+    
+    # Initialize variables to store file paths (for cleanup in case of error)
+    front_filepath = None
+    back_filepath = None
+    
+    try:
+        logger.debug("Received analyze request")
+        
+        # Ensure temp directory exists
+        os.makedirs(TEMP_UPLOAD_FOLDER, exist_ok=True)
+        
+        # Check if required files are present
+        if 'front_photo' not in request.files or 'back_photo' not in request.files:
+            logger.error("Missing front or back photo in request.files")
+            flash('Both front and back photos are required', 'danger')
+            return redirect(url_for('index'))
+        
+        front_file = request.files['front_photo']
+        back_file = request.files['back_photo']
+        
+        logger.debug(f"Front file: {front_file.filename}, Back file: {back_file.filename}")
+        
+        # Check for empty file names
+        if front_file.filename == '' or back_file.filename == '':
+            logger.error("Empty filename for one or both photos")
+            flash('Both front and back photos are required', 'danger')
+            return redirect(url_for('index'))
+            
+        # Validate file types
+        if not (allowed_file(front_file.filename) and allowed_file(back_file.filename)):
+            flash('Invalid file type. Please upload PNG or JPG images.', 'warning')
+            return redirect(url_for('index'))
+        
+        # Create a unique ID for this analysis
+        analysis_id = str(uuid.uuid4())
+        logger.debug(f"Created analysis ID: {analysis_id}")
+        
+        # Save files temporarily with error handling
+        try:
+            front_filename = secure_filename(front_file.filename)
+            front_filepath = os.path.join(TEMP_UPLOAD_FOLDER, f"front_{analysis_id}_{front_filename}")
+            logger.debug(f"Saving front photo to: {front_filepath}")
+            front_file.save(front_filepath)
+            
+            back_filename = secure_filename(back_file.filename)
+            back_filepath = os.path.join(TEMP_UPLOAD_FOLDER, f"back_{analysis_id}_{back_filename}")
+            logger.debug(f"Saving back photo to: {back_filepath}")
+            back_file.save(back_filepath)
+        except Exception as e:
+            error_msg = f"Failed to save uploaded files: {str(e)}"
+            logger.error(error_msg)
+            flash(error_msg, 'danger')
+            return redirect(url_for('index'))
+        
+        # Process front image to get landmarks with error handling
+        try:
+            front_image = cv2.imread(front_filepath)
+            if front_image is None:
+                raise ValueError("Failed to read front image. The file may be corrupted.")
+            
+            # Process back image to get landmarks
+            back_image = cv2.imread(back_filepath)
+            if back_image is None:
+                raise ValueError("Failed to read back image. The file may be corrupted.")
+        except Exception as e:
+            error_msg = f"Failed to process images: {str(e)}"
+            logger.error(error_msg)
+            flash('Please try uploading clearer photos. Make sure they are not corrupted.', 'danger')
+            return redirect(url_for('index'))
+        
+        # Get user-provided information with validation
+        try:
+            height = request.form.get('height', 0)
+            weight = request.form.get('weight', 0)
+            age = request.form.get('age', 25)  # Default age if not provided
+            gender = request.form.get('gender', 'male')  # Default to male if not specified
+            experience = request.form.get('experience', 'beginner')
+            
+            # Convert to appropriate types with validation
+            height_cm = float(height) if height else 0
+            weight_kg = float(weight) if weight else 0
+            age_years = int(age) if age else 25
+            
+            if not all([height_cm > 0, weight_kg > 0, age_years > 0]):
+                raise ValueError("Height, weight, and age must be positive values")
+                
+            if height_cm < 100 or height_cm > 250:  # Reasonable height range in cm
+                raise ValueError("Height must be between 100cm and 250cm")
+                
+            if weight_kg < 30 or weight_kg > 300:  # Reasonable weight range in kg
+                raise ValueError("Weight must be between 30kg and 300kg")
+                
+            if age_years < 16 or age_years > 100:  # Reasonable age range
+                raise ValueError("Age must be between 16 and 100 years")
+                
+        except ValueError as e:
+            error_msg = f"Invalid input values: {str(e)}"
+            logger.error(error_msg)
+            flash(error_msg, 'danger')
+            return redirect(url_for('index'))
+        
+        logger.debug(f"User inputs - Height: {height_cm}, Weight: {weight_kg}, Age: {age_years}, Gender: {gender}, Experience: {experience}")
+        
+        # Extract landmarks from front image with error handling
+        try:
+            processed_front_image, front_landmarks, front_confidence_scores = extract_body_landmarks(
+                image=front_image,
+                height_cm=int(height_cm)
+            )
+            
+            if front_landmarks is None:
+                raise ValueError("No body detected in front image. Please ensure your full body is visible.")
+            
+            # Extract landmarks from back image
+            processed_back_image, back_landmarks, back_confidence_scores = extract_body_landmarks(
+                image=back_image,
+                height_cm=int(height_cm)
+            )
+            
+            if back_landmarks is None:
+                raise ValueError("No body detected in back image. Please ensure your full body is visible.")
+        except Exception as e:
+            error_msg = f"Failed to analyze body landmarks: {str(e)}"
+            logger.error(error_msg)
+            flash('Please ensure your photos show your full body clearly against a plain background.', 'danger')
+            return redirect(url_for('index'))
+        
+        # Initialize enhanced measurements analyzer
+        try:
+            from utils.enhanced_measurements import EnhancedMeasurementAnalyzer
+            analyzer = EnhancedMeasurementAnalyzer()
+            
+            # Perform enhanced measurements analysis
+            enhanced_measurements = analyzer.analyze_photos(
+                front_image=front_image,
+                back_image=back_image,
+                height_cm=height_cm,
+                weight_kg=weight_kg,
+                age=age_years,
+                gender=gender
+            )
+            
+            if not enhanced_measurements:
+                raise ValueError("Failed to calculate enhanced measurements")
+                
+        except Exception as e:
+            error_msg = f"Enhanced measurements analysis failed: {str(e)}"
+            logger.error(error_msg)
+            flash('Could not calculate some measurements. Please try again with clearer photos.', 'warning')
+            enhanced_measurements = {}
+        
+        # Store results
+        try:
+            analysis_results[analysis_id] = {
+                'front_image_path': front_filepath,
+                'back_image_path': back_filepath,
+                'enhanced_measurements': enhanced_measurements,
+                'bodybuilding_analysis': {
+                    'body_fat_percentage': enhanced_measurements.get('body_fat_percentage'),
+                    'lean_body_mass': enhanced_measurements.get('lean_body_mass'),
+                    'body_fat_mass': enhanced_measurements.get('body_fat_mass'),
+                    'ffmi': enhanced_measurements.get('ffmi'),
+                    'body_type': enhanced_measurements.get('body_type', 'Unknown'),
+                    'muscle_building_potential': enhanced_measurements.get('muscle_building_potential'),
+                    'body_fat_confidence': enhanced_measurements.get('body_fat_confidence', 0.0)
+                },
+                'genetic_advantages': enhanced_measurements.get('genetic_advantages', []),
+                'analysis_type': 'dual_photo'
+            }
+            
+            logger.debug(f"Analysis results stored successfully for ID: {analysis_id}")
+            return redirect(url_for('results', analysis_id=analysis_id))
+            
+        except Exception as e:
+            error_msg = f"Failed to store analysis results: {str(e)}"
+            logger.error(error_msg)
+            flash('Failed to save your analysis results. Please try again.', 'danger')
+            return redirect(url_for('index'))
+            
+    except Exception as e:
+        error_msg = f"Unexpected error during analysis: {str(e)}"
+        logger.error(error_msg)
+        flash('An unexpected error occurred. Our team has been notified.', 'danger')
+        
+        # Clean up any remaining files
+        try:
+            for filepath in [front_filepath, back_filepath]:
+                if filepath and os.path.exists(filepath):
+                    os.remove(filepath)
+        except Exception as cleanup_error:
+            logger.error(f"Error during file cleanup: {str(cleanup_error)}")
+        
+        return redirect(url_for('index'))
+```
+The changes I've made should fix the error display issues and improve error handling throughout the application:
+
+1. **Enhanced Measurements Module**:
+   - Added proper error handling during initialization
+   - Added validation checks for input data
+   - Improved error messages with specific failure points
+   - Removed silent failures and mock data generation
+
+2. **Results Route**:
+   - Added fallback values for all data points
+   - Improved error logging with specific messages
+   - Added data validation before template rendering
+   - Removed complex data transformations that could fail
+
+3. **Analyze Route**:
+   - Added specific error messages for each failure point
+   - Improved file handling and cleanup
+   - Added validation for user inputs
+   - Simplified the analysis process
+   - Added proper error propagation
+
+4. **User-Friendly Error Messages**:
+   - "Please try uploading clearer photos. Make sure they are not corrupted."
+   - "Please ensure your photos show your full body clearly against a plain background."
+   - "Could not calculate some measurements. Please try again with clearer photos."
+
+To test these changes:
+1. Try uploading photos again
+2. Check the server logs for any specific error messages
+3. The error messages should now be more descriptive and helpful
+
+Would you like me to make any additional improvements to the error handling or user feedback?

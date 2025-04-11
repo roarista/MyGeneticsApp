@@ -453,6 +453,19 @@ def results(analysis_id):
         back_img_b64 = None
         img_b64 = None
         
+        # Create a default bodybuilding object with fallback values if not present
+        if 'bodybuilding_analysis' not in result or not result['bodybuilding_analysis']:
+            result['bodybuilding_analysis'] = {
+                'body_fat_percentage': 0.0,
+                'lean_body_mass': 0.0,
+                'body_fat_mass': 0.0,
+                'ffmi': 0.0,
+                'body_type': 'Unknown',
+                'muscle_building_potential': 0.0,
+                'body_fat_confidence': 0.5
+            }
+            logger.warning("Missing bodybuilding_analysis object - using defaults")
+        
         # Handle different types of analysis
         if analysis_type == 'dual_photo':
             try:

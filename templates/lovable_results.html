@@ -23,14 +23,14 @@
                             <!-- Body Fat -->
                             <div class="measurement-card">
                                 <div class="measurement-value">
-                                    {% if bodybuilding.body_fat_percentage %}
+                                    {% if bodybuilding is defined and bodybuilding and bodybuilding.body_fat_percentage %}
                                         {{ '{:.1f}'.format(bodybuilding.body_fat_percentage) }}%
                                     {% else %}
                                         N/A
                                     {% endif %}
                                 </div>
                                 <div class="measurement-label">Body Fat Percentage</div>
-                                {% if bodybuilding.body_fat_confidence %}
+                                {% if bodybuilding is defined and bodybuilding and bodybuilding.body_fat_confidence %}
                                 <div class="measurement-confidence text-primary-400">
                                     Confidence: {{ '{:.0f}'.format(bodybuilding.body_fat_confidence * 100) }}%
                                 </div>
@@ -40,7 +40,7 @@
                             <!-- Body Type -->
                             <div class="measurement-card">
                                 <div class="measurement-value">
-                                    {% if bodybuilding.body_type and bodybuilding.body_type != 'Unknown' %}
+                                    {% if bodybuilding is defined and bodybuilding and bodybuilding.body_type and bodybuilding.body_type != 'Unknown' %}
                                         {{ bodybuilding.body_type }}
                                     {% else %}
                                         N/A
@@ -52,7 +52,7 @@
                             <!-- Muscle Building Potential -->
                             <div class="measurement-card">
                                 <div class="measurement-value">
-                                    {% if bodybuilding.muscle_building_potential %}
+                                    {% if bodybuilding is defined and bodybuilding and bodybuilding.muscle_building_potential %}
                                         {{ '{:.1f}'.format(bodybuilding.muscle_building_potential) }}/10
                                     {% else %}
                                         N/A
@@ -340,7 +340,7 @@
                     <h2 class="text-xl font-semibold text-white">Enhanced Bodybuilding Measurements</h2>
                     <span class="px-3 py-1 text-xs font-medium bg-primary-600 text-white rounded-full">50-Point Analysis</span>
                 </div>
-                <div class="card-body" x-data="{ activeTab: '{{ list(categorized_measurements.keys())[0].lower().replace(' ', '-') }}' }">
+                <div class="card-body" x-data="{ activeTab: '{{ categorized_measurements.keys()|list|first|lower|replace(' ', '-') if categorized_measurements and categorized_measurements.keys() else 'body-composition' }}' }">
                     <!-- Tab Navigation -->
                     <div class="flex flex-wrap space-x-1 mb-6 border-b border-dark-700 overflow-x-auto">
                         {% for category in categorized_measurements %}
