@@ -47,8 +47,16 @@
                             </div>
                             <div>
                                 <p class="text-2xl font-bold text-white">
-                                    {% if bodybuilding_analysis and bodybuilding_analysis.body_fat_percentage %}
-                                        {{ '{:.1f}'.format(bodybuilding_analysis.body_fat_percentage) }}%
+                                    {% if bodybuilding_analysis %}
+                                        {% if bodybuilding_analysis.body_fat_percentage is defined %}
+                                            {{ '{:.1f}'.format(bodybuilding_analysis.body_fat_percentage) }}%
+                                        {% elif bodybuilding_analysis.get('body_fat_percentage') %}
+                                            {{ '{:.1f}'.format(bodybuilding_analysis.get('body_fat_percentage')) }}%
+                                        {% elif bodybuilding_analysis.get('body_composition', {}).get('body_fat_percentage') %}
+                                            {{ '{:.1f}'.format(bodybuilding_analysis.get('body_composition', {}).get('body_fat_percentage')) }}%
+                                        {% else %}
+                                            --
+                                        {% endif %}
                                     {% else %}
                                         --
                                     {% endif %}
@@ -66,8 +74,16 @@
                             </div>
                             <div>
                                 <p class="text-2xl font-bold text-white">
-                                    {% if bodybuilding_analysis and bodybuilding_analysis.body_type and bodybuilding_analysis.body_type != 'Unknown' %}
-                                        {{ bodybuilding_analysis.body_type }}
+                                    {% if bodybuilding_analysis %}
+                                        {% if bodybuilding_analysis.body_type is defined and bodybuilding_analysis.body_type != 'Unknown' %}
+                                            {{ bodybuilding_analysis.body_type }}
+                                        {% elif bodybuilding_analysis.get('body_type') and bodybuilding_analysis.get('body_type') != 'Unknown' %}
+                                            {{ bodybuilding_analysis.get('body_type') }}
+                                        {% elif bodybuilding_analysis.get('body_composition', {}).get('body_fat_category') %}
+                                            {{ bodybuilding_analysis.get('body_composition', {}).get('body_fat_category') }}
+                                        {% else %}
+                                            --
+                                        {% endif %}
                                     {% else %}
                                         --
                                     {% endif %}
@@ -85,8 +101,27 @@
                             </div>
                             <div>
                                 <p class="text-2xl font-bold text-white">
-                                    {% if bodybuilding_analysis and bodybuilding_analysis.muscle_building_potential %}
-                                        {{ '{:.1f}'.format(bodybuilding_analysis.muscle_building_potential) }}/10
+                                    {% if bodybuilding_analysis %}
+                                        {% if bodybuilding_analysis.muscle_building_potential is defined %}
+                                            {{ '{:.1f}'.format(bodybuilding_analysis.muscle_building_potential) }}/10
+                                        {% elif bodybuilding_analysis.get('muscle_building_potential') %}
+                                            {{ '{:.1f}'.format(bodybuilding_analysis.get('muscle_building_potential')) }}/10
+                                        {% elif bodybuilding_analysis.get('genetic_potential', {}).get('rating') %}
+                                            {% set rating = bodybuilding_analysis.get('genetic_potential', {}).get('rating') %}
+                                            {% if rating == 'excellent' %}
+                                                9.0/10
+                                            {% elif rating == 'above_average' %}
+                                                7.5/10
+                                            {% elif rating == 'average' %}
+                                                5.0/10
+                                            {% elif rating == 'below_average' %}
+                                                3.0/10
+                                            {% else %}
+                                                5.0/10
+                                            {% endif %}
+                                        {% else %}
+                                            --
+                                        {% endif %}
                                     {% else %}
                                         --
                                     {% endif %}
