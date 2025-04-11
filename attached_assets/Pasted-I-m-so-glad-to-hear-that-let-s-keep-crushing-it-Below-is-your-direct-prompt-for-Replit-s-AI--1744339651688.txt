@@ -1,0 +1,70 @@
+I'm so glad to hear that — let’s keep crushing it 💪! Below is your **direct prompt for Replit’s AI**, fully adapted from the Cursor version to work as if you're speaking to Replit’s agent directly:
+
+---
+
+### ⚙️ Replit Prompt: Fix Left Panel Metrics Not Displaying
+
+---
+
+Hi Replit! I need your help fixing a **UI data sync issue** in my fitness app.
+
+---
+
+### 🧩 PROBLEM:
+
+After users upload front/back photos and input height/weight, the **analysis results are calculated properly** and shown **on the right panel**. This includes:
+
+- Body Fat %  
+- BMI  
+- Lean Body Mass  
+- FFMI  
+- Muscle Building Potential  
+- Body Type  
+
+But on the **left panel** — under **“Body Composition”** — the same metrics either show as:
+
+- `N/A`  
+- `Unknown`  
+- or are completely **missing**  
+
+So the two sides of the results page are **not synchronized**, even though the calculations are being done successfully.
+
+---
+
+### 🛠️ OBJECTIVE:
+
+Make the **left panel** display the same data values shown on the **right** — so that all key metrics are **consistently visible** in both places.
+
+---
+
+### ✅ TASKS FOR YOU:
+
+1. **Locate where the right-panel data is calculated.**  
+   - Identify the backend logic or API call that computes values like `body_fat_percentage`, `bmi`, `ffmi`, and `lean_body_mass`.
+
+2. **Check how the left panel is being rendered.**  
+   - Is it referencing different variables?  
+   - Is it being passed outdated or incomplete data in the `render_template()` call (or via props if frontend is JS-based)?
+
+3. **Inject the same values into the left panel.**  
+   - Ensure the `body_fat`, `body_type`, and `muscle_building_potential` are passed from backend to frontend **and displayed in the left card**.
+
+4. **Add conditional formatting if needed.**  
+   - For example, if confidence is low or values are missing, you can:
+     - Show a tooltip or warning icon  
+     - Add a placeholder text like: "Calculated, confidence low"  
+
+5. **(Optional)** Add a brief animation or smooth load effect when results populate both sides.
+
+---
+
+### 🧠 CONTEXT:
+
+- All metrics are calculated and displayed correctly on the **right** side already.
+- I just need to mirror them to the **left panel**.
+
+Thanks Replit! Help me make this look smooth and synced 🔥
+
+---
+
+Let me know if you want a follow-up version that includes a **data structure refactor** to ensure both sides pull from the exact same centralized state (which can prevent this in future updates).

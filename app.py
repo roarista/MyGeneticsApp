@@ -522,6 +522,13 @@ def results(analysis_id):
             'muscle_building_potential': result.get('bodybuilding_analysis', {}).get('muscle_building_potential', 0)
         }
         
+        # Also update the bodybuilding object to match the analysis values for consistency
+        bodybuilding = {
+            'body_fat_percentage': analysis['body_fat_percentage'],
+            'body_type': analysis['body_type'],
+            'muscle_building_potential': analysis['muscle_building_potential']
+        }
+        
         # Get basic measurements for measurements panel
         basic_measurements = {}
         try:
@@ -666,7 +673,7 @@ def results(analysis_id):
             'format_value': format_trait_value,  # Pass the formatter to the template
             'is_3d_scan': analysis_type == '3d_scan',  # Flag for 3D scan analysis
             'is_dual_photo': analysis_type == 'dual_photo',  # Flag for dual photo analysis
-            'bodybuilding': result.get('bodybuilding_analysis', {}),  # Bodybuilding metrics
+            'bodybuilding': bodybuilding,  # Bodybuilding metrics
             'estimated_measurements': measurements,  # Measurements (combined for dual photo)
             'basic_measurements': basic_measurements,  # Basic measurements for the template
             'proportion_measurements': proportion_measurements,  # Proportion measurements for the template
@@ -841,6 +848,13 @@ def scan3d_results(analysis_id):
         'muscle_building_potential': result.get('traits', {}).get('muscle_building_potential', 0)
     }
     
+    # Also create a bodybuilding object for the left panel
+    bodybuilding = {
+        'body_fat_percentage': analysis['body_fat_percentage'],
+        'body_type': analysis['body_type'],
+        'muscle_building_potential': analysis['muscle_building_potential']
+    }
+    
     # Extract measurements for display in the basic measurements panel
     measurements = result['traits']
     basic_measurements = {}
@@ -964,6 +978,7 @@ def scan3d_results(analysis_id):
         scan_data=result.get('scan_data', {}),
         format_value=format_trait_value,  # Pass the formatter to the template
         is_3d_scan=True,  # Flag to indicate this is a 3D scan analysis
+        bodybuilding=bodybuilding,  # Bodybuilding metrics for left panel
         basic_measurements=basic_measurements,  # Basic measurements for the template
         estimated_measurements=measurements,  # All measurements
         proportion_measurements=proportion_measurements,  # Proportion measurements for the template
@@ -1287,6 +1302,13 @@ def recommendations(analysis_id):
         'muscle_building_potential': result.get('bodybuilding_analysis', {}).get('muscle_building_potential', 0)
     }
     
+    # Also create a bodybuilding object for the left panel
+    bodybuilding = {
+        'body_fat_percentage': analysis['body_fat_percentage'],
+        'body_type': analysis['body_type'],
+        'muscle_building_potential': analysis['muscle_building_potential']
+    }
+    
     # Extract measurements from traits if available
     measurements = {}
     for trait_name, trait_data in result['traits'].items():
@@ -1333,6 +1355,7 @@ def recommendations(analysis_id):
         'tailwind_results.html',
         analysis_id=analysis_id,
         analysis=analysis,  # Add analysis object for template compatibility
+        bodybuilding=bodybuilding,  # Bodybuilding metrics for left panel
         traits=formatted_traits,
         recommendations=result['recommendations'],
         user_info=result['user_info'],
