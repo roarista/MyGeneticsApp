@@ -21,7 +21,14 @@
     </div>
     {% endif %}
     
-    <p class="text-center text-gray-400 mb-8">Based on your uploaded photos and measurements</p>
+    <p class="text-center text-gray-400 mb-2">Based on your uploaded photos and measurements</p>
+    
+    <!-- AI Disclaimer Notice -->
+    <div class="bg-blue-900 bg-opacity-30 border border-blue-800 rounded-lg p-3 mb-8 text-center">
+        <p class="text-sm text-blue-300">
+            <i class="fas fa-info-circle mr-2"></i>These are AI-based estimates. For best accuracy, use 3D scan when available.
+        </p>
+    </div>
     
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         <!-- Left Column: Body Composition and Upload -->
@@ -48,9 +55,6 @@
                                 <p class="text-gray-400">Body Fat Percentage</p>
                             </div>
                         </div>
-                        {% if bodybuilding_analysis and bodybuilding_analysis.body_fat_confidence %}
-                            <span class="w-3 h-3 rounded-full {% if bodybuilding_analysis.body_fat_confidence > 0.7 %}bg-green-500{% elif bodybuilding_analysis.body_fat_confidence > 0.4 %}bg-yellow-500{% else %}bg-red-500{% endif %}"></span>
-                        {% endif %}
                     </div>
                     
                     <!-- Body Type -->
@@ -89,9 +93,6 @@
                                 <p class="text-gray-400">Muscle Building Potential</p>
                             </div>
                         </div>
-                        {% if bodybuilding_analysis and bodybuilding_analysis.muscle_building_confidence %}
-                            <span class="w-3 h-3 rounded-full {% if bodybuilding_analysis.muscle_building_confidence > 0.7 %}bg-green-500{% elif bodybuilding_analysis.muscle_building_confidence > 0.4 %}bg-yellow-500{% else %}bg-red-500{% endif %}"></span>
-                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -153,40 +154,365 @@
         <div class="space-y-8">
             <!-- Key Measurements Section -->
             <div class="dark-card">
-                <h2 class="text-xl font-semibold text-white mb-4">Key Measurements</h2>
+                <h2 class="text-xl font-semibold text-white mb-4">Body Measurements</h2>
                 
                 {% if basic_measurements and basic_measurements|length > 0 %}
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {% for key, data in basic_measurements.items() %}
-                    <div class="flex items-center justify-between p-3 bg-gray-800 rounded-lg">
-                        <div class="flex items-center space-x-3">
-                            <div class="flex-shrink-0">
-                                {% if key == 'Height' %}
-                                    <i class="fas fa-ruler-vertical text-blue-400"></i>
-                                {% elif key == 'Weight' %}
-                                    <i class="fas fa-weight text-purple-400"></i>
-                                {% elif key == 'Chest' %}
-                                    <i class="fas fa-expand text-green-400"></i>
-                                {% elif key == 'Waist' %}
-                                    <i class="fas fa-ruler-horizontal text-yellow-400"></i>
-                                {% elif key == 'Hips' %}
-                                    <i class="fas fa-arrows-alt-h text-red-400"></i>
-                                {% elif key == 'Shoulders' %}
-                                    <i class="fas fa-arrows-alt text-indigo-400"></i>
-                                {% else %}
-                                    <i class="fas fa-ruler text-gray-400"></i>
-                                {% endif %}
-                            </div>
-                            <div>
-                                <p class="text-xl font-bold text-white">{{ data.value }}</p>
-                                <p class="text-gray-400">{{ key }}</p>
-                            </div>
-                        </div>
-                        {% if data.confidence %}
-                        <span class="w-2 h-2 rounded-full {% if data.confidence == 'high' %}bg-green-500{% elif data.confidence == 'medium' %}bg-yellow-500{% else %}bg-gray-500{% endif %}"></span>
-                        {% endif %}
+                <!-- Measurement Grid -->
+                <div class="overflow-hidden rounded-lg border border-gray-800 mb-4">
+                    <table class="min-w-full divide-y divide-gray-800">
+                        <thead class="bg-gray-900">
+                            <tr>
+                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Measurement</th>
+                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Value</th>
+                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Development</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-gray-800 divide-y divide-gray-700">
+                            <!-- Height and Weight -->
+                            {% if basic_measurements.get('Height') %}
+                            <tr>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-ruler-vertical text-blue-400 mr-2"></i>
+                                        <span class="text-white">Height</span>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <span class="text-white font-medium">{{ basic_measurements.get('Height').value }}</span>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <!-- No rating bar for height -->
+                                    <span class="text-gray-500 text-sm">N/A</span>
+                                </td>
+                            </tr>
+                            {% endif %}
+                            
+                            {% if basic_measurements.get('Weight') %}
+                            <tr>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-weight text-purple-400 mr-2"></i>
+                                        <span class="text-white">Weight</span>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <span class="text-white font-medium">{{ basic_measurements.get('Weight').value }}</span>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <!-- No rating bar for weight -->
+                                    <span class="text-gray-500 text-sm">N/A</span>
+                                </td>
+                            </tr>
+                            {% endif %}
+                            
+                            <!-- Chest -->
+                            {% if basic_measurements.get('Chest') %}
+                            <tr>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-expand text-green-400 mr-2"></i>
+                                        <span class="text-white">Chest</span>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <span class="text-white font-medium">{{ basic_measurements.get('Chest').value }}</span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <!-- Development rating - simulating based on standard proportions -->
+                                    {% set score = (basic_measurements.get('Chest').value|float / 
+                                                  basic_measurements.get('Waist', {'value': 100}).value|float * 100 - 100)|int %}
+                                    {% set color = 'bg-red-500' %}
+                                    {% if score > 20 %}
+                                        {% set color = 'bg-green-500' %}
+                                    {% elif score > 10 %}
+                                        {% set color = 'bg-yellow-500' %}
+                                    {% endif %}
+                                    <div class="w-full bg-gray-700 rounded-full h-2.5">
+                                        <div class="{{ color }} h-2.5 rounded-full" style="width: {{ min(max(score, 10), 100) }}%"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endif %}
+                            
+                            <!-- Shoulders -->
+                            {% if basic_measurements.get('Shoulders') %}
+                            <tr>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-arrows-alt text-indigo-400 mr-2"></i>
+                                        <span class="text-white">Shoulders</span>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <span class="text-white font-medium">{{ basic_measurements.get('Shoulders').value }}</span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <!-- Development rating - simulating based on shoulder-to-waist ratio -->
+                                    {% set score = (basic_measurements.get('Shoulders').value|float / 
+                                                  basic_measurements.get('Waist', {'value': 100}).value|float * 100 - 100)|int %}
+                                    {% set color = 'bg-red-500' %}
+                                    {% if score > 40 %}
+                                        {% set color = 'bg-green-500' %}
+                                    {% elif score > 25 %}
+                                        {% set color = 'bg-yellow-500' %}
+                                    {% endif %}
+                                    <div class="w-full bg-gray-700 rounded-full h-2.5">
+                                        <div class="{{ color }} h-2.5 rounded-full" style="width: {{ min(max(score, 10), 100) }}%"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endif %}
+                            
+                            <!-- Waist -->
+                            {% if basic_measurements.get('Waist') %}
+                            <tr>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-ruler-horizontal text-yellow-400 mr-2"></i>
+                                        <span class="text-white">Waist</span>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <span class="text-white font-medium">{{ basic_measurements.get('Waist').value }}</span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <!-- For waist, lower is better (flipped scale) -->
+                                    {% set waist_height_ratio = (basic_measurements.get('Waist').value|float / 
+                                                              basic_measurements.get('Height', {'value': 180}).value|float * 100)|int %}
+                                    {% set score = 100 - min(waist_height_ratio, 90) %}
+                                    {% set color = 'bg-red-500' %}
+                                    {% if score > 55 %}
+                                        {% set color = 'bg-green-500' %}
+                                    {% elif score > 45 %}
+                                        {% set color = 'bg-yellow-500' %}
+                                    {% endif %}
+                                    <div class="w-full bg-gray-700 rounded-full h-2.5">
+                                        <div class="{{ color }} h-2.5 rounded-full" style="width: {{ min(max(score, 10), 100) }}%"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endif %}
+                            
+                            <!-- Hips -->
+                            {% if basic_measurements.get('Hips') %}
+                            <tr>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-arrows-alt-h text-red-400 mr-2"></i>
+                                        <span class="text-white">Hips</span>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <span class="text-white font-medium">{{ basic_measurements.get('Hips').value }}</span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <!-- Hip development -->
+                                    {% set score = 50 %}
+                                    {% set color = 'bg-yellow-500' %}
+                                    <div class="w-full bg-gray-700 rounded-full h-2.5">
+                                        <div class="{{ color }} h-2.5 rounded-full" style="width: {{ score }}%"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endif %}
+                            
+                            <!-- Add more measurements as needed: Arms, Thighs, Calves -->
+                            <!-- Left Arm -->
+                            {% if estimated_measurements.get('left_arm_cm') %}
+                            <tr>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-hand-rock text-blue-400 mr-2"></i>
+                                        <span class="text-white">Left Arm</span>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <span class="text-white font-medium">{{ estimated_measurements.get('left_arm_cm').value }} cm</span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <!-- Arm development based on proportion to height -->
+                                    {% set arm_height_ratio = (estimated_measurements.get('left_arm_cm').value|float / 
+                                                           basic_measurements.get('Height', {'value': 180}).value|float * 100)|int %}
+                                    {% set score = arm_height_ratio * 6 %}
+                                    {% set color = 'bg-red-500' %}
+                                    {% if score > 50 %}
+                                        {% set color = 'bg-green-500' %}
+                                    {% elif score > 35 %}
+                                        {% set color = 'bg-yellow-500' %}
+                                    {% endif %}
+                                    <div class="w-full bg-gray-700 rounded-full h-2.5">
+                                        <div class="{{ color }} h-2.5 rounded-full" style="width: {{ min(max(score, 10), 100) }}%"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endif %}
+                            
+                            <!-- Right Arm -->
+                            {% if estimated_measurements.get('right_arm_cm') %}
+                            <tr>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-hand-rock text-blue-400 mr-2"></i>
+                                        <span class="text-white">Right Arm</span>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <span class="text-white font-medium">{{ estimated_measurements.get('right_arm_cm').value }} cm</span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <!-- Arm development based on proportion to height -->
+                                    {% set arm_height_ratio = (estimated_measurements.get('right_arm_cm').value|float / 
+                                                           basic_measurements.get('Height', {'value': 180}).value|float * 100)|int %}
+                                    {% set score = arm_height_ratio * 6 %}
+                                    {% set color = 'bg-red-500' %}
+                                    {% if score > 50 %}
+                                        {% set color = 'bg-green-500' %}
+                                    {% elif score > 35 %}
+                                        {% set color = 'bg-yellow-500' %}
+                                    {% endif %}
+                                    <div class="w-full bg-gray-700 rounded-full h-2.5">
+                                        <div class="{{ color }} h-2.5 rounded-full" style="width: {{ min(max(score, 10), 100) }}%"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endif %}
+                            
+                            <!-- Left Thigh -->
+                            {% if estimated_measurements.get('left_thigh_cm') %}
+                            <tr>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-walking text-green-400 mr-2"></i>
+                                        <span class="text-white">Left Thigh</span>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <span class="text-white font-medium">{{ estimated_measurements.get('left_thigh_cm').value }} cm</span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <!-- Thigh development -->
+                                    {% set thigh_waist_ratio = (estimated_measurements.get('left_thigh_cm').value|float / 
+                                                            basic_measurements.get('Waist', {'value': 100}).value|float * 100)|int %}
+                                    {% set score = thigh_waist_ratio %}
+                                    {% set color = 'bg-red-500' %}
+                                    {% if score > 60 %}
+                                        {% set color = 'bg-green-500' %}
+                                    {% elif score > 50 %}
+                                        {% set color = 'bg-yellow-500' %}
+                                    {% endif %}
+                                    <div class="w-full bg-gray-700 rounded-full h-2.5">
+                                        <div class="{{ color }} h-2.5 rounded-full" style="width: {{ min(max(score, 10), 100) }}%"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endif %}
+                            
+                            <!-- Right Thigh -->
+                            {% if estimated_measurements.get('right_thigh_cm') %}
+                            <tr>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-walking text-green-400 mr-2"></i>
+                                        <span class="text-white">Right Thigh</span>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <span class="text-white font-medium">{{ estimated_measurements.get('right_thigh_cm').value }} cm</span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <!-- Thigh development -->
+                                    {% set thigh_waist_ratio = (estimated_measurements.get('right_thigh_cm').value|float / 
+                                                            basic_measurements.get('Waist', {'value': 100}).value|float * 100)|int %}
+                                    {% set score = thigh_waist_ratio %}
+                                    {% set color = 'bg-red-500' %}
+                                    {% if score > 60 %}
+                                        {% set color = 'bg-green-500' %}
+                                    {% elif score > 50 %}
+                                        {% set color = 'bg-yellow-500' %}
+                                    {% endif %}
+                                    <div class="w-full bg-gray-700 rounded-full h-2.5">
+                                        <div class="{{ color }} h-2.5 rounded-full" style="width: {{ min(max(score, 10), 100) }}%"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endif %}
+                            
+                            <!-- Left Calf -->
+                            {% if estimated_measurements.get('left_calf_cm') %}
+                            <tr>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-shoe-prints text-purple-400 mr-2"></i>
+                                        <span class="text-white">Left Calf</span>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <span class="text-white font-medium">{{ estimated_measurements.get('left_calf_cm').value }} cm</span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <!-- Calf development -->
+                                    {% set calf_thigh_ratio = (estimated_measurements.get('left_calf_cm').value|float / 
+                                                           estimated_measurements.get('left_thigh_cm', {'value': 60}).value|float * 100)|int %}
+                                    {% set score = calf_thigh_ratio %}
+                                    {% set color = 'bg-red-500' %}
+                                    {% if score > 65 %}
+                                        {% set color = 'bg-green-500' %}
+                                    {% elif score > 55 %}
+                                        {% set color = 'bg-yellow-500' %}
+                                    {% endif %}
+                                    <div class="w-full bg-gray-700 rounded-full h-2.5">
+                                        <div class="{{ color }} h-2.5 rounded-full" style="width: {{ min(max(score, 10), 100) }}%"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endif %}
+                            
+                            <!-- Right Calf -->
+                            {% if estimated_measurements.get('right_calf_cm') %}
+                            <tr>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-shoe-prints text-purple-400 mr-2"></i>
+                                        <span class="text-white">Right Calf</span>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <span class="text-white font-medium">{{ estimated_measurements.get('right_calf_cm').value }} cm</span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <!-- Calf development -->
+                                    {% set calf_thigh_ratio = (estimated_measurements.get('right_calf_cm').value|float / 
+                                                           estimated_measurements.get('right_thigh_cm', {'value': 60}).value|float * 100)|int %}
+                                    {% set score = calf_thigh_ratio %}
+                                    {% set color = 'bg-red-500' %}
+                                    {% if score > 65 %}
+                                        {% set color = 'bg-green-500' %}
+                                    {% elif score > 55 %}
+                                        {% set color = 'bg-yellow-500' %}
+                                    {% endif %}
+                                    <div class="w-full bg-gray-700 rounded-full h-2.5">
+                                        <div class="{{ color }} h-2.5 rounded-full" style="width: {{ min(max(score, 10), 100) }}%"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="flex items-center text-sm text-gray-400 mt-2 space-x-4">
+                    <div class="flex items-center">
+                        <span class="w-3 h-3 rounded-full bg-green-500 mr-1"></span>
+                        <span>Strong</span>
                     </div>
-                    {% endfor %}
+                    <div class="flex items-center">
+                        <span class="w-3 h-3 rounded-full bg-yellow-500 mr-1"></span>
+                        <span>Average</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="w-3 h-3 rounded-full bg-red-500 mr-1"></span>
+                        <span>Needs Focus</span>
+                    </div>
                 </div>
                 {% else %}
                 <div class="flex flex-col items-center justify-center py-12 bg-gray-800 rounded-lg">
