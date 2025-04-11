@@ -155,30 +155,38 @@ def analyze():
         analysis_id = str(uuid.uuid4())
         logger.debug(f"Created analysis ID: {analysis_id}")
         
-        # Save files temporarily
-        front_filename = secure_filename(front_file.filename)
-        front_filepath = os.path.join(TEMP_UPLOAD_FOLDER, f"front_{analysis_id}_{front_filename}")
-        logger.debug(f"Saving front photo to: {front_filepath}")
-        front_file.save(front_filepath)
-        
-        back_filename = secure_filename(back_file.filename)
-        back_filepath = os.path.join(TEMP_UPLOAD_FOLDER, f"back_{analysis_id}_{back_filename}")
-        logger.debug(f"Saving back photo to: {back_filepath}")
-        back_file.save(back_filepath)
-        
-        # Process front image to get landmarks
-        front_image = cv2.imread(front_filepath)
-        if front_image is None:
-            flash('Failed to process front image', 'danger')
+        # Save files temporarily with error handling
+        try:
+            front_filename = secure_filename(front_file.filename)
+            front_filepath = os.path.join(TEMP_UPLOAD_FOLDER, f"front_{analysis_id}_{front_filename}")
+            logger.debug(f"Saving front photo to: {front_filepath}")
+            front_file.save(front_filepath)
+            
+            back_filename = secure_filename(back_file.filename)
+            back_filepath = os.path.join(TEMP_UPLOAD_FOLDER, f"back_{analysis_id}_{back_filename}")
+            logger.debug(f"Saving back photo to: {back_filepath}")
+            back_file.save(back_filepath)
+        except Exception as e:
+            logger.error(f"Failed to save uploaded files: {str(e)}")
+            flash('Failed to process uploaded files', 'danger')
             return redirect(url_for('index'))
         
-        # Process back image to get landmarks
-        back_image = cv2.imread(back_filepath)
-        if back_image is None:
-            flash('Failed to process back image', 'danger')
+        # Process front image to get landmarks with error handling
+        try:
+            front_image = cv2.imread(front_filepath)
+            if front_image is None:
+                raise ValueError("Failed to read front image")
+            
+            # Process back image to get landmarks
+            back_image = cv2.imread(back_filepath)
+            if back_image is None:
+                raise ValueError("Failed to read back image")
+        except Exception as e:
+            logger.error(f"Failed to process images: {str(e)}")
+            flash('Failed to process uploaded images. Please try again with different photos.', 'danger')
             return redirect(url_for('index'))
         
-        # Get user-provided information
+        # Get user-provided information with validation
         try:
             height = request.form.get('height', 0)
             weight = request.form.get('weight', 0)
@@ -186,7 +194,7 @@ def analyze():
             gender = request.form.get('gender', 'male')  # Default to male if not specified
             experience = request.form.get('experience', 'beginner')
             
-            # Convert to appropriate types
+            # Convert to appropriate types with validation
             height_cm = float(height) if height else 0
             weight_kg = float(weight) if weight else 0
             age_years = int(age) if age else 25
@@ -195,30 +203,48 @@ def analyze():
                 flash('Height, weight, and age are required and must be positive values', 'danger')
                 return redirect(url_for('index'))
                 
-        except ValueError:
+            if height_cm < 100 or height_cm > 250:  # Reasonable height range in cm
+                flash('Please enter a valid height between 100cm and 250cm', 'danger')
+                return redirect(url_for('index'))
+                
+            if weight_kg < 30 or weight_kg > 300:  # Reasonable weight range in kg
+                flash('Please enter a valid weight between 30kg and 300kg', 'danger')
+                return redirect(url_for('index'))
+                
+            if age_years < 16 or age_years > 100:  # Reasonable age range
+                flash('Please enter a valid age between 16 and 100 years', 'danger')
+                return redirect(url_for('index'))
+                
+        except ValueError as e:
+            logger.error(f"Invalid input values: {str(e)}")
             flash('Invalid height, weight, or age values', 'danger')
             return redirect(url_for('index'))
         
         logger.debug(f"User inputs - Height: {height_cm}, Weight: {weight_kg}, Age: {age_years}, Gender: {gender}, Experience: {experience}")
         
-        # Extract landmarks from front image
-        processed_front_image, front_landmarks, front_confidence_scores = extract_body_landmarks(
-            image=front_image,
-            height_cm=int(height_cm)  # Convert to int to match the function signature
-        )
-        
-        if front_landmarks is None:
-            flash('No body detected in front image. Please try again with a clearer full-body image.', 'warning')
-            return redirect(url_for('index'))
-        
-        # Extract landmarks from back image
-        processed_back_image, back_landmarks, back_confidence_scores = extract_body_landmarks(
-            image=back_image,
-            height_cm=int(height_cm)  # Convert to int to match the function signature
-        )
-        
-        if back_landmarks is None:
-            flash('No body detected in back image. Please try again with a clearer full-body image.', 'warning')
+        # Extract landmarks from front image with error handling
+        try:
+            processed_front_image, front_landmarks, front_confidence_scores = extract_body_landmarks(
+                image=front_image,
+                height_cm=int(height_cm)
+            )
+            
+            if front_landmarks is None:
+                flash('No body detected in front image. Please try again with a clearer full-body image.', 'warning')
+                return redirect(url_for('index'))
+            
+            # Extract landmarks from back image
+            processed_back_image, back_landmarks, back_confidence_scores = extract_body_landmarks(
+                image=back_image,
+                height_cm=int(height_cm)
+            )
+            
+            if back_landmarks is None:
+                flash('No body detected in back image. Please try again with a clearer full-body image.', 'warning')
+                return redirect(url_for('index'))
+        except Exception as e:
+            logger.error(f"Failed to extract body landmarks: {str(e)}")
+            flash('Failed to analyze body landmarks. Please try again with clearer photos.', 'danger')
             return redirect(url_for('index'))
         
         # Create an analysis metadata to store confidence information
@@ -230,27 +256,33 @@ def analyze():
             'dual_photo_analysis': True
         }
         
-        # Analyze body traits from front image
-        front_traits = analyze_body_traits(
-            landmarks=front_landmarks, 
-            original_image=front_image,
-            height_cm=height_cm, 
-            weight_kg=weight_kg,
-            gender=gender,  
-            experience=experience,
-            is_back_view=False  # Explicitly set to front view
-        )
-        
-        # Analyze body traits from back image
-        back_traits = analyze_body_traits(
-            landmarks=back_landmarks, 
-            original_image=back_image,
-            height_cm=height_cm, 
-            weight_kg=weight_kg,
-            gender=gender,  
-            experience=experience,
-            is_back_view=True  # Indicate this is a back view analysis
-        )
+        # Analyze body traits with error handling
+        try:
+            # Analyze body traits from front image
+            front_traits = analyze_body_traits(
+                landmarks=front_landmarks, 
+                original_image=front_image,
+                height_cm=height_cm, 
+                weight_kg=weight_kg,
+                gender=gender,  
+                experience=experience,
+                is_back_view=False
+            )
+            
+            # Analyze body traits from back image
+            back_traits = analyze_body_traits(
+                landmarks=back_landmarks, 
+                original_image=back_image,
+                height_cm=height_cm, 
+                weight_kg=weight_kg,
+                gender=gender,  
+                experience=experience,
+                is_back_view=True
+            )
+        except Exception as e:
+            logger.error(f"Failed to analyze body traits: {str(e)}")
+            flash('Failed to analyze body traits. Please try again.', 'danger')
+            return redirect(url_for('index'))
         
         # Combine traits from both views
         combined_traits = {**front_traits}
@@ -422,6 +454,14 @@ def analyze():
         
     except Exception as e:
         logger.error(f"Error during analysis: {str(e)}")
+        # Clean up any remaining files
+        try:
+            for filepath in [front_filepath, back_filepath]:
+                if os.path.exists(filepath):
+                    os.remove(filepath)
+        except Exception as cleanup_error:
+            logger.warning(f"Failed to clean up files after error: {str(cleanup_error)}")
+        
         flash(f'Error during analysis: {str(e)}', 'danger')
         
         # Clean up any files that might have been created
@@ -699,8 +739,6 @@ def results(analysis_id):
         flash('Error displaying analysis results. Please try again.', 'danger')
         return redirect(url_for('index'))
     
-
-
 @app.route('/education')
 def education():
     """Display educational content about genetic traits in fitness"""

@@ -29,18 +29,25 @@ class EnhancedMeasurementAnalyzer:
             api_key: Optional API key for external measurement services (not required for demo)
         """
         self.api_key = api_key
-        self.mp_pose = mp.solutions.pose
-        self.mp_drawing = mp.solutions.drawing_utils
         
-        # Initialize pose detection
-        self.pose = self.mp_pose.Pose(
-            static_image_mode=True,
-            model_complexity=2,
-            enable_segmentation=True,
-            min_detection_confidence=0.5
-        )
-        
-        logger.debug("Enhanced Measurement Analyzer initialized")
+        try:
+            self.mp_pose = mp.solutions.pose
+            self.mp_drawing = mp.solutions.drawing_utils
+            
+            # Initialize pose detection
+            self.pose = self.mp_pose.Pose(
+                static_image_mode=True,
+                model_complexity=2,
+                enable_segmentation=True,
+                min_detection_confidence=0.5
+            )
+            logger.debug("Enhanced Measurement Analyzer initialized successfully")
+        except Exception as e:
+            logger.error(f"Failed to initialize MediaPipe: {str(e)}")
+            # Initialize without MediaPipe - will use mock measurements
+            self.mp_pose = None
+            self.mp_drawing = None
+            self.pose = None
     
     def analyze_photos(self, 
                       front_image: np.ndarray,
@@ -100,122 +107,129 @@ class EnhancedMeasurementAnalyzer:
         """
         Call external API for measurements (Bodygram API example)
         This is a simulation of what would be an actual API call
-        
-        Args:
-            front_image: Front view image
-            back_image: Back view image
-            height_cm: User's height
-            weight_kg: User's weight
-            age: User's age
-            gender: User's gender
-            
-        Returns:
-            Dictionary with base measurements
         """
         logger.debug("Processing images with pose detection")
         
-        # Process front image with pose detection
-        front_results = self.pose.process(cv2.cvtColor(front_image, cv2.COLOR_BGR2RGB))
-        
-        # Process back image with pose detection
-        back_results = self.pose.process(cv2.cvtColor(back_image, cv2.COLOR_BGR2RGB))
-        
-        # Extract landmarks
-        front_landmarks = front_results.pose_landmarks.landmark if front_results.pose_landmarks else None
-        back_landmarks = back_results.pose_landmarks.landmark if back_results.pose_landmarks else None
-        
-        if not front_landmarks or not back_landmarks:
-            logger.warning("Could not detect pose landmarks in one or both images")
-            # Default to mock measurements if landmark detection fails
+        if self.pose is None:
+            logger.warning("MediaPipe not initialized, using mock measurements")
             return self._generate_mock_measurements(height_cm, weight_kg, age, gender)
         
-        # Initialize measurements with user input
-        measurements = {
-            'height_cm': height_cm,
-            'weight_kg': weight_kg,
-            'age': age,
-            'gender': gender
-        }
-        
-        # Calculate pixel-to-cm ratio (using height as reference)
-        front_height_pixels = self._calculate_height_pixels(front_landmarks)
-        back_height_pixels = self._calculate_height_pixels(back_landmarks)
-        
-        front_pixel_to_cm = height_cm / front_height_pixels if front_height_pixels else 0
-        back_pixel_to_cm = height_cm / back_height_pixels if back_height_pixels else 0
-        
-        # Calculate measurements from front view
-        if front_pixel_to_cm > 0:
-            # Shoulder width
-            shoulder_width_pixels = self._calculate_shoulder_width(front_landmarks)
-            measurements['shoulder_width_cm'] = shoulder_width_pixels * front_pixel_to_cm
+        try:
+            # Process front image with pose detection
+            front_results = self.pose.process(cv2.cvtColor(front_image, cv2.COLOR_BGR2RGB))
             
-            # Chest circumference (estimated)
-            chest_width_pixels = self._calculate_chest_width(front_landmarks)
-            measurements['chest_circumference_cm'] = self._width_to_circumference(chest_width_pixels * front_pixel_to_cm)
+            # Process back image with pose detection
+            back_results = self.pose.process(cv2.cvtColor(back_image, cv2.COLOR_BGR2RGB))
             
-            # Waist circumference (estimated)
-            waist_width_pixels = self._calculate_waist_width(front_landmarks)
-            measurements['waist_circumference_cm'] = self._width_to_circumference(waist_width_pixels * front_pixel_to_cm)
+            # Extract landmarks
+            front_landmarks = front_results.pose_landmarks.landmark if front_results and front_results.pose_landmarks else None
+            back_landmarks = back_results.pose_landmarks.landmark if back_results and back_results.pose_landmarks else None
             
-            # Hip circumference (estimated)
-            hip_width_pixels = self._calculate_hip_width(front_landmarks)
-            measurements['hip_circumference_cm'] = self._width_to_circumference(hip_width_pixels * front_pixel_to_cm)
+            if not front_landmarks or not back_landmarks:
+                logger.warning("Could not detect pose landmarks in one or both images")
+                return self._generate_mock_measurements(height_cm, weight_kg, age, gender)
+                
+            # Initialize measurements with user input
+            measurements = {
+                'height_cm': height_cm,
+                'weight_kg': weight_kg,
+                'age': age,
+                'gender': gender
+            }
             
-            # Arm measurements
-            left_arm_length_pixels = self._calculate_arm_length(front_landmarks, 'left')
-            right_arm_length_pixels = self._calculate_arm_length(front_landmarks, 'right')
-            measurements['left_arm_length_cm'] = left_arm_length_pixels * front_pixel_to_cm
-            measurements['right_arm_length_cm'] = right_arm_length_pixels * front_pixel_to_cm
+            # Calculate measurements from landmarks
+            try:
+                # Calculate pixel-to-cm ratio (using height as reference)
+                front_height_pixels = self._calculate_height_pixels(front_landmarks)
+                back_height_pixels = self._calculate_height_pixels(back_landmarks)
+                
+                if not front_height_pixels or not back_height_pixels:
+                    logger.warning("Could not calculate height in pixels")
+                    return self._generate_mock_measurements(height_cm, weight_kg, age, gender)
+                
+                front_pixel_to_cm = height_cm / front_height_pixels if front_height_pixels else 0
+                back_pixel_to_cm = height_cm / back_height_pixels if back_height_pixels else 0
+                
+                # Calculate measurements from front view
+                if front_pixel_to_cm > 0:
+                    # Shoulder width
+                    shoulder_width_pixels = self._calculate_shoulder_width(front_landmarks)
+                    measurements['shoulder_width_cm'] = shoulder_width_pixels * front_pixel_to_cm
+                    
+                    # Chest circumference (estimated)
+                    chest_width_pixels = self._calculate_chest_width(front_landmarks)
+                    measurements['chest_circumference_cm'] = self._width_to_circumference(chest_width_pixels * front_pixel_to_cm)
+                    
+                    # Waist circumference (estimated)
+                    waist_width_pixels = self._calculate_waist_width(front_landmarks)
+                    measurements['waist_circumference_cm'] = self._width_to_circumference(waist_width_pixels * front_pixel_to_cm)
+                    
+                    # Hip circumference (estimated)
+                    hip_width_pixels = self._calculate_hip_width(front_landmarks)
+                    measurements['hip_circumference_cm'] = self._width_to_circumference(hip_width_pixels * front_pixel_to_cm)
+                    
+                    # Arm measurements
+                    left_arm_length_pixels = self._calculate_arm_length(front_landmarks, 'left')
+                    right_arm_length_pixels = self._calculate_arm_length(front_landmarks, 'right')
+                    measurements['left_arm_length_cm'] = left_arm_length_pixels * front_pixel_to_cm
+                    measurements['right_arm_length_cm'] = right_arm_length_pixels * front_pixel_to_cm
+                    
+                    # Leg measurements
+                    left_leg_length_pixels = self._calculate_leg_length(front_landmarks, 'left')
+                    right_leg_length_pixels = self._calculate_leg_length(front_landmarks, 'right')
+                    measurements['left_leg_length_cm'] = left_leg_length_pixels * front_pixel_to_cm
+                    measurements['right_leg_length_cm'] = right_leg_length_pixels * front_pixel_to_cm
+                    
+                    # Torso measurements
+                    torso_length_pixels = self._calculate_torso_length(front_landmarks)
+                    measurements['torso_length_cm'] = torso_length_pixels * front_pixel_to_cm
+                    
+                    # Estimate bicep circumference
+                    left_bicep_width_pixels = self._calculate_bicep_width(front_landmarks, 'left')
+                    right_bicep_width_pixels = self._calculate_bicep_width(front_landmarks, 'right')
+                    measurements['left_bicep_circumference_cm'] = self._width_to_circumference(left_bicep_width_pixels * front_pixel_to_cm * 0.8)
+                    measurements['right_bicep_circumference_cm'] = self._width_to_circumference(right_bicep_width_pixels * front_pixel_to_cm * 0.8)
+                    
+                    # Estimate forearm circumference
+                    left_forearm_width_pixels = self._calculate_forearm_width(front_landmarks, 'left')
+                    right_forearm_width_pixels = self._calculate_forearm_width(front_landmarks, 'right')
+                    measurements['left_forearm_circumference_cm'] = self._width_to_circumference(left_forearm_width_pixels * front_pixel_to_cm * 0.9)
+                    measurements['right_forearm_circumference_cm'] = self._width_to_circumference(right_forearm_width_pixels * front_pixel_to_cm * 0.9)
+                
+            except Exception as e:
+                logger.error(f"Error calculating measurements from landmarks: {str(e)}")
+                return self._generate_mock_measurements(height_cm, weight_kg, age, gender)
             
-            # Leg measurements
-            left_leg_length_pixels = self._calculate_leg_length(front_landmarks, 'left')
-            right_leg_length_pixels = self._calculate_leg_length(front_landmarks, 'right')
-            measurements['left_leg_length_cm'] = left_leg_length_pixels * front_pixel_to_cm
-            measurements['right_leg_length_cm'] = right_leg_length_pixels * front_pixel_to_cm
+            # Calculate measurements from back view
+            if back_pixel_to_cm > 0:
+                # Back width
+                back_width_pixels = self._calculate_back_width(back_landmarks)
+                measurements['back_width_cm'] = back_width_pixels * back_pixel_to_cm
+                
+                # Shoulder to waist taper ratio (V-taper)
+                back_waist_width_pixels = self._calculate_waist_width(back_landmarks)
+                back_waist_width_cm = back_waist_width_pixels * back_pixel_to_cm
+                if 'shoulder_width_cm' in measurements and back_waist_width_cm > 0:
+                    measurements['v_taper_ratio'] = measurements['shoulder_width_cm'] / back_waist_width_cm
+                
+                # Estimate thigh circumference
+                left_thigh_width_pixels = self._calculate_thigh_width(back_landmarks, 'left')
+                right_thigh_width_pixels = self._calculate_thigh_width(back_landmarks, 'right')
+                measurements['left_thigh_circumference_cm'] = self._width_to_circumference(left_thigh_width_pixels * back_pixel_to_cm)
+                measurements['right_thigh_circumference_cm'] = self._width_to_circumference(right_thigh_width_pixels * back_pixel_to_cm)
+                
+                # Estimate calf circumference
+                left_calf_width_pixels = self._calculate_calf_width(back_landmarks, 'left')
+                right_calf_width_pixels = self._calculate_calf_width(back_landmarks, 'right')
+                measurements['left_calf_circumference_cm'] = self._width_to_circumference(left_calf_width_pixels * back_pixel_to_cm)
+                measurements['right_calf_circumference_cm'] = self._width_to_circumference(right_calf_width_pixels * back_pixel_to_cm)
             
-            # Torso measurements
-            torso_length_pixels = self._calculate_torso_length(front_landmarks)
-            measurements['torso_length_cm'] = torso_length_pixels * front_pixel_to_cm
+            logger.debug("Base measurements extracted from images")
+            return measurements
             
-            # Estimate bicep circumference
-            left_bicep_width_pixels = self._calculate_bicep_width(front_landmarks, 'left')
-            right_bicep_width_pixels = self._calculate_bicep_width(front_landmarks, 'right')
-            measurements['left_bicep_circumference_cm'] = self._width_to_circumference(left_bicep_width_pixels * front_pixel_to_cm * 0.8)
-            measurements['right_bicep_circumference_cm'] = self._width_to_circumference(right_bicep_width_pixels * front_pixel_to_cm * 0.8)
-            
-            # Estimate forearm circumference
-            left_forearm_width_pixels = self._calculate_forearm_width(front_landmarks, 'left')
-            right_forearm_width_pixels = self._calculate_forearm_width(front_landmarks, 'right')
-            measurements['left_forearm_circumference_cm'] = self._width_to_circumference(left_forearm_width_pixels * front_pixel_to_cm * 0.9)
-            measurements['right_forearm_circumference_cm'] = self._width_to_circumference(right_forearm_width_pixels * front_pixel_to_cm * 0.9)
-        
-        # Calculate measurements from back view
-        if back_pixel_to_cm > 0:
-            # Back width
-            back_width_pixels = self._calculate_back_width(back_landmarks)
-            measurements['back_width_cm'] = back_width_pixels * back_pixel_to_cm
-            
-            # Shoulder to waist taper ratio (V-taper)
-            back_waist_width_pixels = self._calculate_waist_width(back_landmarks)
-            back_waist_width_cm = back_waist_width_pixels * back_pixel_to_cm
-            if 'shoulder_width_cm' in measurements and back_waist_width_cm > 0:
-                measurements['v_taper_ratio'] = measurements['shoulder_width_cm'] / back_waist_width_cm
-            
-            # Estimate thigh circumference
-            left_thigh_width_pixels = self._calculate_thigh_width(back_landmarks, 'left')
-            right_thigh_width_pixels = self._calculate_thigh_width(back_landmarks, 'right')
-            measurements['left_thigh_circumference_cm'] = self._width_to_circumference(left_thigh_width_pixels * back_pixel_to_cm)
-            measurements['right_thigh_circumference_cm'] = self._width_to_circumference(right_thigh_width_pixels * back_pixel_to_cm)
-            
-            # Estimate calf circumference
-            left_calf_width_pixels = self._calculate_calf_width(back_landmarks, 'left')
-            right_calf_width_pixels = self._calculate_calf_width(back_landmarks, 'right')
-            measurements['left_calf_circumference_cm'] = self._width_to_circumference(left_calf_width_pixels * back_pixel_to_cm)
-            measurements['right_calf_circumference_cm'] = self._width_to_circumference(right_calf_width_pixels * back_pixel_to_cm)
-        
-        logger.debug("Base measurements extracted from images")
-        return measurements
+        except Exception as e:
+            logger.error(f"Error in measurement API call: {str(e)}")
+            return self._generate_mock_measurements(height_cm, weight_kg, age, gender)
     
     def _validate_measurements(self, measurements: Dict[str, Any]) -> Dict[str, Any]:
         """
