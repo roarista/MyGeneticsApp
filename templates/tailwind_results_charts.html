@@ -21,10 +21,11 @@
     </div>
     {% endif %}
     
+    <h1 class="text-center text-2xl font-bold text-white mb-2">Body Analysis Results</h1>
     <p class="text-center text-gray-400 mb-2">Based on your uploaded photos and measurements</p>
     
     <!-- AI Disclaimer Notice -->
-    <div class="bg-blue-900 bg-opacity-30 border border-blue-800 rounded-lg p-3 mb-8 text-center">
+    <div class="bg-blue-900 bg-opacity-30 border border-blue-800 rounded-lg p-3 mb-8 text-center shadow-lg">
         <p class="text-sm text-blue-300">
             <i class="fas fa-info-circle mr-2"></i>These are AI-based estimates. For best accuracy, use 3D scan when available.
         </p>
@@ -34,8 +35,8 @@
         <!-- Left Column: Body Composition and Upload -->
         <div class="space-y-8">
             <!-- Body Composition Section -->
-            <div class="dark-card">
-                <h2 class="text-xl font-semibold text-white mb-4">Body Composition</h2>
+            <div class="dark-card shadow-lg border border-gray-800 rounded-lg overflow-hidden">
+                <h2 class="text-xl font-semibold text-white mb-4 px-1 border-b border-gray-800 pb-2">Body Composition</h2>
                 
                 <div class="space-y-6">
                     <!-- Body Fat -->
@@ -98,34 +99,34 @@
             </div>
             
             <!-- Your Upload Section -->
-            <div class="dark-card">
-                <h2 class="text-xl font-semibold text-white mb-4">Your Upload</h2>
+            <div class="dark-card shadow-lg border border-gray-800 rounded-lg overflow-hidden">
+                <h2 class="text-xl font-semibold text-white mb-4 px-1 border-b border-gray-800 pb-2">Your Upload</h2>
                 
                 {% if is_dual_photo %}
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <p class="text-center text-gray-400 mb-2">Front View</p>
                         {% if front_image %}
-                        <img src="data:image/jpeg;base64,{{ front_image }}" alt="Front View" class="w-full rounded">
+                        <img src="data:image/jpeg;base64,{{ front_image }}" alt="Front view photo for body analysis" class="w-full rounded shadow-md">
                         {% else %}
-                        <div class="bg-gray-800 rounded p-4 text-center">
-                            <p class="text-gray-500">Image not available</p>
+                        <div class="bg-gray-800 rounded p-4 text-center shadow-md">
+                            <p class="text-gray-500">Front view image not available</p>
                         </div>
                         {% endif %}
                     </div>
                     <div>
                         <p class="text-center text-gray-400 mb-2">Back View</p>
                         {% if back_image %}
-                        <img src="data:image/jpeg;base64,{{ back_image }}" alt="Back View" class="w-full rounded">
+                        <img src="data:image/jpeg;base64,{{ back_image }}" alt="Back view photo for body analysis" class="w-full rounded shadow-md">
                         {% else %}
-                        <div class="bg-gray-800 rounded p-4 text-center">
-                            <p class="text-gray-500">Image not available</p>
+                        <div class="bg-gray-800 rounded p-4 text-center shadow-md">
+                            <p class="text-gray-500">Back view image not available</p>
                         </div>
                         {% endif %}
                     </div>
                 </div>
                 
-                <div class="flex items-start mt-4 p-3 bg-blue-900 bg-opacity-30 rounded-lg border-l-4 border-blue-500">
+                <div class="flex items-start mt-4 p-3 bg-blue-900 bg-opacity-30 rounded-lg border-l-4 border-blue-500 shadow-md">
                     <div class="flex-shrink-0 mt-1">
                         <i class="fas fa-info-circle text-blue-400"></i>
                     </div>
@@ -138,9 +139,9 @@
                 {% else %}
                 <div class="text-center">
                     {% if image_data %}
-                    <img src="data:image/jpeg;base64,{{ image_data }}" alt="Analysis Photo" class="max-w-full mx-auto rounded">
+                    <img src="data:image/jpeg;base64,{{ image_data }}" alt="Body analysis photo" class="max-w-full mx-auto rounded shadow-md">
                     {% else %}
-                    <div class="bg-gray-800 rounded p-8 text-center">
+                    <div class="bg-gray-800 rounded p-8 text-center shadow-md">
                         <i class="fas fa-image text-gray-600 text-4xl mb-2"></i>
                         <p class="text-gray-500">Image not available</p>
                     </div>
@@ -153,12 +154,12 @@
         <!-- Right Column: Measurements and Traits -->
         <div class="space-y-8">
             <!-- Key Measurements Section -->
-            <div class="dark-card">
-                <h2 class="text-xl font-semibold text-white mb-4">Body Measurements</h2>
+            <div class="dark-card shadow-lg border border-gray-800 rounded-lg overflow-hidden">
+                <h2 class="text-xl font-semibold text-white mb-4 px-1 border-b border-gray-800 pb-2">Body Measurements Summary</h2>
                 
                 {% if basic_measurements and basic_measurements|length > 0 %}
                 <!-- Measurement Grid -->
-                <div class="overflow-hidden rounded-lg border border-gray-800 mb-4">
+                <div class="overflow-hidden rounded-lg border border-gray-800 mb-4 shadow-lg">
                     <table class="min-w-full divide-y divide-gray-800">
                         <thead class="bg-gray-900">
                             <tr>
@@ -523,9 +524,365 @@
                 {% endif %}
             </div>
             
+            <!-- Muscle Development Overview Section -->
+            <div class="dark-card shadow-lg border border-gray-800 rounded-lg overflow-hidden">
+                <h2 class="text-xl font-semibold text-white mb-4 px-1 border-b border-gray-800 pb-2">Muscle Development Overview</h2>
+                
+                <div class="space-y-4">
+                    <!-- Arms -->
+                    <div class="p-3 bg-gray-800 rounded-lg shadow">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center">
+                                <i class="fas fa-hand-rock text-blue-400 mr-2"></i>
+                                <span class="text-lg font-bold text-white">Arm Development</span>
+                            </div>
+                            
+                            {% if estimated_measurements.get('left_arm_cm') and estimated_measurements.get('right_arm_cm') %}
+                                {% set left_arm = estimated_measurements.get('left_arm_cm').value|float %}
+                                {% set right_arm = estimated_measurements.get('right_arm_cm').value|float %}
+                                {% set avg_arm = (left_arm + right_arm) / 2 %}
+                                {% set arm_height_ratio = (avg_arm / basic_measurements.get('Height', {'value': 180}).value|float * 100)|int %}
+                                {% set score = arm_height_ratio * 5 %}
+                                {% set status = "Needs Growth" %}
+                                {% set color = "red" %}
+                                
+                                {% if score > 50 %}
+                                    {% set status = "Well Developed" %}
+                                    {% set color = "green" %}
+                                {% elif score > 35 %}
+                                    {% set status = "Average" %}
+                                    {% set color = "yellow" %}
+                                {% endif %}
+                                
+                                <span class="text-md font-medium text-{{ color }}-400">{{ status }}</span>
+                            {% else %}
+                                <span class="text-md font-medium text-gray-400">No Data</span>
+                            {% endif %}
+                        </div>
+                        
+                        {% if estimated_measurements.get('left_arm_cm') and estimated_measurements.get('right_arm_cm') %}
+                            <div class="flex items-center space-x-1 mb-1">
+                                {% set blocks = 5 %}
+                                {% set filled_blocks = (score / 20)|int %}
+                                {% if filled_blocks > blocks %}
+                                    {% set filled_blocks = blocks %}
+                                {% endif %}
+                                
+                                {% for i in range(filled_blocks) %}
+                                    <div class="flex-1 h-4 bg-{{ color }}-500 rounded"></div>
+                                {% endfor %}
+                                
+                                {% for i in range(blocks - filled_blocks) %}
+                                    <div class="flex-1 h-4 bg-gray-700 rounded"></div>
+                                {% endfor %}
+                                
+                                {% if color == "red" %}
+                                    <span class="ml-2 text-red-500">🔴</span>
+                                {% elif color == "yellow" %}
+                                    <span class="ml-2 text-yellow-500">🟡</span>
+                                {% else %}
+                                    <span class="ml-2 text-green-500">🟢</span>
+                                {% endif %}
+                            </div>
+                            <p class="text-sm text-gray-400">Average arm size: {{ '{:.1f}'.format(avg_arm) }} cm</p>
+                        {% else %}
+                            <div class="flex items-center space-x-1 mb-1">
+                                {% for i in range(5) %}
+                                    <div class="flex-1 h-4 bg-gray-700 rounded"></div>
+                                {% endfor %}
+                                <span class="ml-2 text-gray-500">⚪</span>
+                            </div>
+                            <p class="text-sm text-gray-400">No arm measurements available</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Chest -->
+                    <div class="p-3 bg-gray-800 rounded-lg shadow">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center">
+                                <i class="fas fa-expand text-green-400 mr-2"></i>
+                                <span class="text-lg font-bold text-white">Chest Development</span>
+                            </div>
+                            
+                            {% if basic_measurements.get('Chest') %}
+                                {% set chest = basic_measurements.get('Chest').value|float %}
+                                {% set waist = basic_measurements.get('Waist', {'value': 100}).value|float %}
+                                {% set chest_waist_ratio = ((chest / waist) * 100 - 100)|int %}
+                                {% set score = chest_waist_ratio * 4 %}
+                                {% set status = "Needs Growth" %}
+                                {% set color = "red" %}
+                                
+                                {% if score > 60 %}
+                                    {% set status = "Well Developed" %}
+                                    {% set color = "green" %}
+                                {% elif score > 40 %}
+                                    {% set status = "Average" %}
+                                    {% set color = "yellow" %}
+                                {% endif %}
+                                
+                                <span class="text-md font-medium text-{{ color }}-400">{{ status }}</span>
+                            {% else %}
+                                <span class="text-md font-medium text-gray-400">No Data</span>
+                            {% endif %}
+                        </div>
+                        
+                        {% if basic_measurements.get('Chest') %}
+                            <div class="flex items-center space-x-1 mb-1">
+                                {% set blocks = 5 %}
+                                {% set filled_blocks = (score / 20)|int %}
+                                {% if filled_blocks > blocks %}
+                                    {% set filled_blocks = blocks %}
+                                {% endif %}
+                                
+                                {% for i in range(filled_blocks) %}
+                                    <div class="flex-1 h-4 bg-{{ color }}-500 rounded"></div>
+                                {% endfor %}
+                                
+                                {% for i in range(blocks - filled_blocks) %}
+                                    <div class="flex-1 h-4 bg-gray-700 rounded"></div>
+                                {% endfor %}
+                                
+                                {% if color == "red" %}
+                                    <span class="ml-2 text-red-500">🔴</span>
+                                {% elif color == "yellow" %}
+                                    <span class="ml-2 text-yellow-500">🟡</span>
+                                {% else %}
+                                    <span class="ml-2 text-green-500">🟢</span>
+                                {% endif %}
+                            </div>
+                            <p class="text-sm text-gray-400">Chest size: {{ basic_measurements.get('Chest').value }}</p>
+                        {% else %}
+                            <div class="flex items-center space-x-1 mb-1">
+                                {% for i in range(5) %}
+                                    <div class="flex-1 h-4 bg-gray-700 rounded"></div>
+                                {% endfor %}
+                                <span class="ml-2 text-gray-500">⚪</span>
+                            </div>
+                            <p class="text-sm text-gray-400">No chest measurements available</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Shoulders -->
+                    <div class="p-3 bg-gray-800 rounded-lg shadow">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center">
+                                <i class="fas fa-arrows-alt text-indigo-400 mr-2"></i>
+                                <span class="text-lg font-bold text-white">Shoulder Development</span>
+                            </div>
+                            
+                            {% if basic_measurements.get('Shoulders') %}
+                                {% set shoulders = basic_measurements.get('Shoulders').value|float %}
+                                {% set waist = basic_measurements.get('Waist', {'value': 100}).value|float %}
+                                {% set shoulder_waist_ratio = ((shoulders / waist) * 100 - 100)|int %}
+                                {% set score = shoulder_waist_ratio * 2 %}
+                                {% set status = "Needs Growth" %}
+                                {% set color = "red" %}
+                                
+                                {% if score > 60 %}
+                                    {% set status = "Well Developed" %}
+                                    {% set color = "green" %}
+                                {% elif score > 40 %}
+                                    {% set status = "Average" %}
+                                    {% set color = "yellow" %}
+                                {% endif %}
+                                
+                                <span class="text-md font-medium text-{{ color }}-400">{{ status }}</span>
+                            {% else %}
+                                <span class="text-md font-medium text-gray-400">No Data</span>
+                            {% endif %}
+                        </div>
+                        
+                        {% if basic_measurements.get('Shoulders') %}
+                            <div class="flex items-center space-x-1 mb-1">
+                                {% set blocks = 5 %}
+                                {% set filled_blocks = (score / 20)|int %}
+                                {% if filled_blocks > blocks %}
+                                    {% set filled_blocks = blocks %}
+                                {% endif %}
+                                
+                                {% for i in range(filled_blocks) %}
+                                    <div class="flex-1 h-4 bg-{{ color }}-500 rounded"></div>
+                                {% endfor %}
+                                
+                                {% for i in range(blocks - filled_blocks) %}
+                                    <div class="flex-1 h-4 bg-gray-700 rounded"></div>
+                                {% endfor %}
+                                
+                                {% if color == "red" %}
+                                    <span class="ml-2 text-red-500">🔴</span>
+                                {% elif color == "yellow" %}
+                                    <span class="ml-2 text-yellow-500">🟡</span>
+                                {% else %}
+                                    <span class="ml-2 text-green-500">🟢</span>
+                                {% endif %}
+                            </div>
+                            <p class="text-sm text-gray-400">Shoulder width: {{ basic_measurements.get('Shoulders').value }}</p>
+                        {% else %}
+                            <div class="flex items-center space-x-1 mb-1">
+                                {% for i in range(5) %}
+                                    <div class="flex-1 h-4 bg-gray-700 rounded"></div>
+                                {% endfor %}
+                                <span class="ml-2 text-gray-500">⚪</span>
+                            </div>
+                            <p class="text-sm text-gray-400">No shoulder measurements available</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Legs -->
+                    <div class="p-3 bg-gray-800 rounded-lg shadow">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center">
+                                <i class="fas fa-walking text-yellow-400 mr-2"></i>
+                                <span class="text-lg font-bold text-white">Leg Development</span>
+                            </div>
+                            
+                            {% if estimated_measurements.get('left_thigh_cm') and estimated_measurements.get('right_thigh_cm') %}
+                                {% set left_thigh = estimated_measurements.get('left_thigh_cm').value|float %}
+                                {% set right_thigh = estimated_measurements.get('right_thigh_cm').value|float %}
+                                {% set avg_thigh = (left_thigh + right_thigh) / 2 %}
+                                {% set waist = basic_measurements.get('Waist', {'value': 100}).value|float %}
+                                {% set thigh_waist_ratio = ((avg_thigh / waist) * 100)|int %}
+                                {% set score = thigh_waist_ratio * 1.5 %}
+                                {% set status = "Needs Growth" %}
+                                {% set color = "red" %}
+                                
+                                {% if score > 60 %}
+                                    {% set status = "Well Developed" %}
+                                    {% set color = "green" %}
+                                {% elif score > 40 %}
+                                    {% set status = "Average" %}
+                                    {% set color = "yellow" %}
+                                {% endif %}
+                                
+                                <span class="text-md font-medium text-{{ color }}-400">{{ status }}</span>
+                            {% else %}
+                                <span class="text-md font-medium text-gray-400">No Data</span>
+                            {% endif %}
+                        </div>
+                        
+                        {% if estimated_measurements.get('left_thigh_cm') and estimated_measurements.get('right_thigh_cm') %}
+                            <div class="flex items-center space-x-1 mb-1">
+                                {% set blocks = 5 %}
+                                {% set filled_blocks = (score / 20)|int %}
+                                {% if filled_blocks > blocks %}
+                                    {% set filled_blocks = blocks %}
+                                {% endif %}
+                                
+                                {% for i in range(filled_blocks) %}
+                                    <div class="flex-1 h-4 bg-{{ color }}-500 rounded"></div>
+                                {% endfor %}
+                                
+                                {% for i in range(blocks - filled_blocks) %}
+                                    <div class="flex-1 h-4 bg-gray-700 rounded"></div>
+                                {% endfor %}
+                                
+                                {% if color == "red" %}
+                                    <span class="ml-2 text-red-500">🔴</span>
+                                {% elif color == "yellow" %}
+                                    <span class="ml-2 text-yellow-500">🟡</span>
+                                {% else %}
+                                    <span class="ml-2 text-green-500">🟢</span>
+                                {% endif %}
+                            </div>
+                            <p class="text-sm text-gray-400">Average thigh size: {{ '{:.1f}'.format(avg_thigh) }} cm</p>
+                        {% else %}
+                            <div class="flex items-center space-x-1 mb-1">
+                                {% for i in range(5) %}
+                                    <div class="flex-1 h-4 bg-gray-700 rounded"></div>
+                                {% endfor %}
+                                <span class="ml-2 text-gray-500">⚪</span>
+                            </div>
+                            <p class="text-sm text-gray-400">No leg measurements available</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Core -->
+                    <div class="p-3 bg-gray-800 rounded-lg shadow">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center">
+                                <i class="fas fa-ruler-horizontal text-red-400 mr-2"></i>
+                                <span class="text-lg font-bold text-white">Core Development</span>
+                            </div>
+                            
+                            {% if basic_measurements.get('Waist') %}
+                                {% set waist = basic_measurements.get('Waist').value|float %}
+                                {% set height = basic_measurements.get('Height', {'value': 180}).value|float %}
+                                {% set waist_height_ratio = ((waist / height) * 100)|int %}
+                                {% set score = 100 - (waist_height_ratio * 2) %}
+                                {% set status = "Needs Improvement" %}
+                                {% set color = "red" %}
+                                
+                                {% if score > 60 %}
+                                    {% set status = "Well Defined" %}
+                                    {% set color = "green" %}
+                                {% elif score > 40 %}
+                                    {% set status = "Average" %}
+                                    {% set color = "yellow" %}
+                                {% endif %}
+                                
+                                <span class="text-md font-medium text-{{ color }}-400">{{ status }}</span>
+                            {% else %}
+                                <span class="text-md font-medium text-gray-400">No Data</span>
+                            {% endif %}
+                        </div>
+                        
+                        {% if basic_measurements.get('Waist') %}
+                            <div class="flex items-center space-x-1 mb-1">
+                                {% set blocks = 5 %}
+                                {% set filled_blocks = (score / 20)|int %}
+                                {% if filled_blocks > blocks %}
+                                    {% set filled_blocks = blocks %}
+                                {% endif %}
+                                
+                                {% for i in range(filled_blocks) %}
+                                    <div class="flex-1 h-4 bg-{{ color }}-500 rounded"></div>
+                                {% endfor %}
+                                
+                                {% for i in range(blocks - filled_blocks) %}
+                                    <div class="flex-1 h-4 bg-gray-700 rounded"></div>
+                                {% endfor %}
+                                
+                                {% if color == "red" %}
+                                    <span class="ml-2 text-red-500">🔴</span>
+                                {% elif color == "yellow" %}
+                                    <span class="ml-2 text-yellow-500">🟡</span>
+                                {% else %}
+                                    <span class="ml-2 text-green-500">🟢</span>
+                                {% endif %}
+                            </div>
+                            <p class="text-sm text-gray-400">Waist size: {{ basic_measurements.get('Waist').value }}</p>
+                        {% else %}
+                            <div class="flex items-center space-x-1 mb-1">
+                                {% for i in range(5) %}
+                                    <div class="flex-1 h-4 bg-gray-700 rounded"></div>
+                                {% endfor %}
+                                <span class="ml-2 text-gray-500">⚪</span>
+                            </div>
+                            <p class="text-sm text-gray-400">No core measurements available</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Legend -->
+                    <div class="flex items-center justify-center text-sm text-gray-400 mt-4 space-x-6">
+                        <div class="flex items-center">
+                            <span class="w-3 h-3 rounded-full bg-green-500 inline-block mr-1"></span>
+                            <span>Well Developed 🟢</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="w-3 h-3 rounded-full bg-yellow-500 inline-block mr-1"></span>
+                            <span>Average 🟡</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="w-3 h-3 rounded-full bg-red-500 inline-block mr-1"></span>
+                            <span>Needs Growth 🔴</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <!-- Genetic Traits Section -->
-            <div class="dark-card">
-                <h2 class="text-xl font-semibold text-white mb-4">Genetic Traits</h2>
+            <div class="dark-card shadow-lg border border-gray-800 rounded-lg overflow-hidden">
+                <h2 class="text-xl font-semibold text-white mb-4 px-1 border-b border-gray-800 pb-2">Genetic Traits</h2>
                 
                 <!-- Collapsible Sections -->
                 <div class="space-y-2" x-data="{ openTab: 'muscle-fiber' }">
@@ -620,8 +977,8 @@
     </div>
     
     <!-- Enhanced Bodybuilding Measurements Section -->
-    <div class="mt-8 dark-card">
-        <div class="flex justify-between items-center mb-4">
+    <div class="mt-8 dark-card shadow-lg border border-gray-800 rounded-lg overflow-hidden">
+        <div class="flex justify-between items-center mb-4 px-1 border-b border-gray-800 pb-2">
             <h2 class="text-xl font-semibold text-white">Enhanced Bodybuilding Measurements</h2>
             <span class="bg-blue-600 text-xs px-2 py-1 rounded-full text-white">50-Point Analysis</span>
         </div>

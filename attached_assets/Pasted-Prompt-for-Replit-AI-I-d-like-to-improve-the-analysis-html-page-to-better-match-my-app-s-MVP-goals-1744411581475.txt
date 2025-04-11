@@ -1,0 +1,51 @@
+Prompt for Replit AI:
+
+I'd like to improve the analysis.html page to better match my app's MVP goals. Here's a list of changes and fixes I want you to make — please implement each clearly, keeping the layout clean and visual hierarchy clear:
+
+🎯 GOAL
+Make body measurements and analysis results the centerpiece of the page, and clearly show strengths and weaknesses by muscle group using visuals and labels.
+
+🔧 FIXES & FEATURES TO ADD
+1. 🏋️ Emphasize Body Measurements
+
+Add a "Body Measurements Summary" section directly below the photo upload.
+Display key muscle group measurements (e.g., chest, arms, waist, thighs, calves).
+If data is missing, show placeholders like -- cm.
+2. 🔍 Add Visual Strength/Weakness Indicators
+
+For each body part (arms, chest, shoulders, legs, back, core), add a horizontal bar with:
+Red = Needs Growth
+Yellow = Average
+Green = Well Developed
+Pull status from existing growth potential data or simulate with test values.
+Example format:
+
+Arm Development ▮▮▮▯▯   Needs Growth 🔴  
+Chest Development ▮▮▮▮▮  Well Developed 🟢
+3. 📸 Fix Uploaded Image Display
+
+Ensure front and back photos display correctly in “Your Upload.”
+Add alt text like: alt="Front view photo" and alt="Back view photo"
+4. 📊 Reorganize Layout for Clarity
+
+Reorder sections:
+Header
+AI disclaimer
+Photos + Measurements
+Strength/Weakness bar section
+Genetic Traits & Charts
+5. 💬 Remove “Confidence” Bubbles
+
+Remove all confidence labels (medium/high confidence).
+Add a single note at the top:
+"These are AI-based estimates. For best accuracy, use a 3D scan when available."
+6. 💡 Make It Visually Clean
+
+Use Tailwind or simple clean CSS to:
+Add soft shadows and card-style boxes for each section.
+Use large, bold labels for muscle group names.
+Ensure spacing between major sections.
+🧪 Optional (If Data Not Available):
+Add if/else logic to gracefully show placeholders or “Data not available” where appropriate.
+Let me know once everything is implemented or if you hit any issues. This update is essential for ensuring the analysis page delivers meaningful value to users.
+
