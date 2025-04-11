@@ -114,7 +114,7 @@ def tailwind_index():
 
 @app.route('/analyze', methods=['GET', 'POST'])
 def analyze():
-    """Process uploaded front and back photos for comprehensive body analysis"""
+    """Process uploaded front and back photos for comprehensive body analysis including 50 bodybuilding measurements"""
     # If it's a GET request, redirect to the homepage
     if request.method == 'GET':
         return redirect(url_for('index'))
@@ -175,16 +175,27 @@ def analyze():
             return redirect(url_for('index'))
         
         # Get user-provided information
-        height = request.form.get('height', 0)
-        weight = request.form.get('weight', 0)
-        gender = request.form.get('gender', 'male')  # Default to male if not specified
-        experience = request.form.get('experience', 'beginner')
+        try:
+            height = request.form.get('height', 0)
+            weight = request.form.get('weight', 0)
+            age = request.form.get('age', 25)  # Default age if not provided
+            gender = request.form.get('gender', 'male')  # Default to male if not specified
+            experience = request.form.get('experience', 'beginner')
+            
+            # Convert to appropriate types
+            height_cm = float(height) if height else 0
+            weight_kg = float(weight) if weight else 0
+            age_years = int(age) if age else 25
+            
+            if not all([height_cm > 0, weight_kg > 0, age_years > 0]):
+                flash('Height, weight, and age are required and must be positive values', 'danger')
+                return redirect(url_for('index'))
+                
+        except ValueError:
+            flash('Invalid height, weight, or age values', 'danger')
+            return redirect(url_for('index'))
         
-        # Convert to float for calculations
-        height_cm = float(height) if height else 0
-        weight_kg = float(weight) if weight else 0
-        
-        logger.debug(f"User inputs - Height: {height_cm}, Weight: {weight_kg}, Gender: {gender}, Experience: {experience}")
+        logger.debug(f"User inputs - Height: {height_cm}, Weight: {weight_kg}, Age: {age_years}, Gender: {gender}, Experience: {experience}")
         
         # Extract landmarks from front image
         processed_front_image, front_landmarks, front_confidence_scores = extract_body_landmarks(
@@ -343,6 +354,35 @@ def analyze():
         bodybuilding_analysis = complete_bodybuilding_analysis(user_data)
         logger.debug("Bodybuilding analysis completed")
         
+        # Perform enhanced 50-measurements analysis
+        logger.debug("Performing enhanced 50-measurements bodybuilding analysis...")
+        try:
+            from utils.enhanced_measurements import EnhancedMeasurementAnalyzer, categorize_measurements
+            
+            # Initialize the enhanced measurement analyzer
+            enhanced_analyzer = EnhancedMeasurementAnalyzer()
+            
+            # Process enhanced measurements
+            enhanced_measurements = enhanced_analyzer.analyze_photos(
+                front_image=front_image,
+                back_image=back_image,
+                height_cm=height_cm,
+                weight_kg=weight_kg,
+                age=age_years,
+                gender=gender
+            )
+            
+            # Categorize the measurements for better display
+            categorized_measurements = categorize_measurements(enhanced_measurements)
+            
+            logger.debug("Enhanced 50-measurements analysis completed successfully.")
+            
+        except Exception as e:
+            logger.error(f"Error during enhanced measurements analysis: {str(e)}")
+            flash('Note: Some advanced bodybuilding measurements could not be calculated.', 'warning')
+            enhanced_measurements = {}
+            categorized_measurements = {}
+        
         # Store all results
         analysis_results[analysis_id] = {
             'front_image_path': front_image_path,
@@ -350,14 +390,17 @@ def analyze():
             'traits': combined_traits,
             'recommendations': recommendations,
             'user_info': {
-                'height': height,
-                'weight': weight,
+                'height': height_cm,
+                'weight': weight_kg,
+                'age': age_years,
                 'gender': gender,
                 'experience': experience
             },
             'front_measurements': front_measurements,
             'back_measurements': back_measurements,
             'combined_measurements': combined_measurements,
+            'enhanced_measurements': enhanced_measurements,        # Add enhanced 50 measurements
+            'categorized_measurements': categorized_measurements,  # Add categorized measurements
             'bodybuilding_analysis': bodybuilding_analysis,
             'analysis_type': 'dual_photo'  # Flag to indicate this is a dual photo analysis
         }
@@ -554,6 +597,10 @@ def results(analysis_id):
                     'confidence': confidence
                 }
     
+    # Get enhanced 50-point bodybuilding measurements if available
+    enhanced_measurements = result.get('enhanced_measurements', {})
+    categorized_measurements = result.get('categorized_measurements', {})
+    
     # Template data
     template_data = {
         'analysis_id': analysis_id,
@@ -570,7 +617,10 @@ def results(analysis_id):
         'basic_measurements': basic_measurements,  # Basic measurements for the template
         'proportion_measurements': proportion_measurements,  # Proportion measurements for the template
         'circumference_measurements_left': circumference_measurements_left,  # Left side measurements
-        'circumference_measurements_right': circumference_measurements_right  # Right side measurements
+        'circumference_measurements_right': circumference_measurements_right,  # Right side measurements
+        'enhanced_measurements': enhanced_measurements,  # Enhanced 50-point bodybuilding measurements
+        'categorized_measurements': categorized_measurements,  # Categorized measurements for display
+        'has_enhanced_measurements': bool(enhanced_measurements)  # Flag to indicate enhanced measurements are available
     }
     
     # Add additional data for dual photo analysis
