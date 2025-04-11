@@ -51,7 +51,8 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not auth.is_authenticated:
-            return redirect(auth.login_url())
+            # Correct way to redirect to Replit login
+            return redirect(f"https://replit.com/auth_with_repl_site?domain={web.get_origin()}")
         return f(*args, **kwargs)
     return decorated_function
 
@@ -1042,7 +1043,7 @@ def get_traits_data(analysis_id):
 @app.route('/login')
 def login():
     """Redirect to Replit Auth login"""
-    return redirect(auth.login_url())
+    return redirect(f"https://replit.com/auth_with_repl_site?domain={web.get_origin()}")
 
 
 # Route to redirect to our Google auth blueprint
@@ -1059,12 +1060,12 @@ def google_login():
 @app.route('/signup')
 def signup():
     """Redirect to Replit Auth login (same as login for Replit Auth)"""
-    return redirect(auth.login_url())
+    return redirect(f"https://replit.com/auth_with_repl_site?domain={web.get_origin()}")
 
 @app.route('/logout')
 def logout():
     """Redirect to Replit Auth logout"""
-    return redirect(auth.logout_url())
+    return redirect("https://replit.com/logout")
 
 @app.route('/profile')
 @login_required
