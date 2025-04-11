@@ -103,26 +103,42 @@
                 <h2 class="text-xl font-semibold text-white mb-4 px-1 border-b border-gray-800 pb-2">Your Upload</h2>
                 
                 {% if is_dual_photo %}
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <p class="text-center text-gray-400 mb-2">Front View</p>
-                        {% if front_image %}
-                        <img src="data:image/jpeg;base64,{{ front_image }}" alt="Front view photo for body analysis" class="w-full rounded shadow-md">
-                        {% else %}
-                        <div class="bg-gray-800 rounded p-4 text-center shadow-md">
-                            <p class="text-gray-500">Front view image not available</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-4">
+                    <div class="bg-gray-800 rounded-lg shadow-lg border border-gray-700 overflow-hidden">
+                        <div class="border-b border-gray-700 bg-gray-900 px-4 py-2">
+                            <h3 class="text-center font-medium text-white flex items-center justify-center">
+                                <i class="fas fa-user mr-2 text-blue-400"></i>
+                                Front View
+                            </h3>
                         </div>
-                        {% endif %}
+                        <div class="p-3">
+                            {% if front_image %}
+                            <img src="data:image/jpeg;base64,{{ front_image }}" alt="Front view photo for body analysis" class="w-full rounded shadow-md object-cover">
+                            {% else %}
+                            <div class="bg-gray-800 rounded p-8 text-center shadow-md">
+                                <i class="fas fa-image text-gray-600 text-4xl mb-2"></i>
+                                <p class="text-gray-500">Front view image not available</p>
+                            </div>
+                            {% endif %}
+                        </div>
                     </div>
-                    <div>
-                        <p class="text-center text-gray-400 mb-2">Back View</p>
-                        {% if back_image %}
-                        <img src="data:image/jpeg;base64,{{ back_image }}" alt="Back view photo for body analysis" class="w-full rounded shadow-md">
-                        {% else %}
-                        <div class="bg-gray-800 rounded p-4 text-center shadow-md">
-                            <p class="text-gray-500">Back view image not available</p>
+                    <div class="bg-gray-800 rounded-lg shadow-lg border border-gray-700 overflow-hidden">
+                        <div class="border-b border-gray-700 bg-gray-900 px-4 py-2">
+                            <h3 class="text-center font-medium text-white flex items-center justify-center">
+                                <i class="fas fa-user-check mr-2 text-green-400"></i>
+                                Back View
+                            </h3>
                         </div>
-                        {% endif %}
+                        <div class="p-3">
+                            {% if back_image %}
+                            <img src="data:image/jpeg;base64,{{ back_image }}" alt="Back view photo for body analysis" class="w-full rounded shadow-md object-cover">
+                            {% else %}
+                            <div class="bg-gray-800 rounded p-8 text-center shadow-md">
+                                <i class="fas fa-image text-gray-600 text-4xl mb-2"></i>
+                                <p class="text-gray-500">Back view image not available</p>
+                            </div>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
                 
@@ -851,7 +867,7 @@
                                     <span class="ml-2 text-green-500">🟢</span>
                                 {% endif %}
                             </div>
-                            <p class="text-sm text-gray-400">Waist size: {{ basic_measurements.get('Waist').value }}</p>
+                            <p class="text-sm text-gray-400">Waist size: {{ '{:.1f}'.format(enhanced_measurements.get('waist_circumference_cm', 0)) }} cm</p>
                         {% else %}
                             <div class="flex items-center space-x-1 mb-1">
                                 {% for i in range(5) %}
