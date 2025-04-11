@@ -379,43 +379,73 @@ class WorkoutPlanner:
         
         # Add main chest exercise
         chest_exercises = self.base_exercises['chest']
-        if 'chest_development' in weak_points:
+        chest_development_status = "Normal"
+        chest_priority = "normal"
+        
+        if 'chest_development' in weak_points or 'chest' in weak_points:
             # Add more chest exercises if it's a weak point
             chest_specific = self.specialized_exercises.get('chest_development', [])
             chest_exercises = chest_specific + chest_exercises
+            chest_development_status = "Needs Growth"
+            chest_priority = "high"
         
         # Filter by experience level
         chest_exercises = self._filter_by_experience(chest_exercises, experience)
         
         # Add 2-3 chest exercises
-        exercises.extend(self._select_random_exercises(chest_exercises, 2))
+        chest_selection = self._select_random_exercises(chest_exercises, 2)
+        for ex in chest_selection:
+            ex['development_status'] = chest_development_status
+            ex['priority'] = chest_priority
+            ex['status_indicator'] = "⚠️" if chest_development_status == "Needs Growth" else "✓" if chest_development_status == "Developed" else ""
+        exercises.extend(chest_selection)
         
         # Add shoulder exercises
         shoulder_exercises = self.base_exercises['shoulders']
+        shoulder_development_status = "Normal"
+        shoulder_priority = "normal"
+        
         if 'shoulder_width' in weak_points:
             # Add more shoulder exercises if it's a weak point
             shoulder_specific = self.specialized_exercises.get('shoulder_width', [])
             shoulder_exercises = shoulder_specific + shoulder_exercises
+            shoulder_development_status = "Needs Growth"
+            shoulder_priority = "high"
         
         # Filter by experience level
         shoulder_exercises = self._filter_by_experience(shoulder_exercises, experience)
         
         # Add 1-2 shoulder exercises
-        exercises.extend(self._select_random_exercises(shoulder_exercises, 2))
+        shoulder_selection = self._select_random_exercises(shoulder_exercises, 2)
+        for ex in shoulder_selection:
+            ex['development_status'] = shoulder_development_status
+            ex['priority'] = shoulder_priority
+            ex['status_indicator'] = "⚠️" if shoulder_development_status == "Needs Growth" else "✓" if shoulder_development_status == "Developed" else ""
+        exercises.extend(shoulder_selection)
         
         # Add triceps exercises
         triceps_exercises = [ex for ex in self.base_exercises['arms'] if 'triceps' in ex['target'].lower()]
-        if 'arm_development' in weak_points:
+        arm_development_status = "Normal"
+        arm_priority = "normal"
+        
+        if 'arm_development' in weak_points or 'arm' in weak_points:
             # Add more triceps exercises if arms are a weak point
             arm_specific = [ex for ex in self.specialized_exercises.get('arm_development', []) 
                            if 'triceps' in ex['target'].lower()]
             triceps_exercises = arm_specific + triceps_exercises
+            arm_development_status = "Needs Growth"
+            arm_priority = "high"
         
         # Filter by experience level
         triceps_exercises = self._filter_by_experience(triceps_exercises, experience)
         
         # Add 1-2 triceps exercises
-        exercises.extend(self._select_random_exercises(triceps_exercises, 2))
+        triceps_selection = self._select_random_exercises(triceps_exercises, 2)
+        for ex in triceps_selection:
+            ex['development_status'] = arm_development_status
+            ex['priority'] = arm_priority
+            ex['status_indicator'] = "⚠️" if arm_development_status == "Needs Growth" else "✓" if arm_development_status == "Developed" else ""
+        exercises.extend(triceps_selection)
         
         # Add cardio if high body fat
         if high_body_fat:
@@ -427,7 +457,12 @@ class WorkoutPlanner:
             cardio_exercises = self._filter_by_experience(cardio_exercises, experience)
             
             # Add 1 cardio exercise
-            exercises.extend(self._select_random_exercises(cardio_exercises, 1))
+            cardio_selection = self._select_random_exercises(cardio_exercises, 1)
+            for ex in cardio_selection:
+                ex['development_status'] = "Needs Improvement"
+                ex['priority'] = "high"
+                ex['status_indicator'] = "⚠️"
+            exercises.extend(cardio_selection)
         
         # Convert to the expected format
         formatted_exercises = []
@@ -437,7 +472,10 @@ class WorkoutPlanner:
                 'sets': str(ex['sets']),
                 'reps': ex['reps'],
                 'focus': ex['target'],
-                'category': 'push'
+                'category': 'push',
+                'development_status': ex.get('development_status', 'Normal'),
+                'priority': ex.get('priority', 'normal'),
+                'status_indicator': ex.get('status_indicator', '')
             }
             formatted_exercises.append(formatted_ex)
         
@@ -449,30 +487,50 @@ class WorkoutPlanner:
         
         # Add main back exercises
         back_exercises = self.base_exercises['back']
-        if 'back_width' in weak_points:
+        back_development_status = "Normal"
+        back_priority = "normal"
+        
+        if 'back_width' in weak_points or 'back' in weak_points:
             # Add more back exercises if it's a weak point
             back_specific = self.specialized_exercises.get('back_width', [])
             back_exercises = back_specific + back_exercises
+            back_development_status = "Needs Growth"
+            back_priority = "high"
         
         # Filter by experience level
         back_exercises = self._filter_by_experience(back_exercises, experience)
         
         # Add 2-3 back exercises
-        exercises.extend(self._select_random_exercises(back_exercises, 3))
+        back_selection = self._select_random_exercises(back_exercises, 3)
+        for ex in back_selection:
+            ex['development_status'] = back_development_status
+            ex['priority'] = back_priority
+            ex['status_indicator'] = "⚠️" if back_development_status == "Needs Growth" else "✓" if back_development_status == "Developed" else ""
+        exercises.extend(back_selection)
         
         # Add biceps exercises
         biceps_exercises = [ex for ex in self.base_exercises['arms'] if 'biceps' in ex['target'].lower()]
-        if 'arm_development' in weak_points:
+        arm_development_status = "Normal"
+        arm_priority = "normal"
+        
+        if 'arm_development' in weak_points or 'arm' in weak_points:
             # Add more biceps exercises if arms are a weak point
             arm_specific = [ex for ex in self.specialized_exercises.get('arm_development', []) 
                            if 'biceps' in ex['target'].lower()]
             biceps_exercises = arm_specific + biceps_exercises
+            arm_development_status = "Needs Growth"
+            arm_priority = "high"
         
         # Filter by experience level
         biceps_exercises = self._filter_by_experience(biceps_exercises, experience)
         
         # Add 2 biceps exercises
-        exercises.extend(self._select_random_exercises(biceps_exercises, 2))
+        biceps_selection = self._select_random_exercises(biceps_exercises, 2)
+        for ex in biceps_selection:
+            ex['development_status'] = arm_development_status
+            ex['priority'] = arm_priority
+            ex['status_indicator'] = "⚠️" if arm_development_status == "Needs Growth" else "✓" if arm_development_status == "Developed" else ""
+        exercises.extend(biceps_selection)
         
         # Add rear shoulder exercise
         rear_delt_exercises = [ex for ex in self.base_exercises['shoulders'] 
@@ -483,7 +541,17 @@ class WorkoutPlanner:
         
         # Add 1 rear delt exercise if available
         if rear_delt_exercises:
-            exercises.extend(self._select_random_exercises(rear_delt_exercises, 1))
+            rear_delt_selection = self._select_random_exercises(rear_delt_exercises, 1)
+            # Use shoulder status for rear delts
+            shoulder_development_status = "Normal"
+            if 'shoulder_width' in weak_points:
+                shoulder_development_status = "Needs Growth"
+            
+            for ex in rear_delt_selection:
+                ex['development_status'] = shoulder_development_status
+                ex['priority'] = "normal"
+                ex['status_indicator'] = "⚠️" if shoulder_development_status == "Needs Growth" else "✓" if shoulder_development_status == "Developed" else ""
+            exercises.extend(rear_delt_selection)
         
         # Add cardio if high body fat
         if high_body_fat:
@@ -495,7 +563,12 @@ class WorkoutPlanner:
             cardio_exercises = self._filter_by_experience(cardio_exercises, experience)
             
             # Add 1 cardio exercise
-            exercises.extend(self._select_random_exercises(cardio_exercises, 1))
+            cardio_selection = self._select_random_exercises(cardio_exercises, 1)
+            for ex in cardio_selection:
+                ex['development_status'] = "Needs Improvement"
+                ex['priority'] = "high"
+                ex['status_indicator'] = "⚠️"
+            exercises.extend(cardio_selection)
         
         # Convert to the expected format
         formatted_exercises = []
@@ -505,7 +578,10 @@ class WorkoutPlanner:
                 'sets': str(ex['sets']),
                 'reps': ex['reps'],
                 'focus': ex['target'],
-                'category': 'pull'
+                'category': 'pull',
+                'development_status': ex.get('development_status', 'Normal'),
+                'priority': ex.get('priority', 'normal'),
+                'status_indicator': ex.get('status_indicator', '')
             }
             formatted_exercises.append(formatted_ex)
         
@@ -517,10 +593,15 @@ class WorkoutPlanner:
         
         # Add main leg exercises
         leg_exercises = self.base_exercises['legs']
-        if 'leg_development' in weak_points:
+        leg_development_status = "Normal"
+        leg_priority = "normal"
+        
+        if 'leg_development' in weak_points or 'legs' in weak_points:
             # Add more leg exercises if it's a weak point
             leg_specific = self.specialized_exercises.get('leg_development', [])
             leg_exercises = leg_specific + leg_exercises
+            leg_development_status = "Needs Growth"
+            leg_priority = "high"
         
         # Filter by experience level
         leg_exercises = self._filter_by_experience(leg_exercises, experience)
@@ -531,32 +612,64 @@ class WorkoutPlanner:
                                  if 'hamstring' in ex['target'].lower() or 'glute' in ex['target'].lower()]
             
             # Add 2-3 hamstring/glute exercises
-            exercises.extend(self._select_random_exercises(hamstring_exercises, 2))
+            hamstring_selection = self._select_random_exercises(hamstring_exercises, 2)
+            for ex in hamstring_selection:
+                ex['development_status'] = leg_development_status
+                ex['priority'] = leg_priority
+                ex['status_indicator'] = "⚠️" if leg_development_status == "Needs Growth" else "✓" if leg_development_status == "Developed" else ""
+                ex['focus'] = "Posterior chain: " + ex['target']
+            exercises.extend(hamstring_selection)
             
             # Add 1-2 quad exercises for balance
             quad_exercises = [ex for ex in leg_exercises if 'quad' in ex['target'].lower()]
-            exercises.extend(self._select_random_exercises(quad_exercises, 1))
+            quad_selection = self._select_random_exercises(quad_exercises, 1)
+            for ex in quad_selection:
+                ex['development_status'] = leg_development_status
+                ex['priority'] = "normal"  # Lower priority on posterior chain day
+                ex['status_indicator'] = "⚠️" if leg_development_status == "Needs Growth" else "✓" if leg_development_status == "Developed" else ""
+            exercises.extend(quad_selection)
         else:
             # Standard leg day with emphasis on quads
             quad_exercises = [ex for ex in leg_exercises if 'quad' in ex['target'].lower()]
             
             # Add 2-3 quad exercises
-            exercises.extend(self._select_random_exercises(quad_exercises, 2))
+            quad_selection = self._select_random_exercises(quad_exercises, 2)
+            for ex in quad_selection:
+                ex['development_status'] = leg_development_status
+                ex['priority'] = leg_priority
+                ex['status_indicator'] = "⚠️" if leg_development_status == "Needs Growth" else "✓" if leg_development_status == "Developed" else ""
+            exercises.extend(quad_selection)
             
             # Add 1-2 hamstring/glute exercises
             hamstring_exercises = [ex for ex in leg_exercises 
                                  if 'hamstring' in ex['target'].lower() or 'glute' in ex['target'].lower()]
-            exercises.extend(self._select_random_exercises(hamstring_exercises, 2))
+            hamstring_selection = self._select_random_exercises(hamstring_exercises, 2)
+            for ex in hamstring_selection:
+                ex['development_status'] = leg_development_status
+                ex['priority'] = "normal"  # Standard priority
+                ex['status_indicator'] = "⚠️" if leg_development_status == "Needs Growth" else "✓" if leg_development_status == "Developed" else ""
+            exercises.extend(hamstring_selection)
         
         # Add calf exercises
         calf_exercises = [ex for ex in leg_exercises if 'calf' in ex['target'].lower()]
         if calf_exercises:
-            exercises.extend(self._select_random_exercises(calf_exercises, 1))
+            calf_selection = self._select_random_exercises(calf_exercises, 1)
+            for ex in calf_selection:
+                ex['development_status'] = leg_development_status
+                ex['priority'] = "normal"
+                ex['status_indicator'] = "⚠️" if leg_development_status == "Needs Growth" else "✓" if leg_development_status == "Developed" else ""
+            exercises.extend(calf_selection)
         
         # Add core exercises
         core_exercises = self.base_exercises['core']
         core_exercises = self._filter_by_experience(core_exercises, experience)
-        exercises.extend(self._select_random_exercises(core_exercises, 2))
+        core_selection = self._select_random_exercises(core_exercises, 2)
+        # Core is its own category, not tied to leg development
+        for ex in core_selection:
+            ex['development_status'] = "Normal"
+            ex['priority'] = "normal"
+            ex['status_indicator'] = ""
+        exercises.extend(core_selection)
         
         # Add cardio if high body fat
         if high_body_fat:
@@ -568,7 +681,12 @@ class WorkoutPlanner:
             cardio_exercises = self._filter_by_experience(cardio_exercises, experience)
             
             # Add 1 cardio exercise
-            exercises.extend(self._select_random_exercises(cardio_exercises, 1))
+            cardio_selection = self._select_random_exercises(cardio_exercises, 1)
+            for ex in cardio_selection:
+                ex['development_status'] = "Needs Improvement"
+                ex['priority'] = "high"
+                ex['status_indicator'] = "⚠️"
+            exercises.extend(cardio_selection)
         
         # Convert to the expected format
         formatted_exercises = []
@@ -578,7 +696,10 @@ class WorkoutPlanner:
                 'sets': str(ex['sets']),
                 'reps': ex['reps'],
                 'focus': ex['target'],
-                'category': 'legs'
+                'category': 'legs',
+                'development_status': ex.get('development_status', 'Normal'),
+                'priority': ex.get('priority', 'normal'),
+                'status_indicator': ex.get('status_indicator', '')
             }
             formatted_exercises.append(formatted_ex)
         
