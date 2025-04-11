@@ -266,7 +266,7 @@
                     <a href="/education" class="nav-link {% if request.path == '/education' %}active{% endif %}">
                         <i class="fas fa-book mr-1"></i> Education
                     </a>
-                    {% if current_user.is_authenticated %}
+                    {% if is_authenticated() %}
                     <a href="/profile" class="nav-link {% if request.path == '/profile' %}active{% endif %}">
                         <i class="fas fa-user mr-1"></i> Profile
                     </a>
@@ -300,7 +300,7 @@
                         <div class="py-1">
                             <a href="/" class="block px-4 py-2 text-gray-300 hover:bg-dark-700 hover:text-white">Home</a>
                             <a href="/education" class="block px-4 py-2 text-gray-300 hover:bg-dark-700 hover:text-white">Education</a>
-                            {% if current_user.is_authenticated %}
+                            {% if is_authenticated() %}
                             <a href="/profile" class="block px-4 py-2 text-gray-300 hover:bg-dark-700 hover:text-white">Profile</a>
                             <a href="/logout" class="block px-4 py-2 text-gray-300 hover:bg-dark-700 hover:text-white">Logout</a>
                             {% else %}

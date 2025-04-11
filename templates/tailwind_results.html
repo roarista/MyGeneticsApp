@@ -163,14 +163,14 @@
                     <a href="{{ url_for('index') }}" class="nav-link">Home</a>
                     <a href="{{ url_for('scan3d') }}" class="nav-link">3D Scanning</a>
                     <a href="{{ url_for('education') }}" class="nav-link">Learn</a>
-                    {% if current_user.is_authenticated %}
+                    {% if is_authenticated() %}
                     <a href="{{ url_for('profile') }}" class="nav-link">Profile</a>
                     {% endif %}
                 </div>
 
                 <!-- Auth Buttons -->
                 <div class="hidden md:flex items-center space-x-4">
-                    {% if current_user.is_authenticated %}
+                    {% if is_authenticated() %}
                     <a href="{{ url_for('logout') }}" class="btn-outline">Logout</a>
                     {% else %}
                     <a href="{{ url_for('signup') }}" class="btn-primary">Sign Up</a>
@@ -196,10 +196,10 @@
                 <a href="{{ url_for('index') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800">Home</a>
                 <a href="{{ url_for('scan3d') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800">3D Scanning</a>
                 <a href="{{ url_for('education') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800">Learn</a>
-                {% if current_user.is_authenticated %}
+                {% if is_authenticated() %}
                 <a href="{{ url_for('profile') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800">Profile</a>
                 {% endif %}
-                {% if current_user.is_authenticated %}
+                {% if is_authenticated() %}
                 <a href="{{ url_for('logout') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800">Logout</a>
                 {% else %}
                 <a href="{{ url_for('signup') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800">Sign Up</a>
