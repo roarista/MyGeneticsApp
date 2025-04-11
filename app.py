@@ -1678,8 +1678,31 @@ def workout(analysis_id):
         result = analysis_results[analysis_id]
         logger.debug(f"Retrieved analysis result for ID: {analysis_id}")
         
-        # Get user info and training experience
-        experience = result['user_info'].get('experience', 'beginner')
+        # Import the WorkoutPlanner
+        from utils.workout_planner import WorkoutPlanner
+        
+        # Create user data dictionary for workout planner
+        user_data = {
+            'gender': result['user_info'].get('gender', 'male'),
+            'height_cm': result['user_info'].get('height_cm', 175),
+            'weight_kg': result['user_info'].get('weight_kg', 75),
+            'experience': result['user_info'].get('experience', 'beginner'),
+            'body_fat_percentage': result.get('body_fat_percentage', 20),
+            'measurements': result.get('measurements', {}),
+            'traits': result.get('traits', {})
+        }
+        
+        # Generate personalized workout plan
+        logger.debug(f"Generating personalized workout plan based on physique analysis")
+        workout_planner = WorkoutPlanner()
+        workout_data = workout_planner.generate_workout_plan(user_data)
+        
+        # Extract data from the workout plan
+        workout_plan = workout_data['workout_plan']
+        analysis = workout_data['analysis']
+        training_tips = workout_data['training_tips']
+        equipment = workout_data['equipment']
+        progression_methods = workout_data['progression_methods']
         
         # Process traits to include their units for display
         formatted_traits = {}
@@ -1700,332 +1723,51 @@ def workout(analysis_id):
                 logger.error(f"Error formatting trait {trait_name}: {str(trait_error)}")
                 formatted_traits[trait_name] = trait_data
         
-        # Get user genetic traits
+        # Get user genetic traits and experience
         logger.debug(f"Processing user genetic traits for workout planning")
+        experience = user_data['experience']
         
-        # Get training split from recommendations or use default push/pull/legs
-        training_split = result['recommendations'].get('training_split', {
-            'Monday': 'Push (Chest, Shoulders, Triceps)',
-            'Tuesday': 'Pull (Back, Biceps)',
-            'Wednesday': 'Legs + Core',
-            'Thursday': 'Rest & Recovery',
-            'Friday': 'Push (Chest, Shoulders, Triceps)',
-            'Saturday': 'Pull (Back, Biceps)',
-            'Sunday': 'Legs (Posterior Chain Focus)'
-        })
+        # Use weak points identified by the workout planner
+        weak_points = analysis['focus_areas']
         
-        # Identify weak points from traits for targeted training
-        weak_points = []
-        for trait_name, trait_data in result['traits'].items():
-            if isinstance(trait_data, dict) and 'rating' in trait_data:
-                # Handle dictionary trait data
-                if trait_data['rating'] in ['below_average', 'average']:
-                    weak_points.append({
-                        'name': trait_name.replace('_', ' ').title(),
-                        'rating': trait_data['rating'],
-                        'value': trait_data.get('value', 0)
-                    })
-            elif isinstance(trait_data, str) and trait_data in ['below_average', 'average']:
-                # Handle string trait data that directly contains the rating
-                weak_points.append({
-                    'name': trait_name.replace('_', ' ').title(),
-                    'rating': trait_data,
-                    'value': 0  # Default value since we don't have one
-                })
-        
-        # Create workout structure
-        push_exercises = [
-            {'name': 'Bench Press', 'sets': '4', 'reps': '8-10', 'focus': 'Chest', 'category': 'push'},
-            {'name': 'Incline Dumbbell Press', 'sets': '3', 'reps': '10-12', 'focus': 'Upper Chest', 'category': 'push'},
-            {'name': 'Seated Shoulder Press', 'sets': '3', 'reps': '8-10', 'focus': 'Shoulders', 'category': 'push'},
-            {'name': 'Lateral Raises', 'sets': '3', 'reps': '12-15', 'focus': 'Side Delts', 'category': 'push'},
-            {'name': 'Tricep Pushdowns', 'sets': '3', 'reps': '10-12', 'focus': 'Triceps', 'category': 'push'},
-            {'name': 'Overhead Tricep Extensions', 'sets': '3', 'reps': '10-12', 'focus': 'Triceps', 'category': 'push'}
-        ]
-        
-        pull_exercises = [
-            {'name': 'Pull-Ups/Lat Pulldowns', 'sets': '4', 'reps': '8-10', 'focus': 'Back Width', 'category': 'pull'},
-            {'name': 'Bent Over Rows', 'sets': '3', 'reps': '10-12', 'focus': 'Back Thickness', 'category': 'pull'},
-            {'name': 'Seated Cable Rows', 'sets': '3', 'reps': '10-12', 'focus': 'Mid Back', 'category': 'pull'},
-            {'name': 'Face Pulls', 'sets': '3', 'reps': '12-15', 'focus': 'Rear Delts', 'category': 'pull'},
-            {'name': 'Barbell Curls', 'sets': '3', 'reps': '10-12', 'focus': 'Biceps', 'category': 'pull'},
-            {'name': 'Hammer Curls', 'sets': '3', 'reps': '10-12', 'focus': 'Biceps/Forearms', 'category': 'pull'}
-        ]
-        
-        leg_exercises = [
-            {'name': 'Squats', 'sets': '4', 'reps': '8-10', 'focus': 'Quads/Overall', 'category': 'legs'},
-            {'name': 'Romanian Deadlifts', 'sets': '3', 'reps': '8-10', 'focus': 'Hamstrings/Glutes', 'category': 'legs'},
-            {'name': 'Walking Lunges', 'sets': '3', 'reps': '10-12 per leg', 'focus': 'Quads/Balance', 'category': 'legs'},
-            {'name': 'Leg Press', 'sets': '3', 'reps': '10-12', 'focus': 'Overall Legs', 'category': 'legs'},
-            {'name': 'Calf Raises', 'sets': '4', 'reps': '15-20', 'focus': 'Calves', 'category': 'legs'},
-            {'name': 'Leg Curls', 'sets': '3', 'reps': '12-15', 'focus': 'Hamstrings', 'category': 'legs'}
-        ]
-        
-        posterior_focus = [
-            {'name': 'Deadlifts', 'sets': '4', 'reps': '6-8', 'focus': 'Posterior Chain', 'category': 'legs'},
-            {'name': 'Good Mornings', 'sets': '3', 'reps': '10-12', 'focus': 'Hamstrings/Lower Back', 'category': 'legs'},
-            {'name': 'Glute Bridges', 'sets': '3', 'reps': '12-15', 'focus': 'Glutes', 'category': 'legs'},
-            {'name': 'Back Extensions', 'sets': '3', 'reps': '12-15', 'focus': 'Lower Back/Glutes', 'category': 'legs'},
-            {'name': 'Standing Calf Raises', 'sets': '4', 'reps': '15-20', 'focus': 'Calves', 'category': 'legs'},
-            {'name': 'Seated Calf Raises', 'sets': '3', 'reps': '15-20', 'focus': 'Calves', 'category': 'legs'}
-        ]
-        
-        core_exercises = [
-            {'name': 'Planks', 'sets': '3', 'reps': '30-60 sec', 'focus': 'Core Stability', 'category': 'core'},
-            {'name': 'Russian Twists', 'sets': '3', 'reps': '15 per side', 'focus': 'Obliques', 'category': 'core'},
-            {'name': 'Hanging Leg Raises', 'sets': '3', 'reps': '10-15', 'focus': 'Lower Abs', 'category': 'core'}
-        ]
-        
-        rest_day = [
-            {'name': 'Light Cardio', 'sets': '1', 'reps': '20-30 min', 'focus': 'Recovery', 'category': 'rest'},
-            {'name': 'Stretching', 'sets': '1', 'reps': '15-20 min', 'focus': 'Flexibility', 'category': 'rest'},
-            {'name': 'Foam Rolling', 'sets': '1', 'reps': '10-15 min', 'focus': 'Muscle Recovery', 'category': 'rest'}
-        ]
-        
-        # Specialized exercises for weak points
-        specialized_exercises = {}
-        specialized_exercises['shoulder_width'] = [
-            {'name': 'Wide-Grip Upright Rows', 'sets': '3', 'reps': '10-12', 'focus': 'Lateral Delts', 'category': 'push'},
-            {'name': 'Lateral Raises with Hold', 'sets': '3', 'reps': '12-15', 'focus': 'Side Delts', 'category': 'push'},
-            {'name': 'Cable Lateral Raises', 'sets': '3', 'reps': '12-15', 'focus': 'Side Delts', 'category': 'push'}
-        ]
-        
-        specialized_exercises['arm_development'] = [
-            {'name': 'Close-Grip Bench Press', 'sets': '3', 'reps': '8-10', 'focus': 'Triceps', 'category': 'push'},
-            {'name': 'Incline Dumbbell Curls', 'sets': '3', 'reps': '10-12', 'focus': 'Biceps', 'category': 'pull'},
-            {'name': 'Rope Pushdowns', 'sets': '3', 'reps': '12-15', 'focus': 'Triceps', 'category': 'push'}
-        ]
-        
-        specialized_exercises['chest_development'] = [
-            {'name': 'Cable Crossovers', 'sets': '3', 'reps': '12-15', 'focus': 'Inner Chest', 'category': 'push'},
-            {'name': 'Decline Push-Ups', 'sets': '3', 'reps': '12-15', 'focus': 'Lower Chest', 'category': 'push'},
-            {'name': 'Dumbbell Flyes', 'sets': '3', 'reps': '12-15', 'focus': 'Chest Stretch', 'category': 'push'}
-        ]
-        
-        specialized_exercises['back_width'] = [
-            {'name': 'Wide-Grip Pull-Ups', 'sets': '3', 'reps': '8-10', 'focus': 'Lats Width', 'category': 'pull'},
-            {'name': 'Straight-Arm Pulldowns', 'sets': '3', 'reps': '12-15', 'focus': 'Lats', 'category': 'pull'},
-            {'name': 'Wide-Grip Seated Rows', 'sets': '3', 'reps': '10-12', 'focus': 'Back Width', 'category': 'pull'}
-        ]
-        
-        specialized_exercises['leg_development'] = [
-            {'name': 'Front Squats', 'sets': '3', 'reps': '8-10', 'focus': 'Quads', 'category': 'legs'},
-            {'name': 'Bulgarian Split Squats', 'sets': '3', 'reps': '10-12 per leg', 'focus': 'Unilateral Legs', 'category': 'legs'},
-            {'name': 'Hack Squats', 'sets': '3', 'reps': '10-12', 'focus': 'Quads', 'category': 'legs'}
-        ]
-        
-        # Generate detailed weekly workout plan
-        workout_plan = {}
-        for day, focus in training_split.items():
-            if 'Push' in focus:
-                workout_plan[day] = {
-                    'focus': focus,
-                    'category': 'push',
-                    'exercises': push_exercises.copy()
-                }
-            elif 'Pull' in focus:
-                workout_plan[day] = {
-                    'focus': focus,
-                    'category': 'pull',
-                    'exercises': pull_exercises.copy()
-                }
-            elif 'Legs' in focus and 'Posterior' in focus:
-                workout_plan[day] = {
-                    'focus': focus,
-                    'category': 'legs',
-                    'exercises': posterior_focus.copy()
-                }
-            elif 'Legs' in focus:
-                workout_plan[day] = {
-                    'focus': focus,
-                    'category': 'legs',
-                    'exercises': leg_exercises.copy() + core_exercises.copy()
-                }
-            elif 'Rest' in focus:
-                workout_plan[day] = {
-                    'focus': focus,
-                    'category': 'rest',
-                    'exercises': rest_day.copy()
-                }
-            else:
-                workout_plan[day] = {
-                    'focus': focus,
-                    'category': 'other',
-                    'exercises': []
-                }
-        
-        # Add specialized exercises for weak points
-        for weak_point in weak_points:
-            name = weak_point['name'].lower()
-            if 'shoulder' in name:
-                # Add to push days
-                for day, workout in workout_plan.items():
-                    if workout['category'] == 'push':
-                        workout['exercises'].extend(specialized_exercises['shoulder_width'])
-                        break  # Add to just one push day
-            elif 'arm' in name:
-                # Add arm exercises to both push and pull days
-                push_added = pull_added = False
-                for day, workout in workout_plan.items():
-                    if workout['category'] == 'push' and not push_added:
-                        workout['exercises'].append(specialized_exercises['arm_development'][0])  # Tricep focus
-                        push_added = True
-                    elif workout['category'] == 'pull' and not pull_added:
-                        workout['exercises'].append(specialized_exercises['arm_development'][1])  # Bicep focus
-                        pull_added = True
-                    if push_added and pull_added:
-                        break
-            elif 'chest' in name:
-                # Add to push days
-                for day, workout in workout_plan.items():
-                    if workout['category'] == 'push':
-                        workout['exercises'].extend(specialized_exercises['chest_development'])
-                        break
-            elif 'back' in name or 'lat' in name:
-                # Add to pull days
-                for day, workout in workout_plan.items():
-                    if workout['category'] == 'pull':
-                        workout['exercises'].extend(specialized_exercises['back_width'])
-                        break
-            elif 'leg' in name:
-                # Add to leg days
-                for day, workout in workout_plan.items():
-                    if workout['category'] == 'legs':
-                        workout['exercises'].extend(specialized_exercises['leg_development'])
-                        break
-                        
-        # Prepare training tips based on experience level
-        training_tips = []
-        if experience == 'beginner':
-            training_tips = [
-                "Focus on learning proper form before adding significant weight",
-                "Start with 2-3 sets per exercise, gradually increasing to 3-4 sets as you adapt",
-                "Rest 90-120 seconds between sets to maintain proper form",
-                "Aim for progressive overload by adding small weight increments weekly",
-                "Stick to the basics - master compound movements before adding isolation work"
-            ]
-        elif experience == 'intermediate':
-            training_tips = [
-                "Incorporate periodization - alternate between strength and hypertrophy phases",
-                "Implement supersets for antagonistic muscle groups to increase workout density",
-                "Vary rep ranges between workouts (e.g., heavy day: 6-8 reps, volume day: 10-12 reps)",
-                "Rest 60-90 seconds for isolation exercises, 2-3 minutes for heavy compound lifts",
-                "Track your workouts to ensure consistent progression in weight, reps, or volume"
-            ]
-        else:  # advanced
-            training_tips = [
-                "Utilize advanced techniques like drop sets, rest-pause, and mechanical drop sets",
-                "Implement specialized blocks focusing on lagging body parts",
-                "Consider splitting push/pull workouts into chest/shoulders and back/arms days",
-                "Vary exercise selection regularly while maintaining progressive overload",
-                "Carefully manage fatigue with strategic deload weeks every 6-8 weeks"
-            ]
-            
-        # Equipment recommendations based on experience
-        equipment = [
-            "Barbell and weight plates",
-            "Dumbbells (adjustable or fixed set)",
-            "Power rack or squat stand",
-            "Bench (flat, adjustable if possible)",
-            "Pull-up bar",
-            "Resistance bands"
-        ]
-        
-        if experience != 'beginner':
-            equipment.extend([
-                "Cable machine or functional trainer",
-                "Kettlebells",
-                "Specialized attachments (V-bar, rope, etc.)",
-                "Foam roller and mobility tools"
-            ])
-            
-        # Progressive overload methods
-        progression_methods = [
-            "Increase weight while maintaining reps",
-            "Increase reps with the same weight",
-            "Increase sets with the same weight/reps",
-            "Decrease rest periods with the same weight/reps",
-            "Improve exercise form and range of motion"
-        ]
-        
-        if experience != 'beginner':
-            progression_methods.extend([
-                "Add tempo variations (slower eccentric phase)",
-                "Increase training frequency",
-                "Add advanced techniques (drop sets, rest-pause)",
-                "Increase time under tension"
-            ])
-            
-        # Get body fat and determine body type if available
-        body_fat = 15  # Default value
-        if 'body_fat_percentage' in result['traits']:
-            trait_data = result['traits']['body_fat_percentage']
-            if isinstance(trait_data, dict) and 'value' in trait_data:
-                body_fat = trait_data['value']
-            elif isinstance(trait_data, (int, float)):
-                body_fat = trait_data
-                
-        # Determine body type from traits if available
-        body_type_data = result['traits'].get('body_type', 'balanced')
-        if isinstance(body_type_data, dict):
-            body_type = body_type_data.get('value', 'balanced')
-        else:
-            body_type = body_type_data
-        
-        # Create analysis object for template compatibility
-        analysis = {
-            'id': analysis_id,
-            'body_fat_percentage': body_fat,
-            'body_type': body_type,
-            'muscle_building_potential': result.get('bodybuilding_analysis', {}).get('muscle_building_potential', 0)
-        }
-        
-        # Extract measurements from traits if available
-        measurements = {}
-        for trait_name, trait_data in result['traits'].items():
-            if isinstance(trait_data, dict) and 'value' in trait_data:
-                measurements[trait_name] = trait_data
-        
-        # Create basic measurements for display
+        # Create the basic measurements for the left panel
         basic_measurements = {}
-        if measurements:
-            # Extract key measurements for the basic measurements panel
-            basic_keys = ['height', 'weight', 'chest', 'waist', 'hips', 'shoulders']
-            for key in basic_keys:
-                if key in measurements:
-                    basic_measurements[key.capitalize()] = measurements[key]
-                    
-        # Get proportion measurements for the proportions panel
-        proportion_measurements = {}
-        if measurements:
-            # Extract proportion metrics for display
-            proportion_keys = ['shoulder_hip_ratio', 'waist_hip_ratio', 'arm_torso_ratio', 'leg_torso_ratio']
-            for key in proportion_keys:
-                if key in measurements:
-                    proportion_measurements[key.replace('_', ' ').title()] = measurements[key]
+        measurements = result.get('measurements', {})
         
-        # Prepare circumference measurements (left and right)
+        # Extract main measurements for display
+        if measurements:
+            basic_measurements = {
+                'shoulder_width': measurements.get('shoulder_width_cm', 0),
+                'chest_circumference': measurements.get('chest_circumference_cm', 0),
+                'arm_circumference': measurements.get('arm_circumference_cm', 0),
+                'waist_circumference': measurements.get('waist_circumference_cm', 0),
+                'thigh_circumference': measurements.get('thigh_circumference_cm', 0),
+                'calf_circumference': measurements.get('calf_circumference_cm', 0)
+            }
+        
+        # Parse proportion measurements for display
+        proportion_measurements = {}
+        for key, value in measurements.items():
+            if 'ratio' in key or 'proportion' in key:
+                proportion_measurements[key] = value
+        
+        # Separate left and right side measurements for comparison
         circumference_measurements_left = {}
         circumference_measurements_right = {}
-        if measurements:
-            # Left side measurements
-            left_keys = ['left_arm_cm', 'left_thigh_cm', 'left_calf_cm']
-            for key in left_keys:
-                if key in measurements:
-                    display_key = key.replace('left_', '').replace('_cm', '').capitalize()
-                    circumference_measurements_left[display_key] = measurements[key]
-            
-            # Right side measurements
-            right_keys = ['right_arm_cm', 'right_thigh_cm', 'right_calf_cm']
-            for key in right_keys:
-                if key in measurements:
-                    display_key = key.replace('right_', '').replace('_cm', '').capitalize()
-                    circumference_measurements_right[display_key] = measurements[key]
         
-        # Prepare the context for the template
+        for key, value in measurements.items():
+            if 'left' in key and 'circumference' in key:
+                # Clean up the key name for display
+                display_key = key.replace('left_', '').replace('_cm', '').replace('_', ' ').title()
+                circumference_measurements_left[display_key] = value
+            elif 'right' in key and 'circumference' in key:
+                # Clean up the key name for display
+                display_key = key.replace('right_', '').replace('_cm', '').replace('_', ' ').title()
+                circumference_measurements_right[display_key] = value
+        
+        # Template context with all required data
         context = {
             'analysis_id': analysis_id,
-            'analysis': analysis,  # Add analysis object for template compatibility
             'traits': formatted_traits,
             'weak_points': weak_points,
             'workout_plan': workout_plan,
@@ -2054,7 +1796,7 @@ def workout(analysis_id):
         flash('An error occurred while generating your workout plan. Please try again later.', 'danger')
         # Return a fallback error page or redirect
         return render_template('error.html', error_message="We couldn't generate your workout plan right now. Our team is looking into it."), 500
-
+        
 @app.route('/schedule_analysis')
 def schedule_analysis():
     """Schedule next analysis"""

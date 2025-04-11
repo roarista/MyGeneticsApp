@@ -1,0 +1,148 @@
+### 🧠 Replit AI Prompt: Build Personalized Workout Plan Logic
+
+
+---
+
+
+Hi Replit! I’d like you to help me implement an **intelligent, personalized workout generator** in my fitness app *MyGenetics*. The system should tailor routines for each user based on their **physique analysis** and **fitness goals**, much like a real personal trainer would.
+
+
+---
+
+
+### ✅ GOAL:
+
+
+Create a system that automatically generates a weekly **custom workout plan** using the user’s data (height, weight, gender, body fat %, muscle measurements) and analysis from their uploaded body photos. The plan should:
+
+
+- Prioritize **underdeveloped muscle groups**
+- Include **cardio** if the user has high body fat
+- Suggest **reps, sets, rest time**, and focus areas for each workout day
+
+
+---
+
+
+### 🔧 STEP-BY-STEP TECHNICAL PLAN:
+
+
+#### 🧱 1. Create a `WorkoutPlanner` Module
+
+
+Create a new Python file or module called `workout_planner.py` with a function like:
+
+
+```python
+def generate_workout_plan(user_data):
+    # user_data includes: height, weight, body fat %, muscle group metrics
+    # Return a weekly plan (dict or JSON) tailored to user physique
+```
+
+
+---
+
+
+#### 📊 2. Build a `BodyAnalysisEngine`
+
+
+This logic should:
+- Compare user metrics (arms, legs, shoulders, chest) to ideal muscle proportions
+- Identify **which muscle groups are below average** for their height/weight
+- If body fat % is high (>25% for women, >18% for men), include cardio emphasis
+
+
+---
+
+
+#### 📚 3. Create an Exercise Mapping Dictionary
+
+
+Inside the `WorkoutPlanner`, define logic like:
+
+
+```python
+exercise_map = {
+    "arms_weak": ["Bicep Curls", "Hammer Curls", "Triceps Pushdown"],
+    "shoulders_weak": ["Lateral Raises", "Overhead Press"],
+    "chest_weak": ["Incline Bench", "Push-ups"],
+    "high_bodyfat": ["Treadmill", "HIIT Cardio", "Jump Rope"]
+}
+```
+
+
+Link this to the weaknesses detected by the analysis.
+
+
+---
+
+
+#### 📆 4. Generate a Weekly Plan Format
+
+
+Return a 7-day plan as a JSON-like structure:
+
+
+```json
+{
+  "Monday": {
+    "Focus": "Upper Body",
+    "Exercises": [
+      {"name": "Incline Dumbbell Press", "sets": 3, "reps": 10},
+      {"name": "Lateral Raises", "sets": 3, "reps": 12}
+    ]
+  },
+  ...
+}
+```
+
+
+---
+
+
+#### 🌐 5. Create an API Route
+
+
+Add a new Flask route (or Python backend endpoint) like:
+
+
+```python
+@app.route("/generate-workout", methods=["POST"])
+def generate_workout():
+    user_data = request.get_json()
+    plan = generate_workout_plan(user_data)
+    return jsonify(plan)
+```
+
+
+---
+
+
+#### 🎨 6. Frontend Integration
+
+
+- Link the “**Personalized Workout Plan**” button to call this endpoint
+- Display the workout as a clean, styled weekly grid or list
+- Optional: Highlight focus muscle groups in color, or tag them (e.g., “🟢 Priority: Arms”)
+
+
+---
+
+
+### 🧠 BONUS FEATURES (for later)
+
+
+- Allow user to regenerate plan every 4–6 weeks  
+- Track plan completion/progress  
+- Export workout to PDF or Google Calendar
+
+
+---
+
+
+Please begin implementing this by first creating the backend module, then wiring it into the frontend display. Keep all logic modular and explain what files you update.
+
+
+Thanks Replit! This will make the app feel like a true digital personal trainer 💪
+
+
