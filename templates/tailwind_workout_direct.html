@@ -180,9 +180,39 @@
           </div>
         </div>
         
+        <!-- Muscle Development Assessment -->
+        {% if muscle_assessment %}
+        <div class="bg-gray-800 rounded-xl p-6 shadow-lg" data-aos="fade-right" data-aos-delay="200">
+          <h3 class="text-2xl font-bold mb-4 text-white">Muscle Development</h3>
+          <p class="text-gray-300 mb-4">Based on your body analysis, we've assessed your muscle development:</p>
+          
+          <div class="space-y-3">
+            {% for muscle, status in muscle_assessment.items() %}
+            <div class="p-3 bg-gray-900 rounded-lg">
+              <div class="flex justify-between items-center">
+                <span class="text-white capitalize">{{ muscle|replace('_', ' ') }}</span>
+                <span class="flex items-center gap-1.5">
+                  {% if status == "Needs Growth" %}
+                  <span class="text-red-500">●</span>
+                  <span class="text-xs text-red-400">{{ status }}</span>
+                  {% elif status == "Developed" %}
+                  <span class="text-green-500">●</span>
+                  <span class="text-xs text-green-400">{{ status }}</span>
+                  {% else %}
+                  <span class="text-yellow-500">●</span>
+                  <span class="text-xs text-yellow-400">{{ status }}</span>
+                  {% endif %}
+                </span>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+        
         <!-- Weak points -->
         {% if weak_points %}
-        <div class="bg-gray-800 rounded-xl p-6 shadow-lg" data-aos="fade-right" data-aos-delay="200">
+        <div class="bg-gray-800 rounded-xl p-6 shadow-lg" data-aos="fade-right" data-aos-delay="300">
           <h3 class="text-2xl font-bold mb-4 text-white">Focus Areas</h3>
           <p class="text-gray-300 mb-4">Based on your genetic analysis, focus on these areas:</p>
           
@@ -271,13 +301,24 @@
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               {% for exercise in workout.exercises %}
-              <div class="exercise-card bg-gray-900 rounded-lg p-4">
+              <div class="exercise-card bg-gray-900 rounded-lg p-4 
+                {% if exercise.priority == 'high' %}border-l-4 border-red-500{% endif %}">
                 <div class="flex flex-col">
-                  <h4 class="text-lg font-semibold text-white mb-1">{{ exercise.name }}</h4>
+                  <div class="flex justify-between items-center">
+                    <h4 class="text-lg font-semibold text-white mb-1">{{ exercise.name }}</h4>
+                    {% if exercise.status_indicator %}
+                    <span class="text-xl" title="{{ exercise.development_status }}">{{ exercise.status_indicator }}</span>
+                    {% endif %}
+                  </div>
                   <p class="text-gray-400 text-sm mb-2">{{ exercise.focus }}</p>
                   <div class="flex flex-wrap gap-2 mt-auto">
                     <span class="set-rep-badge">Sets: {{ exercise.sets }}</span>
                     <span class="set-rep-badge">Reps: {{ exercise.reps }}</span>
+                    {% if exercise.development_status == "Needs Growth" %}
+                    <span class="set-rep-badge bg-red-900 text-red-200">Needs Growth</span>
+                    {% elif exercise.development_status == "Developed" %}
+                    <span class="set-rep-badge bg-green-900 text-green-200">Well Developed</span>
+                    {% endif %}
                   </div>
                 </div>
               </div>

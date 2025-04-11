@@ -155,74 +155,31 @@ class WorkoutPlanner:
             # Get measurements or use estimations
             measurements = user_data.get('measurements', {})
             
-            # Identify weak points based on ideal proportions
+            # Generate detailed muscle assessment
+            muscle_assessment = self.assess_muscle_development(measurements, gender, height_cm)
+            
+            # Identify weak points based on muscle assessment
             weak_points = []
             focus_areas = []
             
-            # Use baseline measurements for comparison
-            baselines = self.baseline_measurements.get(gender, self.baseline_measurements['male'])
+            # Map muscle groups to focus areas
+            muscle_to_focus_map = {
+                'shoulder_width': {'name': 'Shoulder Width', 'priority': 'high'},
+                'arm': {'name': 'Arm Development', 'priority': 'medium'},
+                'chest': {'name': 'Chest Development', 'priority': 'medium'},
+                'back': {'name': 'Back Width', 'priority': 'medium'},
+                'legs': {'name': 'Leg Development', 'priority': 'high'}
+            }
             
-            # Check shoulder to waist ratio (V-taper)
-            shoulder_width = measurements.get('shoulder_width_cm', 0)
-            waist_size = measurements.get('waist_circumference_cm', 0)
-            
-            if shoulder_width and waist_size:
-                shoulder_to_waist_ratio = shoulder_width / waist_size
-                ideal_ratio = 1.6 if gender == 'male' else 1.4
-                
-                if shoulder_to_waist_ratio < ideal_ratio * 0.9:  # 10% below ideal
-                    weak_points.append('shoulder_width')
+            # Transform muscle assessment into weak points and focus areas
+            for muscle, status in muscle_assessment.items():
+                if status == "Needs Growth" and muscle in muscle_to_focus_map:
+                    weak_points.append(muscle)
                     focus_areas.append({
-                        'name': 'Shoulder Width',
+                        'name': muscle_to_focus_map[muscle]['name'],
                         'rating': 'below_average',
-                        'priority': 'high'
+                        'priority': muscle_to_focus_map[muscle]['priority']
                     })
-            
-            # Check arm development
-            arm_size = measurements.get('arm_circumference_cm', 0)
-            ideal_arm_size = baselines.get('arm_size')(height_cm)
-            
-            if arm_size and arm_size < ideal_arm_size * 0.9:  # 10% below ideal
-                weak_points.append('arm_development')
-                focus_areas.append({
-                    'name': 'Arm Development',
-                    'rating': 'below_average',
-                    'priority': 'medium'
-                })
-            
-            # Check chest development
-            chest_size = measurements.get('chest_circumference_cm', 0)
-            ideal_chest_size = baselines.get('chest_size')(height_cm)
-            
-            if chest_size and chest_size < ideal_chest_size * 0.9:  # 10% below ideal
-                weak_points.append('chest_development')
-                focus_areas.append({
-                    'name': 'Chest Development',
-                    'rating': 'below_average',
-                    'priority': 'medium'
-                })
-            
-            # Check back width
-            lat_spread = measurements.get('lat_spread_cm', 0)
-            if lat_spread and lat_spread < shoulder_width * 0.9:  # Lats should be close to shoulder width
-                weak_points.append('back_width')
-                focus_areas.append({
-                    'name': 'Back Width',
-                    'rating': 'below_average',
-                    'priority': 'medium'
-                })
-            
-            # Check leg development
-            thigh_size = measurements.get('thigh_circumference_cm', 0)
-            ideal_thigh_size = baselines.get('thigh_size')(height_cm)
-            
-            if thigh_size and thigh_size < ideal_thigh_size * 0.9:  # 10% below ideal
-                weak_points.append('leg_development')
-                focus_areas.append({
-                    'name': 'Leg Development',
-                    'rating': 'below_average',
-                    'priority': 'high'
-                })
             
             # Check body fat levels
             high_body_fat = (gender == 'male' and body_fat > 18) or (gender == 'female' and body_fat > 25)
@@ -245,6 +202,7 @@ class WorkoutPlanner:
             return {
                 'weak_points': weak_points,
                 'focus_areas': focus_areas,
+                'muscle_assessment': muscle_assessment,
                 'experience_level': experience,
                 'high_body_fat': high_body_fat
             }
@@ -261,6 +219,132 @@ class WorkoutPlanner:
                 }],
                 'experience_level': experience,
                 'high_body_fat': False
+            }
+            
+    def assess_muscle_development(self, measurements, gender, height_cm):
+        """
+        Assess muscle development status based on measurements and ideal proportions.
+        
+        Args:
+            measurements (dict): Dictionary containing body measurements
+            gender (str): User's gender ('male' or 'female')
+            height_cm (float): User's height in centimeters
+            
+        Returns:
+            dict: Dictionary mapping each muscle group to its development status
+        """
+        try:
+            # Define thresholds based on baseline measurements
+            baselines = self.baseline_measurements.get(gender, self.baseline_measurements['male'])
+            
+            # Initialize assessment dictionary
+            assessment = {}
+            
+            # Assess shoulder development
+            shoulder_width = measurements.get('shoulder_width_cm', 0)
+            ideal_shoulder_width = baselines.get('shoulder_width')(height_cm)
+            
+            if shoulder_width:
+                if shoulder_width < ideal_shoulder_width * 0.9:
+                    assessment['shoulder_width'] = "Needs Growth"
+                elif shoulder_width > ideal_shoulder_width * 1.1:
+                    assessment['shoulder_width'] = "Developed"
+                else:
+                    assessment['shoulder_width'] = "Normal"
+            
+            # Assess arm development
+            arm_size = measurements.get('arm_circumference_cm', 0)
+            if not arm_size:
+                # Try left and right arm average
+                left_arm = measurements.get('left_arm_circumference_cm', 0)
+                right_arm = measurements.get('right_arm_circumference_cm', 0)
+                if left_arm and right_arm:
+                    arm_size = (left_arm + right_arm) / 2
+            
+            ideal_arm_size = baselines.get('arm_size')(height_cm)
+            
+            if arm_size:
+                if arm_size < ideal_arm_size * 0.9:
+                    assessment['arm'] = "Needs Growth"
+                elif arm_size > ideal_arm_size * 1.1:
+                    assessment['arm'] = "Developed"
+                else:
+                    assessment['arm'] = "Normal"
+            
+            # Assess chest development
+            chest_size = measurements.get('chest_circumference_cm', 0)
+            ideal_chest_size = baselines.get('chest_size')(height_cm)
+            
+            if chest_size:
+                if chest_size < ideal_chest_size * 0.9:
+                    assessment['chest'] = "Needs Growth"
+                elif chest_size > ideal_chest_size * 1.1:
+                    assessment['chest'] = "Developed"
+                else:
+                    assessment['chest'] = "Normal"
+            
+            # Assess back development
+            lat_spread = measurements.get('lat_spread_cm', measurements.get('back_width_cm', 0))
+            
+            if lat_spread and shoulder_width:
+                # Back should be developed in proportion to shoulders
+                if lat_spread < shoulder_width * 0.85:
+                    assessment['back'] = "Needs Growth"
+                elif lat_spread > shoulder_width * 0.95:
+                    assessment['back'] = "Developed"
+                else:
+                    assessment['back'] = "Normal"
+            
+            # Assess leg development
+            thigh_size = measurements.get('thigh_circumference_cm', 0)
+            if not thigh_size:
+                # Try left and right thigh average
+                left_thigh = measurements.get('left_thigh_circumference_cm', 0)
+                right_thigh = measurements.get('right_thigh_circumference_cm', 0)
+                if left_thigh and right_thigh:
+                    thigh_size = (left_thigh + right_thigh) / 2
+            
+            ideal_thigh_size = baselines.get('thigh_size')(height_cm)
+            
+            if thigh_size:
+                if thigh_size < ideal_thigh_size * 0.9:
+                    assessment['legs'] = "Needs Growth"
+                elif thigh_size > ideal_thigh_size * 1.1:
+                    assessment['legs'] = "Developed"
+                else:
+                    assessment['legs'] = "Normal"
+            
+            # Assess calf development
+            calf_size = measurements.get('calf_circumference_cm', 0)
+            if not calf_size:
+                # Try left and right calf average
+                left_calf = measurements.get('left_calf_circumference_cm', 0)
+                right_calf = measurements.get('right_calf_circumference_cm', 0)
+                if left_calf and right_calf:
+                    calf_size = (left_calf + right_calf) / 2
+            
+            ideal_calf_size = baselines.get('calf_size')(height_cm)
+            
+            if calf_size:
+                if calf_size < ideal_calf_size * 0.9:
+                    assessment['calves'] = "Needs Growth"
+                elif calf_size > ideal_calf_size * 1.1:
+                    assessment['calves'] = "Developed"
+                else:
+                    assessment['calves'] = "Normal"
+            
+            return assessment
+            
+        except Exception as e:
+            logger.error(f"Error in assess_muscle_development: {str(e)}")
+            # Return a default assessment if something goes wrong
+            return {
+                'shoulder_width': "Normal",
+                'arm': "Normal",
+                'chest': "Normal",
+                'back': "Normal",
+                'legs': "Normal",
+                'calves': "Normal"
             }
     
     def select_exercises_for_weak_points(self, weak_points, experience):
@@ -545,23 +629,48 @@ class WorkoutPlanner:
             weak_points = analysis['weak_points']
             experience = analysis['experience_level']
             high_body_fat = analysis['high_body_fat']
+            muscle_assessment = analysis.get('muscle_assessment', {})
+            
+            # Add visual indicators for muscle development status in the workout plan
+            muscle_status_indicators = {
+                "Needs Growth": "🔴", # Red indicator for muscles that need growth
+                "Normal": "🟡",      # Yellow indicator for normal muscles
+                "Developed": "🟢"    # Green indicator for well-developed muscles
+            }
+            
+            # Add development status to exercises
+            def add_status_to_exercises(exercises, muscle_group):
+                status = muscle_assessment.get(muscle_group, "Normal")
+                for ex in exercises:
+                    ex['development_status'] = status
+                    ex['status_indicator'] = muscle_status_indicators.get(status, "")
+                return exercises
             
             # Generate weekly workout plan based on Push/Pull/Legs split
             workout_plan = {
                 'Monday': {
                     'category': 'push',
                     'focus': 'Chest, Shoulders, Triceps',
-                    'exercises': self.create_push_day(weak_points, experience, high_body_fat)
+                    'exercises': add_status_to_exercises(
+                        self.create_push_day(weak_points, experience, high_body_fat),
+                        'chest'  # Primary muscle group for push day
+                    )
                 },
                 'Tuesday': {
                     'category': 'pull',
                     'focus': 'Back, Biceps, Rear Delts',
-                    'exercises': self.create_pull_day(weak_points, experience, high_body_fat)
+                    'exercises': add_status_to_exercises(
+                        self.create_pull_day(weak_points, experience, high_body_fat),
+                        'back'  # Primary muscle group for pull day
+                    )
                 },
                 'Wednesday': {
                     'category': 'legs',
                     'focus': 'Quadriceps, Hamstrings, Core',
-                    'exercises': self.create_leg_day(weak_points, experience, high_body_fat)
+                    'exercises': add_status_to_exercises(
+                        self.create_leg_day(weak_points, experience, high_body_fat),
+                        'legs'  # Primary muscle group for leg day
+                    )
                 },
                 'Thursday': {
                     'category': 'rest',
@@ -571,23 +680,81 @@ class WorkoutPlanner:
                 'Friday': {
                     'category': 'push',
                     'focus': 'Chest, Shoulders, Triceps',
-                    'exercises': self.create_push_day(weak_points, experience, high_body_fat)
+                    'exercises': add_status_to_exercises(
+                        self.create_push_day(weak_points, experience, high_body_fat),
+                        'chest'  # Primary muscle group for push day
+                    )
                 },
                 'Saturday': {
                     'category': 'pull',
                     'focus': 'Back, Biceps, Rear Delts',
-                    'exercises': self.create_pull_day(weak_points, experience, high_body_fat)
+                    'exercises': add_status_to_exercises(
+                        self.create_pull_day(weak_points, experience, high_body_fat),
+                        'back'  # Primary muscle group for pull day
+                    )
                 },
                 'Sunday': {
                     'category': 'legs',
                     'focus': 'Posterior Chain Focus',
-                    'exercises': self.create_leg_day(weak_points, experience, high_body_fat, posterior_chain_focus=True)
+                    'exercises': add_status_to_exercises(
+                        self.create_leg_day(weak_points, experience, high_body_fat, posterior_chain_focus=True),
+                        'legs'  # Primary muscle group for leg day
+                    )
                 }
             }
+            
+            # Adjust exercise selection based on muscle assessment
+            for day, workout in workout_plan.items():
+                if day == 'Thursday':  # Skip rest day
+                    continue
+                    
+                exercises = workout['exercises']
+                category = workout['category']
+                
+                # Prioritize exercises for underdeveloped muscles
+                if category == 'push':
+                    if muscle_assessment.get('chest') == 'Needs Growth':
+                        # Add more chest exercises or prioritize them
+                        chest_exercises = [ex for ex in exercises if 'chest' in ex['focus'].lower()]
+                        for ex in chest_exercises:
+                            ex['priority'] = 'high'
+                    
+                    if muscle_assessment.get('shoulder_width') == 'Needs Growth':
+                        # Add more shoulder exercises or prioritize them
+                        shoulder_exercises = [ex for ex in exercises if 'shoulder' in ex['focus'].lower() or 'delt' in ex['focus'].lower()]
+                        for ex in shoulder_exercises:
+                            ex['priority'] = 'high'
+                
+                elif category == 'pull':
+                    if muscle_assessment.get('back') == 'Needs Growth':
+                        # Add more back exercises or prioritize them
+                        back_exercises = [ex for ex in exercises if 'back' in ex['focus'].lower() or 'lat' in ex['focus'].lower()]
+                        for ex in back_exercises:
+                            ex['priority'] = 'high'
+                    
+                    if muscle_assessment.get('arm') == 'Needs Growth':
+                        # Add more bicep exercises or prioritize them
+                        bicep_exercises = [ex for ex in exercises if 'bicep' in ex['focus'].lower()]
+                        for ex in bicep_exercises:
+                            ex['priority'] = 'high'
+                
+                elif category == 'legs':
+                    if muscle_assessment.get('legs') == 'Needs Growth':
+                        # Add more leg exercises or prioritize them
+                        leg_exercises = [ex for ex in exercises if 'quad' in ex['focus'].lower() or 'hamstring' in ex['focus'].lower() or 'glute' in ex['focus'].lower()]
+                        for ex in leg_exercises:
+                            ex['priority'] = 'high'
+                    
+                    if muscle_assessment.get('calves') == 'Needs Growth':
+                        # Add more calf exercises or prioritize them
+                        calf_exercises = [ex for ex in exercises if 'calf' in ex['focus'].lower()]
+                        for ex in calf_exercises:
+                            ex['priority'] = 'high'
             
             return {
                 'workout_plan': workout_plan,
                 'analysis': analysis,
+                'muscle_assessment': muscle_assessment,
                 'training_tips': self._generate_training_tips(experience, high_body_fat),
                 'equipment': self._recommend_equipment(experience),
                 'progression_methods': self._progression_methods(experience)

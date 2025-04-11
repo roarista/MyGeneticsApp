@@ -1,0 +1,610 @@
+I'll help you implement the smart adaptive workout generator system. Based on the code we've already developed in `workout_planner.py`, we'll enhance it to better handle the dynamic workout planning requirements.
+
+First, let's examine the current workout planner implementation:
+
+Read file: utils/workout_planner.py
+
+
+Let's enhance the workout planner to better support the Push/Pull/Legs (PPL) split and dynamic workout generation. I'll create a new method to handle the PPL split specifically:
+
+```python:utils/workout_planner.py
+// ... existing code ...
+
+    def assess_muscle_development(self, measurements: Dict[str, Any], thresholds: Dict[str, Dict[str, float]]) -> Dict[str, str]:
+        """
+        Assess muscle development status based on measurements and thresholds.
+        
+        Args:
+            measurements: Dictionary containing body measurements
+            thresholds: Dictionary containing percentile thresholds for each muscle group
+            
+        Returns:
+            Dictionary mapping each muscle group to its development status
+        """
+        assessment = {}
+        
+        for muscle_group, measurement in measurements.items():
+            if isinstance(measurement, dict) and 'value' in measurement:
+                value = measurement['value']
+            elif isinstance(measurement, (int, float)):
+                value = measurement
+            else:
+                continue
+                
+            if muscle_group in thresholds:
+                if value < thresholds[muscle_group]['low']:
+                    assessment[muscle_group] = "Needs Growth"
+                elif value > thresholds[muscle_group]['high']:
+                    assessment[muscle_group] = "Developed"
+                else:
+                    assessment[muscle_group] = "Normal"
+        
+        return assessment
+
+    def generate_ppl_split(self, muscle_assessment: Dict[str, str], experience_level: str) -> Dict[str, List[Dict[str, Any]]]:
+        """
+        Generate a Push/Pull/Legs split based on muscle assessment and experience level.
+        
+        Args:
+            muscle_assessment: Dictionary mapping muscle groups to their development status
+            experience_level: User's training experience level
+            
+        Returns:
+            Dictionary containing the workout plan for each day
+        """
+        plan = {
+            'Push': [],  # Chest, shoulders, triceps
+            'Pull': [],  # Back, biceps
+            'Legs': [],  # Legs, core
+            'Rest': []
+        }
+        
+        # Define volume adjustments based on muscle development status
+        volume_multipliers = {
+            "Needs Growth": 1.3,  # 30% more volume
+            "Normal": 1.0,
+            "Developed": 0.8  # 20% less volume
+        }
+        
+        # Define exercise difficulty based on experience level
+        allowed_difficulty = {
+            'beginner': ['beginner'],
+            'intermediate': ['beginner', 'intermediate'],
+            'advanced': ['beginner', 'intermediate', 'advanced']
+        }[experience_level]
+        
+        # Generate Push day exercises
+        push_muscles = {
+            'chest': self.base_exercises['chest'],
+            'shoulders': self.base_exercises['shoulders'],
+            'triceps': [ex for ex in self.base_exercises['arms'] if 'triceps' in ex['target'].lower()]
+        }
+        
+        for muscle, exercises in push_muscles.items():
+            status = muscle_assessment.get(muscle, "Normal")
+            multiplier = volume_multipliers[status]
+            
+            # Filter exercises by difficulty
+            suitable_exercises = [ex for ex in exercises if ex['difficulty'] in allowed_difficulty]
+            
+            # Select exercises based on development needs
+            if status == "Needs Growth":
+                selected = suitable_exercises[:3]  # More exercises for underdeveloped muscles
+            else:
+                selected = suitable_exercises[:2]  # Fewer exercises for developed muscles
+                
+            # Adjust volume
+            for exercise in selected:
+                modified_exercise = exercise.copy()
+                modified_exercise['sets'] = math.ceil(exercise['sets'] * multiplier)
+                plan['Push'].append(modified_exercise)
+        
+        # Generate Pull day exercises
+        pull_muscles = {
+            'back': self.base_exercises['back'],
+            'biceps': [ex for ex in self.base_exercises['arms'] if 'biceps' in ex['target'].lower()]
+        }
+        
+        for muscle, exercises in pull_muscles.items():
+            status = muscle_assessment.get(muscle, "Normal")
+            multiplier = volume_multipliers[status]
+            
+            suitable_exercises = [ex for ex in exercises if ex['difficulty'] in allowed_difficulty]
+            
+            if status == "Needs Growth":
+                selected = suitable_exercises[:3]
+            else:
+                selected = suitable_exercises[:2]
+                
+            for exercise in selected:
+                modified_exercise = exercise.copy()
+                modified_exercise['sets'] = math.ceil(exercise['sets'] * multiplier)
+                plan['Pull'].append(modified_exercise)
+        
+        # Generate Legs day exercises
+        legs_muscles = {
+            'legs': self.base_exercises['legs'],
+            'core': self.base_exercises['core']
+        }
+        
+        for muscle, exercises in legs_muscles.items():
+            status = muscle_assessment.get(muscle, "Normal")
+            multiplier = volume_multipliers[status]
+            
+            suitable_exercises = [ex for ex in exercises if ex['difficulty'] in allowed_difficulty]
+            
+            if status == "Needs Growth":
+                selected = suitable_exercises[:3]
+            else:
+                selected = suitable_exercises[:2]
+                
+            for exercise in selected:
+                modified_exercise = exercise.copy()
+                modified_exercise['sets'] = math.ceil(exercise['sets'] * multiplier)
+                plan['Legs'].append(modified_exercise)
+        
+        # Add cardio based on body composition
+        if 'body_fat_percentage' in muscle_assessment:
+            cardio_exercises = [ex for ex in self.base_exercises['cardio'] if ex['difficulty'] in allowed_difficulty]
+            if cardio_exercises:
+                plan['Push'].append(cardio_exercises[0])
+                plan['Pull'].append(cardio_exercises[1] if len(cardio_exercises) > 1 else cardio_exercises[0])
+                plan['Legs'].append(cardio_exercises[2] if len(cardio_exercises) > 2 else cardio_exercises[0])
+        
+        return plan
+
+    def generate_weekly_schedule(self, ppl_plan: Dict[str, List[Dict[str, Any]]]) -> Dict[str, List[Dict[str, Any]]]:
+        """
+        Generate a weekly schedule from the PPL split plan.
+        
+        Args:
+            ppl_plan: Dictionary containing the PPL split workout plan
+            
+        Returns:
+            Dictionary mapping each day to its workout routine
+        """
+        weekly_schedule = {
+            'Monday': ppl_plan['Push'],
+            'Tuesday': ppl_plan['Pull'],
+            'Wednesday': ppl_plan['Legs'],
+            'Thursday': ppl_plan['Push'],
+            'Friday': ppl_plan['Pull'],
+            'Saturday': ppl_plan['Legs'],
+            'Sunday': ppl_plan['Rest']
+        }
+        
+        return weekly_schedule
+
+// ... existing code ...
+```
+
+
+Now let's check if we have a route in `app.py` that handles the workout generation:
+
+Ran tool
+
+
+Let's add the workout route to handle the workout generation:
+
+```python:app.py
+// ... existing code ...
+
+@app.route('/generate_workout', methods=['POST'])
+def generate_workout():
+    """Generate a personalized workout plan based on physique analysis."""
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+
+        # Extract required data
+        user_id = data.get('user_id')
+        analysis_id = data.get('analysis_id')
+        experience_level = data.get('experience_level', 'beginner')
+
+        if not user_id or not analysis_id:
+            return jsonify({'error': 'Missing required parameters'}), 400
+
+        # Get the latest analysis results
+        analysis_results = get_analysis_results(analysis_id)
+        if not analysis_results:
+            return jsonify({'error': 'Analysis results not found'}), 404
+
+        # Get user information
+        user_info = get_user_info(user_id)
+        if not user_info:
+            return jsonify({'error': 'User not found'}), 404
+
+        # Initialize workout planner
+        planner = WorkoutPlanner()
+
+        # Define measurement thresholds based on height and gender
+        height_cm = user_info.get('height_cm', 170)
+        gender = user_info.get('gender', 'male')
+        
+        thresholds = {
+            'chest': {
+                'low': planner.baseline_measurements[gender]['chest'](height_cm) * 0.9,
+                'high': planner.baseline_measurements[gender]['chest'](height_cm) * 1.1
+            },
+            'shoulders': {
+                'low': planner.baseline_measurements[gender]['shoulder_width'](height_cm) * 0.9,
+                'high': planner.baseline_measurements[gender]['shoulder_width'](height_cm) * 1.1
+            },
+            'arms': {
+                'low': planner.baseline_measurements[gender]['arm'](height_cm) * 0.9,
+                'high': planner.baseline_measurements[gender]['arm'](height_cm) * 1.1
+            },
+            'back': {
+                'low': planner.baseline_measurements[gender]['shoulder_width'](height_cm) * 0.95,
+                'high': planner.baseline_measurements[gender]['shoulder_width'](height_cm) * 1.15
+            },
+            'legs': {
+                'low': planner.baseline_measurements[gender]['thigh'](height_cm) * 0.9,
+                'high': planner.baseline_measurements[gender]['thigh'](height_cm) * 1.1
+            }
+        }
+
+        # Assess muscle development
+        measurements = {
+            'chest': analysis_results.get('chest_circumference'),
+            'shoulders': analysis_results.get('shoulder_width'),
+            'arms': analysis_results.get('arm_circumference'),
+            'back': analysis_results.get('back_width'),
+            'legs': analysis_results.get('thigh_circumference'),
+            'body_fat_percentage': analysis_results.get('body_fat_percentage')
+        }
+        
+        muscle_assessment = planner.assess_muscle_development(measurements, thresholds)
+        
+        # Generate PPL split based on assessment
+        ppl_plan = planner.generate_ppl_split(muscle_assessment, experience_level)
+        
+        # Generate weekly schedule
+        weekly_schedule = planner.generate_weekly_schedule(ppl_plan)
+        
+        # Prepare response
+        response = {
+            'workout_plan': weekly_schedule,
+            'muscle_assessment': muscle_assessment,
+            'experience_level': experience_level,
+            'generated_at': datetime.now().isoformat(),
+            'user_id': user_id,
+            'analysis_id': analysis_id
+        }
+        
+        return jsonify(response)
+        
+    except Exception as e:
+        logger.error(f"Error generating workout plan: {str(e)}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+// ... existing code ...
+```
+
+
+Now let's create a new template to display the workout plan:
+
+```html:templates/workout_plan.html
+{% extends "base.html" %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-100 py-6 flex flex-col justify-center sm:py-12">
+    <div class="relative py-3 sm:max-w-5xl sm:mx-auto">
+        <div class="relative px-4 py-10 bg-white mx-8 md:mx-0 shadow rounded-3xl sm:p-10">
+            <div class="max-w-4xl mx-auto">
+                <div class="flex flex-col md:flex-row">
+                    <!-- Workout Overview -->
+                    <div class="w-full md:w-1/3 pr-4">
+                        <div class="bg-gray-50 rounded-xl p-6 mb-6">
+                            <h2 class="text-2xl font-semibold text-gray-900 mb-4">Workout Overview</h2>
+                            <div class="space-y-4">
+                                <div>
+                                    <h3 class="text-sm font-medium text-gray-500">Experience Level</h3>
+                                    <p class="mt-1 text-lg font-semibold text-gray-900">{{ experience_level|title }}</p>
+                                </div>
+                                <div>
+                                    <h3 class="text-sm font-medium text-gray-500">Training Split</h3>
+                                    <p class="mt-1 text-lg font-semibold text-gray-900">Push/Pull/Legs (PPL)</p>
+                                </div>
+                                <div>
+                                    <h3 class="text-sm font-medium text-gray-500">Generated On</h3>
+                                    <p class="mt-1 text-lg font-semibold text-gray-900">{{ generated_at|date }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Muscle Assessment -->
+                        <div class="bg-gray-50 rounded-xl p-6">
+                            <h2 class="text-2xl font-semibold text-gray-900 mb-4">Muscle Assessment</h2>
+                            <div class="space-y-3">
+                                {% for muscle, status in muscle_assessment.items() %}
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-medium text-gray-500">{{ muscle|title }}</span>
+                                    <span class="px-3 py-1 rounded-full text-sm font-medium
+                                        {% if status == 'Needs Growth' %}
+                                            bg-red-100 text-red-800
+                                        {% elif status == 'Developed' %}
+                                            bg-green-100 text-green-800
+                                        {% else %}
+                                            bg-blue-100 text-blue-800
+                                        {% endif %}">
+                                        {{ status }}
+                                    </span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Weekly Schedule -->
+                    <div class="w-full md:w-2/3 pl-4 mt-6 md:mt-0">
+                        <div class="bg-white">
+                            <div class="sm:hidden">
+                                <label for="day-select" class="sr-only">Select a day</label>
+                                <select id="day-select" name="day" class="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm">
+                                    {% for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
+                                    <option>{{ day }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="hidden sm:block">
+                                <div class="border-b border-gray-200">
+                                    <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                                        {% for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
+                                        <button type="button" 
+                                                onclick="showDay('{{ day }}')"
+                                                class="day-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
+                                                    {% if loop.first %}
+                                                        border-blue-500 text-blue-600
+                                                    {% else %}
+                                                        border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300
+                                                    {% endif %}"
+                                                aria-current="{% if loop.first %}page{% endif %}">
+                                            {{ day }}
+                                        </button>
+                                        {% endfor %}
+                                    </nav>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Workout Details -->
+                        {% for day, exercises in workout_plan.items() %}
+                        <div id="{{ day }}-workout" class="day-content mt-6 {% if not loop.first %}hidden{% endif %}">
+                            <div class="bg-white shadow-sm rounded-lg divide-y divide-gray-200">
+                                {% for exercise in exercises %}
+                                <div class="p-6">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex-1">
+                                            <h3 class="text-lg font-medium text-gray-900">{{ exercise.name }}</h3>
+                                            <p class="mt-1 text-sm text-gray-500">{{ exercise.target }}</p>
+                                        </div>
+                                        <div class="ml-4 flex-shrink-0">
+                                            <span class="inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                                                {{ exercise.sets }} sets × {{ exercise.reps }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    {% if exercise.difficulty %}
+                                    <div class="mt-2">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                            {% if exercise.difficulty == 'beginner' %}
+                                                bg-green-100 text-green-800
+                                            {% elif exercise.difficulty == 'intermediate' %}
+                                                bg-yellow-100 text-yellow-800
+                                            {% else %}
+                                                bg-red-100 text-red-800
+                                            {% endif %}">
+                                            {{ exercise.difficulty|title }}
+                                        </span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showDay(day) {
+    // Hide all day contents
+    document.querySelectorAll('.day-content').forEach(el => el.classList.add('hidden'));
+    
+    // Show selected day content
+    document.getElementById(day + '-workout').classList.remove('hidden');
+    
+    // Update tab styles
+    document.querySelectorAll('.day-tab').forEach(tab => {
+        tab.classList.remove('border-blue-500', 'text-blue-600');
+        tab.classList.add('border-transparent', 'text-gray-500');
+    });
+    
+    // Style active tab
+    event.currentTarget.classList.remove('border-transparent', 'text-gray-500');
+    event.currentTarget.classList.add('border-blue-500', 'text-blue-600');
+}
+
+// Handle mobile select changes
+document.getElementById('day-select')?.addEventListener('change', function(e) {
+    showDay(e.target.value);
+});
+</script>
+{% endblock %}
+```
+
+
+Now let's add a route to display the workout plan:
+
+```python:app.py
+// ... existing code ...
+
+@app.route('/workout/<analysis_id>')
+def workout(analysis_id):
+    """Display the workout plan for a given analysis."""
+    try:
+        # Get user information
+        if not current_user.is_authenticated:
+            return redirect(url_for('login'))
+
+        # Get analysis results
+        analysis_results = get_analysis_results(analysis_id)
+        if not analysis_results:
+            flash('Analysis results not found.', 'error')
+            return redirect(url_for('dashboard'))
+
+        # Get user information
+        user_info = get_user_info(current_user.id)
+        if not user_info:
+            flash('User information not found.', 'error')
+            return redirect(url_for('profile'))
+
+        # Generate workout plan
+        planner = WorkoutPlanner()
+        
+        # Define measurement thresholds
+        height_cm = user_info.get('height_cm', 170)
+        gender = user_info.get('gender', 'male')
+        
+        thresholds = {
+            'chest': {
+                'low': planner.baseline_measurements[gender]['chest'](height_cm) * 0.9,
+                'high': planner.baseline_measurements[gender]['chest'](height_cm) * 1.1
+            },
+            'shoulders': {
+                'low': planner.baseline_measurements[gender]['shoulder_width'](height_cm) * 0.9,
+                'high': planner.baseline_measurements[gender]['shoulder_width'](height_cm) * 1.1
+            },
+            'arms': {
+                'low': planner.baseline_measurements[gender]['arm'](height_cm) * 0.9,
+                'high': planner.baseline_measurements[gender]['arm'](height_cm) * 1.1
+            },
+            'back': {
+                'low': planner.baseline_measurements[gender]['shoulder_width'](height_cm) * 0.95,
+                'high': planner.baseline_measurements[gender]['shoulder_width'](height_cm) * 1.15
+            },
+            'legs': {
+                'low': planner.baseline_measurements[gender]['thigh'](height_cm) * 0.9,
+                'high': planner.baseline_measurements[gender]['thigh'](height_cm) * 1.1
+            }
+        }
+
+        # Assess muscle development
+        measurements = {
+            'chest': analysis_results.get('chest_circumference'),
+            'shoulders': analysis_results.get('shoulder_width'),
+            'arms': analysis_results.get('arm_circumference'),
+            'back': analysis_results.get('back_width'),
+            'legs': analysis_results.get('thigh_circumference'),
+            'body_fat_percentage': analysis_results.get('body_fat_percentage')
+        }
+        
+        muscle_assessment = planner.assess_muscle_development(measurements, thresholds)
+        
+        # Get user's experience level
+        experience_level = user_info.get('experience_level', 'beginner')
+        
+        # Generate PPL split based on assessment
+        ppl_plan = planner.generate_ppl_split(muscle_assessment, experience_level)
+        
+        # Generate weekly schedule
+        weekly_schedule = planner.generate_weekly_schedule(ppl_plan)
+        
+        return render_template('workout_plan.html',
+                             workout_plan=weekly_schedule,
+                             muscle_assessment=muscle_assessment,
+                             experience_level=experience_level,
+                             generated_at=datetime.now())
+                             
+    except Exception as e:
+        logger.error(f"Error displaying workout plan: {str(e)}")
+        flash('An error occurred while generating your workout plan.', 'error')
+        return redirect(url_for('dashboard'))
+
+// ... existing code ...
+```
+
+
+Now let's update the analysis page to include a link to generate a workout plan:
+
+```html:templates/analysis.html
+// ... existing code ...
+
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Generate Workout Plan Button -->
+            <div class="mt-8 flex justify-center">
+                <a href="{{ url_for('workout', analysis_id=analysis_id) }}" 
+                   class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                    Generate Workout Plan
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+// ... existing code ...
+```
+
+
+I've implemented a comprehensive workout generation system that:
+
+1. **Analyzes Body Composition**:
+   - Uses the `assess_muscle_development` method to evaluate each muscle group
+   - Compares measurements against personalized thresholds based on height and gender
+   - Categorizes muscles as "Needs Growth", "Normal", or "Developed"
+
+2. **Generates Push/Pull/Legs (PPL) Split**:
+   - Creates a balanced PPL split with the `generate_ppl_split` method
+   - Adjusts volume based on muscle development status:
+     - Underdeveloped muscles get 30% more volume
+     - Well-developed muscles get 20% less volume
+   - Filters exercises based on experience level
+   - Includes cardio based on body composition
+
+3. **Creates Weekly Schedule**:
+   - Generates a 6-day PPL split with one rest day
+   - Alternates Push, Pull, and Legs workouts
+   - Provides detailed exercise information including sets, reps, and difficulty
+
+4. **Modern UI Components**:
+   - Clean, responsive design using Tailwind CSS
+   - Interactive day selection with tabs
+   - Mobile-friendly layout
+   - Visual indicators for muscle development status
+   - Exercise cards with detailed information
+
+5. **Integration with Existing System**:
+   - Uses analysis results from the physique analysis module
+   - Connects to user profile for experience level
+   - Provides direct access from analysis results page
+
+To use the system:
+
+1. Complete a physique analysis
+2. Click the "Generate Workout Plan" button on the analysis page
+3. View your personalized workout plan with:
+   - Workout overview
+   - Muscle assessment
+   - Daily workouts
+   - Exercise details
+
+The system will automatically adjust your workout based on:
+- Underdeveloped muscle groups (more volume and exercises)
+- Well-developed areas (maintenance volume)
+- Experience level (exercise selection and difficulty)
+- Body composition (cardio integration)
+
+Would you like me to make any adjustments to the implementation?

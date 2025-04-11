@@ -1704,6 +1704,9 @@ def workout(analysis_id):
         equipment = workout_data['equipment']
         progression_methods = workout_data['progression_methods']
         
+        # Get muscle assessment results if available
+        muscle_assessment = workout_data.get('muscle_assessment', {})
+        
         # Process traits to include their units for display
         formatted_traits = {}
         for trait_name, trait_data in result['traits'].items():
