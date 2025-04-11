@@ -622,6 +622,8 @@ def results(analysis_id):
             'recommendations': result.get('recommendations', {}),
             'user_info': result.get('user_info', {}),
             'image_data': img_b64,
+            'front_image': front_img_b64,  # Add front image
+            'back_image': back_img_b64,    # Add back image
             'format_value': format_trait_value,
             'is_3d_scan': analysis_type == '3d_scan',
             'is_dual_photo': analysis_type == 'dual_photo',

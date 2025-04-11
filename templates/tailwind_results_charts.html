@@ -537,11 +537,12 @@
                                 <span class="text-lg font-bold text-white">Arm Development</span>
                             </div>
                             
-                            {% if estimated_measurements.get('left_arm_cm') and estimated_measurements.get('right_arm_cm') %}
-                                {% set left_arm = estimated_measurements.get('left_arm_cm').value|float %}
-                                {% set right_arm = estimated_measurements.get('right_arm_cm').value|float %}
+                            {% if enhanced_measurements.get('left_bicep_circumference_cm') and enhanced_measurements.get('right_bicep_circumference_cm') %}
+                                {% set left_arm = enhanced_measurements.get('left_bicep_circumference_cm', 0)|float %}
+                                {% set right_arm = enhanced_measurements.get('right_bicep_circumference_cm', 0)|float %}
                                 {% set avg_arm = (left_arm + right_arm) / 2 %}
-                                {% set arm_height_ratio = (avg_arm / basic_measurements.get('Height', {'value': 180}).value|float * 100)|int %}
+                                {% set height = basic_measurements.get('Height', {}).get('value', 180)|float %}
+                                {% set arm_height_ratio = (avg_arm / height * 100)|int %}
                                 {% set score = arm_height_ratio * 5 %}
                                 {% set status = "Needs Growth" %}
                                 {% set color = "red" %}
@@ -560,7 +561,7 @@
                             {% endif %}
                         </div>
                         
-                        {% if estimated_measurements.get('left_arm_cm') and estimated_measurements.get('right_arm_cm') %}
+                        {% if enhanced_measurements.get('left_bicep_circumference_cm') and enhanced_measurements.get('right_bicep_circumference_cm') %}
                             <div class="flex items-center space-x-1 mb-1">
                                 {% set blocks = 5 %}
                                 {% set filled_blocks = (score / 20)|int %}
@@ -736,11 +737,11 @@
                                 <span class="text-lg font-bold text-white">Leg Development</span>
                             </div>
                             
-                            {% if estimated_measurements.get('left_thigh_cm') and estimated_measurements.get('right_thigh_cm') %}
-                                {% set left_thigh = estimated_measurements.get('left_thigh_cm').value|float %}
-                                {% set right_thigh = estimated_measurements.get('right_thigh_cm').value|float %}
+                            {% if enhanced_measurements.get('left_thigh_circumference_cm') and enhanced_measurements.get('right_thigh_circumference_cm') %}
+                                {% set left_thigh = enhanced_measurements.get('left_thigh_circumference_cm', 0)|float %}
+                                {% set right_thigh = enhanced_measurements.get('right_thigh_circumference_cm', 0)|float %}
                                 {% set avg_thigh = (left_thigh + right_thigh) / 2 %}
-                                {% set waist = basic_measurements.get('Waist', {'value': 100}).value|float %}
+                                {% set waist = enhanced_measurements.get('waist_circumference_cm', basic_measurements.get('Waist', {'value': 100}).value)|float %}
                                 {% set thigh_waist_ratio = ((avg_thigh / waist) * 100)|int %}
                                 {% set score = thigh_waist_ratio * 1.5 %}
                                 {% set status = "Needs Growth" %}
@@ -760,7 +761,7 @@
                             {% endif %}
                         </div>
                         
-                        {% if estimated_measurements.get('left_thigh_cm') and estimated_measurements.get('right_thigh_cm') %}
+                        {% if enhanced_measurements.get('left_thigh_circumference_cm') and enhanced_measurements.get('right_thigh_circumference_cm') %}
                             <div class="flex items-center space-x-1 mb-1">
                                 {% set blocks = 5 %}
                                 {% set filled_blocks = (score / 20)|int %}
@@ -804,9 +805,9 @@
                                 <span class="text-lg font-bold text-white">Core Development</span>
                             </div>
                             
-                            {% if basic_measurements.get('Waist') %}
-                                {% set waist = basic_measurements.get('Waist').value|float %}
-                                {% set height = basic_measurements.get('Height', {'value': 180}).value|float %}
+                            {% if enhanced_measurements.get('waist_circumference_cm') %}
+                                {% set waist = enhanced_measurements.get('waist_circumference_cm')|float %}
+                                {% set height = enhanced_measurements.get('height_cm', basic_measurements.get('Height', {'value': 180}).value)|float %}
                                 {% set waist_height_ratio = ((waist / height) * 100)|int %}
                                 {% set score = 100 - (waist_height_ratio * 2) %}
                                 {% set status = "Needs Improvement" %}
@@ -826,7 +827,7 @@
                             {% endif %}
                         </div>
                         
-                        {% if basic_measurements.get('Waist') %}
+                        {% if enhanced_measurements.get('waist_circumference_cm') %}
                             <div class="flex items-center space-x-1 mb-1">
                                 {% set blocks = 5 %}
                                 {% set filled_blocks = (score / 20)|int %}
