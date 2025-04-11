@@ -1,0 +1,162 @@
+Absolutely — here is the fully revised prompt written **specifically for Replit's AI agent** (no middle layer like Cursor). This is the version you can **copy and paste directly into Replit’s AI**, and it will know exactly what to do.
+
+---
+
+## ✅ PROMPT TO GIVE DIRECTLY TO REPLIT AI:
+
+---
+
+I want you to build a new feature into this fitness app. Below is a **detailed step-by-step plan** for what needs to be done. Please read everything carefully, and follow the plan exactly as laid out.
+
+---
+
+### 🧠 GOAL:
+
+Add a new feature that allows a user to upload their **front and back photos**, enter their **height**, **weight**, **age**, and **gender**, and receive **50 bodybuilding-relevant body measurements** and physique traits. These should be calculated using 3rd-party APIs that can analyze body composition and shape.
+
+---
+
+### 📥 USER INPUT REQUIREMENTS:
+
+The user should be able to:
+- Upload **two images** (front and back of their body)
+- Enter:
+  - Height
+  - Weight
+  - Age
+  - Gender
+
+---
+
+### 📐 RETURN TO USER:
+After processing their data and photos, the user should receive these **50 key physique metrics**:
+
+(Include this full list in the frontend display output)
+
+1. Body Fat Percentage  
+2. Lean Body Mass  
+3. Muscle Mass Percentage  
+4. Visceral Fat Level  
+5. Subcutaneous Fat Thickness  
+6. Water Retention Level  
+7. Skin Thickness  
+8. Muscle Density  
+9. Muscle Hardness  
+10. Muscle Fullness  
+11. Waist-to-Shoulder Ratio  
+12. Waist-to-Hip Ratio  
+13. Chest-to-Waist Ratio  
+14. Arm-to-Waist Ratio  
+15. Leg-to-Waist Ratio  
+16. Thigh-to-Calf Ratio  
+17. Upper Arm Symmetry (Left vs Right)  
+18. Leg Symmetry (Left vs Right)  
+19. Shoulder Width  
+20. Hip Width  
+21. Neck Circumference  
+22. Chest Circumference  
+23. Upper Arm Circumference  
+24. Forearm Circumference  
+25. Waist Circumference  
+26. Hip Circumference  
+27. Thigh Circumference  
+28. Calf Circumference  
+29. Ankle Circumference  
+30. Wrist Circumference  
+31. Visible Muscle Striations  
+32. Muscle Separation  
+33. Vascularity  
+34. Abdominal Definition  
+35. Oblique Definition  
+36. Quadriceps Separation  
+37. Hamstring Definition  
+38. Glute-Ham Tie-In  
+39. Deltoid Separation  
+40. Triceps Definition  
+41. X-Frame Aesthetic  
+42. V-Taper Look  
+43. Muscle Maturity  
+44. Skin Tone and Texture  
+45. Posture and Posing Quality  
+46. Symmetrical Posing  
+47. Biceps Insertion (high/low)  
+48. Pectoral Insertion (wide/narrow)  
+49. Abdominal Muscle Symmetry  
+50. Calf Insertion Type (high/low)
+
+---
+
+### 🔌 SUPPORTED EXTERNAL APIS:
+
+Use one (or a combination) of these APIs to extract body measurements from the photos + inputs:
+
+1. [**Bodygram API**](https://bodygram.com) – Offers full-body measurements from height, weight, and images  
+2. [**Mirrorsize API**](https://mirrorsize.com) – Clothing/fitness image-to-measurement API  
+3. [**Zyla BMI Calculator API**](https://zylalabs.com) – Can help provide BMI/BMR values  
+4. [**LogMeal Body Measurement API**](https://logmeal.com/api/body-measurements) – Tracks long-term body measurement data  
+5. [**Health Calculator API**](https://rapidapi.com/kidddevs/api/health-calculator-api) – Returns metabolic rate, BEE, TDEE etc.
+
+If these APIs require keys or setup, create the functions using placeholders and simulate the response JSON format in mock functions so the app logic is complete.
+
+---
+
+### 🔧 IMPLEMENTATION STEPS:
+
+Please follow this technical guide step-by-step and make sure each part works before moving to the next:
+
+#### 1. **Create a UI Form**
+- Fields:
+  - Height
+  - Weight
+  - Age
+  - Gender
+  - File upload (2 images: front + back)
+- Add frontend validation for missing inputs
+
+#### 2. **Back-End API Integration**
+- Set up a Python Flask route (or use existing backend) to handle POST request from the form
+- On form submit:
+  - Send data and images to the selected 3rd-party body measurement API
+  - Parse the response and extract values for all 50 physique metrics
+
+#### 3. **Simulate Response (if needed)**
+- If API isn’t connected yet, simulate with:
+```json
+{
+  "body_fat_percentage": 14.5,
+  "waist_circumference": 80,
+  "shoulder_width": 115,
+  ...
+}
+```
+- Fill in all 50 measurement keys so the frontend logic is ready
+
+#### 4. **Display Results to User**
+- Show each measurement clearly
+- Group by category (Body Fat, Muscle Size, Aesthetics, Symmetry, Insertions)
+- Optional: Add visual feedback like checkmarks, color-coding, or icons
+
+#### 5. **Organize Code Structure**
+- `/routes/image_analysis.py` – API call and parsing logic  
+- `/templates/results.html` – Display 50 metrics nicely  
+- `/static/js/form-validation.js` – Handle upload errors, missing data  
+- `/utils/api_response_mapper.py` – Converts API result to our metric list  
+
+---
+
+### 📘 FINAL EXPLANATION (for me as a founder):
+
+At the end, summarize what was built in simple terms:
+
+- How the inputs are used  
+- What happens when a user submits their photos  
+- Which external API is used  
+- How the measurements are calculated or mocked  
+- How the results are displayed in the UI  
+- What I need to do next (e.g. add API keys, style the page, etc.)
+
+---
+
+Please now begin implementing this. Start with the backend POST route and simulated API response. Then build the form, and finally create the result display view.
+
+Let me know if you need to break it into smaller steps.
