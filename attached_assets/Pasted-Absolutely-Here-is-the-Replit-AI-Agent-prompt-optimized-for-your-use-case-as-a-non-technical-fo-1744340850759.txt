@@ -1,0 +1,67 @@
+Absolutely! Here is the **Replit AI Agent prompt**—optimized for your use case as a non-technical founder. You can copy and paste this directly into Replit to guide it in implementing your **Lovable UI** design while preserving all the app’s core features:
+
+---
+
+**Prompt for Replit AI:**
+
+Hi Replit 👋 I recently redesigned my app’s UI using **Lovable** to improve visual design and user experience. The preview of the new UI is here:  
+🔗 **https://preview--physique-genesis-studio.lovable.app**
+
+I'd like you to help me **replace the current UI** with this new one, while keeping all the **backend logic and analysis features** intact.
+
+### ✅ Here’s what I need:
+
+---
+
+### 🧠 General Instructions
+
+- **Rebuild the frontend using the new Lovable design.**
+- You can either replicate the design manually or, if Lovable provides exportable HTML/CSS/JS, use that as a starting point.
+- Please **implement this in the existing Replit codebase** using the appropriate frontend framework (e.g., React, HTML + CSS, etc.).
+
+---
+
+### 🎯 UI Integration Tasks
+
+1. **Recreate layout and styling from Lovable**:
+   - Use the new layout grid, cards, fonts, and color styles.
+   - Keep it modern, bold, and fitness-themed.
+
+2. **Replace the old interface with the new UI components**:
+   - Profile analysis panel  
+   - Dual image upload section  
+   - Tabs for body composition, measurements, aesthetic scores  
+   - Improved measurement output visualization (clean spacing, icons, indicators)
+
+3. **Wire new UI elements to current app logic**:
+   - Connect photo upload to the same endpoint or image-processing function.  
+   - Ensure measurements (e.g., arm circumference, BMI, muscle potential) still pull from backend logic.  
+   - Display real results using the updated styling (e.g., colors, confidence indicators).  
+
+4. **Ensure full responsiveness and clean visual flow**:
+   - Desktop, tablet, mobile layout support  
+   - Use TailwindCSS or SCSS for styling if that’s what the app is using now  
+   - Keep contrast readable and interactive elements clear
+
+---
+
+### 🧩 Technical Notes
+
+- Backend logic and image analysis code **must stay unchanged**.
+- Just plug the **new design** into the current backend endpoints.
+- If you update file names or structure, please explain that in a comment.
+
+---
+
+### 📝 After Implementation
+
+Please leave a comment explaining:
+- What files were changed or added  
+- How the Lovable design was broken into components  
+- How the new frontend interacts with existing backend logic
+
+Thanks so much! This new design will make the app feel far more professional and exciting 💪🔥
+
+---
+
+Let me know when you’re ready to move into animation upgrades, design polish, or connecting this to mobile next.

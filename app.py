@@ -493,6 +493,19 @@ def results(analysis_id):
         back_img_b64 = None
         img_b64 = None
         
+        # Create a default bodybuilding object with fallback values if not present
+        if 'bodybuilding_analysis' not in result or not result['bodybuilding_analysis']:
+            result['bodybuilding_analysis'] = {
+                'body_fat_percentage': 0.0,
+                'lean_body_mass': 0.0,
+                'body_fat_mass': 0.0,
+                'ffmi': 0.0,
+                'body_type': 'Unknown',
+                'muscle_building_potential': 0.0,
+                'body_fat_confidence': 0.5
+            }
+            logger.warning("Missing bodybuilding_analysis object - using defaults")
+        
         # Handle different types of analysis
         if analysis_type == 'dual_photo':
             try:
@@ -732,7 +745,7 @@ def results(analysis_id):
             template_data['front_measurements'] = result.get('front_measurements', {})
             template_data['back_measurements'] = result.get('back_measurements', {})
         
-        return render_template('tailwind_results.html', **template_data)
+        return render_template('lovable_results.html', **template_data)
         
     except Exception as e:
         logger.error(f"Error displaying results: {str(e)}")
@@ -1006,7 +1019,7 @@ def scan3d_results(analysis_id):
                 }
     
     return render_template(
-        'tailwind_results.html',
+        'lovable_results.html',
         analysis_id=analysis_id,
         analysis=analysis,  # Add analysis object for template compatibility
         traits=formatted_traits,
@@ -1390,7 +1403,7 @@ def recommendations(analysis_id):
                 circumference_measurements_right[display_key] = measurements[key]
     
     return render_template(
-        'tailwind_results.html',
+        'lovable_results.html',
         analysis_id=analysis_id,
         analysis=analysis,  # Add analysis object for template compatibility
         bodybuilding=bodybuilding,  # Bodybuilding metrics for left panel
