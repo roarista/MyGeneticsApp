@@ -135,7 +135,173 @@
     border-color: rgba(82, 194, 52, 0.8);
     box-shadow: 0 0 15px rgba(82, 194, 52, 0.4);
   }
+  
+  .priority-exercise {
+    border-left: 4px solid #ffd700;
+  }
+  
+  .status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-left: 0.5rem;
+  }
+  
+  .status-needs-growth {
+    background-color: rgba(239, 68, 68, 0.2);
+    color: rgb(239, 68, 68);
+  }
+  
+  .status-developed {
+    background-color: rgba(34, 197, 94, 0.2);
+    color: rgb(34, 197, 94);
+  }
+  
+  .status-normal {
+    background-color: rgba(234, 179, 8, 0.2);
+    color: rgb(234, 179, 8);
+  }
 </style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Get the analysis ID from the page
+    const analysisId = "{{ analysis_id }}";
+    
+    // Initialize the workout display area
+    const selectedWorkoutDisplay = document.getElementById('selected-workout-display');
+    
+    // Function to fetch and display workout for a specific day
+    async function fetchWorkout(day) {
+      try {
+        // Show loading state
+        selectedWorkoutDisplay.innerHTML = `
+          <div class="bg-gray-800 rounded-xl p-6 shadow-lg" data-aos="fade-up">
+            <div class="flex items-center justify-center p-8">
+              <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+              <span class="ml-3 text-white">Loading workout for ${day}...</span>
+            </div>
+          </div>
+        `;
+        
+        // Fetch the workout data from the API
+        const response = await fetch(`/api/workout/${analysisId}/${day}`);
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch workout: ${response.statusText}`);
+        }
+        
+        const workoutData = await response.json();
+        const exercises = workoutData.exercises;
+        const workoutType = workoutData.type;
+        
+        if (!exercises || exercises.length === 0) {
+          selectedWorkoutDisplay.innerHTML = `
+            <div class="bg-gray-800 rounded-xl p-6 shadow-lg" data-aos="fade-up">
+              <div class="text-center p-8">
+                <p class="text-gray-400">No workout available for ${day}.</p>
+              </div>
+            </div>
+          `;
+          return;
+        }
+        
+        // Generate HTML for the workout
+        let workoutHtml = `
+          <div class="bg-gray-800 rounded-xl p-6 shadow-lg" data-aos="fade-up">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
+              <div>
+                <h3 class="text-2xl font-bold text-white">${day}</h3>
+                <p class="text-gray-300">${workoutType} Day</p>
+              </div>
+              <span class="mt-2 sm:mt-0 px-4 py-1 rounded-full text-sm font-medium 
+                ${workoutType === 'Push' ? 'push-badge' : 
+                 workoutType === 'Pull' ? 'pull-badge' : 
+                 workoutType === 'Legs' ? 'legs-badge' : 'rest-badge'}">
+                ${workoutType}
+              </span>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        `;
+        
+        // Add each exercise to the workout
+        exercises.forEach(exercise => {
+          const isPriority = exercise.isPriority;
+          const developmentStatus = exercise.development_status;
+          const statusIndicator = exercise.status_indicator;
+          
+          let statusClass = '';
+          if (developmentStatus === 'Needs Growth') {
+            statusClass = 'status-needs-growth';
+          } else if (developmentStatus === 'Developed') {
+            statusClass = 'status-developed';
+          } else if (developmentStatus === 'Normal') {
+            statusClass = 'status-normal';
+          }
+          
+          workoutHtml += `
+            <div class="exercise-card bg-gray-900 rounded-lg p-4 ${isPriority ? 'priority-exercise' : ''}">
+              <div class="flex flex-col">
+                <div class="flex justify-between items-center">
+                  <div class="flex items-center">
+                    <h4 class="text-lg font-semibold text-white">${exercise.name}</h4>
+                    ${isPriority ? '<span class="status-badge ml-2 bg-yellow-900 text-yellow-200">Priority</span>' : ''}
+                  </div>
+                  ${statusIndicator ? `<span class="text-xl" title="${developmentStatus}">${statusIndicator}</span>` : ''}
+                </div>
+                <p class="text-gray-400 text-sm mb-2">${exercise.focus}</p>
+                <div class="flex flex-wrap gap-2 mt-auto">
+                  <span class="set-rep-badge">Sets: ${exercise.sets}</span>
+                  <span class="set-rep-badge">Reps: ${exercise.reps}</span>
+                  <span class="set-rep-badge">Rest: ${exercise.rest}</span>
+                  ${developmentStatus && developmentStatus !== 'Normal' ? 
+                    `<span class="set-rep-badge ${statusClass}">${developmentStatus}</span>` : ''}
+                </div>
+              </div>
+            </div>
+          `;
+        });
+        
+        workoutHtml += `
+            </div>
+          </div>
+        `;
+        
+        // Update the workout display
+        selectedWorkoutDisplay.innerHTML = workoutHtml;
+        
+      } catch (error) {
+        console.error('Error fetching workout:', error);
+        selectedWorkoutDisplay.innerHTML = `
+          <div class="bg-gray-800 rounded-xl p-6 shadow-lg" data-aos="fade-up">
+            <div class="text-center p-8">
+              <p class="text-red-400">Error loading workout for ${day}. Please try again.</p>
+              <p class="text-gray-400 mt-2">${error.message}</p>
+            </div>
+          </div>
+        `;
+      }
+    }
+    
+    // Configure day buttons to fetch workouts
+    window.showWorkout = function(day) {
+      // Update active button
+      const dayButtons = document.querySelectorAll('.day-button');
+      dayButtons.forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.getAttribute('data-day') === day) {
+          btn.classList.add('active');
+        }
+      });
+      
+      // Fetch and display the workout
+      fetchWorkout(day);
+    };
+  });
+</script>
 {% endblock %}
 
 {% block content %}
@@ -273,6 +439,8 @@
           <button 
             id="day-btn-{{ loop.index }}" 
             class="day-button bg-gray-900 rounded-lg p-3 flex flex-col items-center justify-center text-center {% if 'push' in workout.category %}push-day{% elif 'pull' in workout.category %}pull-day{% elif 'legs' in workout.category %}legs-day{% elif 'rest' in workout.category %}rest-day{% endif %}"
+            data-day="{{ day }}"
+            data-type="{{ workout.category|capitalize }}"
             onclick="showWorkout('{{ day }}')">
             <div class="w-6 h-6 rounded-full flex items-center justify-center mb-2 {% if 'push' in workout.category %}push-badge{% elif 'pull' in workout.category %}pull-badge{% elif 'legs' in workout.category %}legs-badge{% elif 'rest' in workout.category %}rest-badge{% else %}core-badge{% endif %}">
               <span class="text-white text-xs font-bold">{{ loop.index }}</span>
@@ -284,8 +452,16 @@
         </div>
       </div>
       
+      <!-- Selected workout display -->
+      <div id="selected-workout-display" class="mt-6" data-aos="fade-up">
+        <!-- Workout will be loaded dynamically here -->
+        <div class="bg-gray-800 rounded-xl p-6 shadow-lg text-center">
+          <p class="text-gray-400">Select a day above to view your personalized workout routine</p>
+        </div>
+      </div>
+      
       <!-- Daily workout plans - hidden by default, shown when day is selected -->
-      <div id="workout-container" class="space-y-8">
+      <div id="workout-container" class="space-y-8 hidden">
         {% for day, workout in workout_plan.items() %}
         <div id="workout-{{ day }}" class="workout-day {{ workout.category }} bg-gray-800 rounded-xl shadow-lg overflow-hidden hidden" data-aos="fade-up">
           <div class="p-6">
@@ -373,50 +549,163 @@
 </div>
 
 <script>
+  // Make analysis ID available to JavaScript
+  const analysisId = "{{ analysis_id }}";
+  
   // JavaScript to handle day selection and workout display
   document.addEventListener('DOMContentLoaded', function() {
-    // Show the first day's workout by default
-    const firstDay = document.querySelector('.day-button');
-    if (firstDay) {
-      firstDay.classList.add('active');
-      const dayName = firstDay.querySelector('.text-white.font-medium').textContent;
-      showWorkout(dayName);
+    // Add event listeners to each day button
+    const dayButtons = document.querySelectorAll('.day-button');
+    
+    dayButtons.forEach(btn => {
+      btn.addEventListener('click', function() {
+        // Get the day name from the button's data attribute
+        const day = this.getAttribute('data-day');
+        showWorkout(day);
+      });
+    });
+    
+    // Automatically show Monday's workout by default
+    const mondayButton = document.querySelector('[data-day="Monday"]');
+    if (mondayButton) {
+      mondayButton.click();
+    } else {
+      // If there's no Monday button, click the first button
+      const firstButton = document.querySelector('.day-button');
+      if (firstButton) {
+        firstButton.click();
+      }
     }
   });
   
   function showWorkout(day) {
-    console.log('showWorkout called with day:', day);
+    console.log('Showing workout for day:', day);
     
-    // Hide all workout panels
-    const workoutPanels = document.querySelectorAll('[id^="workout-"]');
-    workoutPanels.forEach(panel => {
-      panel.classList.add('hidden');
-    });
-    
-    // Remove active class from all buttons
+    // Deactivate all buttons
     const dayButtons = document.querySelectorAll('.day-button');
-    dayButtons.forEach(button => {
-      button.classList.remove('active');
-    });
+    dayButtons.forEach(btn => btn.classList.remove('active'));
     
-    // Show the selected day's workout
-    const selectedWorkout = document.getElementById(`workout-${day}`);
-    if (selectedWorkout) {
-      selectedWorkout.classList.remove('hidden');
+    // Activate the clicked button
+    const activeButton = document.querySelector(`.day-button[data-day="${day}"]`);
+    if (activeButton) {
+      activeButton.classList.add('active');
     }
     
-    // Add active class to the clicked button
-    dayButtons.forEach(button => {
-      const buttonDay = button.querySelector('.text-white.font-medium').textContent;
-      if (buttonDay === day) {
-        button.classList.add('active');
-      }
-    });
+    // Get the workout display div
+    const workoutDisplay = document.getElementById('selected-workout-display');
     
-    // Scroll to the workout panel
-    if (selectedWorkout) {
-      selectedWorkout.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+    // Show loading state
+    workoutDisplay.innerHTML = `
+      <div class="bg-gray-800 rounded-xl p-6 shadow-lg" data-aos="fade-up">
+        <div class="flex items-center justify-center p-8">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+          <span class="ml-3 text-white">Loading workout for ${day}...</span>
+        </div>
+      </div>
+    `;
+    
+    // Fetch the workout data from the API
+    fetch(`/api/workout/${analysisId}/${day}`)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`Failed to fetch workout: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        const exercises = data.exercises;
+        const workoutType = data.type;
+        
+        if (!exercises || exercises.length === 0) {
+          workoutDisplay.innerHTML = `
+            <div class="bg-gray-800 rounded-xl p-6 shadow-lg" data-aos="fade-up">
+              <div class="text-center p-8">
+                <p class="text-gray-400">No workout available for ${day}.</p>
+              </div>
+            </div>
+          `;
+          return;
+        }
+        
+        // Generate HTML for the workout
+        let workoutHtml = `
+          <div class="bg-gray-800 rounded-xl p-6 shadow-lg" data-aos="fade-up">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
+              <div>
+                <h3 class="text-2xl font-bold text-white">${day}</h3>
+                <p class="text-gray-300">${workoutType} Day</p>
+              </div>
+              <span class="mt-2 sm:mt-0 px-4 py-1 rounded-full text-sm font-medium 
+                ${workoutType === 'Push' ? 'push-badge' : 
+                 workoutType === 'Pull' ? 'pull-badge' : 
+                 workoutType === 'Legs' ? 'legs-badge' : 'rest-badge'}">
+                ${workoutType}
+              </span>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        `;
+        
+        // Add each exercise to the workout
+        exercises.forEach(exercise => {
+          const isPriority = exercise.isPriority;
+          const developmentStatus = exercise.development_status;
+          const statusIndicator = exercise.status_indicator;
+          
+          let statusClass = '';
+          if (developmentStatus === 'Needs Growth') {
+            statusClass = 'status-needs-growth';
+          } else if (developmentStatus === 'Developed') {
+            statusClass = 'status-developed';
+          } else if (developmentStatus === 'Normal') {
+            statusClass = 'status-normal';
+          }
+          
+          workoutHtml += `
+            <div class="exercise-card bg-gray-900 rounded-lg p-4 ${isPriority ? 'priority-exercise' : ''}">
+              <div class="flex flex-col">
+                <div class="flex justify-between items-center">
+                  <div class="flex items-center">
+                    <h4 class="text-lg font-semibold text-white">${exercise.name}</h4>
+                    ${isPriority ? '<span class="status-badge ml-2 bg-yellow-900 text-yellow-200">Priority</span>' : ''}
+                  </div>
+                  ${statusIndicator ? `<span class="text-xl" title="${developmentStatus}">${statusIndicator}</span>` : ''}
+                </div>
+                <p class="text-gray-400 text-sm mb-2">${exercise.focus || ''}</p>
+                <div class="flex flex-wrap gap-2 mt-auto">
+                  <span class="set-rep-badge">Sets: ${exercise.sets}</span>
+                  <span class="set-rep-badge">Reps: ${exercise.reps}</span>
+                  <span class="set-rep-badge">Rest: ${exercise.rest}</span>
+                  ${developmentStatus && developmentStatus !== 'Normal' ? 
+                    `<span class="set-rep-badge ${statusClass}">${developmentStatus}</span>` : ''}
+                </div>
+              </div>
+            </div>
+          `;
+        });
+        
+        workoutHtml += `
+            </div>
+          </div>
+        `;
+        
+        // Update the workout display
+        workoutDisplay.innerHTML = workoutHtml;
+        
+        // Scroll to the workout section
+        workoutDisplay.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      })
+      .catch(error => {
+        console.error('Error fetching workout:', error);
+        workoutDisplay.innerHTML = `
+          <div class="bg-gray-800 rounded-xl p-6 shadow-lg" data-aos="fade-up">
+            <div class="text-center p-8">
+              <p class="text-red-400">Error loading workout for ${day}. Please try again.</p>
+              <p class="text-gray-400 mt-2">${error.message}</p>
+            </div>
+          </div>
+        `;
+      });
   }
 </script>
 {% endblock %}

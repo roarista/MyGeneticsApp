@@ -1801,6 +1801,81 @@ def workout(analysis_id):
         # Return a fallback error page or redirect
         return render_template('error.html', error_message="We couldn't generate your workout plan right now. Our team is looking into it."), 500
         
+@app.route('/api/workout/<analysis_id>/<day>')
+def get_workout(analysis_id, day):
+    """API endpoint to get a specific day's workout"""
+    try:
+        if analysis_id not in analysis_results:
+            return jsonify({'error': 'Analysis not found'}), 404
+            
+        result = analysis_results[analysis_id]
+        
+        # Get the workout planner
+        from utils.workout_planner import WorkoutPlanner
+        workout_planner = WorkoutPlanner()
+        
+        # Get user data
+        user_data = {
+            'gender': result['user_info'].get('gender', 'male'),
+            'height_cm': result['user_info'].get('height_cm', 175),
+            'weight_kg': result['user_info'].get('weight_kg', 75),
+            'experience': result['user_info'].get('experience', 'beginner'),
+            'body_fat_percentage': result.get('body_fat_percentage', 20),
+            'measurements': result.get('measurements', {}),
+            'traits': result.get('traits', {})
+        }
+        
+        # Analyze physique to get weak points
+        analysis = workout_planner.analyze_physique(user_data)
+        weak_points = analysis.get('weak_points', [])
+        high_body_fat = analysis.get('high_body_fat', False)
+        experience = user_data['experience']
+        
+        # Generate the workout based on the day
+        day_lower = day.lower()
+        exercises = []
+        
+        if 'monday' in day_lower or 'friday' in day_lower:
+            # Push day
+            exercises = workout_planner.create_push_day(weak_points, experience, high_body_fat)
+        elif 'tuesday' in day_lower or 'saturday' in day_lower:
+            # Pull day
+            exercises = workout_planner.create_pull_day(weak_points, experience, high_body_fat)
+        elif 'wednesday' in day_lower or 'sunday' in day_lower:
+            # Legs day
+            posterior_chain_focus = 'sunday' in day_lower
+            exercises = workout_planner.create_leg_day(weak_points, experience, high_body_fat, posterior_chain_focus)
+        elif 'thursday' in day_lower:
+            # Rest/Recovery day
+            exercises = workout_planner.create_rest_day_activities()
+            
+        # Format exercises for response
+        formatted_exercises = []
+        for exercise in exercises:
+            formatted_exercise = {
+                'name': exercise['name'],
+                'focus': exercise.get('focus', ''),
+                'sets': exercise['sets'],
+                'reps': exercise['reps'],
+                'isPriority': exercise.get('priority', 'normal') == 'high',
+                'rest': '90s' if exercise.get('priority', 'normal') == 'high' else '60s',
+                'development_status': exercise.get('development_status', 'Normal'),
+                'status_indicator': exercise.get('status_indicator', '')
+            }
+            formatted_exercises.append(formatted_exercise)
+            
+        return jsonify({
+            'exercises': formatted_exercises,
+            'day': day,
+            'type': 'Push' if 'monday' in day_lower or 'friday' in day_lower else
+                   'Pull' if 'tuesday' in day_lower or 'saturday' in day_lower else
+                   'Legs' if 'wednesday' in day_lower or 'sunday' in day_lower else 'Rest'
+        })
+        
+    except Exception as e:
+        logger.error(f"Error generating workout for day {day}: {str(e)}")
+        return jsonify({'error': 'Failed to generate workout'}), 500
+
 @app.route('/schedule_analysis')
 def schedule_analysis():
     """Schedule next analysis"""

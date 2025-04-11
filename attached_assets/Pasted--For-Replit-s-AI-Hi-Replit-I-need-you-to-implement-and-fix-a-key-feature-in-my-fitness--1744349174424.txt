@@ -1,0 +1,88 @@
+### ✅ For Replit’s AI:
+
+
+```
+Hi Replit, I need you to implement and fix a key feature in my fitness app — the personalized workout planner.
+
+
+---
+
+
+🛠️ **Current Issue**
+- The “Select Your Workout” buttons (Monday to Sunday) don’t display any workouts when clicked.
+- The workouts are not personalized based on the user’s body analysis.
+
+
+---
+
+
+🎯 **Goal**
+Create a system where:
+1. When a user clicks a day (e.g., Tuesday), a personalized workout plan for that day appears.
+2. Each workout is tailored based on the user’s genetic/body scan analysis (weak points, strong points, etc.).
+3. The workout respects the split (e.g., Tuesday = Pull), but emphasizes underdeveloped muscle groups and maintains strong ones.
+
+
+---
+
+
+📊 **Inputs Available**
+- Body scan data: muscle measurements, growth potential, muscle group strength level (low, medium, high), etc.
+- Current training split: Push (Mon/Fri), Pull (Tues/Sat), Legs (Weds/Sun), Recovery (Thurs)
+- Experience level: Beginner, Intermediate, Advanced
+
+
+---
+
+
+🔧 **Instructions**
+1. **Create a mapping system** that evaluates the user's physique data and assigns each muscle group a status:
+   - Underdeveloped → High priority in training
+   - Average → Standard volume
+   - Strong → Maintenance volume
+
+
+2. **For each day’s split**, create a `generateWorkout(day, userData)` function that:
+   - Receives the selected day (e.g., “Tuesday”) and the user’s data
+   - Outputs a list of exercises for relevant muscle groups
+   - Prioritizes weak areas (e.g., if biceps are small → extra curls on Pull day)
+   - Balances strong areas with less volume
+
+
+3. **Build a UI interaction system**:
+   - Add dynamic state handling so when a user clicks a day (like "Tuesday"), the page updates with that day’s workout.
+   - Display the workout under “Select Your Workout” or in a modal/card component.
+   - Each workout should include:
+     - Exercise name
+     - Sets & reps
+     - Target muscle
+     - Rest time
+
+
+4. **Add fallback/default logic** for users with incomplete scan data.
+
+
+---
+
+
+💡 **Example: Tuesday Pull Routine for a user with weak biceps**
+```
+Tuesday - Pull Day
+- Deadlifts: 4x6
+- Pull-Ups: 3x8
+- Barbell Rows: 3x10
+- Bicep Curls (priority): 4x12
+- Hammer Curls: 3x15
+```
+
+
+---
+
+
+📌 **Final Requirements**
+- Workouts must change per user depending on physique data
+- Day buttons must function and show different content
+- Code must be modular for future edits (e.g., adding cardio recommendations or auto periodization)
+
+
+Let me know if you need me to provide the current file structure or code snippet!

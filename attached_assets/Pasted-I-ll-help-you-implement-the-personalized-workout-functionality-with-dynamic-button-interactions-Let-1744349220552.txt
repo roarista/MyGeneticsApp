@@ -1,0 +1,305 @@
+I'll help you implement the personalized workout functionality with dynamic button interactions. Let me break this down into steps:
+
+1. First, let's check the current workout planner implementation:
+
+Read file: utils/workout_planner.py
+2. Let's check the current workout template:
+
+Read file: templates/tailwind_workout_direct.html
+Based on the code review, I'll help you implement the dynamic workout display functionality. We'll need to:
+
+1. Add JavaScript to handle button clicks
+2. Create an endpoint to generate workouts
+3. Update the template to display the selected workout
+
+Let's start with adding the JavaScript functionality to the template:
+
+```html:templates/tailwind_workout_direct.html
+{% extends "tailwind_layout.html" %}
+
+{% block title %}Your Personalized Workout Plan{% endblock %}
+
+{% block head %}
+<style>
+  /* ... existing styles ... */
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get all day buttons
+    const dayButtons = document.querySelectorAll('.day-button');
+    const workoutDisplay = document.getElementById('selected-workout-display');
+    
+    // Add click event listeners to all day buttons
+    dayButtons.forEach(button => {
+        button.addEventListener('click', async function() {
+            // Remove active class from all buttons
+            dayButtons.forEach(btn => btn.classList.remove('active'));
+            
+            // Add active class to clicked button
+            this.classList.add('active');
+            
+            // Get the day and type from the button's data attributes
+            const day = this.getAttribute('data-day');
+            const type = this.getAttribute('data-type');
+            
+            try {
+                // Show loading state
+                workoutDisplay.innerHTML = `
+                    <div class="flex items-center justify-center p-8">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                        <span class="ml-3 text-white">Loading workout...</span>
+                    </div>
+                `;
+                
+                // Fetch the workout data
+                const response = await fetch(`/api/workout/${analysisId}/${day}`);
+                const workoutData = await response.json();
+                
+                if (!workoutData.exercises || workoutData.exercises.length === 0) {
+                    workoutDisplay.innerHTML = `
+                        <div class="text-center p-8">
+                            <p class="text-gray-400">No workout available for this day.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Render the workout
+                let workoutHtml = `
+                    <div class="bg-gray-800 rounded-xl p-6 shadow-lg" data-aos="fade-up">
+                        <h3 class="text-2xl font-bold mb-4 text-white">${day} - ${type} Day</h3>
+                        <div class="space-y-4">
+                `;
+                
+                workoutData.exercises.forEach(exercise => {
+                    const priorityBadge = exercise.isPriority ? 
+                        `<span class="ml-2 px-2 py-1 bg-yellow-500 text-black text-xs rounded-full">Priority</span>` : '';
+                    
+                    workoutHtml += `
+                        <div class="exercise-card bg-gray-900 p-4 rounded-lg">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h4 class="text-white font-medium">${exercise.name}${priorityBadge}</h4>
+                                    <p class="text-gray-400 text-sm">${exercise.target}</p>
+                                </div>
+                                <div class="text-right">
+                                    <span class="set-rep-badge">${exercise.sets} sets × ${exercise.reps}</span>
+                                    <p class="text-gray-400 text-xs mt-1">Rest: ${exercise.rest || '60-90s'}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                workoutHtml += `
+                        </div>
+                    </div>
+                `;
+                
+                workoutDisplay.innerHTML = workoutHtml;
+                
+            } catch (error) {
+                console.error('Error fetching workout:', error);
+                workoutDisplay.innerHTML = `
+                    <div class="text-center p-8">
+                        <p class="text-red-400">Error loading workout. Please try again.</p>
+                    </div>
+                `;
+            }
+        });
+    });
+    
+    // Automatically click the Monday button to show initial workout
+    const mondayButton = document.querySelector('[data-day="Monday"]');
+    if (mondayButton) {
+        mondayButton.click();
+    }
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="container px-4 mx-auto py-8">
+  <div class="flex flex-col md:flex-row gap-6">
+    <!-- ... existing sidebar section ... -->
+    
+    <!-- Main content section -->
+    <div class="md:w-2/3 lg:w-3/4">
+      <div class="space-y-6">
+        <!-- Workout plan title and description -->
+        <div class="bg-gray-800 rounded-xl p-6 shadow-lg" data-aos="fade-up">
+          <h2 class="text-3xl font-bold text-white mb-2">Your Personalized Workout Plan</h2>
+          <p class="text-gray-300">Designed based on your body analysis and genetic potential</p>
+        </div>
+        
+        <!-- Training Split -->
+        <div class="bg-gray-800 rounded-xl p-6 shadow-lg" data-aos="fade-up" data-aos-delay="100">
+          <h3 class="text-2xl font-bold mb-4 text-white">Training Split</h3>
+          <p class="text-gray-300 mb-6">{{ split_type }}</p>
+          
+          <!-- Day selection buttons -->
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <button class="day-button push-day p-4 rounded-xl bg-gray-900 text-center" data-day="Monday" data-type="Push">
+              <div class="text-lg font-bold text-white">1</div>
+              <div class="text-sm text-gray-400">Monday</div>
+              <div class="text-xs text-gray-500">Push</div>
+            </button>
+            
+            <button class="day-button pull-day p-4 rounded-xl bg-gray-900 text-center" data-day="Tuesday" data-type="Pull">
+              <div class="text-lg font-bold text-white">2</div>
+              <div class="text-sm text-gray-400">Tuesday</div>
+              <div class="text-xs text-gray-500">Pull</div>
+            </button>
+            
+            <button class="day-button legs-day p-4 rounded-xl bg-gray-900 text-center" data-day="Wednesday" data-type="Legs">
+              <div class="text-lg font-bold text-white">3</div>
+              <div class="text-sm text-gray-400">Wednesday</div>
+              <div class="text-xs text-gray-500">Legs</div>
+            </button>
+            
+            <button class="day-button rest-day p-4 rounded-xl bg-gray-900 text-center" data-day="Thursday" data-type="Rest">
+              <div class="text-lg font-bold text-white">4</div>
+              <div class="text-sm text-gray-400">Thursday</div>
+              <div class="text-xs text-gray-500">Rest</div>
+            </button>
+            
+            <button class="day-button push-day p-4 rounded-xl bg-gray-900 text-center" data-day="Friday" data-type="Push">
+              <div class="text-lg font-bold text-white">5</div>
+              <div class="text-sm text-gray-400">Friday</div>
+              <div class="text-xs text-gray-500">Push</div>
+            </button>
+            
+            <button class="day-button pull-day p-4 rounded-xl bg-gray-900 text-center" data-day="Saturday" data-type="Pull">
+              <div class="text-lg font-bold text-white">6</div>
+              <div class="text-sm text-gray-400">Saturday</div>
+              <div class="text-xs text-gray-500">Pull</div>
+            </button>
+            
+            <button class="day-button legs-day p-4 rounded-xl bg-gray-900 text-center" data-day="Sunday" data-type="Legs">
+              <div class="text-lg font-bold text-white">7</div>
+              <div class="text-sm text-gray-400">Sunday</div>
+              <div class="text-xs text-gray-500">Legs</div>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Selected workout display -->
+        <div id="selected-workout-display" class="space-y-4">
+          <!-- Workout will be dynamically inserted here -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Make analysis ID available to JavaScript
+  const analysisId = "{{ analysis_id }}";
+</script>
+{% endblock %}
+```
+Now let's add the API endpoint to handle the workout requests. We'll add this to the `app.py` file:
+
+```python:app.py
+@app.route('/api/workout/<analysis_id>/<day>')
+def get_workout(analysis_id, day):
+    """API endpoint to get a specific day's workout"""
+    try:
+        if analysis_id not in analysis_results:
+            return jsonify({'error': 'Analysis not found'}), 404
+            
+        result = analysis_results[analysis_id]
+        
+        # Get the workout planner
+        workout_planner = WorkoutPlanner()
+        
+        # Get user data
+        user_data = {
+            'gender': result['user_info'].get('gender', 'male'),
+            'height_cm': result['user_info'].get('height', 175),
+            'weight_kg': result['user_info'].get('weight', 75),
+            'experience': result['user_info'].get('experience', 'beginner'),
+            'measurements': result.get('measurements', {}),
+            'traits': result.get('traits', {})
+        }
+        
+        # Analyze physique to get weak points
+        analysis = workout_planner.analyze_physique(user_data)
+        weak_points = analysis.get('weak_points', [])
+        high_body_fat = 'fat_loss' in weak_points
+        
+        # Generate the workout based on the day
+        day = day.lower()
+        exercises = []
+        
+        if 'monday' in day or 'friday' in day:
+            # Push day
+            exercises = workout_planner.create_push_day(weak_points, user_data['experience'], high_body_fat)
+        elif 'tuesday' in day or 'saturday' in day:
+            # Pull day
+            exercises = workout_planner.create_pull_day(weak_points, user_data['experience'], high_body_fat)
+        elif 'wednesday' in day or 'sunday' in day:
+            # Legs day
+            exercises = workout_planner.create_leg_day(weak_points, user_data['experience'], high_body_fat)
+        elif 'thursday' in day:
+            # Rest/Recovery day
+            exercises = workout_planner.create_rest_day_activities()
+            
+        # Format exercises for response
+        formatted_exercises = []
+        for exercise in exercises:
+            formatted_exercise = {
+                'name': exercise['name'],
+                'target': exercise['target'],
+                'sets': exercise['sets'],
+                'reps': exercise['reps'],
+                'isPriority': exercise.get('priority', 'normal') == 'high',
+                'rest': '90s' if exercise.get('priority', 'normal') == 'high' else '60s'
+            }
+            formatted_exercises.append(formatted_exercise)
+            
+        return jsonify({
+            'exercises': formatted_exercises,
+            'day': day,
+            'type': 'Push' if 'monday' in day or 'friday' in day else
+                   'Pull' if 'tuesday' in day or 'saturday' in day else
+                   'Legs' if 'wednesday' in day or 'sunday' in day else 'Rest'
+        })
+        
+    except Exception as e:
+        logger.error(f"Error generating workout for day {day}: {str(e)}")
+        return jsonify({'error': 'Failed to generate workout'}), 500
+
+// ... existing code ...
+```
+Now the workout functionality should be fully implemented with:
+
+1. Dynamic button interaction
+2. Personalized workout generation based on physique analysis
+3. Clean UI display of the workouts
+
+The workflow is:
+1. When a day button is clicked, it triggers a fetch request to `/api/workout/<analysis_id>/<day>`
+2. The server generates a personalized workout based on:
+   - The user's physique analysis
+   - Their weak points
+   - The specific day's focus (Push/Pull/Legs)
+3. The workout is returned and displayed in a clean, modern UI
+
+Key features:
+- Workouts are truly personalized based on the user's body analysis
+- Priority exercises are highlighted with a yellow badge
+- Rest periods are automatically adjusted (90s for priority exercises, 60s for others)
+- Loading states and error handling are implemented
+- The UI is responsive and matches the modern design
+
+To test it:
+1. Click on any day button
+2. You should see a loading spinner
+3. The workout should appear with exercises tailored to:
+   - The day's focus (Push/Pull/Legs)
+   - Your weak points (more volume/sets for underdeveloped areas)
+   - Your experience level
+
+Let me know if you'd like me to make any adjustments to the implementation!
