@@ -1,0 +1,812 @@
+I'll help you implement a personalized workout generation system for your fitness app. Let's start by exploring the current codebase to understand what we're working with, and then implement the new functionality step by step.
+
+First, let's examine the project structure to see where we should add our new modules.
+
+
+Ran tool
+Let's look at the utils directory to see what utility modules already exist:
+
+
+
+Ran tool
+I see that there's already a `workout_planner.py` file in the utils directory. Let's examine it to see what functionality it already provides:
+
+
+
+
+Read file: utils/workout_planner.py
+Let's read the rest of the workout_planner.py file:
+
+
+
+Read file: utils/workout_planner.py
+Now, let's check if there's already a workout route in the app.py file:
+
+
+
+
+Ran tool
+Let's check if there's any workout-related route in app.py:
+
+
+
+Ran tool
+Let's check the workout route in app.py:
+
+
+
+
+Read file: app.py
+Let's check the workout template to understand how the workout plan is displayed:
+
+
+
+
+Read file: templates/tailwind_workout_direct.html
+Let's read the rest of the workout template:
+
+
+
+
+Read file: templates/tailwind_workout_direct.html
+Based on my analysis of the codebase, I can see that you already have a good foundation for a personalized workout generation system. The `WorkoutPlanner` class in `utils/workout_planner.py` already implements many of the features you're looking for, and there's a workout route in `app.py` that uses this class to generate personalized workout plans.
+
+However, I'll enhance the system to better meet your requirements. Let's make the following improvements:
+
+1. Enhance the `WorkoutPlanner` class to better analyze body composition and weak points
+2. Improve the decision-making engine to generate more personalized workout plans
+3. Add a more comprehensive rule-based mapping system for exercises
+4. Update the workout route to use the enhanced functionality
+
+Let's start by enhancing the `WorkoutPlanner` class:
+
+
+
+```python:utils/workout_planner.py
+import logging
+from typing import Dict, List, Any, Optional
+import math
+
+# Configure logging
+logger = logging.getLogger(__name__)
+
+class WorkoutPlanner:
+    """
+    A class to handle workout plan generation based on user metrics and goals.
+    """
+    
+    def __init__(self):
+        self.base_exercises = {
+            'chest': [
+                {'name': 'Bench Press', 'target': 'overall chest development', 'sets': 3, 'reps': '8-10', 'difficulty': 'intermediate'},
+                {'name': 'Incline Dumbbell Press', 'target': 'upper chest', 'sets': 3, 'reps': '8-10', 'difficulty': 'intermediate'},
+                {'name': 'Cable Flyes', 'target': 'chest stretching and isolation', 'sets': 3, 'reps': '10-12', 'difficulty': 'beginner'},
+                {'name': 'Decline Press', 'target': 'lower chest development', 'sets': 3, 'reps': '10-12', 'difficulty': 'intermediate'},
+                {'name': 'Push-Ups', 'target': 'chest, shoulders, and triceps', 'sets': 3, 'reps': '10-15', 'difficulty': 'beginner'},
+                {'name': 'Dumbbell Press', 'target': 'chest development', 'sets': 3, 'reps': '8-12', 'difficulty': 'beginner'}
+            ],
+            'back': [
+                {'name': 'Pull-ups/Lat Pulldowns', 'target': 'latissimus dorsi', 'sets': 3, 'reps': '8-10', 'difficulty': 'intermediate'},
+                {'name': 'Bent-over Rows', 'target': 'middle back', 'sets': 3, 'reps': '8-10', 'difficulty': 'intermediate'},
+                {'name': 'Seated Cable Rows', 'target': 'overall back development', 'sets': 3, 'reps': '10-12', 'difficulty': 'beginner'},
+                {'name': 'Face Pulls', 'target': 'rear deltoids and upper back', 'sets': 3, 'reps': '12-15', 'difficulty': 'beginner'},
+                {'name': 'Barbell Rows', 'target': 'upper and middle back', 'sets': 3, 'reps': '8-12', 'difficulty': 'intermediate'},
+                {'name': 'Dumbbell Rows', 'target': 'back width and thickness', 'sets': 3, 'reps': '10-12', 'difficulty': 'beginner'}
+            ],
+            'shoulders': [
+                {'name': 'Overhead Press', 'target': 'overall shoulder development', 'sets': 3, 'reps': '8-10', 'difficulty': 'intermediate'},
+                {'name': 'Lateral Raises', 'target': 'lateral deltoids', 'sets': 3, 'reps': '10-15', 'difficulty': 'beginner'},
+                {'name': 'Front Raises', 'target': 'anterior deltoids', 'sets': 3, 'reps': '10-12', 'difficulty': 'beginner'},
+                {'name': 'Reverse Flyes', 'target': 'posterior deltoids', 'sets': 3, 'reps': '10-15', 'difficulty': 'beginner'},
+                {'name': 'Arnold Press', 'target': 'all deltoid heads', 'sets': 3, 'reps': '8-12', 'difficulty': 'intermediate'},
+                {'name': 'Upright Rows', 'target': 'upper traps and deltoids', 'sets': 3, 'reps': '10-12', 'difficulty': 'intermediate'}
+            ],
+            'arms': [
+                {'name': 'Barbell Curls', 'target': 'biceps', 'sets': 3, 'reps': '8-12', 'difficulty': 'beginner'},
+                {'name': 'Tricep Dips', 'target': 'triceps', 'sets': 3, 'reps': '8-12', 'difficulty': 'beginner'},
+                {'name': 'Hammer Curls', 'target': 'brachialis and forearms', 'sets': 3, 'reps': '10-12', 'difficulty': 'beginner'},
+                {'name': 'Tricep Pushdowns', 'target': 'triceps', 'sets': 3, 'reps': '10-12', 'difficulty': 'beginner'},
+                {'name': 'Preacher Curls', 'target': 'biceps peak', 'sets': 3, 'reps': '10-12', 'difficulty': 'intermediate'},
+                {'name': 'Skull Crushers', 'target': 'triceps long head', 'sets': 3, 'reps': '10-12', 'difficulty': 'intermediate'}
+            ],
+            'legs': [
+                {'name': 'Squats', 'target': 'quadriceps and overall leg development', 'sets': 3, 'reps': '8-10', 'difficulty': 'intermediate'},
+                {'name': 'Romanian Deadlifts', 'target': 'hamstrings and glutes', 'sets': 3, 'reps': '8-10', 'difficulty': 'intermediate'},
+                {'name': 'Leg Press', 'target': 'quadriceps', 'sets': 3, 'reps': '10-12', 'difficulty': 'beginner'},
+                {'name': 'Bulgarian Split Squats', 'target': 'single-leg strength and balance', 'sets': 3, 'reps': '10-12 per leg', 'difficulty': 'intermediate'},
+                {'name': 'Calf Raises', 'target': 'calf muscles', 'sets': 3, 'reps': '12-15', 'difficulty': 'beginner'},
+                {'name': 'Lunges', 'target': 'quads, glutes, and balance', 'sets': 3, 'reps': '10-12 per leg', 'difficulty': 'beginner'}
+            ],
+            'core': [
+                {'name': 'Russian Twists', 'target': 'obliques', 'sets': 3, 'reps': '10-15 per side', 'difficulty': 'beginner'},
+                {'name': 'Hanging Leg Raises', 'target': 'lower abs', 'sets': 3, 'reps': '10-15', 'difficulty': 'intermediate'},
+                {'name': 'Ab Wheel Rollouts', 'target': 'entire core', 'sets': 3, 'reps': '8-12', 'difficulty': 'intermediate'},
+                {'name': 'Cable Crunches', 'target': 'upper and middle abs', 'sets': 3, 'reps': '12-15', 'difficulty': 'beginner'},
+                {'name': 'Planks', 'target': 'core stability', 'sets': 3, 'reps': '30-60 seconds', 'difficulty': 'beginner'},
+                {'name': 'Bicycle Crunches', 'target': 'obliques and abs', 'sets': 3, 'reps': '15-20', 'difficulty': 'beginner'}
+            ],
+            'cardio': [
+                {'name': 'HIIT (High-Intensity Interval Training)', 'target': 'fat burning and cardiovascular health', 'sets': 1, 'reps': '20-30 min', 'difficulty': 'intermediate'},
+                {'name': 'Steady-State Cardio', 'target': 'endurance and fat burning', 'sets': 1, 'reps': '30-45 min', 'difficulty': 'beginner'},
+                {'name': 'Jump Rope', 'target': 'coordination and cardiovascular health', 'sets': 1, 'reps': '10-15 min', 'difficulty': 'beginner'},
+                {'name': 'Treadmill Intervals', 'target': 'fat burning and cardiovascular health', 'sets': 1, 'reps': '20-30 min', 'difficulty': 'intermediate'},
+                {'name': 'Cycling', 'target': 'lower body and cardiovascular health', 'sets': 1, 'reps': '30-45 min', 'difficulty': 'beginner'},
+                {'name': 'Rowing', 'target': 'full body and cardiovascular health', 'sets': 1, 'reps': '20-30 min', 'difficulty': 'intermediate'}
+            ]
+        }
+        
+        self.specialized_exercises = {
+            'shoulder_width': [
+                {'name': 'Wide-Grip Upright Rows', 'target': 'lateral deltoids', 'sets': 3, 'reps': '10-12', 'difficulty': 'intermediate'},
+                {'name': 'Lateral Raises with Hold', 'target': 'side delts', 'sets': 3, 'reps': '12-15', 'difficulty': 'beginner'},
+                {'name': 'Cable Lateral Raises', 'target': 'side delts', 'sets': 3, 'reps': '12-15', 'difficulty': 'beginner'},
+                {'name': 'Face Pulls with External Rotation', 'target': 'rear delts and upper back', 'sets': 3, 'reps': '12-15', 'difficulty': 'beginner'},
+                {'name': 'Dumbbell Front Raises', 'target': 'anterior deltoids', 'sets': 3, 'reps': '10-12', 'difficulty': 'beginner'}
+            ],
+            'arm_development': [
+                {'name': 'Close-Grip Bench Press', 'target': 'triceps', 'sets': 3, 'reps': '8-10', 'difficulty': 'intermediate'},
+                {'name': 'Incline Dumbbell Curls', 'target': 'biceps', 'sets': 3, 'reps': '10-12', 'difficulty': 'beginner'},
+                {'name': 'Rope Pushdowns', 'target': 'triceps', 'sets': 3, 'reps': '12-15', 'difficulty': 'beginner'},
+                {'name': 'Concentration Curls', 'target': 'biceps peak', 'sets': 3, 'reps': '10-12', 'difficulty': 'beginner'},
+                {'name': 'Overhead Tricep Extensions', 'target': 'triceps long head', 'sets': 3, 'reps': '10-12', 'difficulty': 'beginner'}
+            ],
+            'chest_development': [
+                {'name': 'Cable Crossovers', 'target': 'inner chest', 'sets': 3, 'reps': '12-15', 'difficulty': 'beginner'},
+                {'name': 'Decline Push-Ups', 'target': 'lower chest', 'sets': 3, 'reps': '12-15', 'difficulty': 'beginner'},
+                {'name': 'Dumbbell Flyes', 'target': 'chest stretch', 'sets': 3, 'reps': '12-15', 'difficulty': 'beginner'},
+                {'name': 'Incline Bench Press', 'target': 'upper chest', 'sets': 3, 'reps': '8-10', 'difficulty': 'intermediate'},
+                {'name': 'Pec Deck Machine', 'target': 'chest isolation', 'sets': 3, 'reps': '12-15', 'difficulty': 'beginner'}
+            ],
+            'back_width': [
+                {'name': 'Wide-Grip Pull-Ups', 'target': 'lats width', 'sets': 3, 'reps': '8-10', 'difficulty': 'intermediate'},
+                {'name': 'Straight-Arm Pulldowns', 'target': 'lats', 'sets': 3, 'reps': '12-15', 'difficulty': 'beginner'},
+                {'name': 'Wide-Grip Seated Rows', 'target': 'back width', 'sets': 3, 'reps': '10-12', 'difficulty': 'beginner'},
+                {'name': 'Lat Pulldowns', 'target': 'lats', 'sets': 3, 'reps': '10-12', 'difficulty': 'beginner'},
+                {'name': 'Single-Arm Dumbbell Rows', 'target': 'back thickness', 'sets': 3, 'reps': '10-12', 'difficulty': 'beginner'}
+            ],
+            'leg_development': [
+                {'name': 'Front Squats', 'target': 'quads', 'sets': 3, 'reps': '8-10', 'difficulty': 'intermediate'},
+                {'name': 'Bulgarian Split Squats', 'target': 'unilateral legs', 'sets': 3, 'reps': '10-12 per leg', 'difficulty': 'intermediate'},
+                {'name': 'Hack Squats', 'target': 'quads', 'sets': 3, 'reps': '10-12', 'difficulty': 'intermediate'},
+                {'name': 'Leg Extensions', 'target': 'quads isolation', 'sets': 3, 'reps': '12-15', 'difficulty': 'beginner'},
+                {'name': 'Leg Curls', 'target': 'hamstrings', 'sets': 3, 'reps': '10-12', 'difficulty': 'beginner'}
+            ],
+            'fat_loss': [
+                {'name': 'HIIT Circuit', 'target': 'fat burning and cardiovascular health', 'sets': 1, 'reps': '20-30 min', 'difficulty': 'intermediate'},
+                {'name': 'Tabata Training', 'target': 'metabolic conditioning', 'sets': 1, 'reps': '20 min', 'difficulty': 'advanced'},
+                {'name': 'Circuit Training', 'target': 'full body conditioning', 'sets': 1, 'reps': '30-45 min', 'difficulty': 'intermediate'},
+                {'name': 'Sprint Intervals', 'target': 'fat burning and power', 'sets': 1, 'reps': '15-20 min', 'difficulty': 'intermediate'},
+                {'name': 'Jump Rope Intervals', 'target': 'coordination and fat burning', 'sets': 1, 'reps': '15-20 min', 'difficulty': 'beginner'}
+            ]
+        }
+        
+        # Define baseline measurements for different body types and heights
+        self.baseline_measurements = {
+            'male': {
+                'shoulder_width': lambda height: height * 0.25,  # 25% of height
+                'chest': lambda height: height * 0.55,  # 55% of height
+                'waist': lambda height: height * 0.45,  # 45% of height
+                'hips': lambda height: height * 0.50,  # 50% of height
+                'arm': lambda height: height * 0.20,  # 20% of height
+                'thigh': lambda height: height * 0.30,  # 30% of height
+                'calf': lambda height: height * 0.18,  # 18% of height
+                'body_fat': {
+                    'athletic': 10,  # 10% body fat
+                    'fitness': 15,  # 15% body fat
+                    'average': 20,  # 20% body fat
+                    'overweight': 25  # 25% body fat
+                }
+            },
+            'female': {
+                'shoulder_width': lambda height: height * 0.23,  # 23% of height
+                'chest': lambda height: height * 0.50,  # 50% of height
+                'waist': lambda height: height * 0.40,  # 40% of height
+                'hips': lambda height: height * 0.55,  # 55% of height
+                'arm': lambda height: height * 0.18,  # 18% of height
+                'thigh': lambda height: height * 0.32,  # 32% of height
+                'calf': lambda height: height * 0.17,  # 17% of height
+                'body_fat': {
+                    'athletic': 15,  # 15% body fat
+                    'fitness': 20,  # 20% body fat
+                    'average': 25,  # 25% body fat
+                    'overweight': 30  # 30% body fat
+                }
+            }
+        }
+    
+    def analyze_body_metrics(self, traits: Dict[str, Any], height_cm: float, gender: str) -> Dict[str, Any]:
+        """
+        Analyze body metrics to identify weak points and areas needing focus.
+        
+        Args:
+            traits: Dictionary containing body measurements and ratings
+            height_cm: User's height in centimeters
+            gender: User's gender ('male' or 'female')
+            
+        Returns:
+            Dictionary containing analysis results including weak areas and imbalances
+        """
+        weak_areas = []
+        imbalances = []
+        body_composition = {
+            'body_fat_percentage': 0,
+            'body_fat_category': 'unknown',
+            'muscle_mass': 0,
+            'muscle_mass_category': 'unknown'
+        }
+        
+        # Get baseline measurements for the user's gender and height
+        baseline = self.baseline_measurements.get(gender.lower(), self.baseline_measurements['male'])
+        
+        # Analyze body fat percentage
+        if 'body_fat_percentage' in traits:
+            body_fat_data = traits['body_fat_percentage']
+            if isinstance(body_fat_data, dict) and 'value' in body_fat_data:
+                body_fat = body_fat_data['value']
+            elif isinstance(body_fat_data, (int, float)):
+                body_fat = body_fat_data
+            else:
+                body_fat = 0
+                
+            body_composition['body_fat_percentage'] = body_fat
+            
+            # Categorize body fat
+            if gender.lower() == 'male':
+                if body_fat < 10:
+                    body_composition['body_fat_category'] = 'athletic'
+                elif body_fat < 15:
+                    body_composition['body_fat_category'] = 'fitness'
+                elif body_fat < 20:
+                    body_composition['body_fat_category'] = 'average'
+                else:
+                    body_composition['body_fat_category'] = 'overweight'
+            else:  # female
+                if body_fat < 15:
+                    body_composition['body_fat_category'] = 'athletic'
+                elif body_fat < 20:
+                    body_composition['body_fat_category'] = 'fitness'
+                elif body_fat < 25:
+                    body_composition['body_fat_category'] = 'average'
+                else:
+                    body_composition['body_fat_category'] = 'overweight'
+        
+        # Analyze muscle mass if available
+        if 'lean_body_mass' in traits:
+            muscle_data = traits['lean_body_mass']
+            if isinstance(muscle_data, dict) and 'value' in muscle_data:
+                muscle_mass = muscle_data['value']
+            elif isinstance(muscle_data, (int, float)):
+                muscle_mass = muscle_data
+            else:
+                muscle_mass = 0
+                
+            body_composition['muscle_mass'] = muscle_mass
+            
+            # Categorize muscle mass (simplified)
+            if gender.lower() == 'male':
+                if muscle_mass > 70:
+                    body_composition['muscle_mass_category'] = 'high'
+                elif muscle_mass > 60:
+                    body_composition['muscle_mass_category'] = 'moderate'
+                else:
+                    body_composition['muscle_mass_category'] = 'low'
+            else:  # female
+                if muscle_mass > 50:
+                    body_composition['muscle_mass_category'] = 'high'
+                elif muscle_mass > 45:
+                    body_composition['muscle_mass_category'] = 'moderate'
+                else:
+                    body_composition['muscle_mass_category'] = 'low'
+        
+        # Analyze individual muscle groups and identify weak points
+        for trait, data in traits.items():
+            if not isinstance(data, dict):
+                continue
+                
+            # Check for rating-based weak points
+            rating = data.get('rating')
+            if rating in ['below_average', 'poor']:
+                if 'shoulder' in trait:
+                    weak_areas.append('shoulders')
+                elif 'arm' in trait:
+                    weak_areas.append('arms')
+                elif 'leg' in trait:
+                    weak_areas.append('legs')
+                elif 'torso' in trait or 'chest' in trait:
+                    weak_areas.append('chest')
+                elif 'back' in trait:
+                    weak_areas.append('back')
+                elif 'core' in trait or 'waist' in trait:
+                    weak_areas.append('core')
+            
+            # Check for measurement-based weak points
+            if 'value' in data and trait in baseline:
+                measured_value = data['value']
+                expected_value = baseline[trait](height_cm)
+                
+                # If measurement is significantly below expected (more than 10% difference)
+                if measured_value < expected_value * 0.9:
+                    if 'shoulder' in trait:
+                        weak_areas.append('shoulders')
+                    elif 'arm' in trait:
+                        weak_areas.append('arms')
+                    elif 'leg' in trait or 'thigh' in trait or 'calf' in trait:
+                        weak_areas.append('legs')
+                    elif 'chest' in trait:
+                        weak_areas.append('chest')
+                    elif 'back' in trait:
+                        weak_areas.append('back')
+        
+        # Check for imbalances (left vs right)
+        left_arm = None
+        right_arm = None
+        left_thigh = None
+        right_thigh = None
+        left_calf = None
+        right_calf = None
+        
+        for trait, data in traits.items():
+            if not isinstance(data, dict) or 'value' not in data:
+                continue
+                
+            if trait == 'left_arm_cm':
+                left_arm = data['value']
+            elif trait == 'right_arm_cm':
+                right_arm = data['value']
+            elif trait == 'left_thigh_cm':
+                left_thigh = data['value']
+            elif trait == 'right_thigh_cm':
+                right_thigh = data['value']
+            elif trait == 'left_calf_cm':
+                left_calf = data['value']
+            elif trait == 'right_calf_cm':
+                right_calf = data['value']
+        
+        # Check for arm imbalance
+        if left_arm and right_arm and abs(left_arm - right_arm) > 1.0:  # More than 1cm difference
+            imbalances.append({
+                'type': 'arms',
+                'description': f"Left arm is {left_arm - right_arm:.1f}cm {'larger' if left_arm > right_arm else 'smaller'} than right arm"
+            })
+        
+        # Check for thigh imbalance
+        if left_thigh and right_thigh and abs(left_thigh - right_thigh) > 1.5:  # More than 1.5cm difference
+            imbalances.append({
+                'type': 'thighs',
+                'description': f"Left thigh is {left_thigh - right_thigh:.1f}cm {'larger' if left_thigh > right_thigh else 'smaller'} than right thigh"
+            })
+        
+        # Check for calf imbalance
+        if left_calf and right_calf and abs(left_calf - right_calf) > 1.0:  # More than 1cm difference
+            imbalances.append({
+                'type': 'calves',
+                'description': f"Left calf is {left_calf - right_calf:.1f}cm {'larger' if left_calf > right_calf else 'smaller'} than right calf"
+            })
+        
+        return {
+            'weak_areas': list(set(weak_areas)),  # Remove duplicates
+            'imbalances': imbalances,
+            'body_composition': body_composition
+        }
+    
+    def determine_training_parameters(self, body_type: str, goal: str, experience: str, body_composition: Dict[str, Any]) -> Dict[str, str]:
+        """
+        Determine training parameters based on body type, goal, experience level, and body composition.
+        
+        Args:
+            body_type: User's body type classification
+            goal: Training goal (lose_fat, gain_muscle, maintain)
+            experience: Training experience level
+            body_composition: Dictionary containing body composition analysis
+            
+        Returns:
+            Dictionary containing training parameters
+        """
+        params = {
+            'rep_ranges': '8-12',
+            'rest_periods': '60-90 seconds',
+            'training_frequency': '4',
+            'volume_multiplier': '1.0',
+            'intensity_focus': 'moderate',
+            'cardio_frequency': '2-3',
+            'cardio_intensity': 'moderate',
+            'cardio_duration': '20-30 min',
+            'progression_rate': 'moderate'
+        }
+        
+        # Adjust based on body type
+        if body_type.lower() == "ectomorph":
+            params.update({
+                'rep_ranges': '6-8',
+                'rest_periods': '2-3 minutes',
+                'training_frequency': '3-4',
+                'volume_multiplier': '0.8',
+                'intensity_focus': 'high',
+                'cardio_frequency': '1-2',
+                'cardio_intensity': 'low',
+                'cardio_duration': '15-20 min',
+                'progression_rate': 'slow'
+            })
+        elif body_type.lower() == "endomorph":
+            params.update({
+                'rep_ranges': '12-15',
+                'rest_periods': '30-60 seconds',
+                'training_frequency': '4-5',
+                'volume_multiplier': '1.2',
+                'intensity_focus': 'moderate-high',
+                'cardio_frequency': '3-4',
+                'cardio_intensity': 'high',
+                'cardio_duration': '30-45 min',
+                'progression_rate': 'moderate'
+            })
+        
+        # Adjust based on goal
+        if goal == 'lose_fat':
+            params.update({
+                'rep_ranges': '12-15',
+                'rest_periods': '30-45 seconds',
+                'intensity_focus': 'high',
+                'cardio_frequency': '3-4',
+                'cardio_intensity': 'high',
+                'cardio_duration': '30-45 min',
+                'progression_rate': 'moderate'
+            })
+        elif goal == 'gain_muscle':
+            params.update({
+                'rep_ranges': '8-12',
+                'rest_periods': '60-90 seconds',
+                'intensity_focus': 'moderate-high',
+                'cardio_frequency': '1-2',
+                'cardio_intensity': 'low',
+                'cardio_duration': '15-20 min',
+                'progression_rate': 'moderate'
+            })
+        
+        # Adjust based on experience
+        if experience == 'beginner':
+            params.update({
+                'rep_ranges': '10-12',
+                'rest_periods': '90-120 seconds',
+                'volume_multiplier': '0.7',
+                'cardio_frequency': '2-3',
+                'cardio_intensity': 'low-moderate',
+                'cardio_duration': '15-20 min',
+                'progression_rate': 'slow'
+            })
+        elif experience == 'advanced':
+            params.update({
+                'volume_multiplier': '1.3',
+                'cardio_frequency': '3-4',
+                'cardio_intensity': 'moderate-high',
+                'cardio_duration': '20-30 min',
+                'progression_rate': 'fast'
+            })
+        
+        # Adjust based on body composition
+        if body_composition.get('body_fat_category') == 'overweight':
+            params.update({
+                'cardio_frequency': '3-4',
+                'cardio_intensity': 'high',
+                'cardio_duration': '30-45 min',
+                'rep_ranges': '12-15',
+                'rest_periods': '30-45 seconds'
+            })
+        elif body_composition.get('body_fat_category') == 'athletic':
+            params.update({
+                'cardio_frequency': '1-2',
+                'cardio_intensity': 'low',
+                'cardio_duration': '15-20 min',
+                'rep_ranges': '6-10',
+                'rest_periods': '90-120 seconds'
+            })
+        
+        if body_composition.get('muscle_mass_category') == 'low':
+            params.update({
+                'volume_multiplier': str(float(params['volume_multiplier']) * 1.2),
+                'training_frequency': str(int(params['training_frequency']) + 1),
+                'progression_rate': 'moderate'
+            })
+        
+        return params
+    
+    def generate_workout_plan(self, 
+                            traits: Dict[str, Any],
+                            body_type: str,
+                            goal: str,
+                            experience: str,
+                            height_cm: float = 175,
+                            gender: str = 'male') -> Dict[str, Any]:
+        """
+        Generate a complete workout plan based on user metrics and goals.
+        
+        Args:
+            traits: Dictionary containing body measurements and ratings
+            body_type: User's body type classification
+            goal: Training goal (lose_fat, gain_muscle, maintain)
+            experience: Training experience level
+            height_cm: User's height in centimeters
+            gender: User's gender ('male' or 'female')
+            
+        Returns:
+            Dictionary containing complete workout plan
+        """
+        try:
+            # Analyze body metrics
+            analysis = self.analyze_body_metrics(traits, height_cm, gender)
+            weak_areas = analysis['weak_areas']
+            imbalances = analysis['imbalances']
+            body_composition = analysis['body_composition']
+            
+            # Get training parameters
+            training_params = self.determine_training_parameters(
+                body_type, 
+                goal, 
+                experience, 
+                body_composition
+            )
+            
+            # Create base workout structure
+            workout_plan = {
+                'training_parameters': training_params,
+                'weak_areas': weak_areas,
+                'imbalances': imbalances,
+                'body_composition': body_composition,
+                'split_type': 'Push/Pull/Legs',
+                'weekly_schedule': {}
+            }
+            
+            # Define the weekly split based on experience and goal
+            if experience == 'beginner':
+                split = {
+                    'Monday': {'focus': 'Push (Chest, Shoulders, Triceps)', 'category': 'push'},
+                    'Tuesday': {'focus': 'Pull (Back, Biceps)', 'category': 'pull'},
+                    'Wednesday': {'focus': 'Legs + Core', 'category': 'legs'},
+                    'Thursday': {'focus': 'Rest & Recovery', 'category': 'rest'},
+                    'Friday': {'focus': 'Push (Chest, Shoulders, Triceps)', 'category': 'push'},
+                    'Saturday': {'focus': 'Pull (Back, Biceps)', 'category': 'pull'},
+                    'Sunday': {'focus': 'Rest & Recovery', 'category': 'rest'}
+                }
+            elif goal == 'lose_fat':
+                split = {
+                    'Monday': {'focus': 'Push (Chest, Shoulders, Triceps)', 'category': 'push'},
+                    'Tuesday': {'focus': 'Pull (Back, Biceps)', 'category': 'pull'},
+                    'Wednesday': {'focus': 'Legs + Core', 'category': 'legs'},
+                    'Thursday': {'focus': 'Cardio + Core', 'category': 'cardio'},
+                    'Friday': {'focus': 'Push (Chest, Shoulders, Triceps)', 'category': 'push'},
+                    'Saturday': {'focus': 'Pull (Back, Biceps)', 'category': 'pull'},
+                    'Sunday': {'focus': 'Rest & Recovery', 'category': 'rest'}
+                }
+            else:
+                split = {
+                    'Monday': {'focus': 'Push (Chest, Shoulders, Triceps)', 'category': 'push'},
+                    'Tuesday': {'focus': 'Pull (Back, Biceps)', 'category': 'pull'},
+                    'Wednesday': {'focus': 'Legs + Core', 'category': 'legs'},
+                    'Thursday': {'focus': 'Rest & Recovery', 'category': 'rest'},
+                    'Friday': {'focus': 'Push (Chest, Shoulders, Triceps)', 'category': 'push'},
+                    'Saturday': {'focus': 'Pull (Back, Biceps)', 'category': 'pull'},
+                    'Sunday': {'focus': 'Legs (Posterior Chain Focus)', 'category': 'legs'}
+                }
+            
+            # Generate exercises for each day
+            for day, day_info in split.items():
+                category = day_info['category']
+                focus = day_info['focus']
+                
+                if category == 'push':
+                    exercises = self.base_exercises['chest'][:2] + \
+                              self.base_exercises['shoulders'][:2] + \
+                              self.base_exercises['arms'][1:2]
+                    
+                    # Add specialized exercises for weak areas
+                    if 'chest' in weak_areas:
+                        exercises.extend(self.specialized_exercises['chest_development'][:2])
+                    if 'shoulders' in weak_areas:
+                        exercises.extend(self.specialized_exercises['shoulder_width'][:2])
+                        
+                elif category == 'pull':
+                    exercises = self.base_exercises['back'][:2] + \
+                              self.base_exercises['arms'][:1]
+                    
+                    # Add specialized exercises for weak areas
+                    if 'back' in weak_areas:
+                        exercises.extend(self.specialized_exercises['back_width'][:2])
+                    if 'arms' in weak_areas:
+                        exercises.extend(self.specialized_exercises['arm_development'][:2])
+                        
+                elif category == 'legs':
+                    exercises = self.base_exercises['legs'][:3]
+                    if 'Posterior' in focus:
+                        exercises.extend([
+                            {'name': 'Deadlifts', 'target': 'posterior chain', 'sets': 3, 'reps': '6-8', 'difficulty': 'intermediate'},
+                            {'name': 'Good Mornings', 'target': 'hamstrings', 'sets': 3, 'reps': '10-12', 'difficulty': 'intermediate'}
+                        ])
+                    
+                    # Add specialized exercises for weak areas
+                    if 'legs' in weak_areas:
+                        exercises.extend(self.specialized_exercises['leg_development'][:2])
+                        
+                    # Add core work
+                    exercises.extend(self.base_exercises['core'][:2])
+                    
+                elif category == 'cardio':
+                    # Add cardio exercises based on goal and body composition
+                    if body_composition.get('body_fat_category') == 'overweight':
+                        exercises = self.specialized_exercises['fat_loss'][:3]
+                    else:
+                        exercises = self.base_exercises['cardio'][:3]
+                    
+                    # Add core work
+                    exercises.extend(self.base_exercises['core'][:2])
+                    
+                else:  # Rest day
+                    exercises = [
+                        {'name': 'Light Cardio', 'target': 'recovery', 'sets': 1, 'reps': '20-30 min', 'difficulty': 'beginner'},
+                        {'name': 'Stretching', 'target': 'flexibility', 'sets': 1, 'reps': '15-20 min', 'difficulty': 'beginner'},
+                        {'name': 'Foam Rolling', 'target': 'muscle recovery', 'sets': 1, 'reps': '10-15 min', 'difficulty': 'beginner'}
+                    ]
+                
+                # Adjust volume based on experience and weak areas
+                volume_multiplier = float(training_params['volume_multiplier'])
+                if any(area in weak_areas for area in ['chest', 'shoulders', 'arms'] if category == 'push') or \
+                   any(area in weak_areas for area in ['back', 'arms'] if category == 'pull') or \
+                   ('legs' in weak_areas and category == 'legs'):
+                    volume_multiplier *= 1.3
+                
+                # Apply volume adjustments
+                for exercise in exercises:
+                    if isinstance(exercise['sets'], (int, float)):
+                        exercise['sets'] = round(exercise['sets'] * volume_multiplier)
+                
+                # Filter exercises based on experience level
+                filtered_exercises = []
+                for exercise in exercises:
+                    if experience == 'beginner' and exercise.get('difficulty') == 'advanced':
+                        continue
+                    if experience == 'intermediate' and exercise.get('difficulty') == 'advanced':
+                        # Reduce sets for advanced exercises
+                        if isinstance(exercise['sets'], (int, float)):
+                            exercise['sets'] = max(1, round(exercise['sets'] * 0.7))
+                    filtered_exercises.append(exercise)
+                
+                workout_plan['weekly_schedule'][day] = {
+                    'focus': focus,
+                    'category': category,
+                    'exercises': filtered_exercises,
+                    'rest_period': training_params['rest_periods'],
+                    'intensity_focus': training_params['intensity_focus']
+                }
+            
+            # Add progression methods
+            progression_methods = [
+                "Gradually increase weight while maintaining the same rep range",
+                "Increase reps while maintaining the same weight",
+                "Decrease rest periods between sets",
+                "Add an extra set to exercises",
+                "Improve form and range of motion"
+            ]
+            
+            if experience != 'beginner':
+                progression_methods.extend([
+                    "Implement drop sets for the last set of each exercise",
+                    "Use supersets for antagonistic muscle groups",
+                    "Incorporate rest-pause sets for the last set",
+                    "Add forced reps with a spotter",
+                    "Implement negative reps for the last set"
+                ])
+            
+            workout_plan['progression_methods'] = progression_methods
+            
+            return workout_plan
+            
+        except Exception as e:
+            logger.error(f"Error generating workout plan: {str(e)}")
+            return this._get_default_plan(experience)
+    
+    def _get_default_plan(self, experience: str) -> Dict[str, Any]:
+        """
+        Get a default workout plan when there's an error generating a custom one.
+        
+        Args:
+            experience: Training experience level
+            
+        Returns:
+            Dictionary containing a basic workout plan
+        """
+        return {
+            'training_parameters': {
+                'rep_ranges': '8-12',
+                'rest_periods': '60-90 seconds',
+                'volume_multiplier': '1.0',
+                'intensity_focus': 'moderate',
+                'cardio_frequency': '2-3',
+                'cardio_intensity': 'moderate',
+                'cardio_duration': '20-30 min',
+                'progression_rate': 'moderate'
+            },
+            'weak_areas': [],
+            'imbalances': [],
+            'body_composition': {
+                'body_fat_percentage': 0,
+                'body_fat_category': 'unknown',
+                'muscle_mass': 0,
+                'muscle_mass_category': 'unknown'
+            },
+            'split_type': 'Full Body',
+            'weekly_schedule': {
+                'Monday': {
+                    'focus': 'Full Body',
+                    'category': 'full_body',
+                    'exercises': self.base_exercises['chest'][:1] + \
+                               self.base_exercises['back'][:1] + \
+                               self.base_exercises['legs'][:1],
+                    'rest_period': '60-90 seconds',
+                    'intensity_focus': 'moderate'
+                },
+                'Wednesday': {
+                    'focus': 'Full Body',
+                    'category': 'full_body',
+                    'exercises': self.base_exercises['shoulders'][:1] + \
+                               self.base_exercises['arms'][:1] + \
+                               self.base_exercises['legs'][:1],
+                    'rest_period': '60-90 seconds',
+                    'intensity_focus': 'moderate'
+                },
+                'Friday': {
+                    'focus': 'Full Body',
+                    'category': 'full_body',
+                    'exercises': self.base_exercises['chest'][:1] + \
+                               self.base_exercises['back'][:1] + \
+                               self.base_exercises['core'][:1],
+                    'rest_period': '60-90 seconds',
+                    'intensity_focus': 'moderate'
+                }
+            },
+            'progression_methods': [
+                "Gradually increase weight while maintaining the same rep range",
+                "Increase reps while maintaining the same weight",
+                "Decrease rest periods between sets",
+                "Add an extra set to exercises",
+                "Improve form and range of motion"
+            ]
+        }
+```
+I've enhanced the `WorkoutPlanner` class with several improvements to better meet your requirements for a personalized workout generation system. Here are the key enhancements:
+
+1. **Enhanced Body Composition Analysis**:
+   - Added baseline measurements for different body types and heights
+   - Improved body fat and muscle mass categorization
+   - Added detection of left/right imbalances in arms, thighs, and calves
+   - More comprehensive weak point identification based on both ratings and measurements
+
+2. **Improved Exercise Database**:
+   - Added difficulty levels to all exercises
+   - Expanded exercise selection for each muscle group
+   - Added specialized exercises for fat loss
+   - Added cardio exercises with varying intensities
+
+3. **Smarter Training Parameters**:
+   - Added cardio-specific parameters (frequency, intensity, duration)
+   - Added progression rate parameter
+   - More nuanced adjustments based on body composition
+   - Better volume adjustments for weak areas
+
+4. **Enhanced Workout Plan Generation**:
+   - Added different split types based on experience and goals
+   - Added cardio days for fat loss goals
+   - Better exercise selection based on experience level
+   - Added progression methods tailored to experience level
+   - Improved volume adjustments for weak areas
+
+5. **Better Default Plan**:
+   - Added a more comprehensive default plan for error cases
+   - Included progression methods in the default plan
+   - Added body composition information to the default plan
+
+The enhanced system now:
+1. Analyzes body composition more thoroughly
+2. Identifies weak points and imbalances more accurately
+3. Generates more personalized workout plans
+4. Provides better progression guidance
+5. Adapts better to different experience levels and goals
+
+Would you like me to make any additional enhancements to the system?
