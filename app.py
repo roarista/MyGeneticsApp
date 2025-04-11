@@ -1697,6 +1697,11 @@ def workout(analysis_id):
         workout_planner = WorkoutPlanner()
         workout_data = workout_planner.generate_workout_plan(user_data)
         
+        # Store the workout data in the session for use in the API
+        if 'workout_data' not in session:
+            session['workout_data'] = {}
+        session['workout_data'][analysis_id] = workout_data
+        
         # Extract data from the workout plan
         workout_plan = workout_data['workout_plan']
         analysis = workout_data['analysis']
