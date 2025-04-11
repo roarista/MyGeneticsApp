@@ -1,0 +1,80 @@
+I'll help you fix the display inconsistency between the left and right panels. Let me first check the relevant files to identify where these values are being set and displayed.
+
+Search files...
+Let me check the main template file that displays the results:
+
+Read file: templates/tailwind_results.html
+Let me check the rest of the template:
+
+Read file: templates/tailwind_results.html
+I see the issue. Let me check the route that renders this template:
+
+Read file: app.py
+Let me check the results route:
+
+Read file: app.py
+I see the issue. The problem is that the left panel's body composition values are being populated from `analysis` object, while the right panel is using data from `bodybuilding_analysis` and `enhanced_measurements`. Let me fix this by updating the template to use the same data source for both panels.
+
+```html:templates/tailwind_results.html
+                <div class="space-y-4">
+                    <div>
+                        <h4 class="text-lg font-semibold text-gray-300 mb-2">Body Composition</h4>
+                        <div class="bg-gray-800 p-4 rounded-lg">
+                            {% if bodybuilding.body_fat_percentage is defined %}
+                            <div class="flex justify-between mb-2">
+                                <span class="text-gray-400">Body Fat</span>
+                                <span class="font-medium">{{ '{:.1f}'.format(bodybuilding.body_fat_percentage) }}%</span>
+                            </div>
+                            {% endif %}
+                            {% if bodybuilding.body_type is defined %}
+                            <div class="flex justify-between mb-2">
+                                <span class="text-gray-400">Body Type</span>
+                                <span class="font-medium">{{ bodybuilding.body_type|capitalize }}</span>
+                            </div>
+                            {% endif %}
+                            {% if bodybuilding.muscle_building_potential is defined %}
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Muscle Building Potential</span>
+                                <span class="font-medium">{{ '{:.1f}'.format(bodybuilding.muscle_building_potential) }}/10</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4 class="text-lg font-semibold text-gray-300 mb-2">Top Genetic Advantages</h4>
+                        <ul class="bg-gray-800 p-4 rounded-lg space-y-2">
+                            {% for advantage in top_advantages %}
+                            <li class="flex items-start">
+                                <span class="text-green-400 mr-2">✓</span>
+                                <span>{{ advantage }}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+// ... existing code ...
+```
+Let me fix the template error:
+
+```html:templates/tailwind_results.html
+        .btn-outline {
+            @apply px-5 py-2 rounded-lg border border-gray-700 hover:border-red-500 text-gray-200 
+                   hover:text-red-500 transition-all duration-300 font-medium;
+        }
+    </style>
+</head>
+<body class="bg-black font-sans text-white">
+// ... existing code ...
+```
+Now that we've fixed the template, the left panel's body composition values will be populated from the same source as the right panel (`bodybuilding_analysis`). This means:
+
+1. Body Fat Percentage will show the value from `bodybuilding.body_fat_percentage`
+2. Body Type will show the value from `bodybuilding.body_type`
+3. Muscle Building Potential will show the value from `bodybuilding.muscle_building_potential`
+
+The changes include:
+1. Added conditional checks to ensure values exist before displaying them
+2. Updated the value sources to use the `bodybuilding` object instead of the `analysis` object
+3. Fixed the formatting to maintain consistency with the right panel
+
+The values should now be synchronized between both panels since they're pulling from the same data source. Would you like me to help you with anything else?
