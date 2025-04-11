@@ -32,39 +32,63 @@
                 
                 <div class="space-y-4">
                     <!-- Body Fat -->
-                    <div class="flex flex-col">
-                        <p class="text-xl font-bold text-white">
-                            {% if bodybuilding and bodybuilding.body_fat_percentage %}
-                                {{ '{:.1f}'.format(bodybuilding.body_fat_percentage) }}%
-                            {% else %}
-                                N/A
-                            {% endif %}
-                        </p>
-                        <p class="text-gray-400">Body Fat Percentage</p>
+                    <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-percentage text-blue-400 text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-xl font-bold text-white">
+                                    {% if bodybuilding and bodybuilding.body_fat_percentage %}
+                                        {{ '{:.1f}'.format(bodybuilding.body_fat_percentage) }}%
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </p>
+                                <p class="text-gray-400">Body Fat Percentage</p>
+                            </div>
+                        </div>
+                        {% if bodybuilding and bodybuilding.body_fat_confidence %}
+                            <span class="w-3 h-3 rounded-full {% if bodybuilding.body_fat_confidence > 0.7 %}bg-green-500{% elif bodybuilding.body_fat_confidence > 0.4 %}bg-yellow-500{% else %}bg-gray-500{% endif %}"></span>
+                        {% endif %}
                     </div>
                     
                     <!-- Body Type -->
-                    <div class="flex flex-col">
-                        <p class="text-xl font-bold text-white">
-                            {% if bodybuilding and bodybuilding.body_type and bodybuilding.body_type != 'Unknown' %}
-                                {{ bodybuilding.body_type }}
-                            {% else %}
-                                N/A
-                            {% endif %}
-                        </p>
-                        <p class="text-gray-400">Body Type Classification</p>
+                    <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-dna text-purple-400 text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-xl font-bold text-white">
+                                    {% if bodybuilding and bodybuilding.body_type and bodybuilding.body_type != 'Unknown' %}
+                                        {{ bodybuilding.body_type }}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </p>
+                                <p class="text-gray-400">Body Type Classification</p>
+                            </div>
+                        </div>
                     </div>
                     
                     <!-- Muscle Building Potential -->
-                    <div class="flex flex-col">
-                        <p class="text-xl font-bold text-white">
-                            {% if bodybuilding and bodybuilding.muscle_building_potential %}
-                                {{ '{:.1f}'.format(bodybuilding.muscle_building_potential) }}/10
-                            {% else %}
-                                N/A
-                            {% endif %}
-                        </p>
-                        <p class="text-gray-400">Muscle Building Potential</p>
+                    <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-dumbbell text-green-400 text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-xl font-bold text-white">
+                                    {% if bodybuilding and bodybuilding.muscle_building_potential %}
+                                        {{ '{:.1f}'.format(bodybuilding.muscle_building_potential) }}/10
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </p>
+                                <p class="text-gray-400">Muscle Building Potential</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -131,25 +155,41 @@
                 {% if basic_measurements and basic_measurements|length > 0 %}
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {% for key, data in basic_measurements.items() %}
-                    <div class="flex flex-col">
-                        <p class="text-xl font-bold text-white">{{ data.value }}</p>
-                        <div class="flex items-center">
-                            <p class="text-gray-400 mr-2">{{ key }}</p>
-                            {% if data.confidence == 'high' %}
-                            <span class="w-2 h-2 rounded-full bg-green-500"></span>
-                            {% elif data.confidence == 'medium' %}
-                            <span class="w-2 h-2 rounded-full bg-yellow-500"></span>
-                            {% else %}
-                            <span class="w-2 h-2 rounded-full bg-gray-500"></span>
-                            {% endif %}
+                    <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <div class="flex-shrink-0">
+                                {% if key == 'Height' %}
+                                    <i class="fas fa-ruler-vertical text-blue-400"></i>
+                                {% elif key == 'Weight' %}
+                                    <i class="fas fa-weight text-purple-400"></i>
+                                {% elif key == 'Chest' %}
+                                    <i class="fas fa-expand text-green-400"></i>
+                                {% elif key == 'Waist' %}
+                                    <i class="fas fa-ruler-horizontal text-yellow-400"></i>
+                                {% elif key == 'Hips' %}
+                                    <i class="fas fa-arrows-alt-h text-red-400"></i>
+                                {% elif key == 'Shoulders' %}
+                                    <i class="fas fa-arrows-alt text-indigo-400"></i>
+                                {% else %}
+                                    <i class="fas fa-ruler text-gray-400"></i>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <p class="text-xl font-bold text-white">{{ data.value }}</p>
+                                <p class="text-gray-400">{{ key }}</p>
+                            </div>
                         </div>
+                        {% if data.confidence %}
+                        <span class="w-3 h-3 rounded-full {% if data.confidence == 'high' %}bg-green-500{% elif data.confidence == 'medium' %}bg-yellow-500{% else %}bg-gray-500{% endif %}"></span>
+                        {% endif %}
                     </div>
                     {% endfor %}
                 </div>
                 {% else %}
-                <div class="flex flex-col items-center justify-center py-12">
+                <div class="flex flex-col items-center justify-center py-8 bg-gray-800 rounded-lg">
                     <i class="fas fa-ruler-combined text-gray-600 text-5xl mb-4"></i>
                     <p class="text-gray-400">No measurement data available</p>
+                    <p class="text-sm text-gray-500 mt-2">Please ensure photos are clear and well-lit</p>
                 </div>
                 {% endif %}
             </div>

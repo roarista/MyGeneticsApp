@@ -579,7 +579,9 @@ def results(analysis_id):
         bodybuilding = {
             'body_fat_percentage': analysis['body_fat_percentage'],
             'body_type': analysis['body_type'],
-            'muscle_building_potential': analysis['muscle_building_potential']
+            'muscle_building_potential': analysis['muscle_building_potential'],
+            'body_fat_confidence': result.get('bodybuilding_analysis', {}).get('body_fat_confidence', 0.6),
+            'muscle_building_confidence': result.get('bodybuilding_analysis', {}).get('muscle_building_confidence', 0.6)
         }
         
         # Get basic measurements for measurements panel

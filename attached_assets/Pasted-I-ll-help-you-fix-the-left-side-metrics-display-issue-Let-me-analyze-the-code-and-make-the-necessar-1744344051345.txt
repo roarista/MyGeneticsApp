@@ -1,0 +1,411 @@
+I'll help you fix the left-side metrics display issue. Let me analyze the code and make the necessary changes.
+
+First, let's check the relevant template file:
+
+Read file: templates/tailwind_results_charts.html
+Now let's check how the data is being passed from the backend. Let me look at the relevant route in app.py:
+
+Read file: app.py
+I see the issue. The problem is in how the data is being passed to the template and how it's being accessed. Let me make the necessary changes to fix this:
+
+1. First, let's update the template to properly access the bodybuilding metrics:
+
+```html:templates/tailwind_results_charts.html
+<!-- Body Composition Section -->
+<div class="dark-card">
+    <h2 class="text-xl font-semibold text-white mb-4">Body Composition</h2>
+    
+    <div class="space-y-6">
+        <!-- Body Fat -->
+        <div class="flex items-center justify-between p-3 bg-gray-800 rounded-lg">
+            <div class="flex items-center space-x-3">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-percentage text-blue-400 text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-white">
+                        {% if bodybuilding_analysis and bodybuilding_analysis.body_fat_percentage %}
+                            {{ '{:.1f}'.format(bodybuilding_analysis.body_fat_percentage) }}%
+                        {% else %}
+                            --
+                        {% endif %}
+                    </p>
+                    <p class="text-gray-400">Body Fat Percentage</p>
+                </div>
+            </div>
+            {% if bodybuilding_analysis and bodybuilding_analysis.body_fat_confidence %}
+                <span class="w-3 h-3 rounded-full {% if bodybuilding_analysis.body_fat_confidence > 0.7 %}bg-green-500{% elif bodybuilding_analysis.body_fat_confidence > 0.4 %}bg-yellow-500{% else %}bg-red-500{% endif %}"></span>
+            {% endif %}
+        </div>
+        
+        <!-- Body Type -->
+        <div class="flex items-center justify-between p-3 bg-gray-800 rounded-lg">
+            <div class="flex items-center space-x-3">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-dna text-purple-400 text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-white">
+                        {% if bodybuilding_analysis and bodybuilding_analysis.body_type and bodybuilding_analysis.body_type != 'Unknown' %}
+                            {{ bodybuilding_analysis.body_type }}
+                        {% else %}
+                            --
+                        {% endif %}
+                    </p>
+                    <p class="text-gray-400">Body Type Classification</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Muscle Building Potential -->
+        <div class="flex items-center justify-between p-3 bg-gray-800 rounded-lg">
+            <div class="flex items-center space-x-3">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-dumbbell text-green-400 text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-white">
+                        {% if bodybuilding_analysis and bodybuilding_analysis.muscle_building_potential %}
+                            {{ '{:.1f}'.format(bodybuilding_analysis.muscle_building_potential) }}/10
+                        {% else %}
+                            --
+                        {% endif %}
+                    </p>
+                    <p class="text-gray-400">Muscle Building Potential</p>
+                </div>
+            </div>
+            {% if bodybuilding_analysis and bodybuilding_analysis.muscle_building_confidence %}
+                <span class="w-3 h-3 rounded-full {% if bodybuilding_analysis.muscle_building_confidence > 0.7 %}bg-green-500{% elif bodybuilding_analysis.muscle_building_confidence > 0.4 %}bg-yellow-500{% else %}bg-red-500{% endif %}"></span>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- ... existing code ... -->
+
+<!-- Key Measurements Section -->
+<div class="dark-card">
+    <h2 class="text-xl font-semibold text-white mb-4">Key Measurements</h2>
+    
+    {% if basic_measurements and basic_measurements|length > 0 %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {% for key, data in basic_measurements.items() %}
+        <div class="flex items-center justify-between p-3 bg-gray-800 rounded-lg">
+            <div class="flex items-center space-x-3">
+                <div class="flex-shrink-0">
+                    {% if key == 'Height' %}
+                        <i class="fas fa-ruler-vertical text-blue-400"></i>
+                    {% elif key == 'Weight' %}
+                        <i class="fas fa-weight text-purple-400"></i>
+                    {% elif key == 'Chest' %}
+                        <i class="fas fa-expand text-green-400"></i>
+                    {% elif key == 'Waist' %}
+                        <i class="fas fa-ruler-horizontal text-yellow-400"></i>
+                    {% elif key == 'Hips' %}
+                        <i class="fas fa-arrows-alt-h text-red-400"></i>
+                    {% elif key == 'Shoulders' %}
+                        <i class="fas fa-arrows-alt text-indigo-400"></i>
+                    {% else %}
+                        <i class="fas fa-ruler text-gray-400"></i>
+                    {% endif %}
+                </div>
+                <div>
+                    <p class="text-xl font-bold text-white">{{ data.value }}</p>
+                    <p class="text-gray-400">{{ key }}</p>
+                </div>
+            </div>
+            {% if data.confidence %}
+            <span class="w-2 h-2 rounded-full {% if data.confidence == 'high' %}bg-green-500{% elif data.confidence == 'medium' %}bg-yellow-500{% else %}bg-gray-500{% endif %}"></span>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="flex flex-col items-center justify-center py-12 bg-gray-800 rounded-lg">
+        <i class="fas fa-ruler-combined text-gray-600 text-5xl mb-4"></i>
+        <p class="text-gray-400">No measurement data available</p>
+        <p class="text-sm text-gray-500 mt-2">Please ensure photos are clear and well-lit</p>
+    </div>
+    {% endif %}
+</div>
+// ... existing code ...
+```
+Now let's update the route in app.py to properly pass the bodybuilding analysis data:
+
+```python:app.py
+@app.route('/results/<analysis_id>')
+def results(analysis_id):
+    """Display analysis results"""
+    try:
+        if analysis_id not in analysis_results:
+            flash('Analysis not found', 'danger')
+            return redirect(url_for('index'))
+        
+        result = analysis_results[analysis_id]
+        
+        # Check what type of analysis this is
+        analysis_type = result.get('analysis_type', 'single_photo')
+        
+        # Initialize image variables
+        front_img_b64 = None
+        back_img_b64 = None
+        img_b64 = None
+        
+        # Get bodybuilding analysis data
+        bodybuilding_analysis = result.get('bodybuilding_analysis', {})
+        if not bodybuilding_analysis:
+            bodybuilding_analysis = {
+                'body_fat_percentage': 0.0,
+                'lean_body_mass': 0.0,
+                'body_fat_mass': 0.0,
+                'ffmi': 0.0,
+                'body_type': 'Unknown',
+                'muscle_building_potential': 0.0,
+                'body_fat_confidence': 0.5,
+                'muscle_building_confidence': 0.5
+            }
+            logger.warning("Missing bodybuilding_analysis object - using defaults")
+        
+        # Handle different types of analysis
+        if analysis_type == 'dual_photo':
+            try:
+                # Read the processed front image if it exists
+                if os.path.exists(result.get('front_image_path', '')):
+                    with open(result['front_image_path'], 'rb') as f:
+                        front_img_data = f.read()
+                    front_img_b64 = base64.b64encode(front_img_data).decode('utf-8')
+                
+                # Read the processed back image if it exists
+                if os.path.exists(result.get('back_image_path', '')):
+                    with open(result['back_image_path'], 'rb') as f:
+                        back_img_data = f.read()
+                    back_img_b64 = base64.b64encode(back_img_data).decode('utf-8')
+                
+                # Use front image as main image, provide back image separately
+                img_b64 = front_img_b64 if front_img_b64 else None
+            except Exception as e:
+                logger.error(f"Error reading image files: {str(e)}")
+                # Continue without images
+        
+        # Process traits to include their units
+        formatted_traits = {}
+        for trait_name, trait_data in result.get('traits', {}).items():
+            # Skip metadata
+            if trait_name == 'metadata':
+                formatted_traits[trait_name] = trait_data
+                continue
+                
+            # For traits that are dictionaries with value keys
+            if isinstance(trait_data, dict) and 'value' in trait_data:
+                # Copy the trait data
+                formatted_trait = trait_data.copy()
+                # Format the value with units
+                formatted_trait['display_value'] = format_trait_value(trait_name, trait_data['value'])
+                formatted_trait['unit'] = get_unit(trait_name)
+                formatted_traits[trait_name] = formatted_trait
+            else:
+                # For other types of traits
+                formatted_traits[trait_name] = trait_data
+        
+        # Get measurements for display
+        measurements = result.get('combined_measurements', {})
+        
+        # Create basic measurements for display
+        basic_measurements = {}
+        if measurements:
+            # Extract key measurements for the basic measurements panel
+            basic_keys = ['height', 'weight', 'chest', 'waist', 'hips', 'shoulders']
+            for key in basic_keys:
+                if key in measurements:
+                    confidence_key = key.replace('_cm', '')
+                    
+                    # Get confidence level based on score
+                    score = measurements.get('confidence_scores', {}).get(confidence_key, 0.6)
+                    if score >= 0.7:
+                        confidence = 'high'
+                    elif score >= 0.4:
+                        confidence = 'medium'
+                    else:
+                        confidence = 'low'
+                    
+                    # Format with proper unit based on measurement type
+                    if key == 'height' or key == 'weight':
+                        unit = 'cm' if key == 'height' else 'kg'
+                        value_str = f"{measurements[key]:.1f} {unit}"
+                    else:
+                        value_str = f"{measurements[key]:.1f} cm"
+                    
+                    basic_measurements[key.capitalize()] = {
+                        'value': value_str,
+                        'confidence': confidence
+                    }
+        
+        # Template data
+        template_data = {
+            'analysis_id': analysis_id,
+            'traits': formatted_traits,
+            'recommendations': result.get('recommendations', {}),
+            'user_info': result.get('user_info', {}),
+            'image_data': img_b64,
+            'front_image': front_img_b64,
+            'back_image': back_img_b64,
+            'is_3d_scan': analysis_type == '3d_scan',
+            'is_dual_photo': analysis_type == 'dual_photo',
+            'bodybuilding_analysis': bodybuilding_analysis,
+            'basic_measurements': basic_measurements,
+            'enhanced_measurements': result.get('enhanced_measurements', {}),
+            'categorized_measurements': result.get('categorized_measurements', {}),
+            'has_enhanced_measurements': bool(result.get('enhanced_measurements', {}))
+        }
+        
+        return render_template('tailwind_results_charts.html', **template_data)
+        
+    except Exception as e:
+        logger.error(f"Error displaying results: {str(e)}")
+        flash('Error displaying analysis results. Please try again.', 'danger')
+        return redirect(url_for('index'))
+// ... existing code ...
+```
+Now let's fix the linter errors in the template file:
+
+```html:templates/tailwind_results_charts.html
+<!-- Body Composition Section -->
+<div class="dark-card">
+    <h2 class="text-xl font-semibold text-white mb-4">Body Composition</h2>
+    
+    <div class="space-y-6">
+        <!-- Body Fat -->
+        <div class="flex items-center justify-between p-3 bg-gray-800 rounded-lg">
+            <div class="flex items-center space-x-3">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-percentage text-blue-400 text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-white">
+                        {% if bodybuilding_analysis and bodybuilding_analysis.body_fat_percentage %}
+                            {{ '{:.1f}'.format(bodybuilding_analysis.body_fat_percentage) }}%
+                        {% else %}
+                            --
+                        {% endif %}
+                    </p>
+                    <p class="text-gray-400">Body Fat Percentage</p>
+                </div>
+            </div>
+            {% if bodybuilding_analysis and bodybuilding_analysis.body_fat_confidence %}
+                <span class="w-3 h-3 rounded-full {% if bodybuilding_analysis.body_fat_confidence > 0.7 %}bg-green-500{% elif bodybuilding_analysis.body_fat_confidence > 0.4 %}bg-yellow-500{% else %}bg-red-500{% endif %}"></span>
+            {% endif %}
+        </div>
+        
+        <!-- Body Type -->
+        <div class="flex items-center justify-between p-3 bg-gray-800 rounded-lg">
+            <div class="flex items-center space-x-3">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-dna text-purple-400 text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-white">
+                        {% if bodybuilding_analysis and bodybuilding_analysis.body_type and bodybuilding_analysis.body_type != 'Unknown' %}
+                            {{ bodybuilding_analysis.body_type }}
+                        {% else %}
+                            --
+                        {% endif %}
+                    </p>
+                    <p class="text-gray-400">Body Type Classification</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Muscle Building Potential -->
+        <div class="flex items-center justify-between p-3 bg-gray-800 rounded-lg">
+            <div class="flex items-center space-x-3">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-dumbbell text-green-400 text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-white">
+                        {% if bodybuilding_analysis and bodybuilding_analysis.muscle_building_potential %}
+                            {{ '{:.1f}'.format(bodybuilding_analysis.muscle_building_potential) }}/10
+                        {% else %}
+                            --
+                        {% endif %}
+                    </p>
+                    <p class="text-gray-400">Muscle Building Potential</p>
+                </div>
+            </div>
+            {% if bodybuilding_analysis and bodybuilding_analysis.muscle_building_confidence %}
+                <span class="w-3 h-3 rounded-full {% if bodybuilding_analysis.muscle_building_confidence > 0.7 %}bg-green-500{% elif bodybuilding_analysis.muscle_building_confidence > 0.4 %}bg-yellow-500{% else %}bg-red-500{% endif %}"></span>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Key Measurements Section -->
+<div class="dark-card">
+    <h2 class="text-xl font-semibold text-white mb-4">Key Measurements</h2>
+    
+    {% if basic_measurements and basic_measurements|length > 0 %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {% for key, data in basic_measurements.items() %}
+        <div class="flex items-center justify-between p-3 bg-gray-800 rounded-lg">
+            <div class="flex items-center space-x-3">
+                <div class="flex-shrink-0">
+                    {% if key == 'Height' %}
+                        <i class="fas fa-ruler-vertical text-blue-400"></i>
+                    {% elif key == 'Weight' %}
+                        <i class="fas fa-weight text-purple-400"></i>
+                    {% elif key == 'Chest' %}
+                        <i class="fas fa-expand text-green-400"></i>
+                    {% elif key == 'Waist' %}
+                        <i class="fas fa-ruler-horizontal text-yellow-400"></i>
+                    {% elif key == 'Hips' %}
+                        <i class="fas fa-arrows-alt-h text-red-400"></i>
+                    {% elif key == 'Shoulders' %}
+                        <i class="fas fa-arrows-alt text-indigo-400"></i>
+                    {% else %}
+                        <i class="fas fa-ruler text-gray-400"></i>
+                    {% endif %}
+                </div>
+                <div>
+                    <p class="text-xl font-bold text-white">{{ data.value }}</p>
+                    <p class="text-gray-400">{{ key }}</p>
+                </div>
+            </div>
+            {% if data.confidence %}
+            <span class="w-2 h-2 rounded-full {% if data.confidence == 'high' %}bg-green-500{% elif data.confidence == 'medium' %}bg-yellow-500{% else %}bg-gray-500{% endif %}"></span>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="flex flex-col items-center justify-center py-12 bg-gray-800 rounded-lg">
+        <i class="fas fa-ruler-combined text-gray-600 text-5xl mb-4"></i>
+        <p class="text-gray-400">No measurement data available</p>
+        <p class="text-sm text-gray-500 mt-2">Please ensure photos are clear and well-lit</p>
+    </div>
+    {% endif %}
+</div>
+```
+Let me try to fix the linter errors by removing the comment at the end and ensuring proper HTML structure:
+
+Ran tool
+I've made several important changes to fix the issues:
+
+1. Updated the template to use `bodybuilding_analysis` instead of `bodybuilding`
+2. Added proper icons and visual indicators for each metric
+3. Improved the layout with better spacing and visual hierarchy
+4. Added confidence indicators for measurements
+5. Improved the error states to show dashes (--) instead of N/A
+6. Added helpful icons for each measurement type
+7. Improved the empty state message
+
+The changes should now:
+1. Properly display body fat percentage, body type, and muscle building potential from the bodybuilding analysis
+2. Show key measurements with proper formatting and confidence indicators
+3. Match the visual style of the rest of the application
+
+The data should now flow correctly from the backend to the frontend. The left-side metrics should now display properly and match the style of the right side.
+
+Would you like me to:
+1. Make any additional visual improvements?
+2. Add any other metrics to the display?
+3. Help with something else?
