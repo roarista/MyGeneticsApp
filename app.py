@@ -493,7 +493,7 @@ def results(analysis_id):
         back_img_b64 = None
         img_b64 = None
         
-        # Create a default bodybuilding object with fallback values if not present
+        # Create a default bodybuilding_analysis object with fallback values if not present
         if 'bodybuilding_analysis' not in result or not result['bodybuilding_analysis']:
             result['bodybuilding_analysis'] = {
                 'body_fat_percentage': 0.0,
@@ -502,7 +502,8 @@ def results(analysis_id):
                 'ffmi': 0.0,
                 'body_type': 'Unknown',
                 'muscle_building_potential': 0.0,
-                'body_fat_confidence': 0.5
+                'body_fat_confidence': 0.5,
+                'muscle_building_confidence': 0.5
             }
             logger.warning("Missing bodybuilding_analysis object - using defaults")
         
@@ -526,19 +527,6 @@ def results(analysis_id):
             except Exception as e:
                 logger.error(f"Error reading image files: {str(e)}")
                 # Continue without images
-        elif analysis_type == '3d_scan':
-            # For 3D scan analysis, we might not have an image
-            img_b64 = None
-        else:
-            # For single photo analysis (legacy mode)
-            try:
-                if 'image_path' in result and os.path.exists(result['image_path']):
-                    with open(result['image_path'], 'rb') as f:
-                        img_data = f.read()
-                    img_b64 = base64.b64encode(img_data).decode('utf-8')
-            except Exception as e:
-                logger.error(f"Error reading image file: {str(e)}")
-                # Continue without image
         
         # Process traits to include their units
         formatted_traits = {}
@@ -560,192 +548,81 @@ def results(analysis_id):
                 # For other types of traits
                 formatted_traits[trait_name] = trait_data
         
-        # Determine which measurements to display
-        measurements = {}
-        if analysis_type == 'dual_photo':
-            measurements = result.get('combined_measurements', {})
-        elif 'estimated_measurements' in result:
-            measurements = result.get('estimated_measurements', {})
+        # Get measurements for display
+        measurements = result.get('combined_measurements', {})
         
         # Create analysis object for template compatibility
         analysis = {
             'id': analysis_id,
-            'body_fat_percentage': result.get('bodybuilding_analysis', {}).get('body_fat_percentage', 0),
-            'body_type': result.get('bodybuilding_analysis', {}).get('body_type', 'Unknown'),
-            'muscle_building_potential': result.get('bodybuilding_analysis', {}).get('muscle_building_potential', 0)
+            'body_fat_percentage': result['bodybuilding_analysis'].get('body_fat_percentage', 0),
+            'body_type': result['bodybuilding_analysis'].get('body_type', 'Unknown'),
+            'muscle_building_potential': result['bodybuilding_analysis'].get('muscle_building_potential', 0)
         }
         
-        # Also update the bodybuilding object to match the analysis values for consistency
-        bodybuilding = {
-            'body_fat_percentage': analysis['body_fat_percentage'],
-            'body_type': analysis['body_type'],
-            'muscle_building_potential': analysis['muscle_building_potential'],
-            'body_fat_confidence': result.get('bodybuilding_analysis', {}).get('body_fat_confidence', 0.6),
-            'muscle_building_confidence': result.get('bodybuilding_analysis', {}).get('muscle_building_confidence', 0.6)
-        }
-        
-        # Get basic measurements for measurements panel
-        basic_measurements = {}
-        try:
-            if measurements:
-                confidence_scores = measurements.get('confidence_scores', {})
+        # Extract measurements from traits if available
+        measurements = {}
+        for trait_name, trait_data in result['traits'].items():
+            if isinstance(trait_data, dict) and 'value' in trait_data:
+                measurements[trait_name] = trait_data
                 
-                # Extract key measurements for the basic measurements panel
-                basic_keys = ['height', 'weight', 'chest', 'waist', 'hips', 'shoulders']
-                for key in basic_keys:
-                    if key in measurements:
-                        confidence_key = key.replace('_cm', '')
-                        
-                        # Get confidence level based on score
-                        score = confidence_scores.get(confidence_key, 0.6)
-                        if score >= 0.7:
-                            confidence = 'high'
-                        elif score >= 0.4:
-                            confidence = 'medium'
-                        else:
-                            confidence = 'low'
-                        
-                        # Format with proper unit based on measurement type
-                        if key == 'height' or key == 'weight':
-                            unit = 'cm' if key == 'height' else 'kg'
-                            value_str = f"{measurements[key]:.1f} {unit}"
-                        else:
-                            value_str = f"{measurements[key]:.1f} cm"
-                        
-                        basic_measurements[key.capitalize()] = {
-                            'value': value_str,
-                            'confidence': confidence
-                        }
-        except Exception as e:
-            logger.error(f"Error processing basic measurements: {str(e)}")
-            # Continue with empty basic measurements
+        # Create basic measurements for display
+        basic_measurements = {}
+        if measurements:
+            # Extract key measurements for the basic measurements panel
+            basic_keys = ['height', 'weight', 'chest', 'waist', 'hips', 'shoulders']
+            for key in basic_keys:
+                if key in measurements:
+                    basic_measurements[key.capitalize()] = measurements[key]
         
         # Get proportion measurements for the proportions panel
         proportion_measurements = {}
-        try:
-            if measurements:
-                confidence_scores = measurements.get('confidence_scores', {})
-                
-                # Extract proportion metrics for display
-                proportion_keys = ['shoulder_hip_ratio', 'waist_hip_ratio', 'arm_torso_ratio', 'leg_torso_ratio']
-                for key in proportion_keys:
-                    if key in measurements:
-                        confidence_key = key.replace('_ratio', '')
-                        
-                        # Get confidence level based on score
-                        score = confidence_scores.get(confidence_key, 0.6)
-                        if score >= 0.7:
-                            confidence = 'high'
-                        elif score >= 0.4:
-                            confidence = 'medium'
-                        else:
-                            confidence = 'low'
-                        
-                        # Format ratio without unit
-                        value_str = f"{measurements[key]:.2f}"
-                        
-                        proportion_measurements[key.replace('_', ' ').title()] = {
-                            'value': value_str,
-                            'confidence': confidence
-                        }
-        except Exception as e:
-            logger.error(f"Error processing proportion measurements: {str(e)}")
-            # Continue with empty proportion measurements
+        if measurements:
+            # Extract proportion metrics for display
+            proportion_keys = ['shoulder_hip_ratio', 'waist_hip_ratio', 'arm_torso_ratio', 'leg_torso_ratio']
+            for key in proportion_keys:
+                if key in measurements:
+                    proportion_measurements[key.replace('_', ' ').title()] = measurements[key]
         
         # Prepare circumference measurements (left and right)
         circumference_measurements_left = {}
         circumference_measurements_right = {}
-        try:
-            if measurements:
-                # Use confidence scores from measurements or default to medium confidence
-                confidence_scores = measurements.get('confidence_scores', {})
-                
-                # Left side measurements
-                left_keys = ['left_arm_cm', 'left_thigh_cm', 'left_calf_cm']
-                for key in left_keys:
-                    if key in measurements:
-                        display_key = key.replace('left_', '').replace('_cm', '').capitalize()
-                        confidence_key = key.replace('left_', '').replace('right_', '').replace('_cm', '')
-                        
-                        # Get confidence level based on score
-                        score = confidence_scores.get(confidence_key, 0.5)
-                        if score >= 0.7:
-                            confidence = 'high'
-                        elif score >= 0.4:
-                            confidence = 'medium'
-                        else:
-                            confidence = 'low'
-                        
-                        # Format with value and confidence level
-                        circumference_measurements_left[display_key] = {
-                            'value': f"{measurements[key]:.1f} cm",
-                            'confidence': confidence
-                        }
-                
-                # Right side measurements
-                right_keys = ['right_arm_cm', 'right_thigh_cm', 'right_calf_cm']
-                for key in right_keys:
-                    if key in measurements:
-                        display_key = key.replace('right_', '').replace('_cm', '').capitalize()
-                        confidence_key = key.replace('left_', '').replace('right_', '').replace('_cm', '')
-                        
-                        # Get confidence level based on score
-                        score = confidence_scores.get(confidence_key, 0.5)
-                        if score >= 0.7:
-                            confidence = 'high'
-                        elif score >= 0.4:
-                            confidence = 'medium'
-                        else:
-                            confidence = 'low'
-                        
-                        # Format with value and confidence level
-                        circumference_measurements_right[display_key] = {
-                            'value': f"{measurements[key]:.1f} cm",
-                            'confidence': confidence
-                        }
-        except Exception as e:
-            logger.error(f"Error processing circumference measurements: {str(e)}")
-            # Continue with empty circumference measurements
-        
-        # Get enhanced 50-point bodybuilding measurements if available
-        enhanced_measurements = result.get('enhanced_measurements', {})
-        categorized_measurements = result.get('categorized_measurements', {})
-        
-        # Get top advantages from the recommendations for the sidebar
-        top_advantages = result.get('recommendations', {}).get('top_advantages', [])
-        if not top_advantages:
-            # Default advantages if none provided
-            top_advantages = ['Good shoulder development', 'Natural V-taper potential']
+        if measurements:
+            # Left side measurements
+            left_keys = ['left_arm_cm', 'left_thigh_cm', 'left_calf_cm']
+            for key in left_keys:
+                if key in measurements:
+                    display_key = key.replace('left_', '').replace('_cm', '').capitalize()
+                    circumference_measurements_left[display_key] = measurements[key]
+            
+            # Right side measurements
+            right_keys = ['right_arm_cm', 'right_thigh_cm', 'right_calf_cm']
+            for key in right_keys:
+                if key in measurements:
+                    display_key = key.replace('right_', '').replace('_cm', '').capitalize()
+                    circumference_measurements_right[display_key] = measurements[key]
         
         # Template data
         template_data = {
             'analysis_id': analysis_id,
-            'analysis': analysis,  # Add analysis object for template compatibility
+            'analysis': analysis,
             'traits': formatted_traits,
             'recommendations': result.get('recommendations', {}),
             'user_info': result.get('user_info', {}),
             'image_data': img_b64,
-            'format_value': format_trait_value,  # Pass the formatter to the template
-            'is_3d_scan': analysis_type == '3d_scan',  # Flag for 3D scan analysis
-            'is_dual_photo': analysis_type == 'dual_photo',  # Flag for dual photo analysis
-            'bodybuilding': bodybuilding,  # Bodybuilding metrics
-            'estimated_measurements': measurements,  # Measurements (combined for dual photo)
-            'basic_measurements': basic_measurements,  # Basic measurements for the template
-            'proportion_measurements': proportion_measurements,  # Proportion measurements for the template
-            'circumference_measurements_left': circumference_measurements_left,  # Left side measurements
-            'circumference_measurements_right': circumference_measurements_right,  # Right side measurements
-            'enhanced_measurements': enhanced_measurements,  # Enhanced 50-point bodybuilding measurements
-            'categorized_measurements': categorized_measurements,  # Categorized measurements for display
-            'has_enhanced_measurements': bool(enhanced_measurements),  # Flag to indicate enhanced measurements are available
-            'top_advantages': top_advantages[:5]  # Top 5 advantages for the sidebar
+            'format_value': format_trait_value,
+            'is_3d_scan': analysis_type == '3d_scan',
+            'is_dual_photo': analysis_type == 'dual_photo',
+            'bodybuilding_analysis': result['bodybuilding_analysis'],
+            'estimated_measurements': measurements,
+            'basic_measurements': basic_measurements,
+            'proportion_measurements': proportion_measurements,
+            'circumference_measurements_left': circumference_measurements_left,
+            'circumference_measurements_right': circumference_measurements_right,
+            'enhanced_measurements': result.get('enhanced_measurements', {}),
+            'categorized_measurements': result.get('categorized_measurements', {}),
+            'has_enhanced_measurements': bool(result.get('enhanced_measurements')),
+            'top_advantages': result.get('recommendations', {}).get('top_advantages', [])[:5]
         }
-        
-        # Add additional data for dual photo analysis
-        if analysis_type == 'dual_photo':
-            template_data['front_image'] = front_img_b64
-            template_data['back_image'] = back_img_b64
-            template_data['front_measurements'] = result.get('front_measurements', {})
-            template_data['back_measurements'] = result.get('back_measurements', {})
         
         return render_template('tailwind_results_charts.html', **template_data)
         
@@ -997,7 +874,7 @@ def scan3d_results(analysis_id):
                     'value': f"{measurements[key]:.1f} cm",
                     'confidence': confidence
                 }
-        
+                
         # Right side measurements
         right_keys = ['right_arm_cm', 'right_thigh_cm', 'right_calf_cm']
         for key in right_keys:
@@ -1350,9 +1227,9 @@ def recommendations(analysis_id):
     # Create analysis object for template compatibility
     analysis = {
         'id': analysis_id,
-        'body_fat_percentage': result.get('bodybuilding_analysis', {}).get('body_fat_percentage', 0),
-        'body_type': result.get('bodybuilding_analysis', {}).get('body_type', 'Unknown'),
-        'muscle_building_potential': result.get('bodybuilding_analysis', {}).get('muscle_building_potential', 0)
+        'body_fat_percentage': result['bodybuilding_analysis'].get('body_fat_percentage', 0),
+        'body_type': result['bodybuilding_analysis'].get('body_type', 'Unknown'),
+        'muscle_building_potential': result['bodybuilding_analysis'].get('muscle_building_potential', 0)
     }
     
     # Also create a bodybuilding object for the left panel
