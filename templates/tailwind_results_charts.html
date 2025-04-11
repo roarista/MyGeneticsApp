@@ -746,7 +746,7 @@
                             {% endif %}
                         </div>
                         
-                        {% if basic_measurements.get('Shoulders') %}
+                        {% if enhanced_measurements.get('shoulder_width_cm') or basic_measurements.get('Shoulders') %}
                             <div class="flex items-center space-x-1 mb-1">
                                 {% set blocks = 5 %}
                                 {% set filled_blocks = (score / 20)|int %}
@@ -770,7 +770,9 @@
                                     <span class="ml-2 text-green-500">🟢</span>
                                 {% endif %}
                             </div>
-                            <p class="text-sm text-gray-400">Shoulder width: {{ basic_measurements.get('Shoulders').value }}</p>
+                            <p class="text-sm text-gray-400">Shoulder width: {{ 
+                                '{:.1f}'.format(enhanced_measurements.get('shoulder_width_cm', basic_measurements.get('Shoulders', {'value': 0}).value)|float) 
+                            }} cm</p>
                         {% else %}
                             <div class="flex items-center space-x-1 mb-1">
                                 {% for i in range(5) %}
