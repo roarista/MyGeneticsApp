@@ -11,6 +11,7 @@ import numpy as np
 import cv2
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
+from replit import web
 from replit.web import auth  # Import Replit Web Authentication
 
 # Configure logging
@@ -1090,7 +1091,7 @@ def profile():
     
     if not user:
         flash('User not found. Please log in again.', 'danger')
-        return redirect(auth.login_url())
+        return redirect(f"https://replit.com/auth_with_repl_site?domain={web.get_origin()}")
     
     # Get user's analyses
     analyses = Analysis.query.filter_by(user_id=user.id).order_by(Analysis.analysis_date.desc()).all()
@@ -1181,7 +1182,7 @@ def account_settings():
         
     if not user:
         flash('User not found. Please log in again.', 'danger')
-        return redirect(auth.login_url())
+        return redirect(f"https://replit.com/auth_with_repl_site?domain={web.get_origin()}")
     
     # Get or create notification settings
     notification_settings = NotificationSetting.query.filter_by(user_id=user.id).first()
