@@ -1779,6 +1779,7 @@ def workout(analysis_id):
             'progression_methods': progression_methods,
             'experience': experience,
             'split_type': 'Push/Pull/Legs',
+            'muscle_assessment': muscle_assessment,  # Muscle development assessment
             'basic_measurements': basic_measurements,  # Basic measurements for the template
             'estimated_measurements': measurements,  # All measurements
             'proportion_measurements': proportion_measurements,  # Proportion measurements for the template
