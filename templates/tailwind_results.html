@@ -289,15 +289,33 @@
                         <div class="bg-gray-800 p-4 rounded-lg">
                             <div class="flex justify-between mb-2">
                                 <span class="text-gray-400">Body Fat</span>
-                                <span class="font-medium">{{ '{:.1f}'.format(bodybuilding.body_fat_percentage) }}%</span>
+                                <span class="font-medium">
+                                    {% if bodybuilding and bodybuilding.body_fat_percentage is defined and bodybuilding.body_fat_percentage is not none %}
+                                        {{ '{:.1f}'.format(bodybuilding.body_fat_percentage) }}%
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </span>
                             </div>
                             <div class="flex justify-between mb-2">
                                 <span class="text-gray-400">Body Type</span>
-                                <span class="font-medium">{{ bodybuilding.body_type|capitalize }}</span>
+                                <span class="font-medium">
+                                    {% if bodybuilding and bodybuilding.body_type is defined and bodybuilding.body_type is not none %}
+                                        {{ bodybuilding.body_type|capitalize }}
+                                    {% else %}
+                                        Unknown
+                                    {% endif %}
+                                </span>
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-gray-400">Muscle Building Potential</span>
-                                <span class="font-medium">{{ '{:.1f}'.format(bodybuilding.muscle_building_potential) }}/10</span>
+                                <span class="font-medium">
+                                    {% if bodybuilding and bodybuilding.muscle_building_potential is defined and bodybuilding.muscle_building_potential is not none %}
+                                        {{ '{:.1f}'.format(bodybuilding.muscle_building_potential) }}/10
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </span>
                             </div>
                         </div>
                     </div>

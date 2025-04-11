@@ -1,0 +1,67 @@
+Absolutely — here is a clear and detailed **prompt you can paste directly into Replit** to help the AI agent debug and fix the internal server error you're facing:
+
+---
+
+**🧠 Prompt for Replit AI Agent (Internal Server Error Troubleshooting)**
+
+---
+
+Hi Replit, I’m getting a **500 Internal Server Error** when I click the **"Analyze my Genetics"** button on the homepage of my app. This happens after a user uploads their front and back body photos and submits their basic info (height, weight, gender, age, etc.).
+
+### ✅ CONTEXT
+
+- The button sends data (including photos and text inputs) to a Flask route (likely `/analyze`, `/results`, or similar).
+- When clicked, the app crashes and shows a **"500 Internal Server Error"**, meaning something went wrong **server-side**.
+- This happened before and is usually related to image processing, input validation, or template rendering.
+
+---
+
+### 🛠️ WHAT I NEED YOU TO DO
+
+1. **Trace the error:**
+   - Locate the route (probably in `main.py`) that handles the form submission.
+   - Wrap the logic inside that route in a `try-except` block.
+   - Print the exact error to the Replit console so I can see what failed.
+
+   Example:
+   ```python
+   @app.route('/analyze', methods=['POST'])
+   def analyze():
+       try:
+           # existing logic
+       except Exception as e:
+           print("ERROR during analysis:", e)
+           return "Internal Server Error", 500
+   ```
+
+2. **Check for likely issues:**
+   - Are the uploaded images being received correctly?
+   - Is any required data (height, weight, etc.) missing or empty?
+   - Is there an error in the body measurement or image processing scripts?
+   - Are you trying to perform a calculation like division on a zero or missing value?
+   - Are you attempting to render a template with missing variables?
+
+3. **Validate input BEFORE processing:**
+   - Add code to check that all inputs exist and are valid (not `None`, empty, or corrupt).
+   - If something is missing or wrong, return a helpful error message instead of crashing.
+
+4. **Explain what went wrong:**
+   - After finding the bug, explain it to me in simple terms.
+   - Suggest what changes were made and how I can avoid similar issues in the future.
+
+---
+
+### 🔍 BONUS: Help Me Prevent This
+
+Once it’s fixed, recommend how to:
+- Validate and sanitize input on the frontend and backend.
+- Show error messages to the user instead of a blank crash screen.
+- Log issues automatically so I can track them more easily.
+
+---
+
+Thanks! I’m a non-technical founder, so please simplify your explanation and give me actionable advice once you’ve fixed the issue.
+
+--- 
+
+Let me know if you want a follow-up prompt to test the fix or improve error messages further.

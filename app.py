@@ -119,34 +119,38 @@ def analyze():
     if request.method == 'GET':
         return redirect(url_for('index'))
     
-    logger.debug("Received analyze request")
-    
-    # Ensure temp directory exists
-    os.makedirs(TEMP_UPLOAD_FOLDER, exist_ok=True)
-    
-    # Check if required files are present
-    if 'front_photo' not in request.files or 'back_photo' not in request.files:
-        logger.error("Missing front or back photo in request.files")
-        flash('Both front and back photos are required', 'danger')
-        return redirect(url_for('index'))
-    
-    front_file = request.files['front_photo']
-    back_file = request.files['back_photo']
-    
-    logger.debug(f"Front file: {front_file.filename}, Back file: {back_file.filename}")
-    
-    # Check for empty file names
-    if front_file.filename == '' or back_file.filename == '':
-        logger.error("Empty filename for one or both photos")
-        flash('Both front and back photos are required', 'danger')
-        return redirect(url_for('index'))
-    
-    # Validate file types
-    if not (allowed_file(front_file.filename) and allowed_file(back_file.filename)):
-        flash('Invalid file type. Please upload PNG or JPG images.', 'warning')
-        return redirect(url_for('index'))
+    # Initialize variables to store file paths (for cleanup in case of error)
+    front_filepath = None
+    back_filepath = None
     
     try:
+        logger.debug("Received analyze request")
+        
+        # Ensure temp directory exists
+        os.makedirs(TEMP_UPLOAD_FOLDER, exist_ok=True)
+        
+        # Check if required files are present
+        if 'front_photo' not in request.files or 'back_photo' not in request.files:
+            logger.error("Missing front or back photo in request.files")
+            flash('Both front and back photos are required', 'danger')
+            return redirect(url_for('index'))
+        
+        front_file = request.files['front_photo']
+        back_file = request.files['back_photo']
+        
+        logger.debug(f"Front file: {front_file.filename}, Back file: {back_file.filename}")
+        
+        # Check for empty file names
+        if front_file.filename == '' or back_file.filename == '':
+            logger.error("Empty filename for one or both photos")
+            flash('Both front and back photos are required', 'danger')
+            return redirect(url_for('index'))
+            
+        # Validate file types
+        if not (allowed_file(front_file.filename) and allowed_file(back_file.filename)):
+            flash('Invalid file type. Please upload PNG or JPG images.', 'warning')
+            return redirect(url_for('index'))
+        
         # Create a unique ID for this analysis
         analysis_id = str(uuid.uuid4())
         logger.debug(f"Created analysis ID: {analysis_id}")
@@ -354,6 +358,10 @@ def analyze():
         bodybuilding_analysis = complete_bodybuilding_analysis(user_data)
         logger.debug("Bodybuilding analysis completed")
         
+        # Initialize enhanced measurements variables
+        enhanced_measurements = {}
+        categorized_measurements = {}
+        
         # Perform enhanced 50-measurements analysis
         logger.debug("Performing enhanced 50-measurements bodybuilding analysis...")
         try:
@@ -380,8 +388,7 @@ def analyze():
         except Exception as e:
             logger.error(f"Error during enhanced measurements analysis: {str(e)}")
             flash('Note: Some advanced bodybuilding measurements could not be calculated.', 'warning')
-            enhanced_measurements = {}
-            categorized_measurements = {}
+            # enhanced_measurements and categorized_measurements are already initialized to empty dicts
         
         # Store all results
         analysis_results[analysis_id] = {
@@ -406,50 +413,284 @@ def analyze():
         }
         
         # Clean up original uploads
-        os.remove(front_filepath)
-        os.remove(back_filepath)
+        if os.path.exists(front_filepath):
+            os.remove(front_filepath)
+        if os.path.exists(back_filepath):
+            os.remove(back_filepath)
         
         return redirect(url_for('results', analysis_id=analysis_id))
         
     except Exception as e:
         logger.error(f"Error during analysis: {str(e)}")
         flash(f'Error during analysis: {str(e)}', 'danger')
+        
+        # Clean up any files that might have been created
+        try:
+            if front_filepath and os.path.exists(front_filepath):
+                os.remove(front_filepath)
+            if back_filepath and os.path.exists(back_filepath):
+                os.remove(back_filepath)
+        except Exception as cleanup_error:
+            logger.error(f"Error during file cleanup: {str(cleanup_error)}")
+        
         return redirect(url_for('index'))
 
 @app.route('/results/<analysis_id>')
 def results(analysis_id):
     """Display analysis results"""
-    if analysis_id not in analysis_results:
-        flash('Analysis not found', 'danger')
-        return redirect(url_for('index'))
-    
-    result = analysis_results[analysis_id]
-    
-    # Check what type of analysis this is
-    analysis_type = result.get('analysis_type', 'single_photo')
-    
-    # Handle different types of analysis
-    if analysis_type == 'dual_photo':
-        # Read the processed front image
-        with open(result['front_image_path'], 'rb') as f:
-            front_img_data = f.read()
-        front_img_b64 = base64.b64encode(front_img_data).decode('utf-8')
+    try:
+        if analysis_id not in analysis_results:
+            flash('Analysis not found', 'danger')
+            return redirect(url_for('index'))
         
-        # Read the processed back image
-        with open(result['back_image_path'], 'rb') as f:
-            back_img_data = f.read()
-        back_img_b64 = base64.b64encode(back_img_data).decode('utf-8')
+        result = analysis_results[analysis_id]
         
-        # Use front image as main image, provide back image separately
-        img_b64 = front_img_b64
-    elif analysis_type == '3d_scan':
-        # For 3D scan analysis, we might not have an image
+        # Check what type of analysis this is
+        analysis_type = result.get('analysis_type', 'single_photo')
+        
+        # Initialize image variables
+        front_img_b64 = None
+        back_img_b64 = None
         img_b64 = None
-    else:
-        # For single photo analysis (legacy mode)
-        with open(result['image_path'], 'rb') as f:
-            img_data = f.read()
-        img_b64 = base64.b64encode(img_data).decode('utf-8')
+        
+        # Handle different types of analysis
+        if analysis_type == 'dual_photo':
+            try:
+                # Read the processed front image if it exists
+                if os.path.exists(result.get('front_image_path', '')):
+                    with open(result['front_image_path'], 'rb') as f:
+                        front_img_data = f.read()
+                    front_img_b64 = base64.b64encode(front_img_data).decode('utf-8')
+                
+                # Read the processed back image if it exists
+                if os.path.exists(result.get('back_image_path', '')):
+                    with open(result['back_image_path'], 'rb') as f:
+                        back_img_data = f.read()
+                    back_img_b64 = base64.b64encode(back_img_data).decode('utf-8')
+                
+                # Use front image as main image, provide back image separately
+                img_b64 = front_img_b64 if front_img_b64 else None
+            except Exception as e:
+                logger.error(f"Error reading image files: {str(e)}")
+                # Continue without images
+        elif analysis_type == '3d_scan':
+            # For 3D scan analysis, we might not have an image
+            img_b64 = None
+        else:
+            # For single photo analysis (legacy mode)
+            try:
+                if 'image_path' in result and os.path.exists(result['image_path']):
+                    with open(result['image_path'], 'rb') as f:
+                        img_data = f.read()
+                    img_b64 = base64.b64encode(img_data).decode('utf-8')
+            except Exception as e:
+                logger.error(f"Error reading image file: {str(e)}")
+                # Continue without image
+        
+        # Process traits to include their units
+        formatted_traits = {}
+        for trait_name, trait_data in result.get('traits', {}).items():
+            # Skip metadata
+            if trait_name == 'metadata':
+                formatted_traits[trait_name] = trait_data
+                continue
+                
+            # For traits that are dictionaries with value keys
+            if isinstance(trait_data, dict) and 'value' in trait_data:
+                # Copy the trait data
+                formatted_trait = trait_data.copy()
+                # Format the value with units
+                formatted_trait['display_value'] = format_trait_value(trait_name, trait_data['value'])
+                formatted_trait['unit'] = get_unit(trait_name)
+                formatted_traits[trait_name] = formatted_trait
+            else:
+                # For other types of traits
+                formatted_traits[trait_name] = trait_data
+        
+        # Determine which measurements to display
+        measurements = {}
+        if analysis_type == 'dual_photo':
+            measurements = result.get('combined_measurements', {})
+        elif 'estimated_measurements' in result:
+            measurements = result.get('estimated_measurements', {})
+        
+        # Create analysis object for template compatibility
+        analysis = {
+            'id': analysis_id,
+            'body_fat_percentage': result.get('bodybuilding_analysis', {}).get('body_fat_percentage', 0),
+            'body_type': result.get('bodybuilding_analysis', {}).get('body_type', 'Unknown'),
+            'muscle_building_potential': result.get('bodybuilding_analysis', {}).get('muscle_building_potential', 0)
+        }
+        
+        # Get basic measurements for measurements panel
+        basic_measurements = {}
+        try:
+            if measurements:
+                confidence_scores = measurements.get('confidence_scores', {})
+                
+                # Extract key measurements for the basic measurements panel
+                basic_keys = ['height', 'weight', 'chest', 'waist', 'hips', 'shoulders']
+                for key in basic_keys:
+                    if key in measurements:
+                        confidence_key = key.replace('_cm', '')
+                        
+                        # Get confidence level based on score
+                        score = confidence_scores.get(confidence_key, 0.6)
+                        if score >= 0.7:
+                            confidence = 'high'
+                        elif score >= 0.4:
+                            confidence = 'medium'
+                        else:
+                            confidence = 'low'
+                        
+                        # Format with proper unit based on measurement type
+                        if key == 'height' or key == 'weight':
+                            unit = 'cm' if key == 'height' else 'kg'
+                            value_str = f"{measurements[key]:.1f} {unit}"
+                        else:
+                            value_str = f"{measurements[key]:.1f} cm"
+                        
+                        basic_measurements[key.capitalize()] = {
+                            'value': value_str,
+                            'confidence': confidence
+                        }
+        except Exception as e:
+            logger.error(f"Error processing basic measurements: {str(e)}")
+            # Continue with empty basic measurements
+        
+        # Get proportion measurements for the proportions panel
+        proportion_measurements = {}
+        try:
+            if measurements:
+                confidence_scores = measurements.get('confidence_scores', {})
+                
+                # Extract proportion metrics for display
+                proportion_keys = ['shoulder_hip_ratio', 'waist_hip_ratio', 'arm_torso_ratio', 'leg_torso_ratio']
+                for key in proportion_keys:
+                    if key in measurements:
+                        confidence_key = key.replace('_ratio', '')
+                        
+                        # Get confidence level based on score
+                        score = confidence_scores.get(confidence_key, 0.6)
+                        if score >= 0.7:
+                            confidence = 'high'
+                        elif score >= 0.4:
+                            confidence = 'medium'
+                        else:
+                            confidence = 'low'
+                        
+                        # Format ratio without unit
+                        value_str = f"{measurements[key]:.2f}"
+                        
+                        proportion_measurements[key.replace('_', ' ').title()] = {
+                            'value': value_str,
+                            'confidence': confidence
+                        }
+        except Exception as e:
+            logger.error(f"Error processing proportion measurements: {str(e)}")
+            # Continue with empty proportion measurements
+        
+        # Prepare circumference measurements (left and right)
+        circumference_measurements_left = {}
+        circumference_measurements_right = {}
+        try:
+            if measurements:
+                # Use confidence scores from measurements or default to medium confidence
+                confidence_scores = measurements.get('confidence_scores', {})
+                
+                # Left side measurements
+                left_keys = ['left_arm_cm', 'left_thigh_cm', 'left_calf_cm']
+                for key in left_keys:
+                    if key in measurements:
+                        display_key = key.replace('left_', '').replace('_cm', '').capitalize()
+                        confidence_key = key.replace('left_', '').replace('right_', '').replace('_cm', '')
+                        
+                        # Get confidence level based on score
+                        score = confidence_scores.get(confidence_key, 0.5)
+                        if score >= 0.7:
+                            confidence = 'high'
+                        elif score >= 0.4:
+                            confidence = 'medium'
+                        else:
+                            confidence = 'low'
+                        
+                        # Format with value and confidence level
+                        circumference_measurements_left[display_key] = {
+                            'value': f"{measurements[key]:.1f} cm",
+                            'confidence': confidence
+                        }
+                
+                # Right side measurements
+                right_keys = ['right_arm_cm', 'right_thigh_cm', 'right_calf_cm']
+                for key in right_keys:
+                    if key in measurements:
+                        display_key = key.replace('right_', '').replace('_cm', '').capitalize()
+                        confidence_key = key.replace('left_', '').replace('right_', '').replace('_cm', '')
+                        
+                        # Get confidence level based on score
+                        score = confidence_scores.get(confidence_key, 0.5)
+                        if score >= 0.7:
+                            confidence = 'high'
+                        elif score >= 0.4:
+                            confidence = 'medium'
+                        else:
+                            confidence = 'low'
+                        
+                        # Format with value and confidence level
+                        circumference_measurements_right[display_key] = {
+                            'value': f"{measurements[key]:.1f} cm",
+                            'confidence': confidence
+                        }
+        except Exception as e:
+            logger.error(f"Error processing circumference measurements: {str(e)}")
+            # Continue with empty circumference measurements
+        
+        # Get enhanced 50-point bodybuilding measurements if available
+        enhanced_measurements = result.get('enhanced_measurements', {})
+        categorized_measurements = result.get('categorized_measurements', {})
+        
+        # Get top advantages from the recommendations for the sidebar
+        top_advantages = result.get('recommendations', {}).get('top_advantages', [])
+        if not top_advantages:
+            # Default advantages if none provided
+            top_advantages = ['Good shoulder development', 'Natural V-taper potential']
+        
+        # Template data
+        template_data = {
+            'analysis_id': analysis_id,
+            'analysis': analysis,  # Add analysis object for template compatibility
+            'traits': formatted_traits,
+            'recommendations': result.get('recommendations', {}),
+            'user_info': result.get('user_info', {}),
+            'image_data': img_b64,
+            'format_value': format_trait_value,  # Pass the formatter to the template
+            'is_3d_scan': analysis_type == '3d_scan',  # Flag for 3D scan analysis
+            'is_dual_photo': analysis_type == 'dual_photo',  # Flag for dual photo analysis
+            'bodybuilding': result.get('bodybuilding_analysis', {}),  # Bodybuilding metrics
+            'estimated_measurements': measurements,  # Measurements (combined for dual photo)
+            'basic_measurements': basic_measurements,  # Basic measurements for the template
+            'proportion_measurements': proportion_measurements,  # Proportion measurements for the template
+            'circumference_measurements_left': circumference_measurements_left,  # Left side measurements
+            'circumference_measurements_right': circumference_measurements_right,  # Right side measurements
+            'enhanced_measurements': enhanced_measurements,  # Enhanced 50-point bodybuilding measurements
+            'categorized_measurements': categorized_measurements,  # Categorized measurements for display
+            'has_enhanced_measurements': bool(enhanced_measurements),  # Flag to indicate enhanced measurements are available
+            'top_advantages': top_advantages[:5]  # Top 5 advantages for the sidebar
+        }
+        
+        # Add additional data for dual photo analysis
+        if analysis_type == 'dual_photo':
+            template_data['front_image'] = front_img_b64
+            template_data['back_image'] = back_img_b64
+            template_data['front_measurements'] = result.get('front_measurements', {})
+            template_data['back_measurements'] = result.get('back_measurements', {})
+        
+        return render_template('tailwind_results.html', **template_data)
+        
+    except Exception as e:
+        logger.error(f"Error displaying results: {str(e)}")
+        flash('Error displaying analysis results. Please try again.', 'danger')
+        return redirect(url_for('index'))
     
     # Process traits to include their units
     formatted_traits = {}
