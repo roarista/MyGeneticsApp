@@ -1,0 +1,465 @@
+I'll help you revert to the MVP version while integrating the graphical components. Let me first check the current template structure:
+
+Read file: templates/tailwind_results.html
+Let me check the rest of the template to understand the current structure:
+
+Read file: templates/tailwind_results.html
+Let me check the final part of the template:
+
+Read file: templates/tailwind_results.html
+Now I'll create a new template that combines the MVP layout with the graphical components. I'll start by creating a new template file:
+
+```html:templates/results.html
+{% extends "base.html" %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-900">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-white mb-8 text-center">Your Genetic Analysis Results</h1>
+        <p class="text-gray-400 text-center mb-12">Based on your uploaded photos and measurements</p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Left Panel -->
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h2 class="text-xl font-semibold text-white mb-6">Analysis Overview</h2>
+                
+                <!-- Photo Upload Section -->
+                <div class="mb-8">
+                    <h3 class="text-lg font-medium text-white mb-4">Your Upload</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-sm text-gray-400 mb-2">Front View</p>
+                            {% if front_img_b64 %}
+                                <img src="data:image/jpeg;base64,{{ front_img_b64 }}" alt="Front View" class="w-full h-auto rounded-lg">
+                            {% else %}
+                                <div class="bg-gray-700 rounded-lg p-4 text-center">
+                                    <p class="text-gray-400">No image available</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-400 mb-2">Back View</p>
+                            {% if back_img_b64 %}
+                                <img src="data:image/jpeg;base64,{{ back_img_b64 }}" alt="Back View" class="w-full h-auto rounded-lg">
+                            {% else %}
+                                <div class="bg-gray-700 rounded-lg p-4 text-center">
+                                    <p class="text-gray-400">No image available</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Body Composition -->
+                <div class="mb-8">
+                    <h3 class="text-lg font-medium text-white mb-4">Body Composition</h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-400">Body Fat Percentage</span>
+                            <span class="text-white font-medium">{{ bodybuilding.body_fat_percentage|default('N/A') }}%</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-400">Body Type</span>
+                            <span class="text-white font-medium">{{ bodybuilding.body_type|default('N/A')|title }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-400">Muscle Building Potential</span>
+                            <span class="text-white font-medium">{{ bodybuilding.muscle_building_potential|default('N/A') }}/10</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="space-y-4">
+                    <a href="{{ url_for('recommendations') }}" class="block w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-center transition-colors">
+                        View Personalized Recommendations
+                    </a>
+                    <a href="{{ url_for('workout_plan') }}" class="block w-full py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg text-center transition-colors">
+                        Get Workout Plan
+                    </a>
+                    <a href="{{ url_for('nutrition_guide') }}" class="block w-full py-2 px-4 bg-yellow-600 hover:bg-yellow-700 text-white font-medium rounded-lg text-center transition-colors">
+                        Nutrition Guidelines
+                    </a>
+                </div>
+            </div>
+
+            <!-- Right Panel -->
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h2 class="text-xl font-semibold text-white mb-6">Enhanced Measurements</h2>
+                
+                <!-- Tabs Navigation -->
+                <div class="flex space-x-4 mb-6">
+                    <button class="px-4 py-2 text-white bg-blue-600 rounded-lg">Body Composition</button>
+                    <button class="px-4 py-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg">Measurements</button>
+                    <button class="px-4 py-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg">Proportions</button>
+                </div>
+
+                <!-- Measurements Display -->
+                <div class="space-y-6">
+                    {% for category, measurements in enhanced_measurements.items() %}
+                    <div class="bg-gray-700 rounded-lg p-4">
+                        <h3 class="text-lg font-medium text-white mb-4">{{ category }}</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            {% for key, value in measurements.items() %}
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400">{{ key }}</span>
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-white font-medium">{{ value.value }}</span>
+                                    <span class="w-2 h-2 rounded-full {{ value.confidence == 'high' ? 'bg-green-500' : (value.confidence == 'medium' ? 'bg-yellow-500' : 'bg-gray-500') }}"></span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Genetic Traits Analysis -->
+        <div class="mt-8 bg-gray-800 rounded-lg p-6">
+            <h2 class="text-xl font-semibold text-white mb-6">Genetic Traits Analysis</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Muscle Fiber Composition -->
+                <div class="bg-gray-700 rounded-lg p-4">
+                    <h3 class="text-lg font-medium text-white mb-4">Muscle Fiber Composition</h3>
+                    <canvas id="muscleChart" class="w-full"></canvas>
+                </div>
+
+                <!-- Recovery Profile -->
+                <div class="bg-gray-700 rounded-lg p-4">
+                    <h3 class="text-lg font-medium text-white mb-4">Recovery Profile</h3>
+                    <canvas id="recoveryChart" class="w-full"></canvas>
+                </div>
+
+                <!-- Growth Potential -->
+                <div class="bg-gray-700 rounded-lg p-4">
+                    <h3 class="text-lg font-medium text-white mb-4">Growth Potential by Muscle Group</h3>
+                    <canvas id="growthChart" class="w-full"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Initialize charts when the DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Muscle Fiber Composition Chart
+    const muscleCtx = document.getElementById('muscleChart').getContext('2d');
+    new Chart(muscleCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Fast-Twitch Type II', 'Slow-Twitch Type I'],
+            datasets: [{
+                data: [65, 35], // Sample data - replace with actual values
+                backgroundColor: ['#FF4B6E', '#3B82F6'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { color: '#fff' }
+                }
+            }
+        }
+    });
+
+    // Recovery Profile Chart
+    const recoveryCtx = document.getElementById('recoveryChart').getContext('2d');
+    new Chart(recoveryCtx, {
+        type: 'radar',
+        data: {
+            labels: ['Nervous System', 'Muscular', 'Hormonal', 'Metabolic', 'Joint'],
+            datasets: [{
+                label: 'Recovery Profile',
+                data: [7, 8, 6, 7, 8], // Sample data - replace with actual values
+                backgroundColor: 'rgba(255, 75, 110, 0.2)',
+                borderColor: '#FF4B6E',
+                pointBackgroundColor: '#FF4B6E',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: '#FF4B6E'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                r: {
+                    angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+                    grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                    pointLabels: { color: '#fff' },
+                    ticks: { display: false, beginAtZero: true, max: 10 }
+                }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+
+    // Growth Potential Chart
+    const growthCtx = document.getElementById('growthChart').getContext('2d');
+    new Chart(growthCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Chest', 'Back', 'Shoulders', 'Arms', 'Legs', 'Core'],
+            datasets: [{
+                label: 'Growth Potential',
+                data: [8, 7, 9, 6, 5, 7], // Sample data - replace with actual values
+                backgroundColor: [
+                    '#FF4B6E',
+                    '#FF6B8A',
+                    '#FF8BA6',
+                    '#FFABC2',
+                    '#FFCBDE',
+                    '#FFEAF0'
+                ]
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    max: 10,
+                    grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                    ticks: { color: '#fff' }
+                },
+                y: {
+                    grid: { display: false },
+                    ticks: { color: '#fff' }
+                }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}
+```
+Now I'll update the route in `app.py` to use the new template and provide the necessary data for the charts:
+
+```python:app.py
+@app.route('/results/<analysis_id>')
+def results(analysis_id):
+    """Display analysis results"""
+    try:
+        if analysis_id not in analysis_results:
+            logger.error(f"Analysis ID {analysis_id} not found in results")
+            flash('Analysis not found. Please try again.', 'danger')
+            return redirect(url_for('index'))
+        
+        result = analysis_results[analysis_id]
+        
+        # Initialize variables
+        front_img_b64 = None
+        back_img_b64 = None
+        enhanced_measurements = {}
+        
+        try:
+            # Process front image
+            if 'front_image_path' in result and os.path.exists(result['front_image_path']):
+                with open(result['front_image_path'], 'rb') as f:
+                    front_img_b64 = base64.b64encode(f.read()).decode('utf-8')
+            
+            # Process back image
+            if 'back_image_path' in result and os.path.exists(result['back_image_path']):
+                with open(result['back_image_path'], 'rb') as f:
+                    back_img_b64 = base64.b64encode(f.read()).decode('utf-8')
+            
+            # Get enhanced measurements
+            if 'enhanced_measurements' in result:
+                enhanced_measurements = result['enhanced_measurements']
+            
+            # Get bodybuilding data
+            bodybuilding = result.get('bodybuilding', {})
+            if not bodybuilding:
+                bodybuilding = {
+                    'body_fat_percentage': None,
+                    'body_type': None,
+                    'muscle_building_potential': None
+                }
+            
+            # Prepare genetic traits data
+            genetic_traits = {
+                'muscle_fiber': {
+                    'fast_twitch': 65,  # Sample data - replace with actual analysis
+                    'slow_twitch': 35
+                },
+                'recovery_profile': {
+                    'nervous_system': 7,
+                    'muscular': 8,
+                    'hormonal': 6,
+                    'metabolic': 7,
+                    'joint': 8
+                },
+                'growth_potential': {
+                    'chest': 8,
+                    'back': 7,
+                    'shoulders': 9,
+                    'arms': 6,
+                    'legs': 5,
+                    'core': 7
+                }
+            }
+            
+            return render_template(
+                'results.html',
+                front_img_b64=front_img_b64,
+                back_img_b64=back_img_b64,
+                bodybuilding=bodybuilding,
+                enhanced_measurements=enhanced_measurements,
+                genetic_traits=genetic_traits
+            )
+            
+        except Exception as e:
+            logger.error(f"Error processing analysis results: {str(e)}")
+            flash('Error displaying analysis results. Please try again.', 'danger')
+            return redirect(url_for('index'))
+            
+    except Exception as e:
+        logger.error(f"Error in results route: {str(e)}")
+        flash('Error displaying analysis results. Please try again.', 'danger')
+        return redirect(url_for('index'))
+```
+Now I'll create a base template that our results template extends from:
+
+```html:templates/base.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyGenetics - Analysis Results</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Custom Styles -->
+    <style>
+        body {
+            background-color: #111827;
+            color: #F3F4F6;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #1F2937;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #4B5563;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6B7280;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="bg-gray-800 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <a href="{{ url_for('index') }}" class="text-white font-bold text-xl">MyGenetics</a>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <a href="{{ url_for('index') }}" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Home</a>
+                    <a href="{{ url_for('education') }}" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Learn</a>
+                    {% if current_user.is_authenticated %}
+                        <a href="{{ url_for('profile') }}" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Profile</a>
+                        <a href="{{ url_for('logout') }}" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Logout</a>
+                    {% else %}
+                        <a href="{{ url_for('login') }}" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Login</a>
+                        <a href="{{ url_for('signup') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium ml-3">Sign Up</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+                {% for category, message in messages %}
+                    <div class="rounded-md p-4 mb-4 {% if category == 'error' %}bg-red-100 border border-red-400 text-red-700{% else %}bg-green-100 border border-green-400 text-green-700{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    {% block content %}{% endblock %}
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 mt-12">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="text-center text-gray-400 text-sm">
+                &copy; 2024 MyGenetics. All rights reserved.
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
+```
+I've made the following changes to revert to the MVP version while integrating the graphical components:
+
+1. Created a new `results.html` template that:
+   - Uses a clean, two-column layout with photos and summary on the left
+   - Shows enhanced measurements on the right
+   - Adds the three graphical components (muscle fiber, recovery, growth potential) below
+   - Uses a consistent dark theme with proper spacing and typography
+
+2. Created a `base.html` template that:
+   - Provides the basic structure and styling
+   - Includes necessary dependencies (Tailwind CSS, Chart.js)
+   - Has a clean navigation bar and footer
+   - Handles flash messages
+
+3. Updated the `results` route in `app.py` to:
+   - Use proper error handling
+   - Provide sample data for the charts
+   - Structure the data in a cleaner way
+   - Remove unnecessary complexity
+
+The changes maintain the functionality of the MVP while adding the requested graphical components. The UI is now:
+1. More focused on essential metrics
+2. Better organized with clear sections
+3. Enhanced with visual data representation
+4. More maintainable with cleaner code structure
+
+Would you like me to make any adjustments to the layout or styling?

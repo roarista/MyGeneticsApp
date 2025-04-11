@@ -745,7 +745,7 @@ def results(analysis_id):
             template_data['front_measurements'] = result.get('front_measurements', {})
             template_data['back_measurements'] = result.get('back_measurements', {})
         
-        return render_template('lovable_results.html', **template_data)
+        return render_template('tailwind_results_charts.html', **template_data)
         
     except Exception as e:
         logger.error(f"Error displaying results: {str(e)}")
@@ -1019,7 +1019,7 @@ def scan3d_results(analysis_id):
                 }
     
     return render_template(
-        'lovable_results.html',
+        'tailwind_results_charts.html',
         analysis_id=analysis_id,
         analysis=analysis,  # Add analysis object for template compatibility
         traits=formatted_traits,
@@ -1403,7 +1403,7 @@ def recommendations(analysis_id):
                 circumference_measurements_right[display_key] = measurements[key]
     
     return render_template(
-        'lovable_results.html',
+        'tailwind_results_charts.html',
         analysis_id=analysis_id,
         analysis=analysis,  # Add analysis object for template compatibility
         bodybuilding=bodybuilding,  # Bodybuilding metrics for left panel

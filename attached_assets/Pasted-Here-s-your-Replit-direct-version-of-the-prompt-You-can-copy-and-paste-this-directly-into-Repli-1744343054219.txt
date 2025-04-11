@@ -1,0 +1,86 @@
+Here’s your **Replit-direct version** of the prompt. You can copy and paste this directly into Replit’s AI to guide it clearly and effectively:
+
+---
+
+**Prompt for Replit AI (directly):**
+
+---
+
+Hi Replit, I need your help fixing a major UI issue in my fitness app project, **MyGeneticsApp**.
+
+### 🎯 Goal:
+
+Restore the **original MVP results page layout**, but **add some new charts** from a prototype I made in Lovable. We are NOT using the Lovable UI design anymore—just incorporating three specific chart components into our previous layout.
+
+---
+
+### ✅ Step-by-Step Instructions:
+
+#### 1. **Restore the Original MVP Layout**
+
+- Revert the current “results page” to the older working version that:
+  - Showed body composition stats (Body Fat %, BMI, FFMI, etc.) clearly on the right.
+  - Displayed the user's uploaded **Front and Back photos** on the left.
+  - Included:  
+    - Body Type  
+    - Muscle Building Potential  
+    - Circumference Measurements  
+    - Top Genetic Advantages (green checkmarks)  
+- Use the previous dark theme and layout as seen before the Lovable redesign.
+
+---
+
+#### 2. **Integrate 3 Graphs from Lovable (Add Only These New Features)**
+
+Add the following 3 charts to the **bottom of the “results page”**, below the current Enhanced Bodybuilding Measurements section:
+
+##### A. **Muscle Fiber Composition (Donut Chart)**  
+- Red (Fast-Twitch Type II)  
+- Blue (Slow-Twitch Type I)  
+- Example: 65% Fast-Twitch / 35% Slow-Twitch
+
+##### B. **Recovery Profile (Radar Graph)**  
+- Axes: Nervous System, Muscular, Hormonal, Metabolic, Joint  
+- Value range: 0 to 10  
+- Example data: { Nervous: 7, Muscular: 8, Hormonal: 6, Metabolic: 5, Joint: 4 }
+
+##### C. **Growth Potential by Muscle Group (Bar Graph)**  
+- Bars for: Chest, Back, Shoulders, Arms, Legs, Core  
+- Scale: 0 to 10  
+- Example values: [8, 8, 6, 5, 4, 6]
+
+---
+
+#### 3. **How to Build the Graphs**
+
+Use any of these libraries (whichever is easiest for you to implement with the current stack):
+
+- `Chart.js`
+- `ApexCharts`
+- `Recharts`
+- `Plotly.js`
+
+**Structure:**
+- Place each chart inside a styled container.
+- Add chart titles and legends.
+- Stack vertically if needed on mobile.
+
+---
+
+#### 4. **Data Notes**
+
+- If real data isn’t generated yet, just use the example values above as static placeholder data.
+- Keep the backend logic unchanged.
+- Focus on visual integration, not feature reengineering.
+
+---
+
+### 🔁 Summary
+
+- ✅ Revert back to the working MVP UI (dark layout, left-right info split).
+- ✅ Keep user photo display and enhanced stats sections.
+- ✅ Add charts from the new design as enhancements.
+- ❌ Don’t use the full Lovable-generated layout.
+- ✅ Make it look clean, readable, and MVP-ready.
+
+Let me know if you need clarification or screenshots from the previous working version!

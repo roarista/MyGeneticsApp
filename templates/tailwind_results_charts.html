@@ -1,0 +1,512 @@
+{% extends "tailwind_layout.html" %}
+
+{% block title %}Analysis Results{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    {% if error %}
+    <div class="bg-red-900 border-l-4 border-red-500 p-4 mb-8">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                </svg>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm text-red-300">
+                    {{ error }}
+                </p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <p class="text-center text-gray-400 mb-8">Based on your uploaded photos and measurements</p>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Left Column: Body Composition and Upload -->
+        <div class="space-y-8">
+            <!-- Body Composition Section -->
+            <div class="dark-card">
+                <h2 class="text-xl font-semibold text-white mb-4">Body Composition</h2>
+                
+                <div class="space-y-4">
+                    <!-- Body Fat -->
+                    <div class="flex flex-col">
+                        <p class="text-xl font-bold text-white">
+                            {% if bodybuilding and bodybuilding.body_fat_percentage %}
+                                {{ '{:.1f}'.format(bodybuilding.body_fat_percentage) }}%
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </p>
+                        <p class="text-gray-400">Body Fat Percentage</p>
+                    </div>
+                    
+                    <!-- Body Type -->
+                    <div class="flex flex-col">
+                        <p class="text-xl font-bold text-white">
+                            {% if bodybuilding and bodybuilding.body_type and bodybuilding.body_type != 'Unknown' %}
+                                {{ bodybuilding.body_type }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </p>
+                        <p class="text-gray-400">Body Type Classification</p>
+                    </div>
+                    
+                    <!-- Muscle Building Potential -->
+                    <div class="flex flex-col">
+                        <p class="text-xl font-bold text-white">
+                            {% if bodybuilding and bodybuilding.muscle_building_potential %}
+                                {{ '{:.1f}'.format(bodybuilding.muscle_building_potential) }}/10
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </p>
+                        <p class="text-gray-400">Muscle Building Potential</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Your Upload Section -->
+            <div class="dark-card">
+                <h2 class="text-xl font-semibold text-white mb-4">Your Upload</h2>
+                
+                {% if is_dual_photo %}
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-center text-gray-400 mb-2">Front View</p>
+                        {% if front_image %}
+                        <img src="data:image/jpeg;base64,{{ front_image }}" alt="Front View" class="w-full rounded">
+                        {% else %}
+                        <div class="bg-gray-800 rounded p-4 text-center">
+                            <p class="text-gray-500">Image not available</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <p class="text-center text-gray-400 mb-2">Back View</p>
+                        {% if back_image %}
+                        <img src="data:image/jpeg;base64,{{ back_image }}" alt="Back View" class="w-full rounded">
+                        {% else %}
+                        <div class="bg-gray-800 rounded p-4 text-center">
+                            <p class="text-gray-500">Image not available</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="flex items-start mt-4 p-3 bg-blue-900 bg-opacity-30 rounded-lg border-l-4 border-blue-500">
+                    <div class="flex-shrink-0 mt-1">
+                        <i class="fas fa-info-circle text-blue-400"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-blue-300">
+                            Our dual-photo analysis combines data from both views for the most accurate measurements possible.
+                        </p>
+                    </div>
+                </div>
+                {% else %}
+                <div class="text-center">
+                    {% if image_data %}
+                    <img src="data:image/jpeg;base64,{{ image_data }}" alt="Analysis Photo" class="max-w-full mx-auto rounded">
+                    {% else %}
+                    <div class="bg-gray-800 rounded p-8 text-center">
+                        <i class="fas fa-image text-gray-600 text-4xl mb-2"></i>
+                        <p class="text-gray-500">Image not available</p>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Right Column: Measurements and Traits -->
+        <div class="space-y-8">
+            <!-- Key Measurements Section -->
+            <div class="dark-card">
+                <h2 class="text-xl font-semibold text-white mb-4">Key Measurements</h2>
+                
+                {% if basic_measurements and basic_measurements|length > 0 %}
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {% for key, data in basic_measurements.items() %}
+                    <div class="flex flex-col">
+                        <p class="text-xl font-bold text-white">{{ data.value }}</p>
+                        <div class="flex items-center">
+                            <p class="text-gray-400 mr-2">{{ key }}</p>
+                            {% if data.confidence == 'high' %}
+                            <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                            {% elif data.confidence == 'medium' %}
+                            <span class="w-2 h-2 rounded-full bg-yellow-500"></span>
+                            {% else %}
+                            <span class="w-2 h-2 rounded-full bg-gray-500"></span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="flex flex-col items-center justify-center py-12">
+                    <i class="fas fa-ruler-combined text-gray-600 text-5xl mb-4"></i>
+                    <p class="text-gray-400">No measurement data available</p>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Genetic Traits Section -->
+            <div class="dark-card">
+                <h2 class="text-xl font-semibold text-white mb-4">Genetic Traits</h2>
+                
+                <!-- Collapsible Sections -->
+                <div class="space-y-2" x-data="{ openTab: 'muscle-fiber' }">
+                    <!-- Muscle Fiber Composition -->
+                    <div>
+                        <button 
+                            @click="openTab = openTab === 'muscle-fiber' ? null : 'muscle-fiber'" 
+                            class="w-full flex justify-between items-center p-3 rounded-md"
+                            :class="openTab === 'muscle-fiber' ? 'bg-blue-900 bg-opacity-30' : 'bg-gray-800 hover:bg-gray-700'"
+                        >
+                            <span>Muscle Fiber Composition</span>
+                            <i class="fas fa-chevron-down transition-transform duration-200"
+                               :class="openTab === 'muscle-fiber' ? 'transform rotate-180' : ''"></i>
+                        </button>
+                        
+                        <div x-show="openTab === 'muscle-fiber'" class="p-3 bg-gray-800 rounded-md mt-1">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-gray-400">Fast-Twitch Dominant</span>
+                                <span class="text-white">{{ traits.get('fast_twitch_percentage', 'Unknown') }}%</span>
+                            </div>
+                            <div class="h-2 bg-gray-700 rounded-full overflow-hidden">
+                                <div class="h-full bg-blue-500" style="width: {{ traits.get('fast_twitch_percentage', 0) }}%"></div>
+                            </div>
+                            <p class="mt-3 text-sm text-gray-400">
+                                {% if traits.get('fast_twitch_percentage', 0) > 60 %}
+                                Your body appears to have more fast-twitch muscle fibers, making you naturally better at explosive movements and strength training.
+                                {% elif traits.get('fast_twitch_percentage', 0) < 40 %}
+                                Your body appears to have more slow-twitch muscle fibers, giving you better endurance capabilities.
+                                {% else %}
+                                You have a balanced muscle fiber composition, allowing you to excel at both strength and endurance activities.
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- Frame Size & Bone Structure -->
+                    <div>
+                        <button 
+                            @click="openTab = openTab === 'frame-size' ? null : 'frame-size'" 
+                            class="w-full flex justify-between items-center p-3 rounded-md"
+                            :class="openTab === 'frame-size' ? 'bg-blue-900 bg-opacity-30' : 'bg-gray-800 hover:bg-gray-700'"
+                        >
+                            <span>Frame Size & Bone Structure</span>
+                            <i class="fas fa-chevron-down transition-transform duration-200"
+                               :class="openTab === 'frame-size' ? 'transform rotate-180' : ''"></i>
+                        </button>
+                        
+                        <div x-show="openTab === 'frame-size'" class="p-3 bg-gray-800 rounded-md mt-1">
+                            <p class="font-medium text-white mb-1">{{ traits.get('frame_size', 'Medium') }}</p>
+                            <p class="text-sm text-gray-400">
+                                You have a {{ traits.get('frame_size', 'medium').lower() }} frame size, which provides a 
+                                {% if traits.get('frame_size', '').lower() == 'large' %}
+                                solid foundation for building muscle mass and overall strength.
+                                {% elif traits.get('frame_size', '').lower() == 'small' %}
+                                structure that can highlight muscle definition and aesthetic proportions.
+                                {% else %}
+                                balanced foundation for both muscle building and definition.
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- Muscle Insertion Points -->
+                    <div>
+                        <button 
+                            @click="openTab = openTab === 'insertions' ? null : 'insertions'" 
+                            class="w-full flex justify-between items-center p-3 rounded-md"
+                            :class="openTab === 'insertions' ? 'bg-blue-900 bg-opacity-30' : 'bg-gray-800 hover:bg-gray-700'"
+                        >
+                            <span>Muscle Insertion Points</span>
+                            <i class="fas fa-chevron-down transition-transform duration-200"
+                               :class="openTab === 'insertions' ? 'transform rotate-180' : ''"></i>
+                        </button>
+                        
+                        <div x-show="openTab === 'insertions'" class="p-3 bg-gray-800 rounded-md mt-1">
+                            <div class="space-y-2">
+                                {% for muscle, insertion in traits.get('muscle_insertions', {}).items() %}
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">{{ muscle|title }}</span>
+                                    <span class="px-2 py-1 text-xs bg-gray-700 rounded-full">{{ insertion }}</span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <p class="mt-3 text-sm text-gray-400">
+                                Your muscle insertion points affect how your muscles appear when developed. Low insertions typically create fuller-looking muscles.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Enhanced Bodybuilding Measurements Section -->
+    <div class="mt-8 dark-card">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold text-white">Enhanced Bodybuilding Measurements</h2>
+            <span class="bg-blue-600 text-xs px-2 py-1 rounded-full text-white">50-Point Analysis</span>
+        </div>
+        
+        <!-- Measurement Categories -->
+        <div x-data="{ activeTab: 'body-composition' }" class="w-full">
+            <!-- Tabs -->
+            <div class="flex flex-wrap space-x-1 mb-4 border-b border-gray-700 overflow-x-auto">
+                {% for category in categorized_measurements.keys()|list|default([]) %}
+                <button 
+                    @click="activeTab = '{{ category|lower|replace(' ', '-') }}'" 
+                    :class="activeTab === '{{ category|lower|replace(' ', '-') }}' ? 'text-white border-b-2 border-blue-500' : 'text-gray-400 hover:text-white'"
+                    class="px-3 py-2 whitespace-nowrap font-medium"
+                >
+                    {{ category }}
+                </button>
+                {% endfor %}
+            </div>
+            
+            <!-- Tab Content -->
+            {% for category, measurements in categorized_measurements.items()|default({}.items()) %}
+            <div x-show="activeTab === '{{ category|lower|replace(' ', '-') }}'" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {% for key, data in measurements.items() %}
+                <div class="p-3 bg-gray-800 rounded-lg">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="font-medium text-white">{{ data.value }}</p>
+                            <p class="text-sm text-gray-400">{{ key }}</p>
+                        </div>
+                        <div class="tooltip">
+                            <span class="inline-block w-3 h-3 rounded-full 
+                               {% if data.confidence == 'high' %}bg-green-500
+                               {% elif data.confidence == 'medium' %}bg-yellow-500
+                               {% else %}bg-gray-500{% endif %}">
+                            </span>
+                            <span class="tooltip-text">{{ data.confidence|capitalize }} confidence</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- New Charts Section -->
+    <div class="mt-8 dark-card">
+        <h2 class="text-xl font-semibold text-white mb-6">Your Genetic Traits Analysis</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Muscle Fiber Composition Chart -->
+            <div class="bg-gray-800 p-4 rounded-lg">
+                <h3 class="text-lg font-medium text-white mb-3 text-center">Muscle Fiber Composition</h3>
+                <div class="chart-container" style="position: relative; height: 200px;">
+                    <canvas id="muscleChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Recovery Profile Chart -->
+            <div class="bg-gray-800 p-4 rounded-lg">
+                <h3 class="text-lg font-medium text-white mb-3 text-center">Recovery Profile</h3>
+                <div class="chart-container" style="position: relative; height: 200px;">
+                    <canvas id="recoveryChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Growth Potential Chart -->
+            <div class="bg-gray-800 p-4 rounded-lg">
+                <h3 class="text-lg font-medium text-white mb-3 text-center">Growth Potential by Muscle Group</h3>
+                <div class="chart-container" style="position: relative; height: 200px;">
+                    <canvas id="growthChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="mt-8 flex flex-wrap gap-4 justify-center">
+        <a href="/recommendations/{{ analysis_id }}" class="btn bg-blue-600 hover:bg-blue-700">
+            <i class="fas fa-lightbulb mr-2"></i> View Personalized Recommendations
+        </a>
+        <a href="/workout/{{ analysis_id }}" class="btn bg-green-600 hover:bg-green-700">
+            <i class="fas fa-dumbbell mr-2"></i> Get Workout Plan
+        </a>
+        <a href="/nutrition/{{ analysis_id }}" class="btn bg-yellow-600 hover:bg-yellow-700">
+            <i class="fas fa-utensils mr-2"></i> Nutrition Guidelines
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Muscle Fiber Composition Chart (Donut)
+    const muscleCtx = document.getElementById('muscleChart').getContext('2d');
+    const muscleChart = new Chart(muscleCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Fast-Twitch Type II', 'Slow-Twitch Type I'],
+            datasets: [{
+                data: [65, 35], // Sample data
+                backgroundColor: ['#ff4b6e', '#3b82f6'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '70%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: '#fff',
+                        font: {
+                            size: 11
+                        },
+                        padding: 10
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.label + ': ' + context.raw + '%';
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Recovery Profile Chart (Radar)
+    const recoveryCtx = document.getElementById('recoveryChart').getContext('2d');
+    const recoveryChart = new Chart(recoveryCtx, {
+        type: 'radar',
+        data: {
+            labels: ['Nervous System', 'Muscular', 'Hormonal', 'Metabolic', 'Joint'],
+            datasets: [{
+                label: 'Recovery Profile',
+                data: [7, 8, 6, 5, 4], // Sample data
+                backgroundColor: 'rgba(255, 75, 110, 0.2)',
+                borderColor: '#ff4b6e',
+                borderWidth: 2,
+                pointBackgroundColor: '#ff4b6e',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: '#ff4b6e',
+                pointRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                r: {
+                    angleLines: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    pointLabels: {
+                        color: '#fff',
+                        font: {
+                            size: 10
+                        }
+                    },
+                    suggestedMin: 0,
+                    suggestedMax: 10,
+                    ticks: {
+                        display: false,
+                        stepSize: 2
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ': ' + context.raw + '/10';
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Growth Potential Chart (Bar)
+    const growthCtx = document.getElementById('growthChart').getContext('2d');
+    const growthChart = new Chart(growthCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Chest', 'Back', 'Shoulders', 'Arms', 'Legs', 'Core'],
+            datasets: [{
+                label: 'Growth Potential',
+                data: [8, 8, 6, 5, 4, 6], // Sample data
+                backgroundColor: [
+                    '#ff4b6e',
+                    '#ff6384',
+                    '#ff7c98',
+                    '#ff94ad',
+                    '#ffadc1',
+                    '#ffc6d6'
+                ],
+                borderWidth: 0,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ': ' + context.raw + '/10';
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    max: 10,
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: '#fff'
+                    }
+                },
+                y: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        color: '#fff',
+                        font: {
+                            size: 11
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}
