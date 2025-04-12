@@ -36,7 +36,22 @@ def utility_functions():
     def max_value(a, b):
         return max(a, b)
     
-    return {'min': min_value, 'max': max_value}
+    def calculate_shoulder_to_waist_ratio(measurements):
+        """Calculate shoulder-to-waist ratio from measurements"""
+        if not measurements:
+            return 1.6  # Default value
+            
+        sw = measurements.get('shoulder_width_cm')
+        wc = measurements.get('waist_circumference_cm')
+            
+        if sw and wc and wc > 0:
+            # Convert waist circumference to width (approximate)
+            waist_width = wc / 3.14
+            ratio = sw / waist_width
+            return round(ratio, 2)
+        return 1.6  # Default value if measurements aren't available
+    
+    return {'min': min_value, 'max': max_value, 'calculate_shoulder_to_waist_ratio': calculate_shoulder_to_waist_ratio}
 
 # Database configuration
 class Base(DeclarativeBase):
@@ -647,7 +662,14 @@ def results(analysis_id):
             'enhanced_measurements': result.get('enhanced_measurements', {}),
             'categorized_measurements': result.get('categorized_measurements', {}),
             'has_enhanced_measurements': bool(result.get('enhanced_measurements')),
-            'top_advantages': result.get('recommendations', {}).get('top_advantages', [])[:5]
+            'top_advantages': result.get('recommendations', {}).get('top_advantages', [])[:5],
+            
+            # Calculate recovery capacity from user metrics
+            'recovery_capacity': result.get('enhanced_measurements', {}).get('recovery_capacity', 5.0),
+            'metabolic_efficiency': result.get('enhanced_measurements', {}).get('metabolic_efficiency', 5.0),
+            
+            # Calculate shoulder-to-waist ratio with default fallback
+            'shoulder_to_waist_ratio': utility_functions()['calculate_shoulder_to_waist_ratio'](result.get('enhanced_measurements', {}))
         }
         
         return render_template('tailwind_results_charts.html', **template_data)
