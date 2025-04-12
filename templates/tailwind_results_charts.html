@@ -190,26 +190,54 @@
                     </div>
                 </div>
                 
-                <!-- Metabolic Efficiency Score Section - Positioned directly below the dual-photo alert -->
-                <div class="mt-6 bg-gray-800 rounded-lg border border-gray-700 shadow-lg p-4">
-                    <h3 class="text-xl font-semibold text-white mb-3 text-center">Metabolic Efficiency Score</h3>
-                    <div class="chart-container mx-auto" style="position: relative; height: 200px; max-width: 500px;">
-                        <canvas id="metabolicScoreChart"></canvas>
-                    </div>
-                    <div class="text-sm text-gray-400 mt-3 text-center">
-                        <p>A higher score indicates a more favorable balance of fat-to-lean mass ratio</p>
-                        <p class="mt-1">Based on your body fat percentage, lean body mass, waist circumference, and normalized FFMI</p>
+                <!-- Metabolic Efficiency Section with charts below -->
+                <div class="mt-6 space-y-6">
+                    <!-- Top Row: Metabolic Efficiency Score -->
+                    <div class="bg-gray-800 rounded-lg border border-gray-700 shadow-lg p-4">
+                        <h3 class="text-xl font-semibold text-white mb-3 text-center">Metabolic Efficiency Score</h3>
+                        <div class="chart-container mx-auto" style="position: relative; height: 200px; max-width: 500px;">
+                            <canvas id="metabolicScoreChart"></canvas>
+                        </div>
+                        <div class="text-sm text-gray-400 mt-3 text-center">
+                            <p>A higher score indicates a more favorable balance of fat-to-lean mass ratio</p>
+                            <p class="mt-1">Based on your body fat percentage, lean body mass, waist circumference, and normalized FFMI</p>
+                        </div>
+                        
+                        <!-- Hidden debug info -->
+                        <div class="text-xs text-gray-500 mt-2 text-center" style="display: none;">
+                            {% if bodybuilding_analysis %}
+                                <p>BF: {{ bodybuilding_analysis.get('body_fat_percentage', 'N/A') }}</p>
+                                <p>BF2: {{ bodybuilding_analysis.get('body_composition', {}).get('body_fat_percentage', 'N/A') }}</p>
+                                <p>LBM: {{ bodybuilding_analysis.get('lean_body_mass_kg', 'N/A') }}</p>
+                                <p>FFMI: {{ bodybuilding_analysis.get('ffmi', 'N/A') }}</p>
+                                <p>Waist: {{ enhanced_measurements.get('waist_circumference_cm', 'N/A') }}</p>
+                            {% endif %}
+                        </div>
                     </div>
                     
-                    <!-- Hidden debug info -->
-                    <div class="text-xs text-gray-500 mt-2 text-center" style="display: none;">
-                        {% if bodybuilding_analysis %}
-                            <p>BF: {{ bodybuilding_analysis.get('body_fat_percentage', 'N/A') }}</p>
-                            <p>BF2: {{ bodybuilding_analysis.get('body_composition', {}).get('body_fat_percentage', 'N/A') }}</p>
-                            <p>LBM: {{ bodybuilding_analysis.get('lean_body_mass_kg', 'N/A') }}</p>
-                            <p>FFMI: {{ bodybuilding_analysis.get('ffmi', 'N/A') }}</p>
-                            <p>Waist: {{ enhanced_measurements.get('waist_circumference_cm', 'N/A') }}</p>
-                        {% endif %}
+                    <!-- Bottom Row: Two Charts Side by Side -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Body Type Matching Chart (Left) -->
+                        <div class="bg-gray-800 rounded-lg border border-gray-700 shadow-lg p-4">
+                            <h3 class="text-xl font-semibold text-white mb-3 text-center">Body Type Matching</h3>
+                            <div class="chart-container mx-auto" style="position: relative; height: 150px;">
+                                <canvas id="bodyTypeSpectrum2"></canvas>
+                            </div>
+                            <div class="text-sm text-gray-400 mt-3 text-center">
+                                <p>Your body type placement is estimated using shoulder-to-waist ratio, body fat %, and muscle-building potential.</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Recovery Capacity Chart (Right) -->
+                        <div class="bg-gray-800 rounded-lg border border-gray-700 shadow-lg p-4">
+                            <h3 class="text-xl font-semibold text-white mb-3 text-center">Recovery Capacity</h3>
+                            <div class="chart-container mx-auto" style="position: relative; height: 150px;">
+                                <canvas id="recoveryCapacityChart"></canvas>
+                            </div>
+                            <div class="text-sm text-gray-400 mt-3 text-center">
+                                <p>Estimated recovery capacity based on your body type, metabolism, and training response.</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 {% else %}
@@ -2051,8 +2079,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 {
                     data: [100],
                     backgroundColor: createSpectrumGradient(),
-                    barPercentage: 0.5, // Thinner bar
-                    categoryPercentage: 0.9,
+                    barPercentage: 0.4, // Thinner bar
+                    categoryPercentage: 0.5, // Reduced height
                     borderRadius: 8,    // More rounded corners
                     borderWidth: 1,
                     borderColor: 'rgba(255, 255, 255, 0.3)' // Subtle white border
@@ -2137,7 +2165,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 for (let i = 0; i <= 10; i++) {
                     const tickX = width * (i / 10);
                     const tickHeight = (i % 5 === 0) ? 10 : 5; // Taller ticks at major points
-                    ctx.fillRect(tickX, height * 0.5 - tickHeight/2, 1, tickHeight);
+                    // Move ticks below the bar
+                    ctx.fillRect(tickX, height * 0.6 - tickHeight/2, 1, tickHeight);
                 }
                 
                 // Add the type labels
@@ -2147,23 +2176,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Ectomorph label (left)
                 ctx.fillStyle = '#3b82f6'; // Blue
                 ctx.font = 'bold 14px Arial';
-                ctx.fillText('Ectomorph', width * 0.15, height * 0.5);
+                // Move labels below the bar
+                ctx.fillText('Ectomorph', width * 0.15, height * 0.7);
                 
                 // Mesomorph label (center)
                 ctx.fillStyle = '#10b981'; // Green
                 ctx.font = 'bold 14px Arial';
-                ctx.fillText('Mesomorph', width * 0.5, height * 0.5);
+                // Move labels below the bar
+                ctx.fillText('Mesomorph', width * 0.5, height * 0.7);
                 
                 // Endomorph label (right)
                 ctx.fillStyle = '#f59e0b'; // Amber
                 ctx.font = 'bold 14px Arial';
-                ctx.fillText('Endomorph', width * 0.85, height * 0.5);
+                // Move labels below the bar
+                ctx.fillText('Endomorph', width * 0.85, height * 0.7);
                 
                 // Draw user's body type position marker
                 {% if body_type %}
                     {# Calculate position based on body_type percentage #}
                     const xPos = width * ({{ position }} / 100);
-                    const yPos = height * 0.3; // Slightly above the center
+                    const yPos = height * 0.4; // Positioned on the center of the bar
                     
                     // Draw marker dot
                     ctx.beginPath();
