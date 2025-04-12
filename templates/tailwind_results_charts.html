@@ -1676,162 +1676,183 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Muscle Dominance Chart (Horizontal Bar)
+    // Muscle Dominance Chart (Horizontal Bar) - Using exact same data as Muscle Development Overview section
     const muscleDominanceCtx = document.getElementById('muscleDominanceChart').getContext('2d');
     
-    // Calculate muscle development scores based on measurements from the Muscle Development Overview section
-    // Default scores in case measurements are unavailable
+    // Default values (only used if calculations below can't be completed)
+    {% set arms_score = 5 %}  
     {% set chest_score = 5 %}
-    {% set back_score = 5 %}
     {% set shoulders_score = 5 %}
-    {% set arms_score = 5 %}
+    {% set back_score = 5 %}
     {% set legs_score = 5 %}
     {% set core_score = 5 %}
     
-    // Default development levels and colors
-    {% set chest_level = "Balanced" %}
-    {% set back_level = "Balanced" %}
-    {% set shoulders_level = "Balanced" %}
     {% set arms_level = "Balanced" %}
+    {% set chest_level = "Balanced" %}
+    {% set shoulders_level = "Balanced" %}
+    {% set back_level = "Balanced" %}
     {% set legs_level = "Balanced" %}
     {% set core_level = "Balanced" %}
     
-    {% set chest_color = "#f59e0b" %}  {# amber for balanced #}
-    {% set back_color = "#f59e0b" %}
+    {% set arms_color = "#f59e0b" %}  // Amber (balanced)
+    {% set chest_color = "#f59e0b" %}
     {% set shoulders_color = "#f59e0b" %}
-    {% set arms_color = "#f59e0b" %}
+    {% set back_color = "#f59e0b" %}
     {% set legs_color = "#f59e0b" %}
     {% set core_color = "#f59e0b" %}
     
-    // Arms development from Muscle Development Overview
+    // ARM DEVELOPMENT - Exact same calculation as the Muscle Development Overview
     {% if enhanced_measurements.get('left_bicep_circumference_cm') and enhanced_measurements.get('right_bicep_circumference_cm') %}
         {% set left_arm = enhanced_measurements.get('left_bicep_circumference_cm', 0)|float %}
         {% set right_arm = enhanced_measurements.get('right_bicep_circumference_cm', 0)|float %}
         {% set avg_arm = (left_arm + right_arm) / 2 %}
         {% set height = basic_measurements.get('Height', {}).get('value', 180)|float %}
         {% set arm_height_ratio = (avg_arm / height * 100)|int %}
-        {% set arms_score_raw = arm_height_ratio * 5 %}
+        {% set arms_raw_score = arm_height_ratio * 5 %}
         
-        {% if arms_score_raw > 50 %}
+        {% if arms_raw_score > 50 %}
+            {% set arms_status = "Well Developed" %}
             {% set arms_level = "Dominant" %}
-            {% set arms_color = "#10b981" %}  {# green for dominant #}
+            {% set arms_color = "#10b981" %}  // Green (dominant)
             {% set arms_score = 8 %}
-        {% elif arms_score_raw > 35 %}
+        {% elif arms_raw_score > 35 %}
+            {% set arms_status = "Average" %}
             {% set arms_level = "Balanced" %}
-            {% set arms_color = "#f59e0b" %}  {# amber for balanced #}
+            {% set arms_color = "#f59e0b" %}  // Amber (balanced)
             {% set arms_score = 6 %}
         {% else %}
+            {% set arms_status = "Needs Growth" %}
             {% set arms_level = "Underdeveloped" %}
-            {% set arms_color = "#ef4444" %}  {# red for underdeveloped #}
+            {% set arms_color = "#ef4444" %}  // Red (underdeveloped)
             {% set arms_score = 3 %}
         {% endif %}
     {% endif %}
     
-    // Chest development
+    // CHEST DEVELOPMENT - Exact same calculation as the Muscle Development Overview
     {% if enhanced_measurements.get('chest_circumference_cm') %}
-        {% set chest_cm = enhanced_measurements.get('chest_circumference_cm', 0)|float %}
-        {% set height = basic_measurements.get('Height', {}).get('value', 180)|float %}
-        {% set chest_height_ratio = (chest_cm / height * 100)|int %}
-        {% set chest_score_raw = chest_height_ratio * 4 %}
+        {% set chest = enhanced_measurements.get('chest_circumference_cm', 0)|float %}
+        {% set waist = enhanced_measurements.get('waist_circumference_cm', basic_measurements.get('Waist', {'value': 100}).value)|float %}
+        {% set chest_waist_ratio = ((chest / waist) * 100 - 100)|int %}
+        {% set chest_raw_score = chest_waist_ratio * 2 %}
         
-        {% if chest_score_raw > 60 %}
+        {% if chest_raw_score > 60 %}
+            {% set chest_status = "Well Developed" %}
             {% set chest_level = "Dominant" %}
-            {% set chest_color = "#10b981" %}
+            {% set chest_color = "#10b981" %}  // Green (dominant)
             {% set chest_score = 8 %}
-        {% elif chest_score_raw > 40 %}
+        {% elif chest_raw_score > 40 %}
+            {% set chest_status = "Average" %}
             {% set chest_level = "Balanced" %}
-            {% set chest_color = "#f59e0b" %}
+            {% set chest_color = "#f59e0b" %}  // Amber (balanced)
             {% set chest_score = 6 %}
         {% else %}
+            {% set chest_status = "Needs Growth" %}
             {% set chest_level = "Underdeveloped" %}
-            {% set chest_color = "#ef4444" %}
+            {% set chest_color = "#ef4444" %}  // Red (underdeveloped)
             {% set chest_score = 3 %}
         {% endif %}
     {% endif %}
     
-    // Legs development (thighs)
+    // SHOULDER DEVELOPMENT - Exact same calculation as the Muscle Development Overview
+    {% if enhanced_measurements.get('shoulder_width_cm') or basic_measurements.get('Shoulders') %}
+        {% set shoulders = enhanced_measurements.get('shoulder_width_cm', basic_measurements.get('Shoulders', {'value': 0}).value)|float %}
+        {% set waist = enhanced_measurements.get('waist_circumference_cm', basic_measurements.get('Waist', {'value': 100}).value)|float %}
+        {% set shoulder_waist_ratio = ((shoulders / waist) * 100 - 100)|int %}
+        {% set shoulders_raw_score = shoulder_waist_ratio * 2 %}
+        
+        {% if shoulders_raw_score > 60 %}
+            {% set shoulders_status = "Well Developed" %}
+            {% set shoulders_level = "Dominant" %}
+            {% set shoulders_color = "#10b981" %}  // Green (dominant)
+            {% set shoulders_score = 8 %}
+        {% elif shoulders_raw_score > 40 %}
+            {% set shoulders_status = "Average" %}
+            {% set shoulders_level = "Balanced" %}
+            {% set shoulders_color = "#f59e0b" %}  // Amber (balanced)
+            {% set shoulders_score = 6 %}
+        {% else %}
+            {% set shoulders_status = "Needs Growth" %}
+            {% set shoulders_level = "Underdeveloped" %}
+            {% set shoulders_color = "#ef4444" %}  // Red (underdeveloped)
+            {% set shoulders_score = 3 %}
+        {% endif %}
+    {% endif %}
+    
+    // BACK DEVELOPMENT - Exact same calculation as the Muscle Development Overview
+    {% if enhanced_measurements.get('back_width_cm') or enhanced_measurements.get('lat_spread_cm') %}
+        {% set back_width = enhanced_measurements.get('back_width_cm', enhanced_measurements.get('lat_spread_cm', 0))|float %}
+        {% set height = basic_measurements.get('Height', {}).get('value', 180)|float %}
+        {% set back_height_ratio = (back_width / height * 100)|int %}
+        {% set back_raw_score = back_height_ratio * 6 %}
+        
+        {% if back_raw_score > 55 %}
+            {% set back_status = "Well Developed" %}
+            {% set back_level = "Dominant" %}
+            {% set back_color = "#10b981" %}  // Green (dominant)
+            {% set back_score = 8 %}
+        {% elif back_raw_score > 35 %}
+            {% set back_status = "Average" %}
+            {% set back_level = "Balanced" %}
+            {% set back_color = "#f59e0b" %}  // Amber (balanced)
+            {% set back_score = 6 %}
+        {% else %}
+            {% set back_status = "Needs Growth" %}
+            {% set back_level = "Underdeveloped" %}
+            {% set back_color = "#ef4444" %}  // Red (underdeveloped)
+            {% set back_score = 3 %}
+        {% endif %}
+    {% endif %}
+    
+    // LEG DEVELOPMENT - Exact same calculation as the Muscle Development Overview
     {% if enhanced_measurements.get('left_thigh_circumference_cm') and enhanced_measurements.get('right_thigh_circumference_cm') %}
         {% set left_thigh = enhanced_measurements.get('left_thigh_circumference_cm', 0)|float %}
         {% set right_thigh = enhanced_measurements.get('right_thigh_circumference_cm', 0)|float %}
         {% set avg_thigh = (left_thigh + right_thigh) / 2 %}
         {% set height = basic_measurements.get('Height', {}).get('value', 180)|float %}
         {% set thigh_height_ratio = (avg_thigh / height * 100)|int %}
-        {% set legs_score_raw = thigh_height_ratio * 5 %}
+        {% set legs_raw_score = thigh_height_ratio * 5 %}
         
-        {% if legs_score_raw > 50 %}
+        {% if legs_raw_score > 45 %}
+            {% set legs_status = "Well Developed" %}
             {% set legs_level = "Dominant" %}
-            {% set legs_color = "#10b981" %}
+            {% set legs_color = "#10b981" %}  // Green (dominant)
             {% set legs_score = 8 %}
-        {% elif legs_score_raw > 35 %}
+        {% elif legs_raw_score > 30 %}
+            {% set legs_status = "Average" %}
             {% set legs_level = "Balanced" %}
-            {% set legs_color = "#f59e0b" %}
+            {% set legs_color = "#f59e0b" %}  // Amber (balanced)
             {% set legs_score = 6 %}
         {% else %}
+            {% set legs_status = "Needs Growth" %}
             {% set legs_level = "Underdeveloped" %}
-            {% set legs_color = "#ef4444" %}
+            {% set legs_color = "#ef4444" %}  // Red (underdeveloped)
             {% set legs_score = 3 %}
         {% endif %}
     {% endif %}
     
-    // Shoulders development
-    {% if enhanced_measurements.get('shoulder_width_cm') %}
-        {% set shoulder_width = enhanced_measurements.get('shoulder_width_cm', 0)|float %}
-        {% set height = basic_measurements.get('Height', {}).get('value', 180)|float %}
-        {% set shoulder_height_ratio = (shoulder_width / height * 100)|int %}
-        {% set shoulders_score_raw = shoulder_height_ratio * 6 %}
-        
-        {% if shoulders_score_raw > 55 %}
-            {% set shoulders_level = "Dominant" %}
-            {% set shoulders_color = "#10b981" %}
-            {% set shoulders_score = 8 %}
-        {% elif shoulders_score_raw > 40 %}
-            {% set shoulders_level = "Balanced" %}
-            {% set shoulders_color = "#f59e0b" %}
-            {% set shoulders_score = 6 %}
-        {% else %}
-            {% set shoulders_level = "Underdeveloped" %}
-            {% set shoulders_color = "#ef4444" %}
-            {% set shoulders_score = 3 %}
-        {% endif %}
-    {% endif %}
-    
-    // Back development (approximate based on shoulders and lats measurements)
-    {% if enhanced_measurements.get('shoulder_width_cm') and enhanced_measurements.get('chest_circumference_cm') %}
-        {% set back_score_raw = (shoulders_score_raw + chest_score_raw) / 2 %}
-        
-        {% if back_score_raw > 55 %}
-            {% set back_level = "Dominant" %}
-            {% set back_color = "#10b981" %}
-            {% set back_score = 8 %}
-        {% elif back_score_raw > 40 %}
-            {% set back_level = "Balanced" %}
-            {% set back_color = "#f59e0b" %}
-            {% set back_score = 6 %}
-        {% else %}
-            {% set back_level = "Underdeveloped" %}
-            {% set back_color = "#ef4444" %}
-            {% set back_score = 3 %}
-        {% endif %}
-    {% endif %}
-    
-    // Core development (waist measurements - here lower is better)
+    // CORE DEVELOPMENT - Exact same calculation as the Muscle Development Overview
     {% if enhanced_measurements.get('waist_circumference_cm') %}
-        {% set waist_cm = enhanced_measurements.get('waist_circumference_cm', 0)|float %}
+        {% set waist = enhanced_measurements.get('waist_circumference_cm', 0)|float %}
         {% set height = basic_measurements.get('Height', {}).get('value', 180)|float %}
-        {% set waist_height_ratio = (waist_cm / height * 100)|int %}
-        {% set core_score_raw = 100 - (waist_height_ratio * 3) %}
+        {% set waist_height_ratio = (waist / height * 100)|int %}
         
-        {% if core_score_raw > 55 %}
+        // For core, lower waist ratio is better
+        {% set core_raw_score = 100 - (waist_height_ratio * 3) %}
+        
+        {% if core_raw_score > 45 %}
+            {% set core_status = "Well Developed" %}
             {% set core_level = "Dominant" %}
-            {% set core_color = "#10b981" %}
+            {% set core_color = "#10b981" %}  // Green (dominant)
             {% set core_score = 8 %}
-        {% elif core_score_raw > 40 %}
+        {% elif core_raw_score > 30 %}
+            {% set core_status = "Average" %}
             {% set core_level = "Balanced" %}
-            {% set core_color = "#f59e0b" %}
+            {% set core_color = "#f59e0b" %}  // Amber (balanced)
             {% set core_score = 6 %}
         {% else %}
+            {% set core_status = "Needs Growth" %}
             {% set core_level = "Underdeveloped" %}
-            {% set core_color = "#ef4444" %}
+            {% set core_color = "#ef4444" %}  // Red (underdeveloped)
             {% set core_score = 3 %}
         {% endif %}
     {% endif %}
@@ -1840,24 +1861,24 @@ document.addEventListener('DOMContentLoaded', function() {
     {% if not enhanced_measurements %}
         {% set back_score = 6 %}
         {% set chest_score = 8 %}
-        {% set shoulders_score = 7 %}
+        {% set shoulders_score = 3 %}
         {% set arms_score = 5 %}
         {% set legs_score = 4 %}
         {% set core_score = 7 %}
         
         {% set back_color = "#f59e0b" %}     // amber (balanced)
         {% set chest_color = "#10b981" %}    // green (dominant)
-        {% set shoulders_color = "#10b981" %} // green (dominant)
+        {% set shoulders_color = "#ef4444" %} // red (underdeveloped)
         {% set arms_color = "#f59e0b" %}     // amber (balanced)
         {% set legs_color = "#ef4444" %}     // red (underdeveloped)
         {% set core_color = "#10b981" %}     // green (dominant)
         
-        {% set back_level = "Balanced" %}
-        {% set chest_level = "Dominant" %}
-        {% set shoulders_level = "Dominant" %}
-        {% set arms_level = "Balanced" %}
-        {% set legs_level = "Underdeveloped" %}
-        {% set core_level = "Dominant" %}
+        {% set back_status = "Average" %}
+        {% set chest_status = "Well Developed" %}
+        {% set shoulders_status = "Needs Growth" %}
+        {% set arms_status = "Average" %}
+        {% set legs_status = "Needs Growth" %}
+        {% set core_status = "Well Developed" %}
     {% endif %}
 
     const muscleDominanceChart = new Chart(muscleDominanceCtx, {
@@ -1898,9 +1919,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     callbacks: {
                         label: function(context) {
                             const index = context.dataIndex;
-                            const labels = ['{{ back_level }}', '{{ chest_level }}', '{{ shoulders_level }}', 
-                                          '{{ arms_level }}', '{{ legs_level }}', '{{ core_level }}'];
-                            return labels[index] + ' (' + context.raw.toFixed(1) + '/10)';
+                            const status = ['{{ back_status|default("Needs Growth") }}', '{{ chest_status|default("Needs Growth") }}', 
+                                          '{{ shoulders_status|default("Needs Growth") }}', '{{ arms_status|default("Needs Growth") }}',
+                                          '{{ legs_status|default("Needs Growth") }}', '{{ core_status|default("Needs Growth") }}'];
+                            return status[index] + ' (' + context.raw.toFixed(1) + '/10)';
                         }
                     }
                 }
