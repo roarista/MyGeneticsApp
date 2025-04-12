@@ -1477,6 +1477,9 @@
 
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Load fitness charts JS first, then the metrics bridge to ensure function definitions are available -->
+<script src="{{ url_for('static', filename='js/fitness_metrics_charts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/metrics_data_bridge.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Metabolic Efficiency Score Chart (Gauge)
@@ -2607,6 +2610,7 @@ document.addEventListener('DOMContentLoaded', function() {
     {% endif %}
     
     // Pass data from server to JavaScript
+    // Define metrics data for charts 
     const metricsData = {
         bodyType: '{{ body_type|lower }}',
         bodyTypePosition: {{ position }},
@@ -2624,7 +2628,14 @@ document.addEventListener('DOMContentLoaded', function() {
         activityLevel: '{{ user_info.get("experience_level", "moderate") }}'
     };
     
-    // Initialize metrics with real data
+    // Debug output
+    console.log('Body composition values from server:', {
+        bodyFatPercentage: {{ body_fat_percentage|default(15.0) }},
+        leanMassPercentage: {{ lean_mass_percentage|default(85.0) }},
+        gender: '{{ gender|default("male") }}'
+    });
+    
+    // Initialize metrics with real data - this will also trigger chart initialization
     initMetricsFromServer(metricsData);
 });
 </script>
