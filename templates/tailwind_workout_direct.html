@@ -581,7 +581,7 @@
                   {% endif %}"
                 data-day="{{ day_workout.weekday }}"
                 data-type="{{ day_workout.focus }}"
-                onclick="showWorkout('{{ day_workout.day }}')">
+                onclick="showWorkout('{{ day_workout.weekday }}')">
                 <div class="w-6 h-6 rounded-full flex items-center justify-center mb-2 
                   {% if 'Push' in day_workout.focus %}push-badge
                   {% elif 'Pull' in day_workout.focus %}pull-badge
@@ -624,47 +624,103 @@
       
       <!-- Daily workout plans - hidden by default, shown when day is selected -->
       <div id="workout-container" class="space-y-8 hidden">
-        {% for day, workout in workout_plan.items() %}
-        <div id="workout-{{ day }}" class="workout-day {{ workout.category }} bg-gray-800 rounded-xl shadow-lg overflow-hidden hidden" data-aos="fade-up">
-          <div class="p-6">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4">
-              <div>
-                <h3 class="text-2xl font-bold text-white">{{ day }}</h3>
-                <p class="text-gray-300">{{ workout.focus }}</p>
+        {% if workout_plan.workout_schedule is defined %}
+          <!-- New format with workout_schedule array -->
+          {% for day_workout in workout_plan.workout_schedule %}
+          <div id="workout-{{ day_workout.weekday }}" class="workout-day {{ day_workout.focus|lower|replace(' ', '-') }} bg-gray-800 rounded-xl shadow-lg overflow-hidden hidden" data-aos="fade-up">
+            <div class="p-6">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4">
+                <div>
+                  <h3 class="text-2xl font-bold text-white">{{ day_workout.weekday }}</h3>
+                  <p class="text-gray-300">{{ day_workout.focus }}</p>
+                </div>
+                <span class="mt-2 sm:mt-0 px-4 py-1 rounded-full text-sm font-medium 
+                  {% if 'Push' in day_workout.focus %}push-badge
+                  {% elif 'Pull' in day_workout.focus %}pull-badge
+                  {% elif 'Legs' in day_workout.focus %}legs-badge
+                  {% elif 'Rest' in day_workout.focus %}rest-badge
+                  {% else %}core-badge{% endif %}">
+                  {{ day_workout.focus }}
+                </span>
               </div>
-              <span class="mt-2 sm:mt-0 px-4 py-1 rounded-full text-sm font-medium {% if 'push' in workout.category %}push-badge{% elif 'pull' in workout.category %}pull-badge{% elif 'legs' in workout.category %}legs-badge{% elif 'rest' in workout.category %}rest-badge{% else %}core-badge{% endif %}">
-                {{ workout.category|capitalize }}
-              </span>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {% for exercise in workout.exercises %}
-              <div class="exercise-card bg-gray-900 rounded-lg p-4 
-                {% if exercise.priority == 'high' %}border-l-4 border-red-500{% endif %}">
-                <div class="flex flex-col">
-                  <div class="flex justify-between items-center">
-                    <h4 class="text-lg font-semibold text-white mb-1">{{ exercise.name }}</h4>
-                    {% if exercise.status_indicator %}
-                    <span class="text-xl" title="{{ exercise.development_status }}">{{ exercise.status_indicator }}</span>
-                    {% endif %}
-                  </div>
-                  <p class="text-gray-400 text-sm mb-2">{{ exercise.focus }}</p>
-                  <div class="flex flex-wrap gap-2 mt-auto">
-                    <span class="set-rep-badge">Sets: {{ exercise.sets }}</span>
-                    <span class="set-rep-badge">Reps: {{ exercise.reps }}</span>
-                    {% if exercise.development_status == "Needs Growth" %}
-                    <span class="set-rep-badge bg-red-900 text-red-200">Needs Growth</span>
-                    {% elif exercise.development_status == "Developed" %}
-                    <span class="set-rep-badge bg-green-900 text-green-200">Well Developed</span>
-                    {% endif %}
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {% for exercise in day_workout.exercises %}
+                <div class="exercise-card bg-gray-900 rounded-lg p-4 
+                  {% if exercise.priority == 'Needs Growth' %}border-l-4 border-red-500{% endif %}">
+                  <div class="flex flex-col">
+                    <div class="flex justify-between items-center">
+                      <h4 class="text-lg font-semibold text-white mb-1">{{ exercise.name }}</h4>
+                      {% if exercise.priority %}
+                      <span class="text-xl" title="{{ exercise.priority }}">
+                        {% if exercise.priority == 'Needs Growth' %}🔴
+                        {% elif exercise.priority == 'Well Developed' %}🟢
+                        {% else %}🟡{% endif %}
+                      </span>
+                      {% endif %}
+                    </div>
+                    <p class="text-gray-400 text-sm mb-2">{{ exercise.muscle }}</p>
+                    <div class="flex flex-wrap gap-2 mt-auto">
+                      <span class="set-rep-badge">Sets: {{ exercise.sets }}</span>
+                      <span class="set-rep-badge">Reps: {{ exercise.reps }}</span>
+                      <span class="set-rep-badge">Rest: {{ exercise.rest }}</span>
+                      {% if exercise.priority == "Needs Growth" %}
+                      <span class="set-rep-badge bg-red-900 text-red-200">Needs Growth</span>
+                      {% elif exercise.priority == "Well Developed" %}
+                      <span class="set-rep-badge bg-green-900 text-green-200">Well Developed</span>
+                      {% endif %}
+                    </div>
                   </div>
                 </div>
+                {% endfor %}
               </div>
-              {% endfor %}
             </div>
           </div>
-        </div>
-        {% endfor %}
+          {% endfor %}
+        {% else %}
+          <!-- Legacy format with key-value pairs -->
+          {% for day, workout in workout_plan.items() %}
+          <div id="workout-{{ day }}" class="workout-day {{ workout.category }} bg-gray-800 rounded-xl shadow-lg overflow-hidden hidden" data-aos="fade-up">
+            <div class="p-6">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4">
+                <div>
+                  <h3 class="text-2xl font-bold text-white">{{ day }}</h3>
+                  <p class="text-gray-300">{{ workout.focus }}</p>
+                </div>
+                <span class="mt-2 sm:mt-0 px-4 py-1 rounded-full text-sm font-medium {% if 'push' in workout.category %}push-badge{% elif 'pull' in workout.category %}pull-badge{% elif 'legs' in workout.category %}legs-badge{% elif 'rest' in workout.category %}rest-badge{% else %}core-badge{% endif %}">
+                  {{ workout.category|capitalize }}
+                </span>
+              </div>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {% for exercise in workout.exercises %}
+                <div class="exercise-card bg-gray-900 rounded-lg p-4 
+                  {% if exercise.priority == 'high' %}border-l-4 border-red-500{% endif %}">
+                  <div class="flex flex-col">
+                    <div class="flex justify-between items-center">
+                      <h4 class="text-lg font-semibold text-white mb-1">{{ exercise.name }}</h4>
+                      {% if exercise.status_indicator %}
+                      <span class="text-xl" title="{{ exercise.development_status }}">{{ exercise.status_indicator }}</span>
+                      {% endif %}
+                    </div>
+                    <p class="text-gray-400 text-sm mb-2">{{ exercise.focus }}</p>
+                    <div class="flex flex-wrap gap-2 mt-auto">
+                      <span class="set-rep-badge">Sets: {{ exercise.sets }}</span>
+                      <span class="set-rep-badge">Reps: {{ exercise.reps }}</span>
+                      {% if exercise.development_status == "Needs Growth" %}
+                      <span class="set-rep-badge bg-red-900 text-red-200">Needs Growth</span>
+                      {% elif exercise.development_status == "Developed" %}
+                      <span class="set-rep-badge bg-green-900 text-green-200">Well Developed</span>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        {% endif %}
       </div>
       
       <!-- Training tips section -->
