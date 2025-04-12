@@ -17,7 +17,7 @@ EXERCISE_MAPPING = {
     ],
     "Shoulders": [
         "Overhead Press", "Lateral Raise", "Arnold Press", "Front Raise",
-        "Rear Delt Fly", "Face Pull", "Upright Row", "Pike Push-Up"
+        "Upright Row", "Pike Push-Up", "DB Shoulder Press", "Machine Shoulder Press"
     ],
     "Triceps": [
         "Skullcrusher", "Dips", "Triceps Pushdown", "Overhead Extension",
@@ -32,6 +32,10 @@ EXERCISE_MAPPING = {
     "Biceps": [
         "Bicep Curl", "Incline Curl", "Hammer Curl", "Concentration Curl",
         "Cable Curl", "Preacher Curl", "Chin-Ups"
+    ],
+    "Rear Delts": [
+        "Face Pull", "Reverse Pec Deck Fly", "Bent-Over Reverse Fly",
+        "Cable Reverse Fly", "Rear Delt Row", "Seated Rear Delt Fly"
     ],
     
     # Legs day exercises
@@ -68,24 +72,22 @@ EXERCISE_MAPPING = {
 # Weekly split templates based on training experience
 SPLIT_TEMPLATES = {
     "beginner": {
-        "3_day": ["Full Body", "Rest", "Full Body", "Rest", "Full Body", "Rest", "Rest"],
-        "4_day": ["Upper Body", "Lower Body", "Rest", "Upper Body", "Lower Body", "Rest", "Rest"],
-        "5_day": ["Push", "Pull", "Legs", "Rest", "Upper Body", "Lower Body", "Rest"]
+        "3_day": ["Push", "Pull", "Legs", "Rest", "Rest", "Rest", "Rest"],
+        "4_day": ["Push", "Pull", "Legs", "Rest", "Push", "Rest", "Rest"],
+        "5_day": ["Push", "Pull", "Legs", "Rest", "Push", "Pull", "Rest"]
     },
     "intermediate": {
-        "3_day": ["Push", "Pull", "Legs", "Rest", "Rest", "Upper Body", "Lower Body"],
-        "4_day": ["Chest/Triceps", "Back/Biceps", "Rest", "Shoulders/Core", "Legs", "Rest", "Rest"],
-        "5_day": ["Chest", "Back", "Rest", "Shoulders", "Arms", "Legs", "Rest"]
+        "5_day": ["Push", "Pull", "Legs", "Rest", "Push", "Pull", "Rest"],
+        "6_day": ["Push", "Pull", "Legs", "Push", "Pull", "Legs", "Rest"]
     },
     "advanced": {
-        "5_day": ["Chest/Triceps", "Back/Biceps", "Rest", "Shoulders", "Legs", "Arms/Core", "Rest"],
         "6_day": ["Push", "Pull", "Legs", "Push", "Pull", "Legs", "Rest"]
     }
 }
 
-# Default set and rep schemes
+# Default set and rep schemes based on muscle development
 DEFAULT_SET_REP_SCHEMES = {
-    "Needs Growth": {"sets": 5, "reps": "10-15", "rest": "60-90s"},
+    "Needs Growth": {"sets": 4, "reps": "12-15", "rest": "60-90s"},
     "Average": {"sets": 3, "reps": "10-12", "rest": "60-90s"},
     "Well Developed": {"sets": 2, "reps": "8-10", "rest": "45-60s"}
 }
@@ -156,7 +158,8 @@ def analyze_muscle_development(bodybuilding_analysis):
     
     # Fill in any missing essential muscle groups with average development
     essential_muscles = ["Chest", "Shoulders", "Back", "Triceps", "Biceps", 
-                        "Quads", "Hamstrings", "Glutes", "Calves", "Core"]
+                        "Quads", "Hamstrings", "Glutes", "Calves", "Core",
+                        "Rear Delts"]
     
     all_categorized = []
     for muscles in muscle_categories.values():
@@ -230,7 +233,7 @@ def customize_muscle_group_order(split_template, categorized_muscles):
     )
     
     # Ensure all standard muscle groups are included
-    all_muscles = ["Chest", "Shoulders", "Back", "Triceps", "Biceps", "Quads", "Hamstrings", "Glutes", "Calves", "Core"]
+    all_muscles = ["Chest", "Shoulders", "Back", "Triceps", "Biceps", "Quads", "Hamstrings", "Glutes", "Calves", "Core", "Rear Delts"]
     for muscle in all_muscles:
         if muscle not in priority_order:
             priority_order.append(muscle)
@@ -254,7 +257,7 @@ def customize_muscle_group_order(split_template, categorized_muscles):
         elif day_focus == "Push":
             muscles_for_day = ["Chest", "Shoulders", "Triceps"]
         elif day_focus == "Pull":
-            muscles_for_day = ["Back", "Biceps"]
+            muscles_for_day = ["Back", "Biceps", "Rear Delts"]
         elif day_focus == "Legs":
             muscles_for_day = ["Quads", "Glutes", "Hamstrings", "Calves", "Core"]
         elif "/" in day_focus:

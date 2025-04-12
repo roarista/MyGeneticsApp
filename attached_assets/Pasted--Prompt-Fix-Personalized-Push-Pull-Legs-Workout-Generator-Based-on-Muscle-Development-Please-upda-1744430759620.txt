@@ -1,0 +1,61 @@
+🧠 Prompt: Fix Personalized Push/Pull/Legs Workout Generator Based on Muscle Development
+Please update the workout generator logic so that it uses real user data from the Muscle Development Analysis and correctly structures the weekly routine using a Push / Pull / Legs split with accurate exercise targeting and adaptive volume.
+✅ Required Fixes and Specifications:
+🔁 1. Muscle Group Analysis Logic
+
+Currently, all users are shown as "Average" across all muscle groups regardless of actual data.
+Fix: Use the actual measurements to classify each muscle group as:
+Well Developed (green)
+Average (yellow)
+Needs Growth (red)
+Make sure this analysis updates correctly when a new user uploads their photos.
+🧠 2. Smart Volume Targeting Based on Needs
+
+Goal: More training volume (not excessive) should be directed to weaker muscle groups.
+For example:
+If Shoulders = Needs Growth, then on Push day → include 2–3 shoulder-focused exercises
+If Back = Well Developed, Pull day = 1 back exercise only
+Volume adjustments can be:
+More exercises (up to 3 per underdeveloped muscle group)
+Slightly more sets/reps (e.g., 4 sets x 12–15 reps for weaker groups)
+🗓️ 3. Weekly Workout Structure (PPL)
+
+Update logic to assign the following split, rotating over 6 days:
+Mon: Push (Chest, Shoulders, Triceps)
+Tue: Pull (Back, Biceps, Rear Delts)
+Wed: Legs (Quads, Glutes, Hamstrings, Calves)
+Thu: Push
+Fri: Pull
+Sat: Legs
+Sun: Rest
+Make sure each day contains 5–8 exercises total (never over 8).
+Days should never be empty or overloaded with just 1–2 exercises.
+🏋️ 4. Exercise Generator by Muscle Group
+
+Pull from a database/list of categorized exercises.
+Randomize slightly for variety, but prioritize underdeveloped areas.
+Examples:
+Push Day:
+Chest: Incline DB Press, Push-ups
+Shoulders: Overhead Press, Lateral Raise
+Triceps: Triceps Dips, Skullcrushers
+Pull Day:
+Back: Pull-ups, Barbell Row
+Biceps: Curl variations
+Rear Delts: Reverse Pec Deck, Face Pulls
+Legs:
+Quads: Lunges, Leg Press
+Hamstrings: Romanian Deadlifts
+Glutes: Hip Thrusts
+Calves: Standing Calf Raise
+🧮 5. Volume/Rest Guidelines
+
+Keep sets/reps within these guidelines:
+Weak groups: 3–4 sets, 10–15 reps
+Average groups: 3 sets, 10–12 reps
+Well developed groups: 2–3 sets, 8–10 reps
+Rest time: 45–90 seconds per set
+🧪 Testing Instructions
+Test with multiple users who have different development scores (e.g., weak shoulders, strong chest).
+Make sure Push/Pull/Legs logic adapts properly and reflects the correct muscles.
+Ensure no workout day is blank or imbalanced.
