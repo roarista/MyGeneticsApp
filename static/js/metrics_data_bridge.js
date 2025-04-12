@@ -40,4 +40,11 @@ function initMetricsFromServer(data) {
     if (data.activityLevel) activityLevel = data.activityLevel;
     
     console.log('Metrics initialized with real data:', data);
+    
+    // Only after all metrics are loaded, initialize the charts
+    if (typeof initAllFitnessCharts === 'function') {
+        initAllFitnessCharts();
+    } else {
+        console.error('initAllFitnessCharts function not found!');
+    }
 }

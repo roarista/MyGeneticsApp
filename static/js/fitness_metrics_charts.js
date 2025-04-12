@@ -2,13 +2,23 @@
 // This script implements the Recovery Capacity and Body Composition Estimation charts
 // with dynamic calculations based on user's physical metrics
 
-document.addEventListener('DOMContentLoaded', function() {
+// Do not initialize charts on DOM load, let metrics_data_bridge.js initialize them after metrics are loaded
+// This ensures data values are properly set before charts are rendered
+
+// Function to initialize all charts - called by metrics_data_bridge.js
+function initAllFitnessCharts() {
+    console.log('Initializing all fitness charts with data:', {
+        bodyFatPercentage,
+        leanMassPercentage,
+        gender
+    });
+    
     // Initialize recovery capacity chart with calculated values
     initRecoveryCapacityChart();
     
     // Initialize body composition estimation chart
     initBodyCompositionChart();
-});
+}
 
 function initRecoveryCapacityChart() {
     const ctx = document.getElementById('recoveryCapacityChart').getContext('2d');
@@ -88,6 +98,14 @@ function initBodyCompositionChart() {
     // These values are calculated on the server using the user's actual data
     const fatPercentage = typeof bodyFatPercentage !== 'undefined' ? bodyFatPercentage : 20;
     const leanMassPercentage = typeof leanMassPercentage !== 'undefined' ? leanMassPercentage : (100 - fatPercentage);
+    
+    // Debug log to check if values are being passed correctly
+    console.log('Body Composition Data:', { 
+        fatPercentage, 
+        leanMassPercentage, 
+        bodyFatPercentage,
+        gender
+    });
     
     // Create body composition donut chart
     new Chart(ctx, {
