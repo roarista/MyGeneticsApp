@@ -1385,11 +1385,14 @@
                     </div>
                 </div>
                 
-                <!-- Placeholder for future chart in the left column -->
+                <!-- Body Type Matching (Visual Spectrum) -->
                 <div class="bg-gray-800 p-4 rounded-lg">
-                    <h3 class="text-lg font-medium text-white mb-3 text-center">Future Chart</h3>
-                    <div class="h-48 flex items-center justify-center">
-                        <p class="text-gray-500">Chart coming soon</p>
+                    <h3 class="text-lg font-medium text-white mb-3 text-center">Body Type Matching</h3>
+                    <div class="chart-container" style="position: relative; height: 160px;">
+                        <canvas id="bodyTypeSpectrum"></canvas>
+                    </div>
+                    <div class="text-xs text-gray-400 mt-2 text-center">
+                        <p>Your body type placement is estimated using shoulder-to-waist ratio, body fat %, and muscle-building potential.</p>
                     </div>
                 </div>
             </div>
@@ -2016,6 +2019,160 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
+    
+    // Body Type Spectrum Chart
+    const bodyTypeCtx = document.getElementById('bodyTypeSpectrum').getContext('2d');
+    
+    // Get the user's body type
+    {% set body_type = 'Balanced' %}
+    {% if bodybuilding_analysis and bodybuilding_analysis.body_type %}
+        {% set body_type = bodybuilding_analysis.body_type|lower %}
+    {% endif %}
+    
+    // Determine position on the spectrum (0-100)
+    {% set position = 50 %} {# Default is middle (balanced/mesomorph) #}
+    {% if body_type and body_type|lower == 'ectomorph' %}
+        {% set position = 15 %}
+    {% elif body_type and body_type|lower == 'endomorph' %}
+        {% set position = 85 %}
+    {% elif body_type and body_type|lower == 'ecto-mesomorph' %}
+        {% set position = 35 %}
+    {% elif body_type and body_type|lower == 'endo-mesomorph' %}
+        {% set position = 65 %}
+    {% endif %}
+    
+    // Create a horizontal bar chart that serves as the spectrum
+    const bodyTypeSpectrum = new Chart(bodyTypeCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Body Type Spectrum'],
+            datasets: [
+                // Background gradient
+                {
+                    data: [100],
+                    backgroundColor: createSpectrumGradient(),
+                    barPercentage: 0.8,
+                    categoryPercentage: 0.9,
+                    borderRadius: 4
+                },
+                // Placeholder for user's position indicator
+                {
+                    data: [0], // Will be handled by plugin
+                    backgroundColor: 'rgba(0, 0, 0, 0)',
+                    barPercentage: 0,
+                    categoryPercentage: 0
+                }
+            ]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    enabled: false
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    max: 100,
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        display: false
+                    },
+                    border: {
+                        display: false
+                    }
+                },
+                markerAxis: {
+                    type: 'linear',
+                    position: 'top',
+                    min: 0,
+                    max: 100,
+                    offset: true,
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        display: false
+                    },
+                    border: {
+                        display: false
+                    }
+                },
+                y: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        display: false
+                    },
+                    border: {
+                        display: false
+                    }
+                }
+            },
+            // Disable all animations
+            animation: false
+        },
+        plugins: [{
+            id: 'bodyTypeLabels',
+            afterDraw: function(chart) {
+                const ctx = chart.ctx;
+                const width = chart.width;
+                const height = chart.height * 0.8; // Adjust for space
+                
+                ctx.save();
+                
+                // Add the type labels
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.font = '14px Arial';
+                
+                // Ectomorph label (left)
+                ctx.fillStyle = '#9ca3af';
+                ctx.fillText('Ectomorph', width * 0.15, height * 0.5);
+                
+                // Mesomorph label (center)
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 14px Arial';
+                ctx.fillText('Mesomorph', width * 0.5, height * 0.5);
+                
+                // Endomorph label (right)
+                ctx.fillStyle = '#9ca3af';
+                ctx.font = '14px Arial';
+                ctx.fillText('Endomorph', width * 0.85, height * 0.5);
+                
+                // Draw user's position text
+                ctx.textAlign = 'center';
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 12px Arial';
+                
+                {% if body_type %}
+                    {# Calculate position based on body_type percentage #}
+                    const xPos = width * ({{ position }} / 100);
+                    ctx.fillText('{{ body_type|capitalize }}', xPos, height * 0.8);
+                {% endif %}
+                
+                ctx.restore();
+            }
+        }]
+    });
+    
+    // Create a gradient for the spectrum
+    function createSpectrumGradient() {
+        const gradient = bodyTypeCtx.createLinearGradient(0, 0, bodyTypeCtx.canvas.width, 0);
+        gradient.addColorStop(0, '#3b82f6');    // Ectomorph (blue)
+        gradient.addColorStop(0.5, '#10b981');  // Mesomorph (green)
+        gradient.addColorStop(1, '#f59e0b');    // Endomorph (amber)
+        return gradient;
+    }
 });
 </script>
 {% endblock %}
