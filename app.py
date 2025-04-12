@@ -27,6 +27,17 @@ app.secret_key = os.environ.get("SESSION_SECRET", "dev_secret_key")
 def inject_auth():
     return {'auth': auth, 'is_authenticated': is_authenticated}
 
+# Add min and max functions to be available in templates
+@app.context_processor
+def utility_functions():
+    def min_value(a, b):
+        return min(a, b)
+    
+    def max_value(a, b):
+        return max(a, b)
+    
+    return {'min': min_value, 'max': max_value}
+
 # Database configuration
 class Base(DeclarativeBase):
     pass
