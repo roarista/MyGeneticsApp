@@ -8,31 +8,60 @@ import json
 import random
 from datetime import datetime, timedelta
 
-# Exercise mapping for each muscle group
+# Exercise mapping based on PPL (Push/Pull/Legs) split
 EXERCISE_MAPPING = {
-    "Arms": [
-        "Bicep Curl", "Tricep Pushdown", "Hammer Curl", "Overhead Extension", 
-        "Cable Curl", "Skull Crushers", "Concentration Curl", "Diamond Push-Ups"
-    ],
+    # Push day exercises
     "Chest": [
-        "Bench Press", "Push-Ups", "Chest Fly", "Incline DB Press", 
-        "Decline Push-Ups", "Cable Crossover", "Pec Deck Fly", "Dips"
+        "Bench Press", "Incline DB Press", "Push-Up", "Cable Crossover",
+        "Decline Push-Ups", "Pec Deck Fly", "Dips", "Chest Fly"
     ],
     "Shoulders": [
-        "Shoulder Press", "Lateral Raises", "Front Raise", "Rear Delt Fly",
-        "Face Pull", "Upright Row", "Arnold Press", "Pike Push-Up"
+        "Overhead Press", "Lateral Raise", "Arnold Press", "Front Raise",
+        "Rear Delt Fly", "Face Pull", "Upright Row", "Pike Push-Up"
     ],
+    "Triceps": [
+        "Skullcrusher", "Dips", "Triceps Pushdown", "Overhead Extension",
+        "Diamond Push-Ups", "Triceps Kickback", "Close-Grip Bench Press"
+    ],
+    
+    # Pull day exercises
     "Back": [
-        "Lat Pulldown", "Barbell Row", "Pull-Ups", "Seated Cable Row",
+        "Pull-Up", "Barbell Row", "Seated Cable Row", "Lat Pulldown",
         "Deadlift", "Chin-Ups", "T-Bar Row", "Single-Arm DB Row"
     ],
-    "Legs": [
-        "Squats", "Lunges", "Leg Press", "Hamstring Curl",
-        "Romanian Deadlift", "Calf Raises", "Leg Extension", "Bulgarian Split Squats"
+    "Biceps": [
+        "Bicep Curl", "Incline Curl", "Hammer Curl", "Concentration Curl",
+        "Cable Curl", "Preacher Curl", "Chin-Ups"
     ],
+    
+    # Legs day exercises
+    "Quads": [
+        "Squat", "Leg Press", "Lunges", "Leg Extension",
+        "Bulgarian Split Squats", "Hack Squat", "Step-Ups"
+    ],
+    "Hamstrings": [
+        "Romanian Deadlift", "Lying Curl", "Seated Leg Curl",
+        "Good Morning", "Stiff-Legged Deadlift", "Nordic Curl"
+    ],
+    "Glutes": [
+        "Hip Thrust", "Glute Kickbacks", "Cable Pull-Through",
+        "Bulgarian Split Squats", "Glute Bridge", "Sumo Deadlift"
+    ],
+    "Calves": [
+        "Seated Calf Raise", "Standing Calf Raise", "Calf Press",
+        "Donkey Calf Raise", "Single-Leg Calf Raise"
+    ],
+    
+    # For core workouts that can be added to any day
     "Core": [
         "Planks", "Leg Raises", "Russian Twists", "Cable Crunches",
         "Ab Rollout", "Hanging Leg Raise", "Mountain Climbers", "Side Planks"
+    ],
+    
+    # For compatibility with older code that might use "Arms"
+    "Arms": [
+        "Bicep Curl", "Triceps Pushdown", "Hammer Curl", "Overhead Extension", 
+        "Cable Curl", "Skullcrusher", "Concentration Curl", "Diamond Push-Ups"
     ]
 }
 
@@ -56,7 +85,7 @@ SPLIT_TEMPLATES = {
 
 # Default set and rep schemes
 DEFAULT_SET_REP_SCHEMES = {
-    "Needs Growth": {"sets": 4, "reps": "12-15", "rest": "60-90s"},
+    "Needs Growth": {"sets": 5, "reps": "10-15", "rest": "60-90s"},
     "Average": {"sets": 3, "reps": "10-12", "rest": "60-90s"},
     "Well Developed": {"sets": 2, "reps": "8-10", "rest": "45-60s"}
 }
@@ -73,36 +102,69 @@ def analyze_muscle_development(bodybuilding_analysis):
         "Well Developed": []
     }
     
+    # Define mapping for legacy and standard muscle names to new structure
+    muscle_mapping = {
+        "arms": ["Biceps", "Triceps"],
+        "Arms": ["Biceps", "Triceps"],
+        "legs": ["Quads", "Hamstrings", "Calves", "Glutes"],
+        "Legs": ["Quads", "Hamstrings", "Calves", "Glutes"],
+        # Other muscles retain their names when capitalized
+    }
+    
     # Extract muscle development from analysis data
     if bodybuilding_analysis and 'muscle_development' in bodybuilding_analysis:
         muscle_development = bodybuilding_analysis['muscle_development']
     else:
         # Fallback extraction - try to find individual muscle metrics
-        for muscle in ["arms", "chest", "shoulders", "back", "legs", "core"]:
+        standard_muscles = ["arms", "chest", "shoulders", "back", "legs", "core", 
+                            "biceps", "triceps", "quads", "hamstrings", "calves", "glutes"]
+        
+        for muscle in standard_muscles:
             # Check standard keys
             if f"{muscle}_development" in bodybuilding_analysis:
                 status = bodybuilding_analysis[f"{muscle}_development"]
                 muscle_development[muscle.capitalize()] = status
             
             # Check for alternate keys
-            elif f"{muscle.capitalize()}" in bodybuilding_analysis:
-                status = bodybuilding_analysis[f"{muscle.capitalize()}"]
+            elif muscle.capitalize() in bodybuilding_analysis:
+                status = bodybuilding_analysis[muscle.capitalize()]
                 muscle_development[muscle.capitalize()] = status
     
     # Categorize muscles by development level
     for muscle, status in muscle_development.items():
-        if status in ["Needs Growth", "needs_growth", "Poor", "Underdeveloped"]:
-            muscle_categories["Needs Growth"].append(muscle)
-        elif status in ["Average", "average", "Moderate", "Normal"]:
-            muscle_categories["Average"].append(muscle)
-        elif status in ["Well Developed", "well_developed", "Good", "Excellent"]:
-            muscle_categories["Well Developed"].append(muscle)
+        # Normalize status strings
+        if isinstance(status, str):
+            if status.lower() in ["needs growth", "needs_growth", "poor", "underdeveloped", "weak"]:
+                normalized_status = "Needs Growth"
+            elif status.lower() in ["average", "moderate", "normal", "medium"]:
+                normalized_status = "Average"  
+            elif status.lower() in ["well developed", "well_developed", "good", "excellent", "strong"]:
+                normalized_status = "Well Developed"
+            else:
+                normalized_status = "Average"  # Default for unrecognized status
+        else:
+            normalized_status = "Average"  # Default for non-string values
+        
+        # Map muscle groups to new structure if needed
+        if muscle in muscle_mapping:
+            for mapped_muscle in muscle_mapping[muscle]:
+                if mapped_muscle not in muscle_categories[normalized_status]:
+                    muscle_categories[normalized_status].append(mapped_muscle)
+        else:
+            if muscle not in muscle_categories[normalized_status]:
+                muscle_categories[normalized_status].append(muscle)
     
-    # If no data was found, assign default balanced categories
-    if not any(muscle_categories.values()):
-        muscle_categories["Needs Growth"] = ["Arms", "Shoulders"]
-        muscle_categories["Average"] = ["Chest", "Back", "Core"]
-        muscle_categories["Well Developed"] = ["Legs"]
+    # Fill in any missing essential muscle groups with average development
+    essential_muscles = ["Chest", "Shoulders", "Back", "Triceps", "Biceps", 
+                        "Quads", "Hamstrings", "Glutes", "Calves", "Core"]
+    
+    all_categorized = []
+    for muscles in muscle_categories.values():
+        all_categorized.extend(muscles)
+    
+    for muscle in essential_muscles:
+        if muscle not in all_categorized:
+            muscle_categories["Average"].append(muscle)
     
     return muscle_categories
 
@@ -168,7 +230,7 @@ def customize_muscle_group_order(split_template, categorized_muscles):
     )
     
     # Ensure all standard muscle groups are included
-    all_muscles = ["Arms", "Chest", "Shoulders", "Back", "Legs", "Core"]
+    all_muscles = ["Chest", "Shoulders", "Back", "Triceps", "Biceps", "Quads", "Hamstrings", "Glutes", "Calves", "Core"]
     for muscle in all_muscles:
         if muscle not in priority_order:
             priority_order.append(muscle)
@@ -190,11 +252,11 @@ def customize_muscle_group_order(split_template, categorized_muscles):
         elif day_focus == "Lower Body":
             muscles_for_day = ["Legs", "Core"]
         elif day_focus == "Push":
-            muscles_for_day = ["Chest", "Shoulders", "Triceps" if "Triceps" in all_muscles else "Arms"]
+            muscles_for_day = ["Chest", "Shoulders", "Triceps"]
         elif day_focus == "Pull":
-            muscles_for_day = ["Back", "Biceps" if "Biceps" in all_muscles else "Arms"]
+            muscles_for_day = ["Back", "Biceps"]
         elif day_focus == "Legs":
-            muscles_for_day = ["Legs", "Core"]
+            muscles_for_day = ["Quads", "Glutes", "Hamstrings", "Calves", "Core"]
         elif "/" in day_focus:
             # Split day like "Chest/Triceps"
             muscles_for_day = day_focus.split("/")
@@ -228,13 +290,15 @@ def generate_exercises_for_day(day_plan, categorized_muscles):
     for muscle in day_plan["muscle_groups"]:
         # Standardize muscle name for lookup
         lookup_muscle = muscle
-        if muscle == "Triceps" or muscle == "Biceps":
-            lookup_muscle = "Arms"
         
         # Determine development level for this muscle
         development_level = "Average"  # Default
         for level, muscles in categorized_muscles.items():
-            if muscle in muscles or (muscle in ["Triceps", "Biceps"] and "Arms" in muscles):
+            if muscle in muscles:
+                development_level = level
+                break
+            # For backward compatibility with old Arms data
+            elif muscle in ["Triceps", "Biceps"] and "Arms" in muscles:
                 development_level = level
                 break
         

@@ -1,0 +1,74 @@
+🧠 Replit Prompt: Enable Full Workout Personalization Based on Dynamic Muscle Scores
+Please update the current workout generation logic to do the following:
+🔍 1. Read Dynamic Muscle Group Status
+
+Ensure that the user’s muscle development scores from the Body Analysis (e.g., “Arm: Needs Growth”, “Shoulders: Well Developed”) are:
+Pulled dynamically per user (not hardcoded defaults)
+Mapped to three categories:
+"Needs Growth" → underdeveloped
+"Average" → normal development
+"Well Developed" → already strong
+Each user should have different combinations of strengths and weaknesses, and these must be read in real-time and shown correctly.
+🧱 2. Fix Muscle Category Display
+
+In the “Muscle Development” box:
+Right now, all muscles show as Average, even when real data varies.
+Fix this by dynamically showing each group in the correct section:
+Needs Growth:
+- Shoulders
+- Core
+
+Average:
+- Chest
+- Arms
+
+Well Developed:
+- Back
+- Legs
+Use the user’s real measurements and development scores to assign these categories accurately.
+🏋️ 3. Generate Full PPL Routine Based on These Scores
+
+Use a consistent Push / Pull / Legs structure:
+Push Day: Chest, Shoulders, Triceps
+Pull Day: Back, Biceps
+Leg Day: Quads, Glutes, Hamstrings, Calves
+Each day should include 4 to 7 exercises total based on these rules:
+Muscle Group Development	# Exercises	Sets	Reps
+Needs Growth	2–3	4–5	10–15
+Average	1–2	3	10–12
+Well Developed	0–1	2	8–10
+🔁 Apply this logic within each day's muscle targets.
+For example:
+On Push Day, if the user needs more shoulder growth:
+Give 3 shoulder exercises
+Give 2 chest and 1 triceps exercise
+On Pull Day, if back is well developed and biceps are weak:
+Give 1 back exercise and 3 bicep-focused ones
+📦 4. Optional: Use or Expand This Exercise Pool
+
+If needed, build or expand this pool:
+{
+  "Push": {
+    "Chest": ["Bench Press", "Incline DB Press", "Push-Up", "Cable Crossover"],
+    "Shoulders": ["Overhead Press", "Lateral Raise", "Arnold Press"],
+    "Triceps": ["Skullcrusher", "Dips", "Triceps Pushdown"]
+  },
+  "Pull": {
+    "Back": ["Pull-Up", "Barbell Row", "Seated Cable Row", "Lat Pulldown"],
+    "Biceps": ["Bicep Curl", "Incline Curl", "Hammer Curl"]
+  },
+  "Legs": {
+    "Quads": ["Squat", "Leg Press", "Lunges"],
+    "Hamstrings": ["Romanian Deadlift", "Lying Curl"],
+    "Glutes": ["Hip Thrust", "Glute Kickbacks"],
+    "Calves": ["Seated Calf Raise", "Standing Calf Raise"]
+  }
+}
+✅ Summary of What to Fix:
+
+ Read actual user muscle data and display it accurately (Needs Growth / Average / Well Developed)
+ Dynamically generate 4–7 exercises per workout based on weaknesses
+ Use Push / Pull / Legs framework, with volume adjusted per muscle score
+ Make sure volume logic follows the table above
+ Each user should have a different routine based on their specific physique
+Let me know if you need sample data to test with.
