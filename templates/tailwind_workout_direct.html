@@ -367,17 +367,36 @@
         <!-- Training split summary -->
         <div class="bg-gray-800 rounded-xl p-6 shadow-lg" data-aos="fade-right">
           <h3 class="text-2xl font-bold mb-4 text-white">Your Training Split</h3>
-          <p class="text-gray-300 mb-4">{{ split_type }} Split</p>
           
-          <div class="space-y-2">
-            {% for day, workout in workout_plan.items() %}
-            <div class="flex items-center gap-3">
-              <div class="w-3 h-3 rounded-full {% if 'push' in workout.category %}bg-red-500{% elif 'pull' in workout.category %}bg-blue-500{% elif 'legs' in workout.category %}bg-purple-500{% else %}bg-green-500{% endif %}"></div>
-              <span class="text-white font-medium">{{ day }}:</span>
-              <span class="text-gray-300 text-sm">{{ workout.focus }}</span>
+          {% if workout_plan.workout_schedule is defined %}
+            <!-- New format with workout_schedule array -->
+            <div class="space-y-2">
+              {% for day_workout in workout_plan.workout_schedule %}
+              <div class="flex items-center gap-3">
+                <div class="w-3 h-3 rounded-full 
+                  {% if 'Push' in day_workout.focus %}bg-red-500
+                  {% elif 'Pull' in day_workout.focus %}bg-blue-500
+                  {% elif 'Legs' in day_workout.focus %}bg-purple-500
+                  {% elif 'Rest' in day_workout.focus %}bg-green-500
+                  {% else %}bg-yellow-500{% endif %}"></div>
+                <span class="text-white font-medium">{{ day_workout.weekday }}:</span>
+                <span class="text-gray-300 text-sm">{{ day_workout.focus }}</span>
+              </div>
+              {% endfor %}
             </div>
-            {% endfor %}
-          </div>
+          {% else %}
+            <!-- Legacy format with direct key-value pairs -->
+            <p class="text-gray-300 mb-4">{{ split_type }} Split</p>
+            <div class="space-y-2">
+              {% for day, workout in workout_plan.items() %}
+              <div class="flex items-center gap-3">
+                <div class="w-3 h-3 rounded-full {% if 'push' in workout.category %}bg-red-500{% elif 'pull' in workout.category %}bg-blue-500{% elif 'legs' in workout.category %}bg-purple-500{% else %}bg-green-500{% endif %}"></div>
+                <span class="text-white font-medium">{{ day }}:</span>
+                <span class="text-gray-300 text-sm">{{ workout.focus }}</span>
+              </div>
+              {% endfor %}
+            </div>
+          {% endif %}
         </div>
         
         <!-- Experience level -->
@@ -407,25 +426,86 @@
           <p class="text-gray-300 mb-4">Based on your body analysis, we've assessed your muscle development:</p>
           
           <div class="space-y-3">
-            {% for muscle, status in muscle_assessment.items() %}
-            <div class="p-3 bg-gray-900 rounded-lg">
-              <div class="flex justify-between items-center">
-                <span class="text-white capitalize">{{ muscle|replace('_', ' ') }}</span>
-                <span class="flex items-center gap-1.5">
-                  {% if status == "Needs Growth" %}
-                  <span class="text-red-500">●</span>
-                  <span class="text-xs text-red-400">{{ status }}</span>
-                  {% elif status == "Developed" %}
-                  <span class="text-green-500">●</span>
-                  <span class="text-xs text-green-400">{{ status }}</span>
-                  {% else %}
-                  <span class="text-yellow-500">●</span>
-                  <span class="text-xs text-yellow-400">{{ status }}</span>
-                  {% endif %}
-                </span>
+            {% if muscle_assessment.primary_focus is defined %}
+              <!-- New format with primary, secondary, maintenance -->
+              <h4 class="text-red-400 font-semibold mt-2 mb-1">Needs Growth:</h4>
+              {% for muscle in muscle_assessment.primary_focus %}
+              <div class="p-3 bg-gray-900 rounded-lg">
+                <div class="flex justify-between items-center">
+                  <span class="text-white capitalize">{{ muscle|replace('_', ' ') }}</span>
+                  <span class="flex items-center gap-1.5">
+                    <span class="text-red-500">●</span>
+                    <span class="text-xs text-red-400">Needs Growth</span>
+                  </span>
+                </div>
               </div>
-            </div>
-            {% endfor %}
+              {% else %}
+              <div class="p-3 bg-gray-900 rounded-lg">
+                <div class="flex justify-center items-center">
+                  <span class="text-gray-400 text-sm">No muscles in this category</span>
+                </div>
+              </div>
+              {% endfor %}
+              
+              <h4 class="text-yellow-400 font-semibold mt-4 mb-1">Average:</h4>
+              {% for muscle in muscle_assessment.secondary_focus %}
+              <div class="p-3 bg-gray-900 rounded-lg">
+                <div class="flex justify-between items-center">
+                  <span class="text-white capitalize">{{ muscle|replace('_', ' ') }}</span>
+                  <span class="flex items-center gap-1.5">
+                    <span class="text-yellow-500">●</span>
+                    <span class="text-xs text-yellow-400">Average</span>
+                  </span>
+                </div>
+              </div>
+              {% else %}
+              <div class="p-3 bg-gray-900 rounded-lg">
+                <div class="flex justify-center items-center">
+                  <span class="text-gray-400 text-sm">No muscles in this category</span>
+                </div>
+              </div>
+              {% endfor %}
+              
+              <h4 class="text-green-400 font-semibold mt-4 mb-1">Well Developed:</h4>
+              {% for muscle in muscle_assessment.maintenance %}
+              <div class="p-3 bg-gray-900 rounded-lg">
+                <div class="flex justify-between items-center">
+                  <span class="text-white capitalize">{{ muscle|replace('_', ' ') }}</span>
+                  <span class="flex items-center gap-1.5">
+                    <span class="text-green-500">●</span>
+                    <span class="text-xs text-green-400">Well Developed</span>
+                  </span>
+                </div>
+              </div>
+              {% else %}
+              <div class="p-3 bg-gray-900 rounded-lg">
+                <div class="flex justify-center items-center">
+                  <span class="text-gray-400 text-sm">No muscles in this category</span>
+                </div>
+              </div>
+              {% endfor %}
+            {% else %}
+              <!-- Legacy format with direct key-value pairs -->
+              {% for muscle, status in muscle_assessment.items() %}
+              <div class="p-3 bg-gray-900 rounded-lg">
+                <div class="flex justify-between items-center">
+                  <span class="text-white capitalize">{{ muscle|replace('_', ' ') }}</span>
+                  <span class="flex items-center gap-1.5">
+                    {% if status == "Needs Growth" %}
+                    <span class="text-red-500">●</span>
+                    <span class="text-xs text-red-400">{{ status }}</span>
+                    {% elif status == "Well Developed" or status == "Developed" %}
+                    <span class="text-green-500">●</span>
+                    <span class="text-xs text-green-400">{{ status }}</span>
+                    {% else %}
+                    <span class="text-yellow-500">●</span>
+                    <span class="text-xs text-yellow-400">{{ status }}</span>
+                    {% endif %}
+                  </span>
+                </div>
+              </div>
+              {% endfor %}
+            {% endif %}
           </div>
         </div>
         {% endif %}
@@ -489,20 +569,48 @@
         <p class="text-gray-300 mb-6">Click on a day to view the specific workout routine</p>
         
         <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2">
-          {% for day, workout in workout_plan.items() %}
-          <button 
-            id="day-btn-{{ loop.index }}" 
-            class="day-button bg-gray-900 rounded-lg p-3 flex flex-col items-center justify-center text-center {% if 'push' in workout.category %}push-day{% elif 'pull' in workout.category %}pull-day{% elif 'legs' in workout.category %}legs-day{% elif 'rest' in workout.category %}rest-day{% endif %}"
-            data-day="{{ day }}"
-            data-type="{{ workout.category|capitalize }}"
-            onclick="showWorkout('{{ day }}')">
-            <div class="w-6 h-6 rounded-full flex items-center justify-center mb-2 {% if 'push' in workout.category %}push-badge{% elif 'pull' in workout.category %}pull-badge{% elif 'legs' in workout.category %}legs-badge{% elif 'rest' in workout.category %}rest-badge{% else %}core-badge{% endif %}">
-              <span class="text-white text-xs font-bold">{{ loop.index }}</span>
-            </div>
-            <span class="text-white font-medium">{{ day }}</span>
-            <span class="text-xs text-gray-400">{{ workout.category|capitalize }}</span>
-          </button>
-          {% endfor %}
+          {% if workout_plan.workout_schedule is defined %}
+            {% for day_workout in workout_plan.workout_schedule %}
+              <button 
+                id="day-btn-{{ loop.index }}" 
+                class="day-button bg-gray-900 rounded-lg p-3 flex flex-col items-center justify-center text-center 
+                  {% if 'Push' in day_workout.focus %}push-day
+                  {% elif 'Pull' in day_workout.focus %}pull-day
+                  {% elif 'Legs' in day_workout.focus %}legs-day
+                  {% elif 'Rest' in day_workout.focus %}rest-day
+                  {% endif %}"
+                data-day="{{ day_workout.weekday }}"
+                data-type="{{ day_workout.focus }}"
+                onclick="showWorkout('{{ day_workout.day }}')">
+                <div class="w-6 h-6 rounded-full flex items-center justify-center mb-2 
+                  {% if 'Push' in day_workout.focus %}push-badge
+                  {% elif 'Pull' in day_workout.focus %}pull-badge
+                  {% elif 'Legs' in day_workout.focus %}legs-badge
+                  {% elif 'Rest' in day_workout.focus %}rest-badge
+                  {% else %}core-badge{% endif %}">
+                  <span class="text-white text-xs font-bold">{{ loop.index }}</span>
+                </div>
+                <span class="text-white font-medium">{{ day_workout.weekday }}</span>
+                <span class="text-xs text-gray-400">{{ day_workout.focus }}</span>
+              </button>
+            {% endfor %}
+          {% else %}
+            <!-- For backward compatibility with old format -->
+            {% for day, workout in workout_plan.items() %}
+              <button 
+                id="day-btn-{{ loop.index }}" 
+                class="day-button bg-gray-900 rounded-lg p-3 flex flex-col items-center justify-center text-center {% if 'push' in workout.category %}push-day{% elif 'pull' in workout.category %}pull-day{% elif 'legs' in workout.category %}legs-day{% elif 'rest' in workout.category %}rest-day{% endif %}"
+                data-day="{{ day }}"
+                data-type="{{ workout.category|capitalize }}"
+                onclick="showWorkout('{{ day }}')">
+                <div class="w-6 h-6 rounded-full flex items-center justify-center mb-2 {% if 'push' in workout.category %}push-badge{% elif 'pull' in workout.category %}pull-badge{% elif 'legs' in workout.category %}legs-badge{% elif 'rest' in workout.category %}rest-badge{% else %}core-badge{% endif %}">
+                  <span class="text-white text-xs font-bold">{{ loop.index }}</span>
+                </div>
+                <span class="text-white font-medium">{{ day }}</span>
+                <span class="text-xs text-gray-400">{{ workout.category|capitalize }}</span>
+              </button>
+            {% endfor %}
+          {% endif %}
         </div>
       </div>
       
