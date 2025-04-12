@@ -673,8 +673,11 @@ def results(analysis_id):
             'position': result['bodybuilding_analysis'].get('body_type_position', 50),
             'body_type': result['bodybuilding_analysis'].get('body_type', 'balanced'),
             # Calculate body composition - actual body fat percentage from AI analysis
-            'body_fat_percentage': result['bodybuilding_analysis'].get('body_fat_percentage', 15.0),
-            'lean_mass_percentage': 100 - result['bodybuilding_analysis'].get('body_fat_percentage', 15.0),
+            # Get body fat with fallback value and ensure it's a valid number
+            'body_fat_percentage': float(result['bodybuilding_analysis'].get('body_fat_percentage', 15.0)),
+            
+            # Calculate lean mass as 100% - body_fat%
+            'lean_mass_percentage': 100.0 - float(result['bodybuilding_analysis'].get('body_fat_percentage', 15.0)),
             
             # Calculate shoulder-to-waist ratio with default fallback
             'shoulder_to_waist_ratio': utility_functions()['calculate_shoulder_to_waist_ratio'](result.get('enhanced_measurements', {}))

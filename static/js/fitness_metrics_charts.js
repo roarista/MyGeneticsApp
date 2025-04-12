@@ -91,24 +91,49 @@ function initRecoveryCapacityChart() {
 }
 
 function initBodyCompositionChart() {
-    const ctx = document.getElementById('bodyCompositionChart').getContext('2d');
-    if (!ctx) return; // Skip if canvas not found
+    const ctx = document.getElementById('bodyCompositionChart');
+    if (!ctx) {
+        console.error('Body composition chart canvas not found!');
+        return; 
+    }
     
-    // Get body composition percentages from metrics_data_bridge.js
-    // These values are calculated on the server using the user's actual data
-    const fatPercentage = typeof bodyFatPercentage !== 'undefined' ? bodyFatPercentage : 20;
-    const leanMassPercentage = typeof leanMassPercentage !== 'undefined' ? leanMassPercentage : (100 - fatPercentage);
+    // Force clear any existing charts to prevent conflicts
+    if (window.bodyCompChart) {
+        window.bodyCompChart.destroy();
+    }
     
-    // Debug log to check if values are being passed correctly
-    console.log('Body Composition Data:', { 
-        fatPercentage, 
-        leanMassPercentage, 
-        bodyFatPercentage,
-        gender
-    });
+    const context2d = ctx.getContext('2d');
+    if (!context2d) {
+        console.error('Could not get 2D context for body composition chart');
+        return;
+    }
     
-    // Create body composition donut chart
-    new Chart(ctx, {
+    // Get body composition percentages - ensure they're numbers, not strings
+    let fatPercentage = parseFloat(bodyFatPercentage) || 20;
+    let leanMassPercentage = parseFloat(leanMassPercentage) || (100 - fatPercentage);
+    
+    // Ensure values add up to 100%
+    if (Math.abs((fatPercentage + leanMassPercentage) - 100) > 0.5) {
+        console.warn('Body composition values don\'t add up to 100%. Adjusting lean mass.');
+        leanMassPercentage = 100 - fatPercentage;
+    }
+    
+    // Verbose debugging output
+    console.log('BODY COMPOSITION CHART DATA (VERIFIED):');
+    console.log('- Body Fat %:', fatPercentage, 'Type:', typeof fatPercentage);
+    console.log('- Lean Mass %:', leanMassPercentage, 'Type:', typeof leanMassPercentage);
+    console.log('- Gender:', gender);
+    console.log('- Chart canvas element:', ctx);
+    
+    // Mark container as having data
+    const container = ctx.closest('.chart-container');
+    if (container) {
+        container.classList.add('has-data');
+        console.log('Added has-data class to container');
+    }
+    
+    // Create body composition donut chart with guaranteed numeric values
+    window.bodyCompChart = new Chart(context2d, {
         type: 'doughnut',
         data: {
             labels: ['Body Fat', 'Lean Mass'],
@@ -163,7 +188,7 @@ function initBodyCompositionChart() {
                 ctx.fillStyle = '#ef4444';
                 ctx.textAlign = "center";
                 
-                // Fat percentage in center
+                // Fat percentage in center - ensure number formatting
                 const fatText = `${fatPercentage.toFixed(1)}%`;
                 ctx.fillText(fatText, width / 2, height / 2 - fontSize / 2);
                 
@@ -222,6 +247,9 @@ function initBodyCompositionChart() {
             }
         }]
     });
+    
+    // Log success
+    console.log('Body composition chart successfully initialized');
 }
 
 // Calculate recovery capacity based on available metrics
