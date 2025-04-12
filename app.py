@@ -1732,39 +1732,127 @@ def workout(analysis_id):
         result = analysis_results[analysis_id]
         logger.debug(f"Retrieved analysis result for ID: {analysis_id}")
         
-        # Import the WorkoutPlanner
-        from utils.workout_planner import WorkoutPlanner
+        # Import our new smart workout generator
+        from utils.workout_generator import generate_complete_workout_plan
         
-        # Create user data dictionary for workout planner
-        user_data = {
-            'gender': result['user_info'].get('gender', 'male'),
-            'height_cm': result['user_info'].get('height_cm', 175),
-            'weight_kg': result['user_info'].get('weight_kg', 75),
-            'experience': result['user_info'].get('experience', 'beginner'),
-            'body_fat_percentage': result.get('body_fat_percentage', 20),
-            'measurements': result.get('measurements', {}),
-            'traits': result.get('traits', {})
-        }
+        # Extract the body analysis data
+        bodybuilding_analysis = {}
         
-        # Generate personalized workout plan
-        logger.debug(f"Generating personalized workout plan based on physique analysis")
-        workout_planner = WorkoutPlanner()
-        workout_data = workout_planner.generate_workout_plan(user_data)
+        # Try to extract muscle development data
+        if 'bodybuilding_metrics' in result:
+            bodybuilding_analysis = result['bodybuilding_metrics']
+            logger.debug(f"Found bodybuilding metrics data")
+        
+        # Fallback to traits data if needed
+        elif 'traits' in result:
+            # Map traits to muscle development assessment
+            traits = result['traits']
+            muscle_traits = {
+                'arm_development': traits.get('arm_strength', {}).get('value', 'Average') if isinstance(traits.get('arm_strength', {}), dict) else 'Average',
+                'chest_development': traits.get('chest_development', {}).get('value', 'Average') if isinstance(traits.get('chest_development', {}), dict) else 'Average',
+                'back_development': traits.get('back_strength', {}).get('value', 'Average') if isinstance(traits.get('back_strength', {}), dict) else 'Average',
+                'shoulder_development': traits.get('shoulder_width', {}).get('value', 'Average') if isinstance(traits.get('shoulder_width', {}), dict) else 'Average',
+                'legs_development': traits.get('leg_strength', {}).get('value', 'Average') if isinstance(traits.get('leg_strength', {}), dict) else 'Average',
+                'core_development': traits.get('core_strength', {}).get('value', 'Average') if isinstance(traits.get('core_strength', {}), dict) else 'Average',
+            }
+            
+            # Convert trait values to development levels
+            muscle_development = {}
+            for muscle, value in muscle_traits.items():
+                level = "Average"  # Default
+                if isinstance(value, (int, float)):
+                    if value < 0.3:
+                        level = "Needs Growth"
+                    elif value > 0.7:
+                        level = "Well Developed"
+                    else:
+                        level = "Average"
+                elif isinstance(value, str):
+                    if value.lower() in ["low", "poor", "below average"]:
+                        level = "Needs Growth"
+                    elif value.lower() in ["high", "excellent", "above average", "good"]:
+                        level = "Well Developed"
+                    else:
+                        level = "Average"
+                
+                # Store in the proper format
+                muscle_key = muscle.split('_')[0].capitalize()
+                muscle_development[muscle_key] = level
+            
+            bodybuilding_analysis['muscle_development'] = muscle_development
+            logger.debug(f"Created muscle development assessment from traits")
+        
+        # Get user info for experience level
+        user_info = result.get('user_info', {})
+        experience_level = user_info.get('experience', 'beginner')
+        
+        # Determine the user's primary goal
+        goal = "muscle_gain"  # Default
+        body_fat_percentage = result.get('body_fat_percentage', 20)
+        
+        # If high body fat, suggest fat loss as primary goal
+        if body_fat_percentage > 25 and user_info.get('gender') == 'male':
+            goal = "fat_loss"
+        elif body_fat_percentage > 32 and user_info.get('gender') == 'female':
+            goal = "fat_loss"
+        
+        # Generate the personalized workout plan
+        logger.debug(f"Generating dynamic workout plan based on muscle development analysis")
+        workout_plan = generate_complete_workout_plan(
+            bodybuilding_analysis=bodybuilding_analysis,
+            experience=experience_level,
+            goal=goal
+        )
         
         # Store the workout data in the session for use in the API
         if 'workout_data' not in session:
             session['workout_data'] = {}
-        session['workout_data'][analysis_id] = workout_data
+        session['workout_data'][analysis_id] = workout_plan
         
-        # Extract data from the workout plan
-        workout_plan = workout_data['workout_plan']
-        analysis = workout_data['analysis']
-        training_tips = workout_data['training_tips']
-        equipment = workout_data['equipment']
-        progression_methods = workout_data['progression_methods']
+        # For compatibility with the existing code
+        analysis = {
+            'weak_points': workout_plan['muscle_focus']['primary'],
+            'average_points': workout_plan['muscle_focus']['secondary'], 
+            'strong_points': workout_plan['muscle_focus']['maintenance']
+        }
         
-        # Get muscle assessment results if available
-        muscle_assessment = workout_data.get('muscle_assessment', {})
+        # Training tips based on experience level
+        training_tips = []
+        if experience_level == 'beginner':
+            training_tips = [
+                "Focus on form before increasing weight",
+                "Rest at least 48 hours between training the same muscle group",
+                "Aim for progressive overload by adding weight or reps each week",
+                "Start with compound exercises at the beginning of your workout",
+                "Don't skip your warm-up sets"
+            ]
+        elif experience_level == 'intermediate':
+            training_tips = [
+                "Consider varying rep ranges (5-8, 8-12, 12-15) for different stimuli",
+                "Track your workouts to ensure progressive overload",
+                "Add intensity techniques like drop sets on your final set",
+                "Focus more volume on lagging muscle groups",
+                "Include deload weeks every 4-6 weeks of training"
+            ]
+        else:  # advanced
+            training_tips = [
+                "Implement periodization to avoid plateaus",
+                "Consider specialized techniques like rest-pause, cluster sets, and mechanical drop sets",
+                "Evaluate recovery markers (sleep quality, resting heart rate, motivation)",
+                "Cycle intensity by alternating focus on volume, intensity and frequency",
+                "Target specific portions of muscle groups (upper/lower chest, etc.)"
+            ]
+        
+        # Equipment and progression methods
+        equipment = ["Barbell", "Dumbbells", "Cable Machine", "Resistance Bands", "Body Weight"]
+        progression_methods = ["Add weight", "Add reps", "Reduce rest time", "Increase volume", "Change tempo"]
+        
+        # Get muscle assessment results from our generated plan
+        muscle_assessment = {
+            'primary_focus': workout_plan['muscle_focus']['primary'],
+            'secondary_focus': workout_plan['muscle_focus']['secondary'],
+            'maintenance': workout_plan['muscle_focus']['maintenance']
+        }
         
         # Process traits to include their units for display
         formatted_traits = {}
@@ -1787,10 +1875,10 @@ def workout(analysis_id):
         
         # Get user genetic traits and experience
         logger.debug(f"Processing user genetic traits for workout planning")
-        experience = user_data['experience']
+        experience = experience_level  # Use the experience level variable we already defined
         
         # Use weak points identified by the workout planner
-        weak_points = analysis['focus_areas']
+        weak_points = analysis['weak_points']
         
         # Create the basic measurements for the left panel
         basic_measurements = {}
@@ -1864,72 +1952,168 @@ def workout(analysis_id):
 def get_workout(analysis_id, day):
     """API endpoint to get a specific day's workout"""
     try:
+        # Check if analysis exists
         if analysis_id not in analysis_results:
             return jsonify({'error': 'Analysis not found'}), 404
+        
+        # Get the workout plan from session if available
+        if 'workout_data' in session and analysis_id in session['workout_data']:
+            workout_plan = session['workout_data'][analysis_id]
+            logger.debug(f"Retrieved workout plan from session for analysis_id {analysis_id}")
+        else:
+            # Generate a new workout plan
+            # Import our workout generator
+            from utils.workout_generator import generate_complete_workout_plan
             
-        result = analysis_results[analysis_id]
-        
-        # Get the workout planner
-        from utils.workout_planner import WorkoutPlanner
-        workout_planner = WorkoutPlanner()
-        
-        # Get user data
-        user_data = {
-            'gender': result['user_info'].get('gender', 'male'),
-            'height_cm': result['user_info'].get('height_cm', 175),
-            'weight_kg': result['user_info'].get('weight_kg', 75),
-            'experience': result['user_info'].get('experience', 'beginner'),
-            'body_fat_percentage': result.get('body_fat_percentage', 20),
-            'measurements': result.get('measurements', {}),
-            'traits': result.get('traits', {})
-        }
-        
-        # Analyze physique to get weak points
-        analysis = workout_planner.analyze_physique(user_data)
-        weak_points = analysis.get('weak_points', [])
-        high_body_fat = analysis.get('high_body_fat', False)
-        experience = user_data['experience']
-        
-        # Generate the workout based on the day
-        day_lower = day.lower()
-        exercises = []
-        
-        if 'monday' in day_lower or 'friday' in day_lower:
-            # Push day
-            exercises = workout_planner.create_push_day(weak_points, experience, high_body_fat)
-        elif 'tuesday' in day_lower or 'saturday' in day_lower:
-            # Pull day
-            exercises = workout_planner.create_pull_day(weak_points, experience, high_body_fat)
-        elif 'wednesday' in day_lower or 'sunday' in day_lower:
-            # Legs day
-            posterior_chain_focus = 'sunday' in day_lower
-            exercises = workout_planner.create_leg_day(weak_points, experience, high_body_fat, posterior_chain_focus)
-        elif 'thursday' in day_lower:
-            # Rest/Recovery day
-            exercises = workout_planner.create_rest_day_activities()
+            # Get the analysis result
+            result = analysis_results[analysis_id]
             
-        # Format exercises for response
-        formatted_exercises = []
-        for exercise in exercises:
-            formatted_exercise = {
-                'name': exercise['name'],
-                'focus': exercise.get('focus', ''),
-                'sets': exercise['sets'],
-                'reps': exercise['reps'],
-                'isPriority': exercise.get('priority', 'normal') == 'high',
-                'rest': '90s' if exercise.get('priority', 'normal') == 'high' else '60s',
-                'development_status': exercise.get('development_status', 'Normal'),
-                'status_indicator': exercise.get('status_indicator', '')
-            }
-            formatted_exercises.append(formatted_exercise)
+            # Create bodybuilding analysis
+            bodybuilding_analysis = {}
             
-        return jsonify({
-            'exercises': formatted_exercises,
-            'day': day,
-            'type': 'Push' if 'monday' in day_lower or 'friday' in day_lower else
-                   'Pull' if 'tuesday' in day_lower or 'saturday' in day_lower else
-                   'Legs' if 'wednesday' in day_lower or 'sunday' in day_lower else 'Rest'
-        })
+            # Try to extract muscle development data
+            if 'bodybuilding_metrics' in result:
+                bodybuilding_analysis = result['bodybuilding_metrics']
+            elif 'traits' in result:
+                # Map traits to muscle development assessment
+                traits = result['traits']
+                muscle_traits = {
+                    'arm_development': traits.get('arm_strength', {}).get('value', 'Average') if isinstance(traits.get('arm_strength', {}), dict) else 'Average',
+                    'chest_development': traits.get('chest_development', {}).get('value', 'Average') if isinstance(traits.get('chest_development', {}), dict) else 'Average',
+                    'back_development': traits.get('back_strength', {}).get('value', 'Average') if isinstance(traits.get('back_strength', {}), dict) else 'Average',
+                    'shoulder_development': traits.get('shoulder_width', {}).get('value', 'Average') if isinstance(traits.get('shoulder_width', {}), dict) else 'Average',
+                    'legs_development': traits.get('leg_strength', {}).get('value', 'Average') if isinstance(traits.get('leg_strength', {}), dict) else 'Average',
+                    'core_development': traits.get('core_strength', {}).get('value', 'Average') if isinstance(traits.get('core_strength', {}), dict) else 'Average',
+                }
+                
+                # Convert trait values to development levels
+                muscle_development = {}
+                for muscle, value in muscle_traits.items():
+                    level = "Average"  # Default
+                    if isinstance(value, (int, float)):
+                        if value < 0.3:
+                            level = "Needs Growth"
+                        elif value > 0.7:
+                            level = "Well Developed"
+                        else:
+                            level = "Average"
+                    elif isinstance(value, str):
+                        if value.lower() in ["low", "poor", "below average"]:
+                            level = "Needs Growth"
+                        elif value.lower() in ["high", "excellent", "above average", "good"]:
+                            level = "Well Developed"
+                        else:
+                            level = "Average"
+                    
+                    # Store in the proper format
+                    muscle_key = muscle.split('_')[0].capitalize()
+                    muscle_development[muscle_key] = level
+                
+                bodybuilding_analysis['muscle_development'] = muscle_development
+            
+            # Get user info for experience level
+            user_info = result.get('user_info', {})
+            experience_level = user_info.get('experience', 'beginner')
+            
+            # Determine the user's primary goal
+            goal = "muscle_gain"
+            body_fat_percentage = result.get('body_fat_percentage', 20)
+            
+            # Generate the workout plan
+            workout_plan = generate_complete_workout_plan(
+                bodybuilding_analysis=bodybuilding_analysis,
+                experience=experience_level,
+                goal=goal
+            )
+            
+            # Store in session
+            if 'workout_data' not in session:
+                session['workout_data'] = {}
+            session['workout_data'][analysis_id] = workout_plan
+        
+        # Try to get the requested day
+        try:
+            # Convert day number to index (1-based to 0-based)
+            day_index = 0
+            
+            if day.isdigit():
+                # If day is a number (1-7)
+                day_index = int(day) - 1
+            else:
+                # If day is a day name (Monday, Tuesday, etc.)
+                day_lower = day.lower()
+                weekdays = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+                
+                for i, weekday in enumerate(weekdays):
+                    if weekday in day_lower:
+                        day_index = i
+                        break
+            
+            # Ensure day_index is within bounds
+            day_index = max(0, min(day_index, 6))
+            
+            # Get the workout for the requested day
+            if 'workout_schedule' in workout_plan and len(workout_plan['workout_schedule']) > day_index:
+                day_workout = workout_plan['workout_schedule'][day_index]
+                
+                # Format response
+                formatted_exercises = []
+                
+                # Handle rest days
+                if day_workout['focus'] == 'Rest Day' or day_workout['focus'] == 'Rest':
+                    return jsonify({
+                        'exercises': [],
+                        'day': day,
+                        'type': 'Rest',
+                        'notes': 'Recovery day. Consider light cardio, stretching, or mobility work.'
+                    })
+                
+                # Format exercises
+                for exercise in day_workout['exercises']:
+                    # Map priority level to color indicator
+                    priority = exercise.get('priority', 'Average')
+                    
+                    status_indicator = '🟡'  # Default yellow (Average)
+                    if priority == 'Needs Growth':
+                        status_indicator = '🔴'  # Red
+                    elif priority == 'Well Developed':
+                        status_indicator = '🟢'  # Green
+                    
+                    formatted_exercise = {
+                        'name': exercise['name'],
+                        'focus': exercise['muscle'],
+                        'sets': exercise['sets'],
+                        'reps': exercise['reps'],
+                        'rest': exercise['rest'],
+                        'isPriority': priority == 'Needs Growth',  # High priority for muscles that need growth
+                        'development_status': priority,
+                        'status_indicator': status_indicator
+                    }
+                    formatted_exercises.append(formatted_exercise)
+                
+                return jsonify({
+                    'exercises': formatted_exercises,
+                    'day': day,
+                    'type': day_workout['focus'],
+                    'notes': day_workout.get('notes', '')
+                })
+            else:
+                # Fallback for missing day
+                return jsonify({
+                    'exercises': [],
+                    'day': day,
+                    'type': 'Unknown',
+                    'notes': 'No workout available for this day.'
+                })
+                
+        except Exception as day_error:
+            logger.error(f"Error processing day {day}: {str(day_error)}")
+            return jsonify({
+                'exercises': [],
+                'day': day,
+                'type': 'Error',
+                'notes': 'Could not load workout for this day.'
+            })
         
     except Exception as e:
         logger.error(f"Error generating workout for day {day}: {str(e)}")

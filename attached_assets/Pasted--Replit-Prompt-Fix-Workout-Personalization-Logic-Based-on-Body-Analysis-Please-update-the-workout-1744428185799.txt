@@ -1,0 +1,56 @@
+🧠 Replit Prompt: Fix Workout Personalization Logic Based on Body Analysis
+Please update the workout generation system so that workouts are dynamically personalized for each user based on their body analysis results. Right now, all users get generic workouts with 3 sets of 10–12 reps regardless of their physique. This should be replaced with a smart workout logic that adapts to individual needs. Below is a detailed plan:
+🔍 1. Source of Data
+Pull muscle development results from the Body Analysis Results, specifically the values shown under:
+Arm Development
+Chest Development
+Shoulder Development
+Back Development
+Leg Development
+Core Development
+These are color-coded (Red = Needs Growth, Yellow = Average, Green = Well Developed) and include text labels. Use that status to determine muscle priority.
+🧩 2. Muscle Group Prioritization Logic
+Group muscle categories into:
+Primary Focus: All muscle groups marked "Needs Growth"
+Secondary Focus: All marked "Average"
+Maintenance: All marked "Well Developed"
+These priority levels will influence:
+Exercise quantity per group
+Weekly placement (e.g., weak groups earlier in the week)
+Set/rep schemes
+🏋️ 3. Exercise Mapping
+Each muscle group should have a corresponding pool of exercises.
+If no exercise map exists, create one like this (feel free to expand):
+{
+  "Arms": ["Bicep Curl", "Tricep Pushdown", "Hammer Curl", "Overhead Extension"],
+  "Chest": ["Bench Press", "Push-Ups", "Chest Fly", "Incline DB Press"],
+  "Shoulders": ["Shoulder Press", "Lateral Raises", "Front Raise", "Rear Delt Fly"],
+  "Back": ["Lat Pulldown", "Barbell Row", "Pull-Ups", "Seated Cable Row"],
+  "Legs": ["Squats", "Lunges", "Leg Press", "Hamstring Curl"],
+  "Core": ["Planks", "Leg Raises", "Russian Twists", "Cable Crunches"]
+}
+📆 4. Weekly Split Generation
+Automatically generate a 7-day schedule.
+Each day can focus on 1–2 muscle groups.
+Prioritize Primary Focus (weakest groups) earlier in the week (e.g., Day 1–3).
+Ensure no overlapping muscle groups are trained on back-to-back days.
+Sample structure:
+Day 1 – Arms + Shoulders (both weak)
+Day 2 – Chest + Core (core = weak, chest = average)
+Day 3 – Back (average)
+Day 4 – Legs (well developed)
+...
+🔁 5. Dynamic Sets & Reps
+Adjust volume based on muscle priority:
+Needs Growth → 4 sets x 12 reps
+Average → 3 sets x 10 reps
+Well Developed → 2 sets x 8 reps
+Display this info on the workout card (e.g., “4 x 12 – Lateral Raise”).
+📋 6. Requirements Recap:
+✅ Read actual muscle development from user’s body scan
+✅ Generate personalized weekly split (based on weak points)
+✅ Pull exercises from mapped pools
+✅ Dynamically generate reps/sets based on need
+✅ Ensure workouts are responsive to new scan results
+✅ Replace static/generic plans with this logic
+Let me know if you need the exact data format used in the body analysis dictionary or if the logic should also vary based on body type or goals (e.g., fat loss vs mass gain).
