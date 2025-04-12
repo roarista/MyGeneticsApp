@@ -668,10 +668,13 @@ def results(analysis_id):
             'recovery_capacity': result.get('enhanced_measurements', {}).get('recovery_capacity', 5.0),
             'metabolic_efficiency': result.get('enhanced_measurements', {}).get('metabolic_efficiency', 5.0),
             
-            # For Fitness Age Estimation chart
+            # For Body Composition Estimation chart
             'gender': result.get('user_info', {}).get('gender', 'male'),
             'position': result['bodybuilding_analysis'].get('body_type_position', 50),
             'body_type': result['bodybuilding_analysis'].get('body_type', 'balanced'),
+            # Calculate body composition - actual body fat percentage from AI analysis
+            'body_fat_percentage': result['bodybuilding_analysis'].get('body_fat_percentage', 15.0),
+            'lean_mass_percentage': 100 - result['bodybuilding_analysis'].get('body_fat_percentage', 15.0),
             
             # Calculate shoulder-to-waist ratio with default fallback
             'shoulder_to_waist_ratio': utility_functions()['calculate_shoulder_to_waist_ratio'](result.get('enhanced_measurements', {}))

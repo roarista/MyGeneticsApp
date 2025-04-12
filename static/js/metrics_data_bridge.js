@@ -9,6 +9,7 @@ let muscleBuilding = 5.0;
 let recoveryCapacity = 5.0;
 let shoulderToWaistRatio = 1.6;
 let bodyFatPercentage = 15.0;
+let leanMassPercentage = 85.0;
 
 // Variables for Fitness Age Estimation
 let userAge = 30;
@@ -29,6 +30,7 @@ function initMetricsFromServer(data) {
     if (data.recoveryCapacity) recoveryCapacity = data.recoveryCapacity;
     if (data.shoulderToWaistRatio) shoulderToWaistRatio = data.shoulderToWaistRatio;
     if (data.bodyFatPercentage) bodyFatPercentage = data.bodyFatPercentage;
+    if (data.leanMassPercentage) leanMassPercentage = data.leanMassPercentage;
     
     // Set Fitness Age Estimation variables
     if (data.userAge) userAge = data.userAge;

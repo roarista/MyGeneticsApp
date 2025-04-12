@@ -84,10 +84,10 @@ function initBodyCompositionChart() {
     const ctx = document.getElementById('bodyCompositionChart').getContext('2d');
     if (!ctx) return; // Skip if canvas not found
     
-    // Calculate body composition percentages
-    // Use bodyFatPercentage from metrics_data_bridge.js
+    // Get body composition percentages from metrics_data_bridge.js
+    // These values are calculated on the server using the user's actual data
     const fatPercentage = typeof bodyFatPercentage !== 'undefined' ? bodyFatPercentage : 20;
-    const leanMassPercentage = 100 - fatPercentage;
+    const leanMassPercentage = typeof leanMassPercentage !== 'undefined' ? leanMassPercentage : (100 - fatPercentage);
     
     // Create body composition donut chart
     new Chart(ctx, {

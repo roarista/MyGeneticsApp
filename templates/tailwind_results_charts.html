@@ -1420,7 +1420,7 @@
                         <canvas id="bodyCompositionChart"></canvas>
                     </div>
                     <div class="text-xs text-gray-400 mt-2 text-center">
-                        <p>This chart breaks down your estimated fat vs lean body mass based on your photo analysis and personal data.</p>
+                        <p>This chart reflects your personalized body composition based on photo analysis and your input data.</p>
                     </div>
                 </div>
             </div>
@@ -2614,7 +2614,8 @@ document.addEventListener('DOMContentLoaded', function() {
         muscleBuilding: {{ bodybuilding_analysis.muscle_building_potential|default(5.0) }},
         recoveryCapacity: {{ recovery_capacity }},
         shoulderToWaistRatio: {{ shoulder_to_waist_ratio }},
-        bodyFatPercentage: {{ bodybuilding_analysis.body_fat_percentage|default(15.0) }},
+        bodyFatPercentage: {{ body_fat_percentage|default(15.0) }},
+        leanMassPercentage: {{ lean_mass_percentage|default(85.0) }},
         // Additional data for Fitness Age estimation
         userAge: {{ basic_measurements.get('Age', {}).get('value', 30)|int }},
         gender: '{{ gender|default("male") }}',
