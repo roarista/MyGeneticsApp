@@ -2620,7 +2620,7 @@ document.addEventListener('DOMContentLoaded', function() {
         gender: '{{ gender|default("male") }}',
         heightCm: {{ enhanced_measurements.get('height_cm', 175)|float }},
         weightKg: {{ enhanced_measurements.get('weight_kg', 75)|float }},
-        activityLevel: '{{ user.experience_level|default("moderate") }}'
+        activityLevel: '{{ user_info.get("experience_level", "moderate") }}'
     };
     
     // Initialize metrics with real data
