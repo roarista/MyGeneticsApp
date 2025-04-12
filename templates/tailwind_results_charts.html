@@ -1413,14 +1413,14 @@
                     </div>
                 </div>
                 
-                <!-- Body Type Matching (Visual Spectrum) -->
+                <!-- Spot for future chart - This will be added in a later update -->
                 <div class="bg-gray-800 p-4 rounded-lg">
-                    <h3 class="text-lg font-medium text-white mb-3 text-center">Body Type Matching</h3>
+                    <h3 class="text-lg font-medium text-white mb-3 text-center">Training Volume Tolerance</h3>
                     <div class="chart-container" style="position: relative; height: 160px;">
-                        <canvas id="bodyTypeSpectrum"></canvas>
+                        <canvas id="trainingVolumeChart"></canvas>
                     </div>
                     <div class="text-xs text-gray-400 mt-2 text-center">
-                        <p>Your body type placement is estimated using shoulder-to-waist ratio, body fat %, and muscle-building potential.</p>
+                        <p>Your optimal training volume is estimated based on recovery capacity, muscle fiber distribution, and body type.</p>
                     </div>
                 </div>
             </div>
@@ -2225,6 +2225,291 @@ document.addEventListener('DOMContentLoaded', function() {
     // Create a gradient for the spectrum
     function createSpectrumGradient() {
         const gradient = bodyTypeCtx.createLinearGradient(0, 0, bodyTypeCtx.canvas.width, 0);
+        gradient.addColorStop(0, '#3b82f6');    // Ectomorph (blue)
+        gradient.addColorStop(0.5, '#10b981');  // Mesomorph (green)
+        gradient.addColorStop(1, '#f59e0b');    // Endomorph (amber)
+        return gradient;
+    }
+    
+    // Training Volume Tolerance Chart (Placeholder)
+    const trainingVolumeCtx = document.getElementById('trainingVolumeChart').getContext('2d');
+    
+    // Sample data - this would be calculated based on user's profile
+    new Chart(trainingVolumeCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Low', 'Moderate', 'High', 'Very High'],
+            datasets: [{
+                label: 'Response',
+                data: [4, 7, 5, 2],
+                backgroundColor: [
+                    'rgba(59, 130, 246, 0.7)',  // blue
+                    'rgba(16, 185, 129, 0.7)',  // green
+                    'rgba(245, 158, 11, 0.7)',  // amber
+                    'rgba(239, 68, 68, 0.7)'    // red
+                ],
+                borderWidth: 0,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                x: {
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: '#fff',
+                        font: {
+                            size: 10
+                        }
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    max: 10,
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: '#fff',
+                        stepSize: 2
+                    }
+                }
+            }
+        }
+    });
+    
+    // Recovery Capacity Chart
+    const recoveryCapacityCtx = document.getElementById('recoveryCapacityChart').getContext('2d');
+    
+    // Create a recovery capacity gauge chart
+    new Chart(recoveryCapacityCtx, {
+        type: 'doughnut',
+        data: {
+            datasets: [{
+                data: [7, 3],  // 7/10 recovery capacity (example)
+                backgroundColor: [
+                    '#3b82f6',  // Blue for recovery capacity
+                    'rgba(31, 41, 55, 0.2)'  // Dark background
+                ],
+                borderWidth: 0,
+                circumference: 180,
+                rotation: 270
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '75%',
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    enabled: false
+                }
+            }
+        },
+        plugins: [{
+            id: 'recoveryText',
+            afterDraw: function(chart) {
+                const width = chart.width;
+                const height = chart.height;
+                const ctx = chart.ctx;
+                
+                ctx.restore();
+                
+                // Font settings for score
+                const fontSize = (height / 10).toFixed(2);
+                ctx.font = fontSize + "px Arial";
+                ctx.textBaseline = "middle";
+                ctx.fillStyle = "#fff";
+                
+                // Display score
+                const scoreText = "7.0";
+                const textX = width / 2;
+                const textY = height - (height / 3);
+                
+                ctx.textAlign = "center";
+                ctx.fillText(scoreText + "/10", textX, textY);
+                
+                // Add rating text
+                ctx.font = (fontSize * 0.6) + "px Arial";
+                ctx.fillStyle = "#3b82f6"; // blue
+                ctx.fillText("Above Average", textX, textY + fontSize * 1.2);
+                
+                ctx.save();
+            }
+        }]
+    });
+    
+    // Body Type Spectrum 2 (Duplicate of bodyTypeSpectrum for display below Metabolic Efficiency)
+    const bodyTypeCtx2 = document.getElementById('bodyTypeSpectrum2').getContext('2d');
+    
+    // Create a horizontal bar chart that serves as the spectrum for the second instance
+    const bodyTypeSpectrum2 = new Chart(bodyTypeCtx2, {
+        type: 'bar',
+        data: {
+            labels: ['Body Type Spectrum'],
+            datasets: [
+                // Background gradient
+                {
+                    data: [100],
+                    backgroundColor: createSpectrumGradient2(),
+                    barPercentage: 0.4, // Thinner bar
+                    categoryPercentage: 0.5, // Reduced height
+                    borderRadius: 8,    // More rounded corners
+                    borderWidth: 1,
+                    borderColor: 'rgba(255, 255, 255, 0.3)' // Subtle white border
+                },
+                // Placeholder for user's position indicator
+                {
+                    data: [0], // Will be handled by plugin
+                    backgroundColor: 'rgba(0, 0, 0, 0)',
+                    barPercentage: 0,
+                    categoryPercentage: 0
+                }
+            ]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    enabled: false
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    max: 100,
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        display: false
+                    },
+                    border: {
+                        display: false
+                    }
+                },
+                markerAxis: {
+                    type: 'linear',
+                    position: 'top',
+                    min: 0,
+                    max: 100,
+                    offset: true,
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        display: false
+                    },
+                    border: {
+                        display: false
+                    }
+                },
+                y: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        display: false
+                    },
+                    border: {
+                        display: false
+                    }
+                }
+            },
+            // Disable all animations
+            animation: false
+        },
+        plugins: [{
+            id: 'bodyTypeLabels2',
+            afterDraw: function(chart) {
+                const ctx = chart.ctx;
+                const width = chart.width;
+                const height = chart.height * 0.8; // Adjust for space
+                
+                ctx.save();
+                
+                // Draw subtle tick marks on the spectrum
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                for (let i = 0; i <= 10; i++) {
+                    const tickX = width * (i / 10);
+                    const tickHeight = (i % 5 === 0) ? 10 : 5; // Taller ticks at major points
+                    // Move ticks below the bar
+                    ctx.fillRect(tickX, height * 0.6 - tickHeight/2, 1, tickHeight);
+                }
+                
+                // Add the type labels
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                
+                // Ectomorph label (left)
+                ctx.fillStyle = '#3b82f6'; // Blue
+                ctx.font = 'bold 14px Arial';
+                // Move labels below the bar
+                ctx.fillText('Ectomorph', width * 0.15, height * 0.7);
+                
+                // Mesomorph label (center)
+                ctx.fillStyle = '#10b981'; // Green
+                ctx.font = 'bold 14px Arial';
+                // Move labels below the bar
+                ctx.fillText('Mesomorph', width * 0.5, height * 0.7);
+                
+                // Endomorph label (right)
+                ctx.fillStyle = '#f59e0b'; // Amber
+                ctx.font = 'bold 14px Arial';
+                // Move labels below the bar
+                ctx.fillText('Endomorph', width * 0.85, height * 0.7);
+                
+                // Draw user's body type position marker
+                {% if body_type %}
+                    {# Calculate position based on body_type percentage #}
+                    const xPos = width * ({{ position }} / 100);
+                    const yPos = height * 0.4; // Positioned on the center of the bar
+                    
+                    // Draw marker dot
+                    ctx.beginPath();
+                    ctx.arc(xPos, yPos, 10, 0, Math.PI * 2);
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fill();
+                    
+                    // Draw outer ring
+                    ctx.beginPath();
+                    ctx.arc(xPos, yPos, 10, 0, Math.PI * 2);
+                    ctx.lineWidth = 2;
+                    ctx.strokeStyle = '#2563eb'; // Blue border
+                    ctx.stroke();
+                    
+                    // Draw body type text label
+                    ctx.textAlign = 'center';
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = 'bold 12px Arial';
+                    ctx.fillText('{{ body_type|capitalize }}', xPos, height * 0.8);
+                {% endif %}
+                
+                ctx.restore();
+            }
+        }]
+    });
+    
+    // Create a gradient for the spectrum (for the second body type chart)
+    function createSpectrumGradient2() {
+        const gradient = bodyTypeCtx2.createLinearGradient(0, 0, bodyTypeCtx2.canvas.width, 0);
         gradient.addColorStop(0, '#3b82f6');    // Ectomorph (blue)
         gradient.addColorStop(0.5, '#10b981');  // Mesomorph (green)
         gradient.addColorStop(1, '#f59e0b');    // Endomorph (amber)
