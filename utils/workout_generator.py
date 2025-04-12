@@ -72,16 +72,16 @@ EXERCISE_MAPPING = {
 # Weekly split templates based on training experience
 SPLIT_TEMPLATES = {
     "beginner": {
-        "3_day": ["Push", "Pull", "Legs", "Rest", "Rest", "Rest", "Rest"],
-        "4_day": ["Push", "Pull", "Legs", "Rest", "Push", "Rest", "Rest"],
-        "5_day": ["Push", "Pull", "Legs", "Rest", "Push", "Pull", "Rest"]
+        "3_day": ["Push", "Pull", "Legs", "Rest", "Rest", "Rest", "Legs"],
+        "4_day": ["Push", "Pull", "Legs", "Rest", "Push", "Rest", "Legs"],
+        "5_day": ["Push", "Pull", "Legs", "Rest", "Push", "Pull", "Legs"]
     },
     "intermediate": {
-        "5_day": ["Push", "Pull", "Legs", "Rest", "Push", "Pull", "Rest"],
-        "6_day": ["Push", "Pull", "Legs", "Push", "Pull", "Legs", "Rest"]
+        "5_day": ["Push", "Pull", "Legs", "Rest", "Push", "Pull", "Legs"],
+        "6_day": ["Push", "Pull", "Legs", "Push", "Pull", "Legs", "Legs"]
     },
     "advanced": {
-        "6_day": ["Push", "Pull", "Legs", "Push", "Pull", "Legs", "Rest"]
+        "6_day": ["Push", "Pull", "Legs", "Push", "Pull", "Legs", "Legs"]
     }
 }
 
@@ -275,7 +275,7 @@ def customize_muscle_group_order(split_template, categorized_muscles):
     
     return customized_split
 
-def generate_exercises_for_day(day_plan, categorized_muscles):
+def generate_exercises_for_day(day_plan, categorized_muscles, day_number=None):
     """
     Generate specific exercises for each muscle group in a day's workout.
     Adjust volume (sets, reps) based on the muscle's development level.
@@ -288,6 +288,9 @@ def generate_exercises_for_day(day_plan, categorized_muscles):
             "notes": "Active recovery, stretching, and light cardio recommended."
         }
     
+    # Sunday (day 7) is a special Leg Day with different exercises
+    is_sunday_leg_day = day_number == 7 and day_plan["focus"] == "Legs"
+    
     # First pass: Generate all potential exercises with priority info
     all_potential_exercises = []
     
@@ -295,6 +298,11 @@ def generate_exercises_for_day(day_plan, categorized_muscles):
     muscle_counts = {}
     for muscle in day_plan["muscle_groups"]:
         muscle_counts[muscle] = 0
+    
+    # Get info from already used leg exercises to avoid repetition on Sunday
+    used_leg_exercises = []
+    if is_sunday_leg_day:
+        day_plan["focus"] = "Legs (Strength Focus)"  # Mark Sunday as special leg day
     
     # Determine exercise count per muscle based on priority
     for muscle in day_plan["muscle_groups"]:
@@ -333,11 +341,37 @@ def generate_exercises_for_day(day_plan, categorized_muscles):
             # Get all exercises for this muscle
             available_exercises = EXERCISE_MAPPING[lookup_muscle]
             
-            # Select the required number of exercises randomly
-            if len(available_exercises) >= exercise_count:
-                muscle_exercises = random.sample(available_exercises, exercise_count)
+            # For Sunday leg day, use different exercise selection pattern
+            if is_sunday_leg_day:
+                # Specific emphasis for Sunday leg day based on muscle
+                if lookup_muscle == "Quads":
+                    # For Sunday, prioritize compound movements for quads
+                    compound_exercises = ["Squat", "Leg Press", "Hack Squat"]
+                    compound_available = [ex for ex in available_exercises if ex in compound_exercises]
+                    if compound_available:
+                        muscle_exercises = [random.choice(compound_available)]
+                        # Add isolation if needed
+                        if exercise_count > 1 and len(available_exercises) > len(compound_available):
+                            isolation = [ex for ex in available_exercises if ex not in compound_available]
+                            muscle_exercises.extend(random.sample(isolation, min(exercise_count-1, len(isolation))))
+                elif lookup_muscle == "Hamstrings":
+                    # For Sunday, prioritize Romanian Deadlift for hamstrings if available
+                    if "Romanian Deadlift" in available_exercises:
+                        muscle_exercises = ["Romanian Deadlift"]
+                        remaining = [ex for ex in available_exercises if ex != "Romanian Deadlift"]
+                        if exercise_count > 1 and remaining:
+                            muscle_exercises.extend(random.sample(remaining, min(exercise_count-1, len(remaining))))
+                    else:
+                        muscle_exercises = random.sample(available_exercises, min(exercise_count, len(available_exercises)))
+                else:
+                    # For other leg muscles on Sunday, use standard random selection
+                    muscle_exercises = random.sample(available_exercises, min(exercise_count, len(available_exercises)))
             else:
-                muscle_exercises = available_exercises
+                # Standard exercise selection for non-Sunday workouts
+                if len(available_exercises) >= exercise_count:
+                    muscle_exercises = random.sample(available_exercises, exercise_count)
+                else:
+                    muscle_exercises = available_exercises
         
         # Add exercises to the potential list
         for exercise in muscle_exercises:
@@ -390,11 +424,19 @@ def generate_exercises_for_day(day_plan, categorized_muscles):
                     break
     
     # Create the complete day workout
+    if is_sunday_leg_day:
+        notes = "Sunday Leg Day focuses on compound strength movements like Squats and Romanian Deadlifts. "
+        weak_muscles = set([e["muscle"] for e in final_exercises if e["priority"] == "Needs Growth"])
+        if weak_muscles:
+            notes += f"Prioritize these weak areas: {', '.join(weak_muscles)}."
+    else:
+        notes = f"Focus on {'the weakest ' if final_exercises else ''}muscle groups: " + \
+                ", ".join(set([e["muscle"] for e in final_exercises if e["priority"] == "Needs Growth"]))
+    
     workout = {
         "focus": day_plan["focus"],
         "exercises": final_exercises,
-        "notes": f"Focus on {'the weakest ' if final_exercises else ''}muscle groups: " + 
-                 ", ".join(set([e["muscle"] for e in final_exercises if e["priority"] == "Needs Growth"]))
+        "notes": notes
     }
     
     return workout
@@ -423,8 +465,9 @@ def generate_complete_workout_plan(bodybuilding_analysis, experience="intermedia
     # Generate exercises for each day
     workout_days = []
     for day_index, day_plan in enumerate(customized_split):
-        day_workout = generate_exercises_for_day(day_plan, categorized_muscles)
-        day_workout["day"] = day_index + 1  # Add day number
+        day_number = day_index + 1  # 1-based day number (7 = Sunday)
+        day_workout = generate_exercises_for_day(day_plan, categorized_muscles, day_number)
+        day_workout["day"] = day_number
         day_workout["weekday"] = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"][day_index]
         workout_days.append(day_workout)
     
