@@ -2051,9 +2051,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 {
                     data: [100],
                     backgroundColor: createSpectrumGradient(),
-                    barPercentage: 0.8,
+                    barPercentage: 0.5, // Thinner bar
                     categoryPercentage: 0.9,
-                    borderRadius: 4
+                    borderRadius: 8,    // More rounded corners
+                    borderWidth: 1,
+                    borderColor: 'rgba(255, 255, 255, 0.3)' // Subtle white border
                 },
                 // Placeholder for user's position indicator
                 {
@@ -2130,33 +2132,56 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 ctx.save();
                 
+                // Draw subtle tick marks on the spectrum
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                for (let i = 0; i <= 10; i++) {
+                    const tickX = width * (i / 10);
+                    const tickHeight = (i % 5 === 0) ? 10 : 5; // Taller ticks at major points
+                    ctx.fillRect(tickX, height * 0.5 - tickHeight/2, 1, tickHeight);
+                }
+                
                 // Add the type labels
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.font = '14px Arial';
                 
                 // Ectomorph label (left)
-                ctx.fillStyle = '#9ca3af';
+                ctx.fillStyle = '#3b82f6'; // Blue
+                ctx.font = 'bold 14px Arial';
                 ctx.fillText('Ectomorph', width * 0.15, height * 0.5);
                 
                 // Mesomorph label (center)
-                ctx.fillStyle = '#ffffff';
+                ctx.fillStyle = '#10b981'; // Green
                 ctx.font = 'bold 14px Arial';
                 ctx.fillText('Mesomorph', width * 0.5, height * 0.5);
                 
                 // Endomorph label (right)
-                ctx.fillStyle = '#9ca3af';
-                ctx.font = '14px Arial';
+                ctx.fillStyle = '#f59e0b'; // Amber
+                ctx.font = 'bold 14px Arial';
                 ctx.fillText('Endomorph', width * 0.85, height * 0.5);
                 
-                // Draw user's position text
-                ctx.textAlign = 'center';
-                ctx.fillStyle = '#ffffff';
-                ctx.font = 'bold 12px Arial';
-                
+                // Draw user's body type position marker
                 {% if body_type %}
                     {# Calculate position based on body_type percentage #}
                     const xPos = width * ({{ position }} / 100);
+                    const yPos = height * 0.3; // Slightly above the center
+                    
+                    // Draw marker dot
+                    ctx.beginPath();
+                    ctx.arc(xPos, yPos, 10, 0, Math.PI * 2);
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fill();
+                    
+                    // Draw outer ring
+                    ctx.beginPath();
+                    ctx.arc(xPos, yPos, 10, 0, Math.PI * 2);
+                    ctx.lineWidth = 2;
+                    ctx.strokeStyle = '#2563eb'; // Blue border
+                    ctx.stroke();
+                    
+                    // Draw body type text label
+                    ctx.textAlign = 'center';
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = 'bold 12px Arial';
                     ctx.fillText('{{ body_type|capitalize }}', xPos, height * 0.8);
                 {% endif %}
                 
