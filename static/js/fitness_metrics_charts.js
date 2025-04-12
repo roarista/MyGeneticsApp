@@ -1,13 +1,13 @@
 // Advanced Fitness Metrics Charts
-// This script implements the Recovery Capacity and Training Volume Tolerance charts
+// This script implements the Recovery Capacity and Fitness Age Estimation charts
 // with dynamic calculations based on user's physical metrics
 
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize recovery capacity chart with calculated values
     initRecoveryCapacityChart();
     
-    // Initialize training volume tolerance chart
-    initTrainingVolumeChart();
+    // Initialize fitness age estimation chart
+    initFitnessAgeChart();
 });
 
 function initRecoveryCapacityChart() {
@@ -80,35 +80,50 @@ function initRecoveryCapacityChart() {
     });
 }
 
-function initTrainingVolumeChart() {
-    const ctx = document.getElementById('trainingVolumeChart').getContext('2d');
+function initFitnessAgeChart() {
+    const ctx = document.getElementById('fitnessAgeChart').getContext('2d');
     if (!ctx) return; // Skip if canvas not found
     
-    // Calculate recovery capacity score first (needed for training volume)
-    const recoveryScore = calculateRecoveryCapacity();
+    // Get user data from the page if available (these variables might be defined in the template)
+    let chronologicalAge = typeof userAge !== 'undefined' ? userAge : 30; // Default if not available
+    const bodyFatPercentage = typeof bodyFatPercent !== 'undefined' ? bodyFatPercent : 20;
+    const gender = typeof userGender !== 'undefined' ? userGender : 'male';
+    const heightCm = typeof userHeight !== 'undefined' ? userHeight : 175;
+    const weightKg = typeof userWeight !== 'undefined' ? userWeight : 75;
+    const activityLevel = typeof userActivity !== 'undefined' ? userActivity : 'moderate';
+
+    // Fallback: Try to extract age from the DOM if JS variables aren't available
+    if (typeof userAge === 'undefined') {
+        const ageElements = document.querySelectorAll('.user-age, .age-value, [data-age]');
+        if (ageElements.length > 0) {
+            const ageText = ageElements[0].textContent || ageElements[0].dataset.age;
+            if (ageText) {
+                const ageMatch = ageText.match(/\d+/);
+                if (ageMatch) {
+                    chronologicalAge = parseInt(ageMatch[0], 10);
+                }
+            }
+        }
+    }
+
+    // Calculate fitness age using available metrics
+    const fitnessAge = calculateFitnessAge(chronologicalAge, bodyFatPercentage, gender, heightCm, weightKg, activityLevel);
     
-    // Calculate training volume response values based on metrics
-    const volumeResponse = calculateTrainingVolumeResponse();
+    // Determine if fitness age is better or worse than chronological age
+    const ageDifference = chronologicalAge - fitnessAge;
     
-    // Calculate overall training volume tolerance score (0-10)
-    const tolerance = calculateTrainingVolumeTolerance(volumeResponse);
-    const toleranceRating = getTrainingVolumeRating(tolerance);
-    const toleranceColor = getTrainingVolumeColor(tolerance);
+    // Choose colors based on whether fitness age is better or worse than chronological
+    let chronologicalColor = 'rgba(103, 120, 136, 0.8)'; // Neutral gray
+    let fitnessColor = ageDifference >= 0 ? 'rgba(16, 185, 129, 0.8)' : 'rgba(239, 68, 68, 0.8)'; // Green if younger, red if older
     
-    // Draw a combination chart to visualize training volume tolerance
+    // Create bar chart comparing chronological age vs fitness age
     new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: ['Low', 'Moderate', 'High', 'Very High'],
+            labels: ['Chronological Age', 'Fitness Age'],
             datasets: [{
-                label: 'Response',
-                data: volumeResponse,
-                backgroundColor: [
-                    'rgba(59, 130, 246, 0.7)',  // blue
-                    'rgba(16, 185, 129, 0.7)',  // green
-                    'rgba(245, 158, 11, 0.7)',  // amber
-                    'rgba(239, 68, 68, 0.7)'    // red
-                ],
+                data: [chronologicalAge, fitnessAge],
+                backgroundColor: [chronologicalColor, fitnessColor],
                 borderWidth: 0,
                 borderRadius: 4
             }]
@@ -121,7 +136,7 @@ function initTrainingVolumeChart() {
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            return `Score: ${context.raw}`;
+                            return `Age: ${Math.round(context.raw)} years`;
                         }
                     }
                 }
@@ -129,50 +144,54 @@ function initTrainingVolumeChart() {
             scales: {
                 x: {
                     grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                    ticks: {
-                        color: '#fff',
-                        font: { size: 10 }
-                    }
+                    ticks: { color: '#fff' }
                 },
                 y: {
-                    beginAtZero: true,
-                    max: 10,
                     grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                    ticks: {
-                        color: '#fff',
-                        stepSize: 2
-                    }
+                    ticks: { color: '#fff' },
+                    suggestedMin: Math.min(fitnessAge, chronologicalAge) * 0.8,
+                    suggestedMax: Math.max(fitnessAge, chronologicalAge) * 1.2
                 }
             }
         },
         plugins: [{
-            id: 'volumeToleranceText',
+            id: 'fitnessAgeText',
             afterDraw: function(chart) {
                 const ctx = chart.ctx;
                 const width = chart.width;
                 const height = chart.height;
                 
-                // Add a semi-transparent overlay with the overall tolerance score
+                // Add a semi-transparent overlay with age difference
                 ctx.save();
                 
                 // Add semi-transparent background
                 ctx.fillStyle = 'rgba(17, 24, 39, 0.7)';
                 ctx.fillRect(width * 0.6, height * 0.05, width * 0.35, height * 0.25);
-                ctx.strokeStyle = toleranceColor;
+                ctx.strokeStyle = ageDifference >= 0 ? '#10b981' : '#ef4444'; // Green if younger, red if older
                 ctx.lineWidth = 2;
                 ctx.strokeRect(width * 0.6, height * 0.05, width * 0.35, height * 0.25);
                 
-                // Add tolerance score text
+                // Add age difference text
                 ctx.fillStyle = '#ffffff';
                 ctx.font = 'bold 16px Arial';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(`${tolerance.toFixed(1)}/10`, width * 0.78, height * 0.15);
                 
-                // Add rating text
-                ctx.fillStyle = toleranceColor;
+                // Show age difference with sign (+ means younger fitness age, - means older)
+                const differenceText = Math.abs(ageDifference) < 1 ? 
+                    'Age Aligned' : 
+                    `${ageDifference >= 0 ? '+' : ''}${Math.round(ageDifference)} years`;
+                ctx.fillText(differenceText, width * 0.78, height * 0.15);
+                
+                // Add status text
                 ctx.font = '12px Arial';
-                ctx.fillText(toleranceRating, width * 0.78, height * 0.23);
+                ctx.fillStyle = ageDifference >= 5 ? '#10b981' : // Much younger
+                               ageDifference >= 0 ? '#3b82f6' : // Slightly younger
+                               ageDifference >= -5 ? '#f59e0b' : // Slightly older
+                               '#ef4444'; // Much older
+                               
+                const statusText = getAgeComparisonStatus(ageDifference);
+                ctx.fillText(statusText, width * 0.78, height * 0.23);
                 
                 ctx.restore();
             }
@@ -180,50 +199,72 @@ function initTrainingVolumeChart() {
     });
 }
 
-// Calculate training volume tolerance based on volume response
-function calculateTrainingVolumeTolerance(volumeResponse) {
-    if (!volumeResponse || volumeResponse.length < 4) {
-        return 5.0; // Default moderate tolerance
+// Calculate estimated fitness age based on available metrics
+function calculateFitnessAge(chronologicalAge, bodyFatPercentage, gender, height, weight, activityLevel) {
+    // Default to chronological age if insufficient data
+    if (!bodyFatPercentage || !gender) {
+        return chronologicalAge;
     }
     
-    // Calculate a weighted score based on the response pattern
-    // Higher values for moderate-to-high = better tolerance
-    const weights = [0.5, 1.5, 1.2, 0.8]; // Weights for: Low, Moderate, High, Very High
-    let totalWeightedScore = 0;
-    let totalWeights = 0;
+    // Activity level multipliers
+    const activityMultipliers = {
+        'sedentary': 1.2,
+        'light': 1.375,
+        'moderate': 1.55,
+        'active': 1.725,
+        'very_active': 1.9
+    };
     
-    for (let i = 0; i < 4; i++) {
-        totalWeightedScore += volumeResponse[i] * weights[i];
-        totalWeights += weights[i];
+    // Get activity multiplier (default to moderate if not specified)
+    const activityMultiplier = activityMultipliers[activityLevel] || activityMultipliers.moderate;
+    
+    // Calculate BMI
+    const heightM = height / 100;
+    const bmi = weight / (heightM * heightM);
+    
+    // Estimate VO2 max using a simplified formula based on body fat and age
+    // This is a simplification of the Jackson formula
+    let estimatedVo2Max;
+    
+    if (gender.toLowerCase() === 'male') {
+        // For males
+        estimatedVo2Max = 56.2 - (0.413 * chronologicalAge) - (0.4 * bodyFatPercentage);
+    } else {
+        // For females
+        estimatedVo2Max = 44.3 - (0.413 * chronologicalAge) - (0.4 * bodyFatPercentage);
     }
     
-    // Scale to 0-10
-    const scaledScore = (totalWeightedScore / totalWeights) * 2;
+    // Apply activity level adjustment to VO2 max
+    estimatedVo2Max *= (0.8 + (activityMultiplier / 5));
     
-    // Apply recovery capacity adjustment if available
-    if (typeof recoveryCapacity !== 'undefined') {
-        return Math.min(10, scaledScore * (0.8 + (recoveryCapacity / 50)));
+    // Calculate fitness age using the simplified formula:
+    // Fitness Age = Real Age - (VO2 max adjustment)
+    // This approximates the Norwegian formula from NTNU research
+    let fitnessAge = 60 - ((estimatedVo2Max - 20) * 0.5);
+    
+    // Apply a BMI correction
+    // Higher BMI tends to correlate with higher fitness age
+    if (bmi > 25) {
+        fitnessAge += (bmi - 25) * 0.5;
+    } else if (bmi < 18.5) {
+        fitnessAge += (18.5 - bmi) * 0.3; // Being underweight can also negatively impact fitness age
     }
     
-    return Math.min(10, scaledScore);
+    // Ensure fitness age doesn't go below 15 or above 100
+    fitnessAge = Math.max(15, Math.min(100, fitnessAge));
+    
+    return fitnessAge;
 }
 
-// Get text rating for training volume tolerance
-function getTrainingVolumeRating(score) {
-    if (score >= 8.5) return "Very High Tolerance";
-    if (score >= 7.0) return "High Tolerance";
-    if (score >= 5.0) return "Moderate Tolerance";
-    if (score >= 3.5) return "Low Tolerance";
-    return "Very Low Tolerance";
-}
-
-// Get color for training volume tolerance
-function getTrainingVolumeColor(score) {
-    if (score >= 8.5) return '#10b981'; // green
-    if (score >= 7.0) return '#3b82f6'; // blue
-    if (score >= 5.0) return '#f59e0b'; // amber
-    if (score >= 3.5) return '#f97316'; // orange
-    return '#ef4444'; // red
+// Get status text based on the age difference
+function getAgeComparisonStatus(ageDifference) {
+    if (ageDifference >= 10) return "Exceptional";
+    if (ageDifference >= 5) return "Excellent";
+    if (ageDifference >= 2) return "Good";
+    if (ageDifference >= -2) return "Average";
+    if (ageDifference >= -5) return "Below Average";
+    if (ageDifference >= -10) return "Poor";
+    return "Concerning";
 }
 
 // Calculate recovery capacity based on available metrics
