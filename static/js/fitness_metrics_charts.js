@@ -1,13 +1,13 @@
 // Advanced Fitness Metrics Charts
-// This script implements the Recovery Capacity and Fitness Age Estimation charts
+// This script implements the Recovery Capacity and Body Composition Estimation charts
 // with dynamic calculations based on user's physical metrics
 
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize recovery capacity chart with calculated values
     initRecoveryCapacityChart();
     
-    // Initialize fitness age estimation chart
-    initFitnessAgeChart();
+    // Initialize body composition estimation chart
+    initBodyCompositionChart();
 });
 
 function initRecoveryCapacityChart() {
@@ -80,173 +80,130 @@ function initRecoveryCapacityChart() {
     });
 }
 
-function initFitnessAgeChart() {
-    const ctx = document.getElementById('fitnessAgeChart').getContext('2d');
+function initBodyCompositionChart() {
+    const ctx = document.getElementById('bodyCompositionChart').getContext('2d');
     if (!ctx) return; // Skip if canvas not found
     
-    // Use global variables set by metrics_data_bridge.js
-    const chronologicalAge = userAge;
+    // Calculate body composition percentages
     // Use bodyFatPercentage from metrics_data_bridge.js
-
-    // Calculate fitness age using available metrics
-    const fitnessAge = calculateFitnessAge(chronologicalAge, bodyFatPercentage, gender, heightCm, weightKg, activityLevel);
+    const fatPercentage = typeof bodyFatPercentage !== 'undefined' ? bodyFatPercentage : 20;
+    const leanMassPercentage = 100 - fatPercentage;
     
-    // Determine if fitness age is better or worse than chronological age
-    const ageDifference = chronologicalAge - fitnessAge;
-    
-    // Choose colors based on whether fitness age is better or worse than chronological
-    let chronologicalColor = 'rgba(103, 120, 136, 0.8)'; // Neutral gray
-    let fitnessColor = ageDifference >= 0 ? 'rgba(16, 185, 129, 0.8)' : 'rgba(239, 68, 68, 0.8)'; // Green if younger, red if older
-    
-    // Create bar chart comparing chronological age vs fitness age
+    // Create body composition donut chart
     new Chart(ctx, {
-        type: 'bar',
+        type: 'doughnut',
         data: {
-            labels: ['Chronological Age', 'Fitness Age'],
+            labels: ['Body Fat', 'Lean Mass'],
             datasets: [{
-                data: [chronologicalAge, fitnessAge],
-                backgroundColor: [chronologicalColor, fitnessColor],
-                borderWidth: 0,
-                borderRadius: 4
+                data: [fatPercentage, leanMassPercentage],
+                backgroundColor: [
+                    '#ef4444', // red for fat
+                    '#10b981'  // green for lean mass
+                ],
+                borderWidth: 1,
+                borderColor: '#1f2937'
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            cutout: '65%',
             plugins: {
-                legend: { display: false },
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: '#fff',
+                        padding: 10,
+                        font: {
+                            size: 12
+                        }
+                    }
+                },
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            return `Age: ${Math.round(context.raw)} years`;
+                            const value = context.raw;
+                            return `${context.label}: ${value.toFixed(1)}%`;
                         }
                     }
-                }
-            },
-            scales: {
-                x: {
-                    grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                    ticks: { color: '#fff' }
-                },
-                y: {
-                    grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                    ticks: { color: '#fff' },
-                    suggestedMin: Math.min(fitnessAge, chronologicalAge) * 0.8,
-                    suggestedMax: Math.max(fitnessAge, chronologicalAge) * 1.2
                 }
             }
         },
         plugins: [{
-            id: 'fitnessAgeText',
+            id: 'bodyCompositionText',
             afterDraw: function(chart) {
-                const ctx = chart.ctx;
                 const width = chart.width;
                 const height = chart.height;
-                
-                // Add a semi-transparent overlay with age difference
-                ctx.save();
-                
-                // Add semi-transparent background
-                ctx.fillStyle = 'rgba(17, 24, 39, 0.7)';
-                ctx.fillRect(width * 0.6, height * 0.05, width * 0.35, height * 0.25);
-                ctx.strokeStyle = ageDifference >= 0 ? '#10b981' : '#ef4444'; // Green if younger, red if older
-                ctx.lineWidth = 2;
-                ctx.strokeRect(width * 0.6, height * 0.05, width * 0.35, height * 0.25);
-                
-                // Add age difference text
-                ctx.fillStyle = '#ffffff';
-                ctx.font = 'bold 16px Arial';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                
-                // Show age difference with sign (+ means younger fitness age, - means older)
-                const differenceText = Math.abs(ageDifference) < 1 ? 
-                    'Age Aligned' : 
-                    `${ageDifference >= 0 ? '+' : ''}${Math.round(ageDifference)} years`;
-                ctx.fillText(differenceText, width * 0.78, height * 0.15);
-                
-                // Add status text
-                ctx.font = '12px Arial';
-                ctx.fillStyle = ageDifference >= 5 ? '#10b981' : // Much younger
-                               ageDifference >= 0 ? '#3b82f6' : // Slightly younger
-                               ageDifference >= -5 ? '#f59e0b' : // Slightly older
-                               '#ef4444'; // Much older
-                               
-                const statusText = getAgeComparisonStatus(ageDifference);
-                ctx.fillText(statusText, width * 0.78, height * 0.23);
+                const ctx = chart.ctx;
                 
                 ctx.restore();
+                ctx.textBaseline = "middle";
+                
+                // Draw fat mass in center
+                const fontSize = (height / 10).toFixed(2);
+                ctx.font = "bold " + fontSize + "px Arial";
+                ctx.fillStyle = '#ef4444';
+                ctx.textAlign = "center";
+                
+                // Fat percentage in center
+                const fatText = `${fatPercentage.toFixed(1)}%`;
+                ctx.fillText(fatText, width / 2, height / 2 - fontSize / 2);
+                
+                // Smaller "Body Fat" text
+                ctx.font = (fontSize * 0.5) + "px Arial";
+                ctx.fillStyle = '#fff';
+                ctx.fillText("Body Fat", width / 2, height / 2 + fontSize);
+                
+                // Get category based on gender and body fat percentage
+                let category = "";
+                let categoryColor = "";
+                
+                if (gender && gender.toLowerCase() === 'male') {
+                    if (fatPercentage < 6) {
+                        category = "Essential Fat";
+                        categoryColor = "#f59e0b"; // amber - too low can be unhealthy
+                    } else if (fatPercentage < 14) {
+                        category = "Athletic";
+                        categoryColor = "#10b981"; // green
+                    } else if (fatPercentage < 18) {
+                        category = "Fitness";
+                        categoryColor = "#3b82f6"; // blue
+                    } else if (fatPercentage < 25) {
+                        category = "Average";
+                        categoryColor = "#f59e0b"; // amber
+                    } else {
+                        category = "Excess";
+                        categoryColor = "#ef4444"; // red
+                    }
+                } else {
+                    // Female or undefined - use female ranges
+                    if (fatPercentage < 14) {
+                        category = "Essential Fat";
+                        categoryColor = "#f59e0b"; // amber - too low can be unhealthy
+                    } else if (fatPercentage < 21) {
+                        category = "Athletic";
+                        categoryColor = "#10b981"; // green
+                    } else if (fatPercentage < 25) {
+                        category = "Fitness";
+                        categoryColor = "#3b82f6"; // blue
+                    } else if (fatPercentage < 32) {
+                        category = "Average";
+                        categoryColor = "#f59e0b"; // amber
+                    } else {
+                        category = "Excess";
+                        categoryColor = "#ef4444"; // red
+                    }
+                }
+                
+                // Add category text
+                ctx.font = (fontSize * 0.6) + "px Arial";
+                ctx.fillStyle = categoryColor;
+                ctx.fillText(category, width / 2, height / 2 + fontSize * 2);
+                
+                ctx.save();
             }
         }]
     });
-}
-
-// Calculate estimated fitness age based on available metrics
-function calculateFitnessAge(chronologicalAge, bodyFatPercentage, gender, height, weight, activityLevel) {
-    // Default to chronological age if insufficient data
-    if (!bodyFatPercentage || !gender) {
-        return chronologicalAge;
-    }
-    
-    // Activity level multipliers
-    const activityMultipliers = {
-        'sedentary': 1.2,
-        'light': 1.375,
-        'moderate': 1.55,
-        'active': 1.725,
-        'very_active': 1.9
-    };
-    
-    // Get activity multiplier (default to moderate if not specified)
-    const activityMultiplier = activityMultipliers[activityLevel] || activityMultipliers.moderate;
-    
-    // Calculate BMI
-    const heightM = height / 100;
-    const bmi = weight / (heightM * heightM);
-    
-    // Estimate VO2 max using a simplified formula based on body fat and age
-    // This is a simplification of the Jackson formula
-    let estimatedVo2Max;
-    
-    if (gender.toLowerCase() === 'male') {
-        // For males
-        estimatedVo2Max = 56.2 - (0.413 * chronologicalAge) - (0.4 * bodyFatPercentage);
-    } else {
-        // For females
-        estimatedVo2Max = 44.3 - (0.413 * chronologicalAge) - (0.4 * bodyFatPercentage);
-    }
-    
-    // Apply activity level adjustment to VO2 max
-    estimatedVo2Max *= (0.8 + (activityMultiplier / 5));
-    
-    // Calculate fitness age using the simplified formula:
-    // Fitness Age = Real Age - (VO2 max adjustment)
-    // This approximates the Norwegian formula from NTNU research
-    let fitnessAge = 60 - ((estimatedVo2Max - 20) * 0.5);
-    
-    // Apply a BMI correction
-    // Higher BMI tends to correlate with higher fitness age
-    if (bmi > 25) {
-        fitnessAge += (bmi - 25) * 0.5;
-    } else if (bmi < 18.5) {
-        fitnessAge += (18.5 - bmi) * 0.3; // Being underweight can also negatively impact fitness age
-    }
-    
-    // Ensure fitness age doesn't go below 15 or above 100
-    fitnessAge = Math.max(15, Math.min(100, fitnessAge));
-    
-    return fitnessAge;
-}
-
-// Get status text based on the age difference
-function getAgeComparisonStatus(ageDifference) {
-    if (ageDifference >= 10) return "Exceptional";
-    if (ageDifference >= 5) return "Excellent";
-    if (ageDifference >= 2) return "Good";
-    if (ageDifference >= -2) return "Average";
-    if (ageDifference >= -5) return "Below Average";
-    if (ageDifference >= -10) return "Poor";
-    return "Concerning";
 }
 
 // Calculate recovery capacity based on available metrics
