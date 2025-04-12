@@ -59,7 +59,7 @@ def calculate_body_composition(weight_kg, height_m, age, sex):
         # Return reasonable defaults if calculation fails
         return 20.0, 80.0
 
-def analyze_body_traits(landmarks=None, original_image=None, height_cm=None, weight_kg=None, gender='male', age=30):
+def analyze_body_traits(landmarks=None, original_image=None, height_cm=None, weight_kg=None, gender='male', age=30, experience=None, is_back_view=False, **kwargs):
     """
     Analyze body traits from image landmarks or measurements.
     This function integrates with the existing code base and calls
@@ -72,6 +72,9 @@ def analyze_body_traits(landmarks=None, original_image=None, height_cm=None, wei
         weight_kg: Weight in kilograms
         gender: 'male' or 'female'
         age: Age in years
+        experience: User's fitness experience level (e.g., 'beginner', 'intermediate', 'advanced')
+        is_back_view: Boolean indicating if the image is a back view
+        **kwargs: Additional keyword arguments for flexibility
         
     Returns:
         dict: Dictionary of body traits and metrics
@@ -79,6 +82,9 @@ def analyze_body_traits(landmarks=None, original_image=None, height_cm=None, wei
     logger.debug(f"Analyzing body traits - height: {height_cm}cm, weight: {weight_kg}kg, gender: {gender}, age: {age}")
     
     try:
+        # Initialize height_m to avoid unbound variable errors
+        height_m = 1.75  # Default height (175 cm)
+        
         # Calculate BMI
         if height_cm and weight_kg:
             height_m = height_cm / 100.0
@@ -88,6 +94,7 @@ def analyze_body_traits(landmarks=None, original_image=None, height_cm=None, wei
             bmi = 22.0  # Default healthy BMI
             
         # Calculate body fat percentage using Navy Method or BMI formula
+            
         try:
             from utils.navy_body_fat import calculate_body_fat_navy_derived
             from utils.bodybuilding_metrics import calculate_body_fat_percentage

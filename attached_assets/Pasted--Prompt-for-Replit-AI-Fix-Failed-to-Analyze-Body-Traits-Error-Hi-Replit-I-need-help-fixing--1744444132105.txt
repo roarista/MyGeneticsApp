@@ -1,0 +1,43 @@
+✅ Prompt for Replit AI: Fix “Failed to Analyze Body Traits” Error
+Hi Replit 👋 — I need help fixing a recurring backend error in my Flask app.
+
+❗Problem Summary:
+After a user uploads their front and back body photos and fills out height, weight, gender, and age, they click the “Analyze My Genetics” button. Instead of going to the results page, they get this error at the top of the homepage:
+
+🔴 “Failed to analyze body traits. Please try again.”
+This used to happen before — and it was caused by a silent crash in the analysis route.
+
+🔍 Please Diagnose:
+Check the /analyze route logic
+Confirm uploaded image files are being received
+Validate all inputs are extracted and converted properly (height, weight, sex, age)
+Ensure image paths or user data aren’t None
+Add print() or logger.debug() to track each step
+Wrap the analysis logic in try/except
+@app.route('/analyze', methods=['POST'])
+def analyze():
+    try:
+        # existing logic
+    except Exception as e:
+        print("❌ Error in /analyze route:", e)
+        return redirect(url_for('home', error="Failed to analyze body traits"))
+Check the image/model handler
+If using a function like analyze_body(image_path), check that it returns all required metrics
+If any expected value (e.g. body_fat, body_type, insertions) is missing or None, the front end may crash or skip rendering
+Fix any file-not-found, KeyError, or TypeError issues from malformed response objects
+Confirm session or response object is being passed correctly
+After analysis, confirm the result is stored in session['analysis_results']
+Avoid stale data or accidental reuse of empty sessions
+💡 Bonus Improvements (Optional):
+Update error display to show specific failure reason (e.g. “No photo detected”, “Unable to calculate metrics”, etc.)
+Add a debug route like /test-analysis to return dummy analysis results for testing chart rendering
+Prevent frontend components from breaking if one value is null
+✅ My Goal:
+Make sure users never get this vague “Failed to analyze” message again. Instead:
+
+Return clear backend logs
+Ensure values are calculated from valid input
+Show results or fallback defaults
+Please walk through the backend logic and fix whatever is silently failing. Let me know what you changed so I can understand the fix.
+
+Thanks! 🙏
