@@ -1,0 +1,47 @@
+🔧 URGENT FIX: Body Composition Estimation Chart – Static Results Must Be Replaced with Dynamic Calculations
+The current body composition chart always displays the same Body Fat % (31.9%) and Lean Mass % (68.1%) regardless of user input — including height, weight, age, sex, or photos. This is incorrect and breaks core functionality.
+🔍 1. Problem:
+The values appear hardcoded or returned from a default constant.
+These values must instead be calculated dynamically and independently for each user.
+✅ 2. What the Chart Should Display:
+🎯 A donut chart with two segments:
+
+Body Fat % (red)
+Lean Mass % (green)
+✅ These values must:
+
+Be calculated uniquely per user
+Change depending on input (weight, height, age, gender) AND photo-based estimates
+Always sum to 100%
+🧮 3. How to Dynamically Calculate Body Fat %
+✅ Preferably use the U.S. Navy formula based on image + text input:
+
+For males:
+
+Body Fat % = 86.010 * log10(waist - neck) - 70.041 * log10(height) + 36.76
+For females:
+
+Body Fat % = 163.205 * log10(waist + hip - neck) - 97.684 * log10(height) - 78.387
+Units: all in centimeters
+Waist, hip, and neck should be extracted from the body photo using pixel-to-cm conversion with the user’s height.
+Use AI landmarks (e.g. OpenPose or Mediapipe) to detect anatomical points for these measurements.
+🛠 4. Fallback if Image Landmarking Fails (BMI-Based Formula):
+If you can't extract accurate body measurements from the image, fall back to:
+For all users:
+
+BMI = weight (kg) / (height (m))²
+Body Fat % = (1.20 × BMI) + (0.23 × age) − (10.8 × sex) − 5.4
+Where sex = 1 for males, 0 for females
+Then:
+Lean Mass % = 100 - Body Fat %
+🚫 5. Remove Incorrect Display Code:
+Delete any hardcoded values (e.g., "Body Fat %: 31.9")
+Delete the debug panel below the chart
+Don’t display debug info unless in dev-only mode
+🧪 6. Final QA Requirements:
+Please verify that:
+Changing height, weight, age, or sex alters the body fat estimate
+Changing the uploaded body photo affects the result if landmarks are in use
+Values are unique across users
+Output values are plausible and sum to 100%
+✅ This is critical for delivering accurate fitness analytics to users. Please implement this logic and replace all static estimates immediately. Let us know once dynamic results are confirmed across multiple test users.

@@ -1,0 +1,65 @@
+🐞 Replit AI Debug Task: Dynamic Body Composition Still Not Working
+ISSUE:
+After implementing dynamic body composition logic, the values (body_fat, lean_mass) still do not update — they remain fixed (e.g., 31.9%, 68.1%) for every user.
+
+🔍 Debug Objectives
+Please trace the entire data flow step-by-step and verify these critical checkpoints:
+
+✅ STEP 1 — HTML Form
+File: templates/analysis.html
+
+Ensure form includes all fields: weight, height, age, sex
+Ensure the form uses method="post" and action points to url_for('analyze')
+Confirm fields are named correctly so Flask can access them:
+<input type="number" name="weight" ...>
+<input type="number" name="height" ...>
+<input type="number" name="age" ...>
+<select name="sex">...</select>
+✅ STEP 2 — Flask Route /analyze
+File: app.py
+
+Verify request.form.get(...) successfully retrieves all values
+Add a print() or logger.debug() to confirm parsed values
+Confirm calculate_body_composition() is being called with those exact values
+Confirm session['analysis_results'] is being correctly updated
+Confirm redirect(url_for('results')) is actually working
+print("Parsed:", weight, height, age, sex)
+print("Calculated:", body_fat, lean_mass)
+print("Session Data:", session.get('analysis_results'))
+✅ STEP 3 — Flask Route /results
+File: app.py
+
+Confirm route reads from session['analysis_results']
+Confirm it passes body_fat and lean_mass into the template context
+✅ STEP 4 — Template Rendering
+File: templates/results.html
+
+Confirm you are rendering:
+{{ analysis_results.body_fat }}
+{{ analysis_results.lean_mass }}
+Check that the JS donut chart uses these values
+Add temporary debug print in HTML:
+<p>Body Fat: {{ analysis_results.body_fat }}%</p>
+<p>Lean Mass: {{ analysis_results.lean_mass }}%</p>
+Also log in JS:
+console.log("Body Composition:", bodyComposition);
+✅ STEP 5 — Prevent Cache Issues
+Ensure:
+
+Flask is sending Cache-Control: no-store headers
+JS charts are destroyed and re-created
+No JS file or page is pulling from an outdated variable or stale state
+✅ STEP 6 — Manual Test
+In a temporary route:
+
+@app.route('/test-calculation')
+def test_calculation():
+    result = calculate_body_composition(70, 1.75, 30, 1)
+    return jsonify({'body_fat': result[0], 'lean_mass': result[1]})
+Confirm expected output via direct access.
+
+🧠 Replit AI — Please:
+Run this full trace step-by-step
+Add debug logging to confirm values are flowing correctly
+Identify exactly where values are being lost or ignored
+Fix the issue and ensure new user inputs change the analysis results dynamically

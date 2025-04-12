@@ -1,4 +1,8 @@
 from app import app, db
+from utils.test_routes import test_routes
+
+# Register test routes for debugging
+app.register_blueprint(test_routes)
 
 # Create all database tables
 with app.app_context():

@@ -1,0 +1,50 @@
+✅ 🔧 Replit Prompt: Fix Static Body Composition Estimation (Final Implementation)
+🚨 Critical Issue: The Body Composition Estimation chart still shows static values for all users, regardless of their unique data (height, weight, gender, age, photos).
+We need to fully implement dynamic, per-user body composition analysis using the inputs and image analysis system already available in the app.
+📌 Step-by-Step Implementation Instructions
+1. Collect and Use User Inputs
+
+Make sure the following fields are being used as actual variables:
+
+Height (cm)
+Weight (kg)
+Age (years)
+Gender (male/female)
+2. Estimate Body Measurements from Image
+
+Extract waist width, neck width, and hip width from the front-facing photo using your body landmark model.
+Use height to convert pixel ratios to real cm.
+3. Calculate Body Fat % Using U.S. Navy Method
+
+For Males:
+BodyFatPercent = 86.010 * log10(waist - neck) - 70.041 * log10(height) + 36.76
+For Females:
+BodyFatPercent = 163.205 * log10(waist + hip - neck) - 97.684 * log10(height) - 78.387
+Units: All in centimeters.
+Use math.log10() if using Python, or Math.log10() in JS.
+4. Fallback Calculation (if image estimation fails)
+
+BMI = weight / (height/100)**2
+BodyFatPercent = (1.20 * BMI) + (0.23 * age) - (10.8 * sex) - 5.4
+Where sex = 1 for males, 0 for females
+5. Calculate Lean Mass %
+
+LeanMassPercent = 100 - BodyFatPercent
+🎯 6. Render These Values in the Chart
+Show a donut chart with two segments:
+Red: Body Fat %
+Green: Lean Mass %
+Make sure the values are actually passed to the component dynamically, like:
+data = {
+  labels: ['Body Fat', 'Lean Mass'],
+  values: [bodyFat, 100 - bodyFat]
+}
+🧹 7. Cleanup
+❌ Remove any debug text, static fallback values, or hardcoded placeholders
+✅ Ensure values update in real-time for each user with different inputs and photos
+🧪 8. Test Cases to Verify
+Create three fake users:
+User 1: 5'6", 120 lbs, female → should show higher body fat
+User 2: 6'2", 190 lbs, male → should show moderate body fat
+User 3: 5'9", 160 lbs, male, lean → should show low body fat
+Confirm chart displays different results per user

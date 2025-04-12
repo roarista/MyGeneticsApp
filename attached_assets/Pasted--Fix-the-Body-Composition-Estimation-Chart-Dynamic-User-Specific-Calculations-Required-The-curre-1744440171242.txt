@@ -1,0 +1,46 @@
+🔧 Fix the Body Composition Estimation Chart – Dynamic User-Specific Calculations Required
+The current chart displays static values (e.g., Body Fat %: 31.9, Lean Mass %: 68.1) across all users, which is incorrect. It must instead compute unique values per user based on uploaded photos and input data.
+Please do the following:
+✅ 1. Make Body Composition Dynamic and Personalized
+Replace any static or hardcoded values. The body fat % and lean mass % must be dynamically calculated using:
+a. User Input Data (already collected):
+
+Height (in cm)
+Weight (in kg)
+Sex (male/female)
+Age (in years)
+b. Image Analysis Data (from uploaded body images):
+
+Estimate waist circumference from the front-view photo using shoulder/waist pixel ratios
+If available, estimate neck and hip width for better accuracy
+Use the person’s height to convert pixels to cm where necessary
+🧠 2. Calculate Body Fat % Using U.S. Navy Method
+For males:
+Body Fat % = 86.010 * log10(waist - neck) - 70.041 * log10(height) + 36.76
+For females:
+Body Fat % = 163.205 * log10(waist + hip - neck) - 97.684 * log10(height) - 78.387
+Notes:
+All measurements should be in centimeters.
+If you cannot reliably extract neck or hip from the image, use the BMI-based fallback below.
+🧮 3. Fallback Formula (If Image Extraction Fails)
+If the image analysis cannot return reliable waist or hip values, then:
+BMI = weight (kg) / (height (m))²
+Body Fat % = (1.20 × BMI) + (0.23 × age) − (10.8 × sex) − 5.4
+sex = 1 for males, 0 for females
+After body fat % is calculated, compute:
+Lean Mass % = 100 - Body Fat %
+📊 4. Fix the Visualization
+Remove the debug panel and raw calculation output from the card (currently displayed as “Raw Debug Data:…”)
+Retain only the donut/pie chart showing:
+One red segment for Body Fat %
+One green segment for Lean Mass %
+Ensure both values add up to 100%
+🧪 5. Test With Different User Inputs
+Confirm that changing the user’s:
+Height
+Weight
+Age
+Sex
+Body images
+… results in visibly different Body Fat % and Lean Mass % values on the chart.
+This is critical for our Body Analysis Results page. The values must be visually accurate, vary by user, and reflect their personal physique using real calculations — not defaults.

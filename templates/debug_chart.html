@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Body Composition Chart</title>
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: #0d1117;
+            color: #c9d1d9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .card {
+            background-color: #161b22;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .chart-container {
+            height: 300px;
+            width: 300px;
+            margin: 0 auto;
+        }
+        .debug-info {
+            background-color: #21262d;
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 20px;
+            font-family: monospace;
+            white-space: pre;
+        }
+        h1, h2, h3 {
+            color: #58a6ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Body Composition Debug Chart</h1>
+        <p>This page displays a test chart to debug body composition calculations.</p>
+        
+        <div class="card">
+            <h2>Body Composition Chart</h2>
+            <div class="chart-container">
+                <canvas id="bodyCompChart"></canvas>
+            </div>
+            
+            <div class="debug-info">
+                <h3>Raw Values:</h3>
+                <p>Body Fat: {{ body_fat }}%</p>
+                <p>Lean Mass: {{ lean_mass }}%</p>
+                <p>Sum: {{ body_fat + lean_mass }}%</p>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>Test Controls</h2>
+            <form action="/test-calculation" target="_blank">
+                <div class="row mb-3">
+                    <div class="col">
+                        <label for="height" class="form-label">Height (cm)</label>
+                        <input type="number" class="form-control" id="height" name="height" value="175" min="140" max="220">
+                    </div>
+                    <div class="col">
+                        <label for="weight" class="form-label">Weight (kg)</label>
+                        <input type="number" class="form-control" id="weight" name="weight" value="70" min="40" max="150">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col">
+                        <label for="age" class="form-label">Age</label>
+                        <input type="number" class="form-control" id="age" name="age" value="30" min="18" max="90">
+                    </div>
+                    <div class="col">
+                        <label for="gender" class="form-label">Gender</label>
+                        <select class="form-select" id="gender" name="gender">
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col">
+                        <label for="waist" class="form-label">Waist (cm)</label>
+                        <input type="number" class="form-control" id="waist" name="waist" value="80" min="60" max="150">
+                    </div>
+                    <div class="col">
+                        <label for="neck" class="form-label">Neck (cm)</label>
+                        <input type="number" class="form-control" id="neck" name="neck" value="38" min="20" max="60">
+                    </div>
+                    <div class="col">
+                        <label for="hip" class="form-label">Hip (cm) - Females only</label>
+                        <input type="number" class="form-control" id="hip" name="hip" value="90" min="60" max="150">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Test Calculation</button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const bodyFat = {{ body_fat }};
+        const leanMass = {{ lean_mass }};
+        
+        console.log('Chart data:', { bodyFat, leanMass });
+        
+        const ctx = document.getElementById('bodyCompChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Body Fat %', 'Lean Mass %'],
+                datasets: [{
+                    data: [bodyFat, leanMass],
+                    backgroundColor: ['#ef4444', '#10b981'], // red, green
+                    borderWidth: 1,
+                    borderColor: '#1f2937'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '65%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#fff',
+                            padding: 10,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.label}: ${context.raw.toFixed(1)}%`;
+                            }
+                        }
+                    }
+                }
+            },
+            plugins: [{
+                id: 'bodyCompositionText',
+                afterDraw: function(chart) {
+                    const width = chart.width;
+                    const height = chart.height;
+                    const ctx = chart.ctx;
+                    
+                    ctx.restore();
+                    ctx.textBaseline = "middle";
+                    
+                    // Draw fat mass in center
+                    const fontSize = (height / 10).toFixed(2);
+                    ctx.font = "bold " + fontSize + "px Arial";
+                    ctx.fillStyle = '#ef4444';
+                    ctx.textAlign = "center";
+                    
+                    // Fat percentage in center - ensure number formatting
+                    const fatText = `${bodyFat.toFixed(1)}%`;
+                    ctx.fillText(fatText, width / 2, height / 2 - fontSize / 2);
+                    
+                    // Smaller "Body Fat" text
+                    ctx.font = (fontSize * 0.5) + "px Arial";
+                    ctx.fillStyle = '#fff';
+                    ctx.fillText("Body Fat", width / 2, height / 2 + fontSize);
+                    
+                    ctx.save();
+                }
+            }]
+        });
+    });
+    </script>
+</body>
+</html>

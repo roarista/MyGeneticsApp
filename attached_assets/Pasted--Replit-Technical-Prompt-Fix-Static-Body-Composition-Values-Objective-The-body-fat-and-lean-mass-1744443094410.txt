@@ -1,0 +1,147 @@
+🛠 Replit Technical Prompt: Fix Static Body Composition Values
+Objective:
+The body_fat and lean_mass values must be dynamically calculated and updated per user input. Current implementation shows static values. Implement the following changes to fix this.
+
+🔧 Update utils/body_analysis.py:
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+def calculate_body_composition(weight_kg, height_m, age, sex):
+    logger.debug(f"Input values - weight: {weight_kg}kg, height: {height_m}m, age: {age}, sex: {sex}")
+    
+    try:
+        if not all(isinstance(x, (int, float)) for x in [weight_kg, height_m, age]):
+            raise ValueError("Invalid input types")
+        if not 30 <= weight_kg <= 300:
+            raise ValueError(f"Weight {weight_kg} out of valid range")
+        if not 1.0 <= height_m <= 2.5:
+            raise ValueError(f"Height {height_m} out of valid range")
+        if not 18 <= age <= 100:
+            raise ValueError(f"Age {age} out of valid range")
+        if sex not in [0, 1]:
+            raise ValueError(f"Invalid sex value: {sex}")
+
+        bmi = weight_kg / (height_m ** 2)
+        logger.debug(f"Calculated BMI: {bmi}")
+        
+        body_fat = (1.20 * bmi) + (0.23 * age) - (10.8 * sex) - 5.4
+        logger.debug(f"Initial body fat calculation: {body_fat}%")
+        
+        body_fat = max(5, min(50, body_fat))
+        lean_mass = 100 - body_fat
+        
+        logger.debug(f"Final results - Body Fat: {body_fat}%, Lean Mass: {lean_mass}%")
+        return round(body_fat, 1), round(lean_mass, 1)
+        
+    except Exception as e:
+        logger.error(f"Error in body composition calculation: {str(e)}")
+        raise
+🔧 Update app.py:
+from flask import Flask, request, render_template, redirect, url_for, session, jsonify
+import logging, time
+from utils.body_analysis import calculate_body_composition
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+app = Flask(__name__)
+app.secret_key = 'your-secret-key-here'
+
+@app.after_request
+def add_header(response):
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '-1'
+    return response
+
+@app.route('/analyze', methods=['POST'])
+def analyze():
+    try:
+        logger.debug(f"Form data received: {request.form}")
+        weight = float(request.form.get('weight', 0))
+        height = float(request.form.get('height', 0)) / 100
+        age = int(request.form.get('age', 0))
+        sex = 1 if request.form.get('sex', '').lower() == 'male' else 0
+        logger.debug(f"Parsed values - weight: {weight}, height: {height}, age: {age}, sex: {sex}")
+
+        body_fat, lean_mass = calculate_body_composition(weight, height, age, sex)
+        logger.debug(f"Calculation results - Body Fat: {body_fat}%, Lean Mass: {lean_mass}%")
+
+        session.pop('analysis_results', None)
+        session['analysis_results'] = {
+            'body_fat': body_fat,
+            'lean_mass': lean_mass,
+            'timestamp': time.time()
+        }
+        logger.debug(f"Stored in session: {session['analysis_results']}")
+
+        return redirect(url_for('results'))
+
+    except Exception as e:
+        logger.error(f"Error in analyze route: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/results')
+def results():
+    analysis_results = session.get('analysis_results')
+    logger.debug(f"Retrieved from session: {analysis_results}")
+    if not analysis_results:
+        return redirect(url_for('index'))
+    return render_template(
+        'results.html',
+        analysis_results=analysis_results,
+        body_fat=analysis_results['body_fat'],
+        lean_mass=analysis_results['lean_mass']
+    )
+🔧 Update templates/results.html:
+<!-- Debug Output -->
+<div class="debug-panel" style="background: #f5f5f5; padding: 10px;">
+  <h4>Debug:</h4>
+  <pre>
+Body Fat: {{ analysis_results.body_fat }}%
+Lean Mass: {{ analysis_results.lean_mass }}%
+Timestamp: {{ analysis_results.timestamp }}
+  </pre>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const bodyComposition = {
+        bodyFat: {{ analysis_results.body_fat|float }},
+        leanMass: {{ analysis_results.lean_mass|float }}
+    };
+    console.log('Chart data:', bodyComposition);
+
+    const data = {
+        labels: ['Body Fat %', 'Lean Mass %'],
+        datasets: [{
+            data: [bodyComposition.bodyFat, bodyComposition.leanMass],
+            backgroundColor: ['#FF6B6B', '#4ECDC4']
+        }]
+    };
+
+    if (window.compositionChart) {
+        window.compositionChart.destroy();
+    }
+
+    const ctx = document.getElementById('compositionChart').getContext('2d');
+    window.compositionChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: data,
+        options: {
+            responsive: true,
+            animation: {
+                animateRotate: true,
+                animateScale: true
+            }
+        }
+    });
+});
+</script>
+✅ Expected Outcome:
+Dynamic user inputs (weight, height, age, sex) will now update the body composition output.
+Session data will be refreshed with every new analysis.
+Chart and template will reflect updated values and avoid stale or cached results.
+🧠 Replit AI: Please implement the above code changes in the appropriate files. Once complete, test with multiple user inputs and verify different results are shown for different inputs. Let me know if session values or chart updates still fail to reflect input changes.
