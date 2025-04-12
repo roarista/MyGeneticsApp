@@ -47,7 +47,9 @@
                             </div>
                             <div>
                                 <p class="text-2xl font-bold text-white">
-                                    {% if bodybuilding_analysis %}
+                                    {% if enhanced_measurements and enhanced_measurements.get('body_fat_percentage') %}
+                                        {{ '{:.1f}'.format(enhanced_measurements.get('body_fat_percentage')) }}%
+                                    {% elif bodybuilding_analysis %}
                                         {% if bodybuilding_analysis.body_fat_percentage is defined %}
                                             {{ '{:.1f}'.format(bodybuilding_analysis.body_fat_percentage) }}%
                                         {% elif bodybuilding_analysis.get('body_fat_percentage') %}
@@ -567,10 +569,150 @@
                     </div>
                 </div>
                 {% else %}
-                <div class="flex flex-col items-center justify-center py-12 bg-gray-800 rounded-lg">
-                    <i class="fas fa-ruler-combined text-gray-600 text-5xl mb-4"></i>
-                    <p class="text-gray-400">No measurement data available</p>
-                    <p class="text-sm text-gray-500 mt-2">Please ensure photos are clear and well-lit</p>
+                <!-- Muscle Development Chart -->
+                <div class="p-6 bg-gray-800 rounded-lg shadow">
+                    <h3 class="text-lg font-semibold text-white mb-4">Muscle Development Summary</h3>
+                    
+                    <!-- Horizontal Bar Chart -->
+                    <div class="space-y-4">
+                        <!-- Arms Development -->
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-white">Arms Development</span>
+                                {% if enhanced_measurements.get('left_bicep_circumference_cm') and enhanced_measurements.get('right_bicep_circumference_cm') %}
+                                    {% set left_arm = enhanced_measurements.get('left_bicep_circumference_cm', 0)|float %}
+                                    {% set right_arm = enhanced_measurements.get('right_bicep_circumference_cm', 0)|float %}
+                                    {% set avg_arm = (left_arm + right_arm) / 2 %}
+                                    {% set score = (avg_arm / 40) * 100 %}
+                                    <span class="text-white">{{ '{:.1f}'.format(avg_arm) }} cm</span>
+                                {% else %}
+                                    {% set score = 0 %}
+                                    <span class="text-gray-500">N/A</span>
+                                {% endif %}
+                            </div>
+                            <div class="w-full bg-gray-700 rounded-full h-4">
+                                <div class="bg-blue-500 h-4 rounded-full" style="width: {{ min(max(score, 10), 100) }}%"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Chest Development -->
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-white">Chest Development</span>
+                                {% if enhanced_measurements.get('chest_circumference_cm') or basic_measurements.get('Chest') %}
+                                    {% set chest = enhanced_measurements.get('chest_circumference_cm', basic_measurements.get('Chest', {'value': 0}).value)|float %}
+                                    {% set score = (chest / 120) * 100 %}
+                                    <span class="text-white">{{ '{:.1f}'.format(chest) }} cm</span>
+                                {% else %}
+                                    {% set score = 0 %}
+                                    <span class="text-gray-500">N/A</span>
+                                {% endif %}
+                            </div>
+                            <div class="w-full bg-gray-700 rounded-full h-4">
+                                <div class="bg-green-500 h-4 rounded-full" style="width: {{ min(max(score, 10), 100) }}%"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Shoulder Development -->
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-white">Shoulder Development</span>
+                                {% if enhanced_measurements.get('shoulder_width_cm') or basic_measurements.get('Shoulders') %}
+                                    {% set shoulders = enhanced_measurements.get('shoulder_width_cm', basic_measurements.get('Shoulders', {'value': 0}).value)|float %}
+                                    {% set score = (shoulders / 60) * 100 %}
+                                    <span class="text-white">{{ '{:.1f}'.format(shoulders) }} cm</span>
+                                {% else %}
+                                    {% set score = 0 %}
+                                    <span class="text-gray-500">N/A</span>
+                                {% endif %}
+                            </div>
+                            <div class="w-full bg-gray-700 rounded-full h-4">
+                                <div class="bg-indigo-500 h-4 rounded-full" style="width: {{ min(max(score, 10), 100) }}%"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Back Development -->
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-white">Back Development</span>
+                                {% if enhanced_measurements.get('back_width_cm') or enhanced_measurements.get('lat_spread_cm') %}
+                                    {% set back_width = enhanced_measurements.get('back_width_cm', enhanced_measurements.get('lat_spread_cm', 0))|float %}
+                                    {% set score = (back_width / 60) * 100 %}
+                                    <span class="text-white">{{ '{:.1f}'.format(back_width) }} cm</span>
+                                {% else %}
+                                    {% set score = 0 %}
+                                    <span class="text-gray-500">N/A</span>
+                                {% endif %}
+                            </div>
+                            <div class="w-full bg-gray-700 rounded-full h-4">
+                                <div class="bg-blue-500 h-4 rounded-full" style="width: {{ min(max(score, 10), 100) }}%"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Leg Development -->
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-white">Leg Development</span>
+                                {% if enhanced_measurements.get('left_thigh_circumference_cm') and enhanced_measurements.get('right_thigh_circumference_cm') %}
+                                    {% set left_thigh = enhanced_measurements.get('left_thigh_circumference_cm', 0)|float %}
+                                    {% set right_thigh = enhanced_measurements.get('right_thigh_circumference_cm', 0)|float %}
+                                    {% set avg_thigh = (left_thigh + right_thigh) / 2 %}
+                                    {% set score = (avg_thigh / 60) * 100 %}
+                                    <span class="text-white">{{ '{:.1f}'.format(avg_thigh) }} cm</span>
+                                {% else %}
+                                    {% set score = 0 %}
+                                    <span class="text-gray-500">N/A</span>
+                                {% endif %}
+                            </div>
+                            <div class="w-full bg-gray-700 rounded-full h-4">
+                                <div class="bg-yellow-500 h-4 rounded-full" style="width: {{ min(max(score, 10), 100) }}%"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Core Development -->
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-white">Core Development</span>
+                                {% if enhanced_measurements.get('waist_circumference_cm') %}
+                                    {% set waist = enhanced_measurements.get('waist_circumference_cm')|float %}
+                                    {% set score = (80 / waist) * 100 %}
+                                    <span class="text-white">{{ '{:.1f}'.format(waist) }} cm</span>
+                                {% else %}
+                                    {% set score = 0 %}
+                                    <span class="text-gray-500">N/A</span>
+                                {% endif %}
+                            </div>
+                            <div class="w-full bg-gray-700 rounded-full h-4">
+                                <div class="bg-red-500 h-4 rounded-full" style="width: {{ min(max(score, 10), 100) }}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Chart Legend -->
+                    <div class="mt-4 flex flex-wrap justify-center gap-4 text-sm">
+                        <div class="flex items-center">
+                            <span class="w-3 h-3 rounded-full bg-blue-500 inline-block mr-1"></span>
+                            <span class="text-gray-300">Arms & Back</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="w-3 h-3 rounded-full bg-green-500 inline-block mr-1"></span>
+                            <span class="text-gray-300">Chest</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="w-3 h-3 rounded-full bg-indigo-500 inline-block mr-1"></span>
+                            <span class="text-gray-300">Shoulders</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="w-3 h-3 rounded-full bg-yellow-500 inline-block mr-1"></span>
+                            <span class="text-gray-300">Legs</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="w-3 h-3 rounded-full bg-red-500 inline-block mr-1"></span>
+                            <span class="text-gray-300">Core</span>
+                        </div>
+                    </div>
+                    
+                    <p class="text-sm text-gray-400 mt-4 text-center">Based on your body measurements with adjustments for standard proportions</p>
                 </div>
                 {% endif %}
             </div>
