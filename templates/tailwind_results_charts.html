@@ -1377,10 +1377,9 @@
             </div>
         </div>
         
-        <!-- Bottom row with Metabolic Efficiency Score -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-            <!-- Metabolic Efficiency Score -->
-            <div class="bg-gray-800 p-4 rounded-lg">
+        <!-- Metabolic Efficiency Score -->
+        <div class="grid grid-cols-1 gap-6 mt-6">
+            <div class="bg-gray-800 p-4 rounded-lg md:col-span-1">
                 <h3 class="text-lg font-medium text-white mb-3 text-center">Metabolic Efficiency Score</h3>
                 <div class="chart-container" style="position: relative; height: 200px;">
                     <canvas id="metabolicScoreChart"></canvas>
@@ -1388,11 +1387,17 @@
                 <div class="text-xs text-gray-400 mt-2 text-center">
                     <p>A higher score indicates a more favorable balance of fat-to-lean mass</p>
                 </div>
-            </div>
-            
-            <!-- Empty space or future chart -->
-            <div class="bg-gray-800 p-4 rounded-lg hidden md:block">
-                <!-- Placeholder for future content -->
+                
+                <!-- Debug info to see what data is available -->
+                <div class="text-xs text-gray-500 mt-2 text-center">
+                    {% if bodybuilding_analysis %}
+                        <p>BF: {{ bodybuilding_analysis.get('body_fat_percentage', 'N/A') }}</p>
+                        <p>BF2: {{ bodybuilding_analysis.get('body_composition', {}).get('body_fat_percentage', 'N/A') }}</p>
+                        <p>LBM: {{ bodybuilding_analysis.get('lean_body_mass_kg', 'N/A') }}</p>
+                        <p>FFMI: {{ bodybuilding_analysis.get('ffmi', 'N/A') }}</p>
+                        <p>Waist: {{ enhanced_measurements.get('waist_circumference_cm', 'N/A') }}</p>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
