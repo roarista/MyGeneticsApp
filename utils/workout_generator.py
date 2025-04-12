@@ -279,6 +279,7 @@ def generate_exercises_for_day(day_plan, categorized_muscles):
     """
     Generate specific exercises for each muscle group in a day's workout.
     Adjust volume (sets, reps) based on the muscle's development level.
+    Enforce a hard limit of 8 exercises per day.
     """
     if day_plan["focus"] == "Rest":
         return {
@@ -287,7 +288,13 @@ def generate_exercises_for_day(day_plan, categorized_muscles):
             "notes": "Active recovery, stretching, and light cardio recommended."
         }
     
-    exercises = []
+    # First pass: Generate all potential exercises with priority info
+    all_potential_exercises = []
+    
+    # Track muscle counts to ensure proper distribution
+    muscle_counts = {}
+    for muscle in day_plan["muscle_groups"]:
+        muscle_counts[muscle] = 0
     
     # Determine exercise count per muscle based on priority
     for muscle in day_plan["muscle_groups"]:
@@ -305,7 +312,7 @@ def generate_exercises_for_day(day_plan, categorized_muscles):
                 development_level = level
                 break
         
-        # Determine number of exercises based on priority
+        # Determine number of exercises based on priority (initial allocation)
         if development_level == "Needs Growth":
             exercise_count = 3
         elif development_level == "Average":
@@ -332,23 +339,62 @@ def generate_exercises_for_day(day_plan, categorized_muscles):
             else:
                 muscle_exercises = available_exercises
         
-        # Add exercises to the day's plan
+        # Add exercises to the potential list
         for exercise in muscle_exercises:
-            exercises.append({
+            # Assign priority scores for sorting later
+            # Lower score = higher priority for inclusion
+            priority_score = 0
+            if development_level == "Needs Growth":
+                priority_score = 0  # Highest priority
+            elif development_level == "Average":
+                priority_score = 10
+            else:  # Well Developed
+                priority_score = 20
+            
+            # Add order within muscle group to maintain distribution
+            muscle_counts[muscle] += 1
+            priority_score += muscle_counts[muscle]
+            
+            all_potential_exercises.append({
                 "name": exercise,
                 "muscle": muscle,
                 "sets": scheme["sets"],
                 "reps": scheme["reps"],
                 "rest": scheme["rest"],
-                "priority": development_level
+                "priority": development_level,
+                "priority_score": priority_score
             })
+    
+    # Sort exercises by priority (lowest score = highest priority)
+    all_potential_exercises.sort(key=lambda x: x["priority_score"])
+    
+    # Cap at maximum 8 exercises total
+    MAX_EXERCISES = 8
+    final_exercises = all_potential_exercises[:MAX_EXERCISES]
+    
+    # Ensure at least one exercise per muscle group if possible (only if we have space)
+    if len(final_exercises) < MAX_EXERCISES:
+        # Find which muscle groups don't have any exercise yet
+        represented_muscles = {ex["muscle"] for ex in final_exercises}
+        missing_muscles = [m for m in day_plan["muscle_groups"] if m not in represented_muscles]
+        
+        # Add one exercise for each missing muscle group if possible
+        for muscle in missing_muscles:
+            if len(final_exercises) >= MAX_EXERCISES:
+                break  # Stop if we've reached the max
+                
+            # Find an exercise for this muscle
+            for ex in all_potential_exercises:
+                if ex["muscle"] == muscle and ex not in final_exercises:
+                    final_exercises.append(ex)
+                    break
     
     # Create the complete day workout
     workout = {
         "focus": day_plan["focus"],
-        "exercises": exercises,
-        "notes": f"Focus on {'the weakest ' if exercises else ''}muscle groups: " + 
-                 ", ".join([e["muscle"] for e in exercises if e["priority"] == "Needs Growth"])
+        "exercises": final_exercises,
+        "notes": f"Focus on {'the weakest ' if final_exercises else ''}muscle groups: " + 
+                 ", ".join(set([e["muscle"] for e in final_exercises if e["priority"] == "Needs Growth"]))
     }
     
     return workout
