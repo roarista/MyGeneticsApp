@@ -84,9 +84,18 @@ function initTrainingVolumeChart() {
     const ctx = document.getElementById('trainingVolumeChart').getContext('2d');
     if (!ctx) return; // Skip if canvas not found
     
+    // Calculate recovery capacity score first (needed for training volume)
+    const recoveryScore = calculateRecoveryCapacity();
+    
     // Calculate training volume response values based on metrics
     const volumeResponse = calculateTrainingVolumeResponse();
     
+    // Calculate overall training volume tolerance score (0-10)
+    const tolerance = calculateTrainingVolumeTolerance(volumeResponse);
+    const toleranceRating = getTrainingVolumeRating(tolerance);
+    const toleranceColor = getTrainingVolumeColor(tolerance);
+    
+    // Draw a combination chart to visualize training volume tolerance
     new Chart(ctx, {
         type: 'bar',
         data: {
@@ -108,7 +117,14 @@ function initTrainingVolumeChart() {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { display: false }
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `Score: ${context.raw}`;
+                        }
+                    }
+                }
             },
             scales: {
                 x: {
@@ -128,8 +144,86 @@ function initTrainingVolumeChart() {
                     }
                 }
             }
-        }
+        },
+        plugins: [{
+            id: 'volumeToleranceText',
+            afterDraw: function(chart) {
+                const ctx = chart.ctx;
+                const width = chart.width;
+                const height = chart.height;
+                
+                // Add a semi-transparent overlay with the overall tolerance score
+                ctx.save();
+                
+                // Add semi-transparent background
+                ctx.fillStyle = 'rgba(17, 24, 39, 0.7)';
+                ctx.fillRect(width * 0.6, height * 0.05, width * 0.35, height * 0.25);
+                ctx.strokeStyle = toleranceColor;
+                ctx.lineWidth = 2;
+                ctx.strokeRect(width * 0.6, height * 0.05, width * 0.35, height * 0.25);
+                
+                // Add tolerance score text
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 16px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(`${tolerance.toFixed(1)}/10`, width * 0.78, height * 0.15);
+                
+                // Add rating text
+                ctx.fillStyle = toleranceColor;
+                ctx.font = '12px Arial';
+                ctx.fillText(toleranceRating, width * 0.78, height * 0.23);
+                
+                ctx.restore();
+            }
+        }]
     });
+}
+
+// Calculate training volume tolerance based on volume response
+function calculateTrainingVolumeTolerance(volumeResponse) {
+    if (!volumeResponse || volumeResponse.length < 4) {
+        return 5.0; // Default moderate tolerance
+    }
+    
+    // Calculate a weighted score based on the response pattern
+    // Higher values for moderate-to-high = better tolerance
+    const weights = [0.5, 1.5, 1.2, 0.8]; // Weights for: Low, Moderate, High, Very High
+    let totalWeightedScore = 0;
+    let totalWeights = 0;
+    
+    for (let i = 0; i < 4; i++) {
+        totalWeightedScore += volumeResponse[i] * weights[i];
+        totalWeights += weights[i];
+    }
+    
+    // Scale to 0-10
+    const scaledScore = (totalWeightedScore / totalWeights) * 2;
+    
+    // Apply recovery capacity adjustment if available
+    if (typeof recoveryCapacity !== 'undefined') {
+        return Math.min(10, scaledScore * (0.8 + (recoveryCapacity / 50)));
+    }
+    
+    return Math.min(10, scaledScore);
+}
+
+// Get text rating for training volume tolerance
+function getTrainingVolumeRating(score) {
+    if (score >= 8.5) return "Very High Tolerance";
+    if (score >= 7.0) return "High Tolerance";
+    if (score >= 5.0) return "Moderate Tolerance";
+    if (score >= 3.5) return "Low Tolerance";
+    return "Very Low Tolerance";
+}
+
+// Get color for training volume tolerance
+function getTrainingVolumeColor(score) {
+    if (score >= 8.5) return '#10b981'; // green
+    if (score >= 7.0) return '#3b82f6'; // blue
+    if (score >= 5.0) return '#f59e0b'; // amber
+    if (score >= 3.5) return '#f97316'; // orange
+    return '#ef4444'; // red
 }
 
 // Calculate recovery capacity based on available metrics
@@ -143,7 +237,7 @@ function calculateRecoveryCapacity() {
         typeof muscleBuilding !== 'undefined') {
         
         // Base recovery on metabolic efficiency (0-10 scale)
-        let baseRecovery = metabolicEfficiency / 10;
+        let baseRecovery = metabolicEfficiency;
         
         // Adjust for body type
         let bodyTypeMultiplier = 1.0;
@@ -153,17 +247,31 @@ function calculateRecoveryCapacity() {
             bodyTypeMultiplier = 0.9; // Slower recovery for endomorphs
         } else if (bodyType === 'mesomorph') {
             bodyTypeMultiplier = 1.1; // Good recovery for mesomorphs
+        } else if (bodyType === 'ecto-mesomorph') {
+            bodyTypeMultiplier = 1.15; // Mix of ecto and meso
+        } else if (bodyType === 'endo-mesomorph') {
+            bodyTypeMultiplier = 1.0; // Mix of endo and meso
         }
         
         // Adjust for muscle building potential
-        let mbpFactor = muscleBuilding / 10;
+        let mbpFactor = muscleBuilding;
         
         // Calculate final score (0-10 scale)
-        recoveryScore = baseRecovery * bodyTypeMultiplier * (1 + mbpFactor * 0.2);
+        recoveryScore = (baseRecovery * 0.6) + 
+                        (bodyTypeMultiplier * 2) + 
+                        (mbpFactor * 0.2);
         
         // Ensure the score is within bounds
         recoveryScore = Math.max(1, Math.min(9.5, recoveryScore));
+    } else if (recoveryCapacity) {
+        // Use pre-calculated recovery capacity from server if available
+        recoveryScore = recoveryCapacity;
     }
+    
+    console.log('Calculated recovery capacity:', recoveryScore, 
+                'Using metrics - metabolicEfficiency:', metabolicEfficiency, 
+                'bodyType:', bodyType, 
+                'muscleBuilding:', muscleBuilding);
     
     return recoveryScore;
 }

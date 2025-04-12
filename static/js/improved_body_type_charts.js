@@ -4,8 +4,13 @@
 
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize both body type charts with improved positioning
-    initBodyTypeChart('bodyTypeSpectrum', bodyTypePosition);
-    initBodyTypeChart('bodyTypeSpectrum2', bodyTypePosition);
+    if (document.getElementById('bodyTypeSpectrum')) {
+        initBodyTypeChart('bodyTypeSpectrum', bodyTypePosition);
+    }
+    
+    if (document.getElementById('bodyTypeSpectrum2')) {
+        initBodyTypeChart('bodyTypeSpectrum2', bodyTypePosition);
+    }
 });
 
 function initBodyTypeChart(canvasId, position) {
