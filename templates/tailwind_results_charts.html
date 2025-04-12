@@ -215,12 +215,12 @@
                         </div>
                     </div>
                     
-                    <!-- Bottom Row: Two Charts Side by Side -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- Body Type Matching Chart (Left) -->
+                    <!-- Bottom Row: Stacked Charts -->
+                    <div class="space-y-6">
+                        <!-- Body Type Matching Chart (Top) -->
                         <div class="bg-gray-800 rounded-lg border border-gray-700 shadow-lg p-4">
                             <h3 class="text-xl font-semibold text-white mb-3 text-center">Body Type Matching</h3>
-                            <div class="chart-container mx-auto" style="position: relative; height: 150px;">
+                            <div class="chart-container mx-auto" style="position: relative; height: 150px; max-width: 600px;">
                                 <canvas id="bodyTypeSpectrum2"></canvas>
                             </div>
                             <div class="text-sm text-gray-400 mt-3 text-center">
@@ -228,14 +228,14 @@
                             </div>
                         </div>
                         
-                        <!-- Recovery Capacity Chart (Right) -->
+                        <!-- Recovery Capacity Chart (Bottom) -->
                         <div class="bg-gray-800 rounded-lg border border-gray-700 shadow-lg p-4">
                             <h3 class="text-xl font-semibold text-white mb-3 text-center">Recovery Capacity</h3>
-                            <div class="chart-container mx-auto" style="position: relative; height: 150px;">
+                            <div class="chart-container mx-auto" style="position: relative; height: 150px; max-width: 600px;">
                                 <canvas id="recoveryCapacityChart"></canvas>
                             </div>
                             <div class="text-sm text-gray-400 mt-3 text-center">
-                                <p>Estimated recovery capacity based on your body type, metabolism, and training response.</p>
+                                <p>Estimated recovery capacity based on your muscle fiber composition, metabolic efficiency, and body type.</p>
                             </div>
                         </div>
                     </div>
@@ -1413,10 +1413,10 @@
                     </div>
                 </div>
                 
-                <!-- Spot for future chart - This will be added in a later update -->
+                <!-- Training Volume Tolerance Chart -->
                 <div class="bg-gray-800 p-4 rounded-lg">
                     <h3 class="text-lg font-medium text-white mb-3 text-center">Training Volume Tolerance</h3>
-                    <div class="chart-container" style="position: relative; height: 160px;">
+                    <div class="chart-container mx-auto" style="position: relative; height: 160px; max-width: 400px;">
                         <canvas id="trainingVolumeChart"></canvas>
                     </div>
                     <div class="text-xs text-gray-400 mt-2 text-center">
