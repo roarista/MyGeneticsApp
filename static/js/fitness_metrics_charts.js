@@ -7,11 +7,7 @@
 
 // Function to initialize all charts - called by metrics_data_bridge.js
 function initAllFitnessCharts() {
-    console.log('Initializing all fitness charts with data:', {
-        bodyFatPercentage,
-        leanMassPercentage,
-        gender
-    });
+    console.log('Initializing fitness charts...');
     
     // Initialize recovery capacity chart with calculated values
     initRecoveryCapacityChart();
@@ -111,23 +107,14 @@ function initBodyCompositionChart() {
     // Get body composition percentages - ensure they're proper numbers, not strings
     let fatPercentage = parseFloat(bodyFatPercentage) || 20;
     
-    // CRITICAL FIX: Always calculate lean mass directly from body fat to ensure 100% total
-    // This overrides any existing leanMassPercentage value
+    // Always calculate lean mass directly from body fat to ensure they sum to 100%
+    // This overrides any existing leanMassPercentage value for mathematical consistency
     let leanMassPercentage = 100 - fatPercentage;
     
-    console.warn('FIXING BODY COMPOSITION CALCULATION');
-    console.warn('- Original body fat %:', bodyFatPercentage);
-    console.warn('- Original lean mass %:', leanMassPercentage);
-    console.warn('- Fixed body fat %:', fatPercentage);
-    console.warn('- Fixed lean mass %:', leanMassPercentage);
-    console.warn('- Total %:', fatPercentage + leanMassPercentage);
-    
-    // Verbose debugging output
-    console.log('BODY COMPOSITION CHART DATA (VERIFIED):');
-    console.log('- Body Fat %:', fatPercentage, 'Type:', typeof fatPercentage);
-    console.log('- Lean Mass %:', leanMassPercentage, 'Type:', typeof leanMassPercentage);
-    console.log('- Gender:', gender);
-    console.log('- Chart canvas element:', ctx);
+    // Light logging to track chart initialization
+    console.log('Body composition values:');
+    console.log('- Body Fat %:', fatPercentage.toFixed(1));
+    console.log('- Lean Mass %:', leanMassPercentage.toFixed(1));
     
     // Mark container as having data
     const container = ctx.closest('.chart-container');

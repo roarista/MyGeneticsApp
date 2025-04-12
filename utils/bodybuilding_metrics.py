@@ -7,6 +7,7 @@ focusing on physique proportions, symmetry, and body composition metrics.
 
 import math
 import logging
+from utils.navy_body_fat import calculate_navy_body_fat, calculate_body_fat_navy_derived
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -78,25 +79,47 @@ def complete_bodybuilding_analysis(user_data):
             'ankle': ankle_cm
         }
         
-        # Calculate body fat percentage
+        # Calculate body fat percentage using improved Navy method
         if neck_cm > 0 and waist_cm > 0:
+            # Use the full Navy formula if all required measurements are available
             if gender.lower() == 'male':
-                body_fat_percentage = estimate_bodyfat_from_measurements(
-                    gender, waist_cm, neck_cm, height_cm)
+                navy_result = calculate_navy_body_fat(
+                    gender, height_cm, neck_cm, waist_cm)
+                if navy_result is not None:
+                    body_fat_percentage = navy_result
+                    logger.debug(f"Body fat calculated using Navy method: {body_fat_percentage:.1f}%")
+                else:
+                    # Fallback to derived method
+                    body_fat_percentage, method = calculate_body_fat_navy_derived(
+                        gender, height_cm, weight_kg, waist_cm, neck_cm)
+                    logger.debug(f"Body fat calculated using {method} method: {body_fat_percentage:.1f}%")
             else:
-                body_fat_percentage = estimate_bodyfat_from_measurements(
-                    gender, waist_cm, neck_cm, height_cm, hips_cm)
+                # For females, we need hip measurement
+                if hips_cm > 0:
+                    navy_result = calculate_navy_body_fat(
+                        gender, height_cm, neck_cm, waist_cm, hips_cm)
+                    if navy_result is not None:
+                        body_fat_percentage = navy_result
+                        logger.debug(f"Body fat calculated using Navy method: {body_fat_percentage:.1f}%")
+                    else:
+                        # Fallback to derived method
+                        body_fat_percentage, method = calculate_body_fat_navy_derived(
+                            gender, height_cm, weight_kg, waist_cm, neck_cm, hips_cm)
+                        logger.debug(f"Body fat calculated using {method} method: {body_fat_percentage:.1f}%")
+                else:
+                    # No hip measurement, use derived method
+                    body_fat_percentage, method = calculate_body_fat_navy_derived(
+                        gender, height_cm, weight_kg, waist_cm, neck_cm)
+                    logger.debug(f"Body fat calculated using {method} method (no hip measurement): {body_fat_percentage:.1f}%")
         else:
-            # Default to estimate based on BMI
-            bmi = weight_kg / ((height_cm / 100) ** 2) if height_cm > 0 else 0
-            if gender.lower() == 'male':
-                body_fat_percentage = 1.20 * bmi + 0.23 * 30 - 16.2  # Assume age 30 by default
-            else:
-                body_fat_percentage = 1.20 * bmi + 0.23 * 30 - 5.4
-                
-            # Ensure reasonable bounds
-            body_fat_percentage = max(5 if gender.lower() == 'male' else 10, 
-                                       min(body_fat_percentage, 40))
+            # Insufficient measurements, fall back to waist-to-height or BMI method
+            body_fat_percentage, method = calculate_body_fat_navy_derived(
+                gender, height_cm, weight_kg, waist_cm if waist_cm > 0 else None)
+            logger.debug(f"Body fat calculated using {method} method (limited measurements): {body_fat_percentage:.1f}%")
+            
+        # Ensure reasonable bounds based on gender
+        body_fat_percentage = max(5 if gender.lower() == 'male' else 10, 
+                                  min(body_fat_percentage, 40))
         
         # Categorize body fat percentage
         bf_category = "Not Available"
