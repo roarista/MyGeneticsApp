@@ -1347,6 +1347,7 @@
     <div class="mt-8 dark-card">
         <h2 class="text-xl font-semibold text-white mb-6">Your Genetic Traits Analysis</h2>
         
+        <!-- Top row charts -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <!-- Body Proportion Ratios Chart -->
             <div class="bg-gray-800 p-4 rounded-lg">
@@ -1375,6 +1376,25 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Bottom row with Metabolic Efficiency Score -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+            <!-- Metabolic Efficiency Score -->
+            <div class="bg-gray-800 p-4 rounded-lg">
+                <h3 class="text-lg font-medium text-white mb-3 text-center">Metabolic Efficiency Score</h3>
+                <div class="chart-container" style="position: relative; height: 200px;">
+                    <canvas id="metabolicScoreChart"></canvas>
+                </div>
+                <div class="text-xs text-gray-400 mt-2 text-center">
+                    <p>A higher score indicates a more favorable balance of fat-to-lean mass</p>
+                </div>
+            </div>
+            
+            <!-- Empty space or future chart -->
+            <div class="bg-gray-800 p-4 rounded-lg hidden md:block">
+                <!-- Placeholder for future content -->
+            </div>
+        </div>
     </div>
     
     <!-- Action Buttons -->
@@ -1396,6 +1416,137 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Metabolic Efficiency Score Chart (Gauge)
+    const metabolicCtx = document.getElementById('metabolicScoreChart').getContext('2d');
+    
+    // Calculate Metabolic Efficiency Score (0-10 scale)
+    {% set metabolic_score = 0 %}
+    {% set has_data = false %}
+    {% set missing_data_message = "Insufficient data to calculate score" %}
+    
+    {% if enhanced_measurements %}
+        {% set has_data = true %}
+        
+        {# Extract the relevant metrics #}
+        {% set body_fat_percentage = enhanced_measurements.get('body_fat_percentage', 0) %}
+        {% set lean_body_mass = enhanced_measurements.get('lean_body_mass_kg', 0) %}
+        {% set waist_circumference = enhanced_measurements.get('waist_circumference_cm', 0) %}
+        {% set ffmi = enhanced_measurements.get('ffmi', 0) %}
+        
+        {# Only calculate score if we have all required metrics #}
+        {% if body_fat_percentage > 0 and lean_body_mass > 0 and waist_circumference > 0 and ffmi > 0 %}
+            {# Normalize body fat percentage - lower is better (0-10 range) #}
+            {% set bf_score = max(0, 10 - (body_fat_percentage / 3.5)) %}
+            
+            {# Normalize lean body mass - higher is better (0-10 range) #}
+            {% set lbm_score = min(10, (lean_body_mass / 8)) %}
+            
+            {# Normalize waist circumference - lower is better (0-10 range) #}
+            {% set waist_factor = 100 / waist_circumference %}
+            {% set waist_score = min(10, waist_factor * 10) %}
+            
+            {# Normalize FFMI - higher is better (0-10 range) #}
+            {% set ffmi_score = min(10, (ffmi / 2.5)) %}
+            
+            {# Final metabolic score is weighted average #}
+            {% set metabolic_score = ((bf_score * 0.35) + (lbm_score * 0.25) + (waist_score * 0.15) + (ffmi_score * 0.25))|float %}
+            {% set metabolic_score = min(10, max(0, metabolic_score)) %}
+        {% else %}
+            {% set has_data = false %}
+        {% endif %}
+    {% endif %}
+    
+    {# Create the gauge chart #}
+    new Chart(metabolicCtx, {
+        type: 'doughnut',
+        data: {
+            datasets: [{
+                data: [{{ metabolic_score }}, 10 - {{ metabolic_score }}],
+                backgroundColor: [
+                    '{{ "rgba(16, 185, 129, 0.9)" if has_data else "rgba(156, 163, 175, 0.5)" }}', // Green if has data, gray if not
+                    'rgba(31, 41, 55, 0.2)'  // Dark background
+                ],
+                borderWidth: 0,
+                circumference: 180,
+                rotation: 270
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '75%',
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    enabled: {{ 'true' if has_data else 'false' }}
+                }
+            },
+            layout: {
+                padding: {
+                    bottom: 30
+                }
+            }
+        },
+        plugins: [{
+            id: 'centerText',
+            afterDraw: function(chart) {
+                const width = chart.width;
+                const height = chart.height;
+                const ctx = chart.ctx;
+                
+                ctx.restore();
+                
+                // Font settings for score
+                const fontSize = (height / 10).toFixed(2);
+                ctx.font = fontSize + "px Arial";
+                ctx.textBaseline = "middle";
+                ctx.fillStyle = "#fff";
+                
+                // Display score or message
+                {% if has_data %}
+                    const scoreText = "{{ '{:.1f}'.format(metabolic_score) }}";
+                    const textX = width / 2;
+                    const textY = height - (height / 3);
+                    
+                    ctx.textAlign = "center";
+                    ctx.fillText(scoreText + "/10", textX, textY);
+                    
+                    // Add rating text
+                    ctx.font = (fontSize * 0.6) + "px Arial";
+                    let ratingText = "";
+                    {% if metabolic_score >= 8 %}
+                        ratingText = "Excellent";
+                        ctx.fillStyle = "#10b981"; // green
+                    {% elif metabolic_score >= 6 %}
+                        ratingText = "Good";
+                        ctx.fillStyle = "#3b82f6"; // blue
+                    {% elif metabolic_score >= 4 %}
+                        ratingText = "Average";
+                        ctx.fillStyle = "#f59e0b"; // amber
+                    {% else %}
+                        ratingText = "Needs Improvement";
+                        ctx.fillStyle = "#ef4444"; // red
+                    {% endif %}
+                    
+                    ctx.fillText(ratingText, textX, textY + fontSize * 1.2);
+                {% else %}
+                    const messageText = "{{ missing_data_message }}";
+                    const textX = width / 2;
+                    const textY = height - (height / 3);
+                    
+                    ctx.textAlign = "center";
+                    ctx.font = (fontSize * 0.7) + "px Arial";
+                    ctx.fillStyle = "#9ca3af"; // Gray text
+                    ctx.fillText(messageText, textX, textY);
+                {% endif %}
+                
+                ctx.save();
+            }
+        }]
+    });
+    
     // Body Proportion Ratios Chart (Horizontal Bar)
     const proportionCtx = document.getElementById('proportionRatiosChart').getContext('2d');
     
