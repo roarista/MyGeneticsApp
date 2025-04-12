@@ -2614,7 +2614,13 @@ document.addEventListener('DOMContentLoaded', function() {
         muscleBuilding: {{ bodybuilding_analysis.muscle_building_potential|default(5.0) }},
         recoveryCapacity: {{ recovery_capacity }},
         shoulderToWaistRatio: {{ shoulder_to_waist_ratio }},
-        bodyFatPercentage: {{ bodybuilding_analysis.body_fat_percentage|default(15.0) }}
+        bodyFatPercentage: {{ bodybuilding_analysis.body_fat_percentage|default(15.0) }},
+        // Additional data for Fitness Age estimation
+        userAge: {{ basic_measurements.get('Age', {}).get('value', 30)|int }},
+        gender: '{{ gender|default("male") }}',
+        heightCm: {{ enhanced_measurements.get('height_cm', 175)|float }},
+        weightKg: {{ enhanced_measurements.get('weight_kg', 75)|float }},
+        activityLevel: '{{ user.experience_level|default("moderate") }}'
     };
     
     // Initialize metrics with real data

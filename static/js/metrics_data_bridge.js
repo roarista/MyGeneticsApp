@@ -10,6 +10,13 @@ let recoveryCapacity = 5.0;
 let shoulderToWaistRatio = 1.6;
 let bodyFatPercentage = 15.0;
 
+// Variables for Fitness Age Estimation
+let userAge = 30;
+let gender = 'male';
+let heightCm = 175;
+let weightKg = 75;
+let activityLevel = 'moderate';
+
 // Function to initialize all metrics from server data
 function initMetricsFromServer(data) {
     if (!data) return;
@@ -22,6 +29,13 @@ function initMetricsFromServer(data) {
     if (data.recoveryCapacity) recoveryCapacity = data.recoveryCapacity;
     if (data.shoulderToWaistRatio) shoulderToWaistRatio = data.shoulderToWaistRatio;
     if (data.bodyFatPercentage) bodyFatPercentage = data.bodyFatPercentage;
+    
+    // Set Fitness Age Estimation variables
+    if (data.userAge) userAge = data.userAge;
+    if (data.gender) gender = data.gender;
+    if (data.heightCm) heightCm = data.heightCm;
+    if (data.weightKg) weightKg = data.weightKg;
+    if (data.activityLevel) activityLevel = data.activityLevel;
     
     console.log('Metrics initialized with real data:', data);
 }

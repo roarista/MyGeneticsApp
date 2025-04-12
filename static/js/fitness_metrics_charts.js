@@ -84,27 +84,9 @@ function initFitnessAgeChart() {
     const ctx = document.getElementById('fitnessAgeChart').getContext('2d');
     if (!ctx) return; // Skip if canvas not found
     
-    // Get user data from the page if available (these variables might be defined in the template)
-    let chronologicalAge = typeof userAge !== 'undefined' ? userAge : 30; // Default if not available
-    const bodyFatPercentage = typeof bodyFatPercent !== 'undefined' ? bodyFatPercent : 20;
-    const gender = typeof userGender !== 'undefined' ? userGender : 'male';
-    const heightCm = typeof userHeight !== 'undefined' ? userHeight : 175;
-    const weightKg = typeof userWeight !== 'undefined' ? userWeight : 75;
-    const activityLevel = typeof userActivity !== 'undefined' ? userActivity : 'moderate';
-
-    // Fallback: Try to extract age from the DOM if JS variables aren't available
-    if (typeof userAge === 'undefined') {
-        const ageElements = document.querySelectorAll('.user-age, .age-value, [data-age]');
-        if (ageElements.length > 0) {
-            const ageText = ageElements[0].textContent || ageElements[0].dataset.age;
-            if (ageText) {
-                const ageMatch = ageText.match(/\d+/);
-                if (ageMatch) {
-                    chronologicalAge = parseInt(ageMatch[0], 10);
-                }
-            }
-        }
-    }
+    // Use global variables set by metrics_data_bridge.js
+    const chronologicalAge = userAge;
+    // Use bodyFatPercentage from metrics_data_bridge.js
 
     // Calculate fitness age using available metrics
     const fitnessAge = calculateFitnessAge(chronologicalAge, bodyFatPercentage, gender, heightCm, weightKg, activityLevel);
