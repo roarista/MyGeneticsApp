@@ -676,7 +676,8 @@ def results(analysis_id):
             # Get body fat with fallback value and ensure it's a valid number
             'body_fat_percentage': float(result['bodybuilding_analysis'].get('body_fat_percentage', 15.0)),
             
-            # Calculate lean mass as 100% - body_fat%
+            # CRITICAL FIX: Always ensure lean mass is calculated correctly as 100% - body_fat%
+            # This ensures the values always add up to 100%
             'lean_mass_percentage': 100.0 - float(result['bodybuilding_analysis'].get('body_fat_percentage', 15.0)),
             
             # Calculate shoulder-to-waist ratio with default fallback
@@ -830,9 +831,14 @@ def scan3d_results(analysis_id):
             formatted_traits[trait_name] = trait_data
     
     # Create analysis object for template compatibility
+    # Get body fat percentage, ensuring it's a valid float
+    body_fat = result.get('traits', {}).get('body_fat_percentage', 0)
+    if not isinstance(body_fat, (int, float)):
+        body_fat = 0.0
+    
     analysis = {
         'id': analysis_id,
-        'body_fat_percentage': result.get('traits', {}).get('body_fat_percentage', 0),
+        'body_fat_percentage': body_fat,
         'body_type': result.get('traits', {}).get('body_type', 'Unknown'),
         'muscle_building_potential': result.get('traits', {}).get('muscle_building_potential', 0)
     }
