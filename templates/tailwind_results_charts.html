@@ -1423,6 +1423,7 @@
                         <p>This chart reflects your personalized body composition based on photo analysis and your input data.</p>
                     </div>
                     <!-- Debug element to display raw values -->
+                    <div id="raw-debug-data" class="text-xs text-gray-400 mt-3 p-2 border border-gray-700 rounded-lg bg-gray-900"></div>
                     <div id="raw-debug-data" class="text-xs mt-2 text-center"></div>
                 </div>
             </div>
@@ -2621,7 +2622,8 @@ document.addEventListener('DOMContentLoaded', function() {
         recoveryCapacity: {{ recovery_capacity }},
         shoulderToWaistRatio: {{ shoulder_to_waist_ratio }},
         bodyFatPercentage: {{ body_fat_percentage|default(15.0) }},
-        leanMassPercentage: {{ lean_mass_percentage|default(85.0) }},
+        // CRITICAL FIX: Always calculate lean mass as 100 - body_fat% to ensure proper values
+        leanMassPercentage: {{ (100.0 - body_fat_percentage|default(15.0))|float }},
         // Additional data for Fitness Age estimation
         userAge: {{ basic_measurements.get('Age', {}).get('value', 30)|int }},
         gender: '{{ gender|default("male") }}',
@@ -2640,9 +2642,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add raw HTML display of the body fat percentage for visual debugging
     document.getElementById('raw-debug-data').innerHTML = `
         <div style="background: rgba(0,0,0,0.7); padding: 5px; margin-top: 10px; border-radius: 4px; font-size: 12px;">
-            <p>Raw Debug Data:</p>
+            <p>Raw Debug Data (Correctly Calculated):</p>
             <p>Body Fat %: <strong>{{ body_fat_percentage|default(15.0) }}</strong></p>
-            <p>Lean Mass %: <strong>{{ lean_mass_percentage|default(85.0) }}</strong></p>
+            <p>Lean Mass %: <strong>{{ (100.0 - body_fat_percentage|default(15.0))|float }}</strong></p>
+            <p>Total %: <strong>{{ body_fat_percentage|default(15.0) + (100.0 - body_fat_percentage|default(15.0))|float }}</strong></p>
         </div>
     `;
     

@@ -108,15 +108,19 @@ function initBodyCompositionChart() {
         return;
     }
     
-    // Get body composition percentages - ensure they're numbers, not strings
+    // Get body composition percentages - ensure they're proper numbers, not strings
     let fatPercentage = parseFloat(bodyFatPercentage) || 20;
-    let leanMassPercentage = parseFloat(leanMassPercentage) || (100 - fatPercentage);
     
-    // Ensure values add up to 100%
-    if (Math.abs((fatPercentage + leanMassPercentage) - 100) > 0.5) {
-        console.warn('Body composition values don\'t add up to 100%. Adjusting lean mass.');
-        leanMassPercentage = 100 - fatPercentage;
-    }
+    // CRITICAL FIX: Always calculate lean mass directly from body fat to ensure 100% total
+    // This overrides any existing leanMassPercentage value
+    let leanMassPercentage = 100 - fatPercentage;
+    
+    console.warn('FIXING BODY COMPOSITION CALCULATION');
+    console.warn('- Original body fat %:', bodyFatPercentage);
+    console.warn('- Original lean mass %:', leanMassPercentage);
+    console.warn('- Fixed body fat %:', fatPercentage);
+    console.warn('- Fixed lean mass %:', leanMassPercentage);
+    console.warn('- Total %:', fatPercentage + leanMassPercentage);
     
     // Verbose debugging output
     console.log('BODY COMPOSITION CHART DATA (VERIFIED):');
