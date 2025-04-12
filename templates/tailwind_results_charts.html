@@ -2051,22 +2051,83 @@ document.addEventListener('DOMContentLoaded', function() {
     // Body Type Spectrum Chart
     const bodyTypeCtx = document.getElementById('bodyTypeSpectrum').getContext('2d');
     
-    // Get the user's body type
+    // Get the user's body type - Use real data from measurements
     {% set body_type = 'Balanced' %}
     {% if bodybuilding_analysis and bodybuilding_analysis.body_type %}
         {% set body_type = bodybuilding_analysis.body_type|lower %}
     {% endif %}
     
-    // Determine position on the spectrum (0-100)
+    // Calculate body type position based on real metrics
     {% set position = 50 %} {# Default is middle (balanced/mesomorph) #}
-    {% if body_type and body_type|lower == 'ectomorph' %}
-        {% set position = 15 %}
-    {% elif body_type and body_type|lower == 'endomorph' %}
-        {% set position = 85 %}
-    {% elif body_type and body_type|lower == 'ecto-mesomorph' %}
-        {% set position = 35 %}
-    {% elif body_type and body_type|lower == 'endo-mesomorph' %}
-        {% set position = 65 %}
+    
+    {# Use enhanced measurements to calculate a more accurate position #}
+    {% if enhanced_measurements %}
+        {# 1. Shoulder-to-waist ratio - higher = more mesomorph/ectomorph #}
+        {% set sw_ratio = 0 %}
+        {% if enhanced_measurements.get('shoulder_width_cm') and enhanced_measurements.get('waist_circumference_cm') %}
+            {% set sw_ratio = (enhanced_measurements.get('shoulder_width_cm') / 
+                              (enhanced_measurements.get('waist_circumference_cm')/3.14))|float %}
+        {% endif %}
+        
+        {# 2. Body fat percentage - higher = more endomorph #}
+        {% set bf_pct = 0 %}
+        {% if enhanced_measurements.get('body_fat_percentage') %}
+            {% set bf_pct = enhanced_measurements.get('body_fat_percentage')|float %}
+        {% elif bodybuilding_analysis.get('body_fat_percentage') %}
+            {% set bf_pct = bodybuilding_analysis.get('body_fat_percentage')|float %}
+        {% endif %}
+        
+        {# 3. Muscle building potential - higher = more mesomorph #}
+        {% set mbp = 5 %}
+        {% if bodybuilding_analysis.get('muscle_building_potential') %}
+            {% set mbp = bodybuilding_analysis.get('muscle_building_potential')|float %}
+        {% endif %}
+        
+        {# Calculate position on spectrum #}
+        {% set ecto_factor = max(0, min(50, (sw_ratio * 20 - 20))) %}
+        {% set endo_factor = max(0, min(50, (bf_pct - 10))) %}
+        {% set meso_factor = max(0, min(50, (mbp * 5))) %}
+        
+        {# Weigh factors to get final position (0-100) #}
+        {% set position = 50 - ecto_factor + endo_factor %}
+        {% if position < 30 and meso_factor > 25 %}
+            {# Ecto-mesomorph #}
+            {% set position = 35 %}
+            {% set body_type = 'ecto-mesomorph' %}
+        {% elif position > 70 and meso_factor > 25 %}
+            {# Endo-mesomorph #}
+            {% set position = 65 %}
+            {% set body_type = 'endo-mesomorph' %}
+        {% elif position < 30 %}
+            {# Ectomorph #}
+            {% set position = 15 %}
+            {% set body_type = 'ectomorph' %}
+        {% elif position > 70 %}
+            {# Endomorph #}
+            {% set position = 85 %}
+            {% set body_type = 'endomorph' %}
+        {% elif meso_factor > 30 %}
+            {# Pure mesomorph #}
+            {% set position = 50 %}
+            {% set body_type = 'mesomorph' %}
+        {% else %}
+            {# Balanced #}
+            {% set position = 50 %}
+            {% set body_type = 'balanced' %}
+        {% endif %}
+    {% else %}
+        {# If no enhanced measurements, use explicit body type #}
+        {% if body_type|lower == 'ectomorph' %}
+            {% set position = 15 %}
+        {% elif body_type|lower == 'endomorph' %}
+            {% set position = 85 %}
+        {% elif body_type|lower == 'ecto-mesomorph' %}
+            {% set position = 35 %}
+        {% elif body_type|lower == 'endo-mesomorph' %}
+            {% set position = 65 %}
+        {% elif body_type|lower == 'mesomorph' %}
+            {% set position = 50 %}
+        {% endif %}
     {% endif %}
     
     // Create a horizontal bar chart that serves as the spectrum
