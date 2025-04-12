@@ -1396,14 +1396,14 @@
             
             <!-- RIGHT COLUMN -->
             <div class="space-y-6">
-                <!-- Recovery Profile Chart (Radar) -->
+                <!-- Muscle Dominance Chart (Horizontal Bar) -->
                 <div class="bg-gray-800 p-4 rounded-lg">
-                    <h3 class="text-lg font-medium text-white mb-3 text-center">Recovery Profile</h3>
+                    <h3 class="text-lg font-medium text-white mb-3 text-center">Muscle Dominance Chart</h3>
                     <div class="chart-container" style="position: relative; height: 200px;">
-                        <canvas id="recoveryChart"></canvas>
+                        <canvas id="muscleDominanceChart"></canvas>
                     </div>
                     <div class="text-xs text-gray-400 mt-2 text-center">
-                        <p>Based on your muscle fiber composition and hormonal indicators</p>
+                        <p>Dominant vs underdeveloped muscle groups based on your measurements</p>
                     </div>
                 </div>
                 
@@ -1676,50 +1676,155 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Recovery Profile Chart (Radar)
-    const recoveryCtx = document.getElementById('recoveryChart').getContext('2d');
-    const recoveryChart = new Chart(recoveryCtx, {
-        type: 'radar',
+    // Muscle Dominance Chart (Horizontal Bar)
+    const muscleDominanceCtx = document.getElementById('muscleDominanceChart').getContext('2d');
+    
+    // Calculate muscle development scores based on measurements
+    {% set chest_score = 0 %}
+    {% set back_score = 0 %}
+    {% set shoulders_score = 0 %}
+    {% set arms_score = 0 %}
+    {% set legs_score = 0 %}
+    {% set core_score = 0 %}
+    
+    // Extract scores from the basic measurements table if available
+    {% if basic_measurements %}
+        // Chest score
+        {% if basic_measurements.get('Chest') %}
+            {% set chest_score = (basic_measurements.get('Chest').value|float / 
+                               basic_measurements.get('Waist', {'value': 100}).value|float * 100 - 100)|int %}
+        {% endif %}
+        
+        // Shoulders score
+        {% if basic_measurements.get('Shoulders') %}
+            {% set shoulders_score = (basic_measurements.get('Shoulders').value|float / 
+                                  basic_measurements.get('Waist', {'value': 100}).value|float * 100 - 100)|int %}
+        {% endif %}
+        
+        // Arms score - use average of left and right if available
+        {% if estimated_measurements.get('left_arm_cm') %}
+            {% set arm_height_ratio = (estimated_measurements.get('left_arm_cm').value|float / 
+                                   basic_measurements.get('Height', {'value': 180}).value|float * 100)|int %}
+            {% set arms_score = arm_height_ratio * 6 %}
+        {% endif %}
+        
+        // Legs score - use average of left and right thigh
+        {% if estimated_measurements.get('left_thigh_cm') %}
+            {% set leg_height_ratio = (estimated_measurements.get('left_thigh_cm').value|float / 
+                                   basic_measurements.get('Height', {'value': 180}).value|float * 100)|int %}
+            {% set legs_score = leg_height_ratio * 5 %}
+        {% endif %}
+        
+        // Back score - estimate based on shoulders and chest
+        {% set back_score = (chest_score + shoulders_score) / 2 %}
+        
+        // Core score - inverse of waist (lower is better)
+        {% if basic_measurements.get('Waist') %}
+            {% set waist_height_ratio = (basic_measurements.get('Waist').value|float / 
+                                      basic_measurements.get('Height', {'value': 180}).value|float * 100)|int %}
+            {% set core_score = 100 - min(waist_height_ratio, 90) %}
+        {% endif %}
+    {% endif %}
+    
+    // Normalize scores to 0-10 range
+    {% set chest_score = min(10, max(0, chest_score / 8)) %}
+    {% set back_score = min(10, max(0, back_score / 8)) %}
+    {% set shoulders_score = min(10, max(0, shoulders_score / 8)) %}
+    {% set arms_score = min(10, max(0, arms_score / 10)) %}
+    {% set legs_score = min(10, max(0, legs_score / 10)) %}
+    {% set core_score = min(10, max(0, core_score / 10)) %}
+    
+    // Classify development levels
+    {% set chest_level = "Balanced" %}
+    {% set chest_color = "#f59e0b" %} {# amber for balanced #}
+    {% if chest_score >= 7 %}
+        {% set chest_level = "Dominant" %}
+        {% set chest_color = "#10b981" %} {# green for dominant #}
+    {% elif chest_score <= 3 %}
+        {% set chest_level = "Underdeveloped" %}
+        {% set chest_color = "#ef4444" %} {# red for underdeveloped #}
+    {% endif %}
+    
+    {% set back_level = "Balanced" %}
+    {% set back_color = "#f59e0b" %}
+    {% if back_score >= 7 %}
+        {% set back_level = "Dominant" %}
+        {% set back_color = "#10b981" %}
+    {% elif back_score <= 3 %}
+        {% set back_level = "Underdeveloped" %}
+        {% set back_color = "#ef4444" %}
+    {% endif %}
+    
+    {% set shoulders_level = "Balanced" %}
+    {% set shoulders_color = "#f59e0b" %}
+    {% if shoulders_score >= 7 %}
+        {% set shoulders_level = "Dominant" %}
+        {% set shoulders_color = "#10b981" %}
+    {% elif shoulders_score <= 3 %}
+        {% set shoulders_level = "Underdeveloped" %}
+        {% set shoulders_color = "#ef4444" %}
+    {% endif %}
+    
+    {% set arms_level = "Balanced" %}
+    {% set arms_color = "#f59e0b" %}
+    {% if arms_score >= 7 %}
+        {% set arms_level = "Dominant" %}
+        {% set arms_color = "#10b981" %}
+    {% elif arms_score <= 3 %}
+        {% set arms_level = "Underdeveloped" %}
+        {% set arms_color = "#ef4444" %}
+    {% endif %}
+    
+    {% set legs_level = "Balanced" %}
+    {% set legs_color = "#f59e0b" %}
+    {% if legs_score >= 7 %}
+        {% set legs_level = "Dominant" %}
+        {% set legs_color = "#10b981" %}
+    {% elif legs_score <= 3 %}
+        {% set legs_level = "Underdeveloped" %}
+        {% set legs_color = "#ef4444" %}
+    {% endif %}
+    
+    {% set core_level = "Balanced" %}
+    {% set core_color = "#f59e0b" %}
+    {% if core_score >= 7 %}
+        {% set core_level = "Dominant" %}
+        {% set core_color = "#10b981" %}
+    {% elif core_score <= 3 %}
+        {% set core_level = "Underdeveloped" %}
+        {% set core_color = "#ef4444" %}
+    {% endif %}
+    
+    const muscleDominanceChart = new Chart(muscleDominanceCtx, {
+        type: 'bar',
         data: {
-            labels: ['Nervous System', 'Muscular', 'Hormonal', 'Metabolic', 'Joint'],
+            labels: ['Back', 'Chest', 'Shoulders', 'Arms', 'Legs', 'Core'],
             datasets: [{
-                label: 'Recovery Profile',
-                data: [7, 8, 6, 5, 4], // Sample data
-                backgroundColor: 'rgba(255, 75, 110, 0.2)',
-                borderColor: '#ff4b6e',
-                borderWidth: 2,
-                pointBackgroundColor: '#ff4b6e',
-                pointBorderColor: '#fff',
-                pointHoverBackgroundColor: '#fff',
-                pointHoverBorderColor: '#ff4b6e',
-                pointRadius: 4
+                label: 'Development Score',
+                data: [
+                    {{ back_score }},
+                    {{ chest_score }},
+                    {{ shoulders_score }},
+                    {{ arms_score }},
+                    {{ legs_score }},
+                    {{ core_score }}
+                ],
+                backgroundColor: [
+                    '{{ back_color }}',
+                    '{{ chest_color }}',
+                    '{{ shoulders_color }}',
+                    '{{ arms_color }}',
+                    '{{ legs_color }}',
+                    '{{ core_color }}'
+                ],
+                borderWidth: 0,
+                borderRadius: 4
             }]
         },
         options: {
+            indexAxis: 'y',
             responsive: true,
             maintainAspectRatio: false,
-            scales: {
-                r: {
-                    angleLines: {
-                        color: 'rgba(255, 255, 255, 0.1)'
-                    },
-                    grid: {
-                        color: 'rgba(255, 255, 255, 0.1)'
-                    },
-                    pointLabels: {
-                        color: '#fff',
-                        font: {
-                            size: 10
-                        }
-                    },
-                    suggestedMin: 0,
-                    suggestedMax: 10,
-                    ticks: {
-                        display: false,
-                        stepSize: 2
-                    }
-                }
-            },
             plugins: {
                 legend: {
                     display: false
@@ -1727,7 +1832,34 @@ document.addEventListener('DOMContentLoaded', function() {
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            return context.dataset.label + ': ' + context.raw + '/10';
+                            const index = context.dataIndex;
+                            const labels = ['{{ back_level }}', '{{ chest_level }}', '{{ shoulders_level }}', 
+                                          '{{ arms_level }}', '{{ legs_level }}', '{{ core_level }}'];
+                            return labels[index] + ' (' + context.raw.toFixed(1) + '/10)';
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    max: 10,
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: '#fff',
+                        stepSize: 2
+                    }
+                },
+                y: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        color: '#fff',
+                        font: {
+                            size: 11
                         }
                     }
                 }
