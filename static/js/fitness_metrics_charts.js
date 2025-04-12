@@ -120,7 +120,6 @@ function initBodyCompositionChart() {
     const container = ctx.closest('.chart-container');
     if (container) {
         container.classList.add('has-data');
-        console.log('Added has-data class to container');
     }
     
     // Create body composition donut chart with guaranteed numeric values
@@ -285,10 +284,8 @@ function calculateRecoveryCapacity() {
         recoveryScore = recoveryCapacity;
     }
     
-    console.log('Calculated recovery capacity:', recoveryScore, 
-                'Using metrics - metabolicEfficiency:', metabolicEfficiency, 
-                'bodyType:', bodyType, 
-                'muscleBuilding:', muscleBuilding);
+    // Recovery capacity calculation complete
+    console.log('Recovery capacity score:', recoveryScore.toFixed(1));
     
     return recoveryScore;
 }
