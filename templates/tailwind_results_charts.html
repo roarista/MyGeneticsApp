@@ -1422,6 +1422,8 @@
                     <div class="text-xs text-gray-400 mt-2 text-center">
                         <p>This chart reflects your personalized body composition based on photo analysis and your input data.</p>
                     </div>
+                    <!-- Debug element to display raw values -->
+                    <div id="raw-debug-data" class="text-xs mt-2 text-center"></div>
                 </div>
             </div>
             
@@ -2628,12 +2630,21 @@ document.addEventListener('DOMContentLoaded', function() {
         activityLevel: '{{ user_info.get("experience_level", "moderate") }}'
     };
     
-    // Debug output
-    console.log('Body composition values from server:', {
-        bodyFatPercentage: {{ body_fat_percentage|default(15.0) }},
-        leanMassPercentage: {{ lean_mass_percentage|default(85.0) }},
-        gender: '{{ gender|default("male") }}'
-    });
+    // Verbose Debug output - Raw data display
+    console.log('DETAILED CHART DATA DEBUG:');
+    console.log('1. Body fat value from server:', {{ body_fat_percentage|default(15.0) }});
+    console.log('2. Lean mass value from server:', {{ lean_mass_percentage|default(85.0) }});
+    console.log('3. Gender from server:', '{{ gender|default("male") }}');
+    console.log('4. Bodybuilding analysis object:', {{ bodybuilding_analysis|tojson }});
+    
+    // Add raw HTML display of the body fat percentage for visual debugging
+    document.getElementById('raw-debug-data').innerHTML = `
+        <div style="background: rgba(0,0,0,0.7); padding: 5px; margin-top: 10px; border-radius: 4px; font-size: 12px;">
+            <p>Raw Debug Data:</p>
+            <p>Body Fat %: <strong>{{ body_fat_percentage|default(15.0) }}</strong></p>
+            <p>Lean Mass %: <strong>{{ lean_mass_percentage|default(85.0) }}</strong></p>
+        </div>
+    `;
     
     // Initialize metrics with real data - this will also trigger chart initialization
     initMetricsFromServer(metricsData);
