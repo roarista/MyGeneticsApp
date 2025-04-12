@@ -1,0 +1,48 @@
+🧠 Replit Prompt: Personalized Push / Pull / Legs Routine Based on Body Weaknesses
+Please rework the workout generation logic to follow a Push / Pull / Legs split across the week. This structure should remain consistent, but within each day, the system must prioritize exercises that match the user’s weaker muscle groups as determined by their Body Analysis results.
+✅ Base Structure to Follow:
+Push Day:
+Focus: Chest, Shoulders, Triceps
+Pull Day:
+Focus: Back, Biceps
+Leg Day:
+Focus: Quads, Hamstrings, Glutes, Calves
+Repeat this cycle every 3 days or space with rest depending on design, but always follow P-P-L format.
+🔍 Personalization Rules
+Use the user's Muscle Development data (from the Body Analysis section) to assign priority weights to each muscle group:
+“Needs Growth” = Primary emphasis → more exercises, higher volume
+“Average” = Normal volume
+“Well Developed” = Fewer exercises or lower sets/reps
+For example, if the user's shoulders and chest “Need Growth”, the Push Day should include 2–3 shoulder-focused movements and 2 chest-focused movements, while triceps receive 1–2 exercises at lower intensity.
+🏋️ Example Volume Logic per Muscle Group (Per Day):
+Status	Exercises	Sets	Reps
+Needs Growth	3–4	4–5	10–15
+Average	2–3	3	10–12
+Well Developed	1–2	2	8–10
+Adjust the exact range as needed per day.
+📋 Exercise Pool (if needed):
+If no pool exists yet, please create one grouped by function:
+{
+  "Push": {
+    "Chest": ["Bench Press", "Push-Ups", "Incline DB Press"],
+    "Shoulders": ["Overhead Press", "Lateral Raise", "Front Raise"],
+    "Triceps": ["Tricep Pushdown", "Skullcrushers", "Overhead Tricep Extension"]
+  },
+  "Pull": {
+    "Back": ["Pull-Ups", "Barbell Row", "Lat Pulldown"],
+    "Biceps": ["Bicep Curl", "Hammer Curl", "Preacher Curl"]
+  },
+  "Legs": {
+    "Quads": ["Squats", "Leg Press", "Lunges"],
+    "Hamstrings": ["Romanian Deadlift", "Hamstring Curl"],
+    "Glutes": ["Hip Thrust", "Step-Ups"],
+    "Calves": ["Standing Calf Raise", "Seated Calf Raise"]
+  }
+}
+🔄 Implementation Summary:
+Always follow Push / Pull / Legs format
+Use the user's weak muscle groups to emphasize volume on relevant days
+Pull all data from the Body Analysis Results (muscle development scores)
+Vary exercise count, sets, and reps per group based on user-specific status
+Render dynamic, personalized routines when user navigates to each day
+Let me know if you need a sample JSON for a user's muscle scores to test against.
