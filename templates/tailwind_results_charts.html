@@ -1149,35 +1149,90 @@
                 <h2 class="text-xl font-semibold text-white mb-4 px-1 border-b border-gray-800 pb-2">Genetic Traits</h2>
                 
                 <!-- Collapsible Sections -->
-                <div class="space-y-2" x-data="{ openTab: 'muscle-fiber' }">
-                    <!-- Muscle Fiber Composition -->
+                <div class="space-y-2" x-data="{ openTab: 'body-proportions' }">
+                    <!-- Body Proportion Ratios -->
                     <div>
                         <button 
-                            @click="openTab = openTab === 'muscle-fiber' ? null : 'muscle-fiber'" 
+                            @click="openTab = openTab === 'body-proportions' ? null : 'body-proportions'" 
                             class="w-full flex justify-between items-center p-3 rounded-md"
-                            :class="openTab === 'muscle-fiber' ? 'bg-blue-900 bg-opacity-30' : 'bg-gray-800 hover:bg-gray-700'"
+                            :class="openTab === 'body-proportions' ? 'bg-blue-900 bg-opacity-30' : 'bg-gray-800 hover:bg-gray-700'"
                         >
-                            <span>Muscle Fiber Composition</span>
+                            <span>Body Proportion Ratios</span>
                             <i class="fas fa-chevron-down transition-transform duration-200"
-                               :class="openTab === 'muscle-fiber' ? 'transform rotate-180' : ''"></i>
+                               :class="openTab === 'body-proportions' ? 'transform rotate-180' : ''"></i>
                         </button>
                         
-                        <div x-show="openTab === 'muscle-fiber'" class="p-3 bg-gray-800 rounded-md mt-1">
-                            <div class="flex justify-between items-center mb-2">
-                                <span class="text-gray-400">Fast-Twitch Dominant</span>
-                                <span class="text-white">{{ traits.get('fast_twitch_percentage', 'Unknown') }}%</span>
+                        <div x-show="openTab === 'body-proportions'" class="p-3 bg-gray-800 rounded-md mt-1">
+                            <!-- Body Proportion Ratios Display -->
+                            <div class="space-y-3">
+                                <!-- Shoulder-to-Waist Ratio -->
+                                <div>
+                                    <div class="flex justify-between items-center mb-1">
+                                        <span class="text-gray-400">Shoulder-to-Waist</span>
+                                        {% if enhanced_measurements.get('shoulder_width_cm') and enhanced_measurements.get('waist_circumference_cm') %}
+                                            {% set swr = (enhanced_measurements.get('shoulder_width_cm') / (enhanced_measurements.get('waist_circumference_cm')/3.14))|float %}
+                                            <span class="text-white">{{ '{:.2f}'.format(swr) }}</span>
+                                        {% else %}
+                                            <span class="text-gray-500">N/A</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="h-2 bg-gray-700 rounded-full overflow-hidden">
+                                        {% if enhanced_measurements.get('shoulder_width_cm') and enhanced_measurements.get('waist_circumference_cm') %}
+                                            {% set swr = (enhanced_measurements.get('shoulder_width_cm') / (enhanced_measurements.get('waist_circumference_cm')/3.14))|float %}
+                                            {% set width = (swr / 2) * 100 %}
+                                            <div class="h-full bg-blue-500" style="width: {{ min(max(width, 10), 100) }}%"></div>
+                                        {% else %}
+                                            <div class="h-full bg-gray-600" style="width: 10%"></div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <!-- Waist-to-Hip Ratio -->
+                                <div>
+                                    <div class="flex justify-between items-center mb-1">
+                                        <span class="text-gray-400">Waist-to-Hip</span>
+                                        {% if enhanced_measurements.get('waist_circumference_cm') and enhanced_measurements.get('hip_circumference_cm') %}
+                                            {% set whr = (enhanced_measurements.get('waist_circumference_cm') / enhanced_measurements.get('hip_circumference_cm'))|float %}
+                                            <span class="text-white">{{ '{:.2f}'.format(whr) }}</span>
+                                        {% else %}
+                                            <span class="text-gray-500">N/A</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="h-2 bg-gray-700 rounded-full overflow-hidden">
+                                        {% if enhanced_measurements.get('waist_circumference_cm') and enhanced_measurements.get('hip_circumference_cm') %}
+                                            {% set whr = (enhanced_measurements.get('waist_circumference_cm') / enhanced_measurements.get('hip_circumference_cm'))|float %}
+                                            {% set width = (whr / 1.2) * 100 %}
+                                            <div class="h-full bg-green-500" style="width: {{ min(max(width, 10), 100) }}%"></div>
+                                        {% else %}
+                                            <div class="h-full bg-gray-600" style="width: 10%"></div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <!-- Other proportion metrics -->
+                                <div>
+                                    <div class="flex justify-between items-center mb-1">
+                                        <span class="text-gray-400">Leg-to-Torso</span>
+                                        {% if enhanced_measurements.get('leg_torso_ratio') %}
+                                            <span class="text-white">{{ '{:.2f}'.format(enhanced_measurements.get('leg_torso_ratio')) }}</span>
+                                        {% else %}
+                                            <span class="text-gray-500">N/A</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="h-2 bg-gray-700 rounded-full overflow-hidden">
+                                        {% if enhanced_measurements.get('leg_torso_ratio') %}
+                                            {% set width = (enhanced_measurements.get('leg_torso_ratio') / 1.2) * 100 %}
+                                            <div class="h-full bg-amber-500" style="width: {{ min(max(width, 10), 100) }}%"></div>
+                                        {% else %}
+                                            <div class="h-full bg-gray-600" style="width: 10%"></div>
+                                        {% endif %}
+                                    </div>
+                                </div>
                             </div>
-                            <div class="h-2 bg-gray-700 rounded-full overflow-hidden">
-                                <div class="h-full bg-blue-500" style="width: {{ traits.get('fast_twitch_percentage', 0) }}%"></div>
-                            </div>
+                            
                             <p class="mt-3 text-sm text-gray-400">
-                                {% if traits.get('fast_twitch_percentage', 0) > 60 %}
-                                Your body appears to have more fast-twitch muscle fibers, making you naturally better at explosive movements and strength training.
-                                {% elif traits.get('fast_twitch_percentage', 0) < 40 %}
-                                Your body appears to have more slow-twitch muscle fibers, giving you better endurance capabilities.
-                                {% else %}
-                                You have a balanced muscle fiber composition, allowing you to excel at both strength and endurance activities.
-                                {% endif %}
+                                Body proportion ratios determine your aesthetic appearance and help identify ideal training approaches. 
+                                A higher shoulder-to-waist ratio creates the coveted V-taper physique.
                             </p>
                         </div>
                     </div>
@@ -1293,11 +1348,14 @@
         <h2 class="text-xl font-semibold text-white mb-6">Your Genetic Traits Analysis</h2>
         
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Muscle Fiber Composition Chart -->
+            <!-- Body Proportion Ratios Chart -->
             <div class="bg-gray-800 p-4 rounded-lg">
-                <h3 class="text-lg font-medium text-white mb-3 text-center">Muscle Fiber Composition</h3>
+                <h3 class="text-lg font-medium text-white mb-3 text-center">Body Proportion Ratios</h3>
                 <div class="chart-container" style="position: relative; height: 200px;">
-                    <canvas id="muscleChart"></canvas>
+                    <canvas id="proportionRatiosChart"></canvas>
+                </div>
+                <div class="text-xs text-gray-400 mt-2 text-center">
+                    <p>Calculated from your body measurements</p>
                 </div>
             </div>
             
@@ -1338,37 +1396,99 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Muscle Fiber Composition Chart (Donut)
-    const muscleCtx = document.getElementById('muscleChart').getContext('2d');
-    const muscleChart = new Chart(muscleCtx, {
-        type: 'doughnut',
+    // Body Proportion Ratios Chart (Horizontal Bar)
+    const proportionCtx = document.getElementById('proportionRatiosChart').getContext('2d');
+    
+    // Get proportion data from measurements. Use default values if missing
+    {% set shoulder_waist_ratio = 0 %}
+    {% set waist_hip_ratio = 0 %}
+    {% set leg_torso_ratio = 0 %}
+    {% set arm_torso_ratio = 0 %}
+    
+    {% if enhanced_measurements %}
+        {% if enhanced_measurements.get('shoulder_width_cm') and enhanced_measurements.get('waist_circumference_cm') %}
+            {% set shoulder_waist_ratio = (enhanced_measurements.get('shoulder_width_cm') / (enhanced_measurements.get('waist_circumference_cm')/3.14))|float %}
+        {% endif %}
+        
+        {% if enhanced_measurements.get('waist_circumference_cm') and enhanced_measurements.get('hip_circumference_cm') %}
+            {% set waist_hip_ratio = (enhanced_measurements.get('waist_circumference_cm') / enhanced_measurements.get('hip_circumference_cm'))|float %}
+        {% endif %}
+        
+        {% if enhanced_measurements.get('leg_torso_ratio') %}
+            {% set leg_torso_ratio = enhanced_measurements.get('leg_torso_ratio')|float %}
+        {% else %}
+            {% set leg_torso_ratio = 0.8 %}
+        {% endif %}
+        
+        {% if enhanced_measurements.get('arm_torso_ratio') %}
+            {% set arm_torso_ratio = enhanced_measurements.get('arm_torso_ratio')|float %}
+        {% else %}
+            {% set arm_torso_ratio = 0.4 %}
+        {% endif %}
+    {% endif %}
+    
+    const proportionRatiosChart = new Chart(proportionCtx, {
+        type: 'bar',
         data: {
-            labels: ['Fast-Twitch Type II', 'Slow-Twitch Type I'],
+            labels: ['Shoulder-to-Waist', 'Waist-to-Hip', 'Leg-to-Torso', 'Arm-to-Torso'],
             datasets: [{
-                data: [65, 35], // Sample data
-                backgroundColor: ['#ff4b6e', '#3b82f6'],
-                borderWidth: 0
+                label: 'Ratio',
+                data: [
+                    {{ shoulder_waist_ratio }},
+                    {{ waist_hip_ratio }},
+                    {{ leg_torso_ratio }},
+                    {{ arm_torso_ratio }}
+                ],
+                backgroundColor: [
+                    '#3b82f6', // blue
+                    '#10b981', // green
+                    '#f59e0b', // amber
+                    '#8b5cf6'  // purple
+                ],
+                borderWidth: 0,
+                borderRadius: 4
             }]
         },
         options: {
+            indexAxis: 'y',
             responsive: true,
             maintainAspectRatio: false,
-            cutout: '70%',
             plugins: {
                 legend: {
-                    position: 'bottom',
-                    labels: {
-                        color: '#fff',
-                        font: {
-                            size: 11
-                        },
-                        padding: 10
-                    }
+                    display: false
                 },
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            return context.label + ': ' + context.raw + '%';
+                            if (context.raw === 0) {
+                                return "Data unavailable";
+                            }
+                            return 'Ratio: ' + context.raw.toFixed(2);
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: '#fff',
+                        callback: function(value) {
+                            return value.toFixed(1);
+                        }
+                    }
+                },
+                y: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        color: '#fff',
+                        font: {
+                            size: 11
                         }
                     }
                 }
