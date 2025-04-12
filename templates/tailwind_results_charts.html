@@ -1347,56 +1347,82 @@
     <div class="mt-8 dark-card">
         <h2 class="text-xl font-semibold text-white mb-6">Your Genetic Traits Analysis</h2>
         
-        <!-- Top row charts -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Body Proportion Ratios Chart -->
-            <div class="bg-gray-800 p-4 rounded-lg">
-                <h3 class="text-lg font-medium text-white mb-3 text-center">Body Proportion Ratios</h3>
-                <div class="chart-container" style="position: relative; height: 200px;">
-                    <canvas id="proportionRatiosChart"></canvas>
-                </div>
-                <div class="text-xs text-gray-400 mt-2 text-center">
-                    <p>Calculated from your body measurements</p>
-                </div>
-            </div>
-            
-            <!-- Recovery Profile Chart -->
-            <div class="bg-gray-800 p-4 rounded-lg">
-                <h3 class="text-lg font-medium text-white mb-3 text-center">Recovery Profile</h3>
-                <div class="chart-container" style="position: relative; height: 200px;">
-                    <canvas id="recoveryChart"></canvas>
-                </div>
-            </div>
-            
-            <!-- Growth Potential Chart -->
-            <div class="bg-gray-800 p-4 rounded-lg">
-                <h3 class="text-lg font-medium text-white mb-3 text-center">Growth Potential by Muscle Group</h3>
-                <div class="chart-container" style="position: relative; height: 200px;">
-                    <canvas id="growthChart"></canvas>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Metabolic Efficiency Score -->
-        <div class="grid grid-cols-1 gap-6 mt-6">
-            <div class="bg-gray-800 p-4 rounded-lg md:col-span-1">
-                <h3 class="text-lg font-medium text-white mb-3 text-center">Metabolic Efficiency Score</h3>
-                <div class="chart-container" style="position: relative; height: 200px;">
-                    <canvas id="metabolicScoreChart"></canvas>
-                </div>
-                <div class="text-xs text-gray-400 mt-2 text-center">
-                    <p>A higher score indicates a more favorable balance of fat-to-lean mass</p>
+        <!-- Two-column layout for charts -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- LEFT COLUMN -->
+            <div class="space-y-6">
+                <!-- Body Proportion Ratios Chart -->
+                <div class="bg-gray-800 p-4 rounded-lg">
+                    <h3 class="text-lg font-medium text-white mb-3 text-center">Body Proportion Ratios</h3>
+                    <div class="chart-container" style="position: relative; height: 200px;">
+                        <canvas id="proportionRatiosChart"></canvas>
+                    </div>
+                    <div class="text-xs text-gray-400 mt-2 text-center">
+                        <p>Calculated from your body measurements</p>
+                    </div>
                 </div>
                 
-                <!-- Hidden debug info -->
-                <div class="text-xs text-gray-500 mt-2 text-center" style="display: none;">
-                    {% if bodybuilding_analysis %}
-                        <p>BF: {{ bodybuilding_analysis.get('body_fat_percentage', 'N/A') }}</p>
-                        <p>BF2: {{ bodybuilding_analysis.get('body_composition', {}).get('body_fat_percentage', 'N/A') }}</p>
-                        <p>LBM: {{ bodybuilding_analysis.get('lean_body_mass_kg', 'N/A') }}</p>
-                        <p>FFMI: {{ bodybuilding_analysis.get('ffmi', 'N/A') }}</p>
-                        <p>Waist: {{ enhanced_measurements.get('waist_circumference_cm', 'N/A') }}</p>
-                    {% endif %}
+                <!-- Metabolic Efficiency Score -->
+                <div class="bg-gray-800 p-4 rounded-lg">
+                    <h3 class="text-lg font-medium text-white mb-3 text-center">Metabolic Efficiency Score</h3>
+                    <div class="chart-container" style="position: relative; height: 200px;">
+                        <canvas id="metabolicScoreChart"></canvas>
+                    </div>
+                    <div class="text-xs text-gray-400 mt-2 text-center">
+                        <p>A higher score indicates a more favorable balance of fat-to-lean mass</p>
+                    </div>
+                    
+                    <!-- Hidden debug info -->
+                    <div class="text-xs text-gray-500 mt-2 text-center" style="display: none;">
+                        {% if bodybuilding_analysis %}
+                            <p>BF: {{ bodybuilding_analysis.get('body_fat_percentage', 'N/A') }}</p>
+                            <p>BF2: {{ bodybuilding_analysis.get('body_composition', {}).get('body_fat_percentage', 'N/A') }}</p>
+                            <p>LBM: {{ bodybuilding_analysis.get('lean_body_mass_kg', 'N/A') }}</p>
+                            <p>FFMI: {{ bodybuilding_analysis.get('ffmi', 'N/A') }}</p>
+                            <p>Waist: {{ enhanced_measurements.get('waist_circumference_cm', 'N/A') }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Placeholder for future chart in the left column -->
+                <div class="bg-gray-800 p-4 rounded-lg hidden">
+                    <h3 class="text-lg font-medium text-white mb-3 text-center">Future Chart</h3>
+                    <div class="h-48 flex items-center justify-center">
+                        <p class="text-gray-500">Chart coming soon</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- RIGHT COLUMN -->
+            <div class="space-y-6">
+                <!-- Recovery Profile Chart (Radar) -->
+                <div class="bg-gray-800 p-4 rounded-lg">
+                    <h3 class="text-lg font-medium text-white mb-3 text-center">Recovery Profile</h3>
+                    <div class="chart-container" style="position: relative; height: 200px;">
+                        <canvas id="recoveryChart"></canvas>
+                    </div>
+                    <div class="text-xs text-gray-400 mt-2 text-center">
+                        <p>Based on your muscle fiber composition and hormonal indicators</p>
+                    </div>
+                </div>
+                
+                <!-- Growth Potential by Muscle Group -->
+                <div class="bg-gray-800 p-4 rounded-lg">
+                    <h3 class="text-lg font-medium text-white mb-3 text-center">Growth Potential by Muscle Group</h3>
+                    <div class="chart-container" style="position: relative; height: 200px;">
+                        <canvas id="growthChart"></canvas>
+                    </div>
+                    <div class="text-xs text-gray-400 mt-2 text-center">
+                        <p>Based on your genetic traits and current development</p>
+                    </div>
+                </div>
+                
+                <!-- Placeholder for future chart in the right column -->
+                <div class="bg-gray-800 p-4 rounded-lg hidden">
+                    <h3 class="text-lg font-medium text-white mb-3 text-center">Future Chart</h3>
+                    <div class="h-48 flex items-center justify-center">
+                        <p class="text-gray-500">Chart coming soon</p>
+                    </div>
                 </div>
             </div>
         </div>
