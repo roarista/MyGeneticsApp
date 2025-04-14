@@ -126,7 +126,7 @@ function initBodyCompositionChart() {
         data: {
             labels: ['Body Fat', 'Lean Mass'],
             datasets: [{
-                data: [fatPercentage, leanMassPercentage],
+                data: [bodyFat, leanMass],
                 backgroundColor: [
                     '#ef4444', // red for fat
                     '#10b981'  // green for lean mass
@@ -177,7 +177,7 @@ function initBodyCompositionChart() {
                 ctx.textAlign = "center";
                 
                 // Fat percentage in center - ensure number formatting
-                const fatText = `${fatPercentage.toFixed(1)}%`;
+                const fatText = `${bodyFat.toFixed(1)}%`;
                 ctx.fillText(fatText, width / 2, height / 2 - fontSize / 2);
                 
                 // Smaller "Body Fat" text
@@ -190,16 +190,16 @@ function initBodyCompositionChart() {
                 let categoryColor = "";
                 
                 if (gender && gender.toLowerCase() === 'male') {
-                    if (fatPercentage < 6) {
+                    if (bodyFat < 6) {
                         category = "Essential Fat";
                         categoryColor = "#f59e0b"; // amber - too low can be unhealthy
-                    } else if (fatPercentage < 14) {
+                    } else if (bodyFat < 14) {
                         category = "Athletic";
                         categoryColor = "#10b981"; // green
-                    } else if (fatPercentage < 18) {
+                    } else if (bodyFat < 18) {
                         category = "Fitness";
                         categoryColor = "#3b82f6"; // blue
-                    } else if (fatPercentage < 25) {
+                    } else if (bodyFat < 25) {
                         category = "Average";
                         categoryColor = "#f59e0b"; // amber
                     } else {
@@ -208,16 +208,16 @@ function initBodyCompositionChart() {
                     }
                 } else {
                     // Female or undefined - use female ranges
-                    if (fatPercentage < 14) {
+                    if (bodyFat < 14) {
                         category = "Essential Fat";
                         categoryColor = "#f59e0b"; // amber - too low can be unhealthy
-                    } else if (fatPercentage < 21) {
+                    } else if (bodyFat < 21) {
                         category = "Athletic";
                         categoryColor = "#10b981"; // green
-                    } else if (fatPercentage < 25) {
+                    } else if (bodyFat < 25) {
                         category = "Fitness";
                         categoryColor = "#3b82f6"; // blue
-                    } else if (fatPercentage < 32) {
+                    } else if (bodyFat < 32) {
                         category = "Average";
                         categoryColor = "#f59e0b"; // amber
                     } else {
@@ -325,15 +325,10 @@ function initBodyCompDoughnutChart() {
         return;
     }
     
-    // Get body composition percentages - ensure they're proper numbers, not strings
-    let fatPercentage = parseFloat(bodyFatPercentage) || 20;
-    
-    // Always calculate lean mass directly from body fat to ensure they sum to 100%
-    let leanMassPercentage = 100 - fatPercentage;
-    
+    // Use the direct bodyFat and leanMass variables passed from HTML
     console.log('BODY COMP DOUGHNUT CHART DEBUG:');
-    console.log('- Body Fat %:', fatPercentage.toFixed(1));
-    console.log('- Lean Mass %:', leanMassPercentage.toFixed(1));
+    console.log('- Body Fat %:', bodyFat.toFixed(1));
+    console.log('- Lean Mass %:', leanMass.toFixed(1));
     
     // Create body composition donut chart with guaranteed numeric values
     window.bodyCompDoughnutChart = new Chart(context2d, {
@@ -341,7 +336,7 @@ function initBodyCompDoughnutChart() {
         data: {
             labels: ['Body Fat', 'Lean Mass'],
             datasets: [{
-                data: [fatPercentage, leanMassPercentage],
+                data: [bodyFat, leanMass],
                 backgroundColor: [
                     '#ef4444', // red for fat
                     '#10b981'  // green for lean mass
