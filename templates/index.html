@@ -1,3 +1,4 @@
+
 {% extends "base.html" %}
 
 {% block title %}MyGenetics - Unlock Your Genetic Potential{% endblock %}
@@ -68,31 +69,7 @@
             <h3 class="mb-0 fw-bold">Start Your Analysis</h3>
           </div>
           <div class="card-body">
-            <form action="{{ url_for('analyze') }}" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
-              <!-- Front Photo Upload -->
-              <div class="mb-3">
-                <label for="front_photo" class="form-label fw-medium">Front View Photo:</label>
-                <input type="file" name="front_photo" id="front_photo" class="form-control" accept=".jpg,.jpeg,.png" required>
-                <div class="invalid-feedback text-danger">
-                  Please upload a front view photo.
-                </div>
-                <div class="file-feedback">
-                  Upload a clear, front-view photo in good lighting.
-                </div>
-              </div>
-              
-              <!-- Back Photo Upload -->
-              <div class="mb-3">
-                <label for="back_photo" class="form-label fw-medium">Back View Photo:</label>
-                <input type="file" name="back_photo" id="back_photo" class="form-control" accept=".jpg,.jpeg,.png" required>
-                <div class="invalid-feedback text-danger">
-                  Please upload a back view photo.
-                </div>
-                <div class="file-feedback">
-                  Upload a clear, back-view photo in good lighting.
-                </div>
-              </div>
-              
+            <form action="{{ url_for('analyze') }}" method="POST" class="needs-validation" novalidate>
               <div class="row mb-3">
                 <div class="col-md-4">
                   <label for="height" class="form-label fw-medium">Height (cm):</label>
@@ -163,8 +140,8 @@
             <div class="icon-circle upload-icon">
               <i class="fas fa-upload"></i>
             </div>
-            <h5 class="fw-bold mb-2">Upload Photos</h5>
-            <p class="text-muted small">Upload clear front and back photos in neutral standing position</p>
+            <h5 class="fw-bold mb-2">Enter Data</h5>
+            <p class="text-muted small">Enter your basic measurements and fitness details</p>
           </div>
         </div>
       </div>
