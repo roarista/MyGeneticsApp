@@ -159,6 +159,12 @@
           <a href="{{ url_for('education') }}" class="nav-link {% if request.endpoint == 'education' %}active{% endif %}">
             Learn
           </a>
+          <a href="{{ url_for('simple_body_comp') }}" class="nav-link {% if request.endpoint == 'simple_body_comp' %}active{% endif %}">
+            <span class="text-yellow-500">Simple Calc</span>
+          </a>
+          <a href="{{ url_for('test_set_session') }}" class="nav-link {% if request.endpoint == 'test_set_session' %}active{% endif %}">
+            <span class="text-green-500">Test Session</span>
+          </a>
           {% if is_authenticated() %}
           <a href="{{ url_for('profile') }}" class="nav-link {% if request.endpoint == 'profile' %}active{% endif %}">
             Profile

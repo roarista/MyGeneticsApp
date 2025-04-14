@@ -43,6 +43,155 @@ logger.info("Session configuration initialized with enhanced persistence setting
 def inject_auth():
     return {'auth': auth, 'is_authenticated': is_authenticated}
 
+# Simple body composition calculation (for debugging session issues)
+def calculate_body_composition(weight, height, age, sex):
+    """Calculate body fat and lean mass using simplified formula"""
+    # BMI-based body fat estimate (simplified)
+    bmi = weight / (height * height)
+    
+    # Apply gender adjustment (men typically have less body fat)
+    if sex == 1:  # male
+        body_fat = (1.20 * bmi) + (0.23 * age) - 16.2
+    else:  # female
+        body_fat = (1.20 * bmi) + (0.23 * age) - 5.4
+        
+    # Ensure reasonable range
+    body_fat = max(5.0, min(body_fat, 45.0))
+    
+    # Lean mass percentage is what remains
+    lean_mass = 100.0 - body_fat
+    
+    return body_fat, lean_mass
+
+@app.route('/simple_body_comp')
+def simple_body_comp():
+    """Simple body composition calculator page for session debugging"""
+    return render_template('simple_body_comp.html')
+
+@app.route('/simple_analyze', methods=['POST'])
+def simple_analyze():
+    """Process simple body composition calculation for session debugging"""
+    try:
+        # Extract form values
+        weight = float(request.form.get('weight', 0))
+        height = float(request.form.get('height', 0)) / 100  # convert to meters
+        age = int(request.form.get('age', 0))
+        sex = 1 if request.form.get('sex', '').lower() == 'male' else 0
+
+        print("📥 Received:", weight, height, age, sex)
+        logger.debug(f"📥 Received: weight={weight}, height={height}, age={age}, sex={sex}")
+
+        # Calculate body composition
+        body_fat, lean_mass = calculate_body_composition(weight, height, age, sex)
+
+        print("📊 Calculated:", body_fat, lean_mass)
+        logger.debug(f"📊 Calculated: body_fat={body_fat}, lean_mass={lean_mass}")
+
+        # Store in session with multiple approaches for redundancy
+        session['analysis_results'] = {
+            'body_fat': body_fat,
+            'lean_mass': lean_mass
+        }
+        
+        # Also store values separately
+        session['body_fat'] = body_fat
+        session['lean_mass'] = lean_mass
+        
+        # Force session persistence
+        session.modified = True
+
+        print("💾 Session set:", session['analysis_results'])
+        logger.debug(f"💾 Session set: {session['analysis_results']}")
+        logger.debug(f"💾 Session keys: {list(session.keys())}")
+
+        # Redirect to simple results
+        return redirect(url_for('simple_results'))
+
+    except Exception as e:
+        print("❌ Error in /simple_analyze:", str(e))
+        logger.error(f"❌ Error in /simple_analyze: {str(e)}")
+        return render_template('error.html', message=f"Error: {str(e)}")
+
+@app.route('/simple_results')
+def simple_results():
+    """Display simple body composition results for session debugging"""
+    try:
+        logger.debug(f"🔍 Simple results route - Session keys: {list(session.keys())}")
+        
+        # Try multiple approaches to get the data
+        if 'analysis_results' in session:
+            logger.debug(f"✅ Found analysis_results in session: {session['analysis_results']}")
+            results = session['analysis_results']
+            body_fat = results.get('body_fat', 0)
+            lean_mass = results.get('lean_mass', 0)
+        elif 'body_fat' in session and 'lean_mass' in session:
+            logger.debug(f"✅ Found separate body_fat and lean_mass in session")
+            body_fat = session['body_fat']
+            lean_mass = session['lean_mass']
+        else:
+            logger.warning("❌ No analysis data found in session")
+            return render_template('error.html', message="No analysis data found in session. Please try again.")
+            
+        logger.debug(f"📊 Displaying results: body_fat={body_fat}, lean_mass={lean_mass}")
+        
+        # Return a simple HTML result directly (no template needed)
+        return f'''
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Body Composition Results</title>
+                <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+            </head>
+            <body class="bg-dark text-light">
+                <div class="container mt-5">
+                    <h1>Body Composition Results</h1>
+                    <div class="card bg-secondary my-3">
+                        <div class="card-body">
+                            <h5 class="card-title">Body Fat Percentage</h5>
+                            <h2 class="display-4 text-primary">{body_fat:.1f}%</h2>
+                            <div class="progress mt-2">
+                                <div class="progress-bar bg-primary" role="progressbar" 
+                                    style="width: {body_fat}%" 
+                                    aria-valuenow="{body_fat}" 
+                                    aria-valuemin="0" 
+                                    aria-valuemax="100">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card bg-secondary my-3">
+                        <div class="card-body">
+                            <h5 class="card-title">Lean Mass Percentage</h5>
+                            <h2 class="display-4 text-success">{lean_mass:.1f}%</h2>
+                            <div class="progress mt-2">
+                                <div class="progress-bar bg-success" role="progressbar" 
+                                    style="width: {lean_mass}%" 
+                                    aria-valuenow="{lean_mass}" 
+                                    aria-valuemin="0" 
+                                    aria-valuemax="100">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card bg-secondary my-3">
+                        <div class="card-body">
+                            <h5 class="card-title">Session Keys</h5>
+                            <p class="card-text">{list(session.keys())}</p>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <a href="/simple_body_comp" class="btn btn-primary">Calculate Again</a>
+                        <a href="/" class="btn btn-secondary ms-2">Back to Home</a>
+                    </div>
+                </div>
+            </body>
+            </html>
+        '''
+        
+    except Exception as e:
+        logger.error(f"❌ Error in /simple_results: {str(e)}")
+        return render_template('error.html', message=f"Error displaying results: {str(e)}")
+
 # Add min and max functions to be available in templates
 @app.context_processor
 def utility_functions():
@@ -135,6 +284,74 @@ try:
     app.register_blueprint(google_auth)
 except ImportError:
     logger.warning("Google authentication module not available")
+
+# Simple test routes for session debugging
+@app.route('/test_set_session')
+def test_set_session():
+    """Set session values for testing"""
+    # Set test values in session
+    session['test_value'] = 'This is a test value'
+    session['test_dict'] = {
+        'body_fat': 15.5,
+        'lean_mass': 84.5
+    }
+    # Force session persistence
+    session.modified = True
+    
+    # Print debugging information
+    print("📥 SET SESSION test_value:", session.get('test_value'))
+    print("📥 SET SESSION test_dict:", session.get('test_dict'))
+    print("📥 SET SESSION keys:", list(session.keys()))
+    
+    # Use flash message to confirm
+    flash('Session values set successfully!', 'success')
+    return redirect(url_for('test_get_session'))
+
+@app.route('/test_get_session')
+def test_get_session():
+    """Get session values for testing"""
+    # Print debugging information
+    print("📤 GET SESSION keys:", list(session.keys()))
+    print("📤 GET SESSION test_value:", session.get('test_value'))
+    print("📤 GET SESSION test_dict:", session.get('test_dict'))
+    
+    # Render simple template with session data
+    return f'''
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Session Test</title>
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        </head>
+        <body class="bg-dark text-light">
+            <div class="container mt-5">
+                <h1>Session Test Results</h1>
+                <div class="card bg-secondary my-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Session Keys</h5>
+                        <p class="card-text">{list(session.keys())}</p>
+                    </div>
+                </div>
+                <div class="card bg-secondary my-3">
+                    <div class="card-body">
+                        <h5 class="card-title">test_value</h5>
+                        <p class="card-text">{session.get('test_value', 'Not found')}</p>
+                    </div>
+                </div>
+                <div class="card bg-secondary my-3">
+                    <div class="card-body">
+                        <h5 class="card-title">test_dict</h5>
+                        <p class="card-text">{session.get('test_dict', 'Not found')}</p>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <a href="/test_set_session" class="btn btn-primary">Set Session Values Again</a>
+                    <a href="/" class="btn btn-secondary ms-2">Back to Home</a>
+                </div>
+            </div>
+        </body>
+        </html>
+    '''
 
 # Configure upload settings
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
