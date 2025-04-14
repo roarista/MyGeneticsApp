@@ -506,8 +506,15 @@ def analyze():
             os.remove(front_filepath)
         if os.path.exists(back_filepath):
             os.remove(back_filepath)
-        
-        return redirect(url_for('results', analysis_id=analysis_id))
+            
+        # Update the default redirect to handle session expiration better
+        try:
+            # First try redirecting with analysis_id
+            return redirect(url_for('results', analysis_id=analysis_id))
+        except Exception as redirect_error:
+            logger.warning(f"Error redirecting with analysis_id: {str(redirect_error)}")
+            # Fallback to plain results route which will use session data
+            return redirect(url_for('results'))
         
     except Exception as e:
         logger.error(f"Error during analysis: {str(e)}")
@@ -532,6 +539,7 @@ def analyze():
         
         return redirect(url_for('index'))
 
+@app.route('/results', defaults={'analysis_id': None})
 @app.route('/results/<analysis_id>')
 def results(analysis_id):
     """Display analysis results"""
@@ -540,16 +548,44 @@ def results(analysis_id):
         logger.debug(f"Session contents: {session}")
         logger.debug(f"Requested analysis_id: {analysis_id}")
         
-        # First check if analysis exists in our in-memory dictionary
-        if analysis_id not in analysis_results:
+        # If no analysis_id provided, try to use session data directly
+        if analysis_id is None:
+            if 'analysis_results' in session:
+                logger.info("Using analysis results from session (no ID provided)")
+                result = session['analysis_results']
+                analysis_id = result.get('id', str(uuid.uuid4()))
+            else:
+                # No analysis ID and no session data - handle gracefully
+                logger.warning("No analysis ID provided and no session data available")
+                return render_template('results.html', 
+                                      analysis_results=None, 
+                                      error_message="No analysis data found. Please submit your information again.")
+        # If analysis_id is provided, try to find the results
+        elif analysis_id not in analysis_results:
             logger.warning(f"Analysis ID {analysis_id} not found in analysis_results")
             # Try to fall back to session if available
             if 'analysis_results' in session and session['analysis_results'].get('id') == analysis_id:
                 logger.info(f"Found analysis {analysis_id} in session")
                 result = session['analysis_results']
+            elif 'analysis_results' in session:
+                # Session exists but with different ID - use it anyway as fallback
+                logger.info(f"Using session analysis results with different ID")
+                result = session['analysis_results']
+                # Update the analysis_id to match what's in the session
+                analysis_id = result.get('id', analysis_id)
             else:
-                flash('Analysis not found. Please try again.', 'danger')
-                return redirect(url_for('index'))
+                # Try to render a simplified results page with just body_fat and lean_mass if available
+                if 'body_fat' in session and 'lean_mass' in session:
+                    logger.info("Falling back to basic body composition data in session")
+                    return render_template('results.html', 
+                                         body_fat_percentage=session['body_fat'],
+                                         lean_mass_percentage=session['lean_mass'],
+                                         basic_data_only=True)
+                else:
+                    logger.warning("No fallback data available in session")
+                    return render_template('results.html', 
+                                         analysis_results=None, 
+                                         error_message="Analysis not found. Please try again.")
         else:
             result = analysis_results[analysis_id]
         
