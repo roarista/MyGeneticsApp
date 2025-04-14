@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}MyGenetics - Unlock Your Genetic Potential{% endblock %}</title>
+  
+  <!-- External CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  
+  <!-- Chart.js for results visualization -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Custom CSS -->
+  <style>
+    :root {
+      --primary-color: #FF4D4D;
+      --primary-hover: #CC3D3D;
+      --dark-bg: #0F0F0F;
+      --card-bg: #1A1A1A;
+      --card-border: #333;
+      --text-light: #F0F0F0;
+      --text-muted: #AAAAAA;
+      --success-color: #28a745;
+      --info-color: #0d6efd;
+    }
+    
+    body {
+      background-color: var(--dark-bg);
+      color: var(--text-light);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .header {
+      background-color: rgba(0, 0, 0, 0.8);
+      border-bottom: 1px solid var(--card-border);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 1rem 0;
+    }
+    
+    .logo-container {
+      display: flex;
+      align-items: center;
+    }
+    
+    .logo {
+      color: var(--primary-color);
+      font-weight: bold;
+      font-size: 1.5rem;
+      text-decoration: none;
+    }
+    
+    .logo-sub {
+      font-size: 0.7rem;
+      color: var(--primary-color);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      display: block;
+      margin-top: -5px;
+    }
+    
+    .btn-primary {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+      border-color: var(--primary-hover);
+    }
+    
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 0.75rem;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .card-header {
+      background-color: var(--info-color);
+      color: white;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      font-weight: 600;
+    }
+    
+    .hero-title {
+      font-size: 3rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 1.5rem;
+    }
+    
+    .gradient-text {
+      background: linear-gradient(90deg, var(--primary-color), #F9CB28);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: inline-block;
+    }
+    
+    .form-control, .form-select {
+      background-color: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--card-border);
+      color: var(--text-light);
+    }
+    
+    .form-control:focus, .form-select:focus {
+      background-color: rgba(0, 0, 0, 0.3);
+      border-color: var(--primary-color);
+      color: var(--text-light);
+      box-shadow: 0 0 0 0.25rem rgba(255, 77, 77, 0.25);
+    }
+    
+    .custom-file-upload {
+      position: relative;
+      display: inline-block;
+      width: 100%;
+    }
+    
+    .file-feedback {
+      margin-top: 0.25rem;
+      font-size: 0.875em;
+      color: var(--text-muted);
+    }
+    
+    footer {
+      margin-top: auto;
+      background-color: rgba(0, 0, 0, 0.4);
+      border-top: 1px solid var(--card-border);
+      padding: 2rem 0;
+    }
+    
+    /* Progress bar styles for results page */
+    .progress {
+      background-color: rgba(255, 255, 255, 0.1);
+      height: 1.5rem;
+      border-radius: 1rem;
+    }
+    
+    .progress-bar {
+      border-radius: 1rem;
+    }
+    
+    .display-4 {
+      font-weight: 700;
+    }
+    
+    .metrics-card {
+      transition: transform 0.2s;
+    }
+    
+    .metrics-card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .nav-link {
+      color: var(--text-muted);
+      transition: color 0.3s;
+    }
+    
+    .nav-link:hover {
+      color: var(--text-light);
+    }
+    
+    .nav-link.active {
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    /* Animation class for fade-ins */
+    .fade-in {
+      animation: fadeIn 0.8s ease-in-out;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+  
+  {% block head_extras %}{% endblock %}
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-center">
+        <a href="/" class="logo-container">
+          <div>
+            <span class="logo">MyGenetics</span>
+            <span class="logo-sub">ALPHA</span>
+          </div>
+        </a>
+        
+        <nav>
+          <ul class="nav">
+            <li class="nav-item">
+              <a class="nav-link {% if request.endpoint == 'index' %}active{% endif %}" href="/">Home</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container py-5">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} mb-4 alert-dismissible fade show">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="text-center">
+    <div class="container">
+      <p class="mb-1">&copy; 2025 MyGenetics. All rights reserved.</p>
+      <p class="mb-0 text-muted">Unlock your genetic potential</p>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JavaScript -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    // Basic validation for file inputs
+    document.addEventListener('DOMContentLoaded', function() {
+      // Setup file validation if upload fields exist
+      const frontPhotoInput = document.getElementById('front_photo');
+      const backPhotoInput = document.getElementById('back_photo');
+      const submitButton = document.querySelector('button[type="submit"]');
+      
+      if (frontPhotoInput && backPhotoInput && submitButton) {
+        function validateFiles() {
+          const frontValid = frontPhotoInput.files.length > 0;
+          const backValid = backPhotoInput.files.length > 0;
+          
+          if (!frontValid) {
+            frontPhotoInput.classList.add('is-invalid');
+          } else {
+            frontPhotoInput.classList.remove('is-invalid');
+          }
+          
+          if (!backValid) {
+            backPhotoInput.classList.add('is-invalid');
+          } else {
+            backPhotoInput.classList.remove('is-invalid');
+          }
+          
+          submitButton.disabled = !(frontValid && backValid);
+        }
+        
+        frontPhotoInput.addEventListener('change', validateFiles);
+        backPhotoInput.addEventListener('change', validateFiles);
+        
+        // Initial validation
+        validateFiles();
+      }
+    });
+  </script>
+  
+  {% block scripts %}{% endblock %}
+</body>
+</html>

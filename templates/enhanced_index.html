@@ -1,0 +1,217 @@
+{% extends "enhanced_layout.html" %}
+
+{% block title %}MyGenetics - Unlock Your Genetic Potential{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="row justify-content-center text-center mb-5 fade-in">
+  <div class="col-lg-10">
+    <h1 class="hero-title">DISCOVER YOUR <span class="gradient-text">GENETIC POTENTIAL</span></h1>
+    <p class="lead mb-4">
+      Optimize your fitness routine based on your unique body structure. Upload photos to analyze your genetic traits and get personalized workout recommendations.
+    </p>
+  </div>
+</div>
+
+<div class="row">
+  <!-- Left Column - Benefits -->
+  <div class="col-lg-5 mb-5 mb-lg-0 fade-in" style="animation-delay: 0.1s">
+    <h2 class="mb-4">Why Body Analysis Matters</h2>
+    <p class="mb-4">
+      Your body's structure significantly affects how you should train. Everyone has genetic advantages and limitations.
+    </p>
+    
+    <div class="mb-4">
+      <div class="d-flex align-items-center mb-3">
+        <div class="me-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background-color: rgba(255, 77, 77, 0.1); border-radius: 50%">
+          <i class="fas fa-dna text-primary"></i>
+        </div>
+        <div>
+          <h5 class="mb-1">Muscle Insertions</h5>
+          <p class="mb-0 text-muted">The points where muscles attach to bones determine leverage and growth potential</p>
+        </div>
+      </div>
+      
+      <div class="d-flex align-items-center mb-3">
+        <div class="me-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background-color: rgba(255, 77, 77, 0.1); border-radius: 50%">
+          <i class="fas fa-ruler text-primary"></i>
+        </div>
+        <div>
+          <h5 class="mb-1">Limb Proportions</h5>
+          <p class="mb-0 text-muted">Arm and leg length affect exercise mechanics and muscle activation</p>
+        </div>
+      </div>
+      
+      <div class="d-flex align-items-center">
+        <div class="me-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background-color: rgba(255, 77, 77, 0.1); border-radius: 50%">
+          <i class="fas fa-bone text-primary"></i>
+        </div>
+        <div>
+          <h5 class="mb-1">Bone Structure</h5>
+          <p class="mb-0 text-muted">Frame size influences muscle appearance and functional strength</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Right Column - Analysis Form -->
+  <div class="col-lg-7 fade-in" style="animation-delay: 0.2s">
+    <div class="card">
+      <div class="card-header bg-dark text-center">
+        <h3 class="mb-0">Start Your Analysis</h3>
+      </div>
+      <div class="card-body">
+        <form action="{{ url_for('analyze') }}" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+          <!-- Front Photo Upload -->
+          <div class="mb-3">
+            <label for="front_photo" class="form-label">Front View Photo:</label>
+            <input type="file" name="front_photo" id="front_photo" class="form-control" accept=".jpg,.jpeg,.png" required>
+            <div class="invalid-feedback">
+              Please upload a front view photo.
+            </div>
+            <div class="file-feedback">
+              Upload a clear, front-view photo in good lighting.
+            </div>
+          </div>
+          
+          <!-- Back Photo Upload -->
+          <div class="mb-3">
+            <label for="back_photo" class="form-label">Back View Photo:</label>
+            <input type="file" name="back_photo" id="back_photo" class="form-control" accept=".jpg,.jpeg,.png" required>
+            <div class="invalid-feedback">
+              Please upload a back view photo.
+            </div>
+            <div class="file-feedback">
+              Upload a clear, back-view photo in good lighting.
+            </div>
+          </div>
+          
+          <div class="row mb-3">
+            <div class="col-md-4">
+              <label for="height" class="form-label">Height (cm):</label>
+              <input type="number" name="height" id="height" class="form-control" min="120" max="220" placeholder="170" required>
+              <div class="invalid-feedback">
+                Please enter a valid height.
+              </div>
+            </div>
+            <div class="col-md-4">
+              <label for="weight" class="form-label">Weight (kg):</label>
+              <input type="number" name="weight" id="weight" class="form-control" min="40" max="180" placeholder="70" required>
+              <div class="invalid-feedback">
+                Please enter a valid weight.
+              </div>
+            </div>
+            <div class="col-md-4">
+              <label for="age" class="form-label">Age (years):</label>
+              <input type="number" name="age" id="age" class="form-control" min="16" max="90" placeholder="30" required>
+              <div class="invalid-feedback">
+                Please enter a valid age.
+              </div>
+            </div>
+          </div>
+          
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <label for="gender" class="form-label">Gender:</label>
+              <select name="gender" id="gender" class="form-select" required>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label for="experience" class="form-label">Training Experience:</label>
+              <select name="experience" id="experience" class="form-select" required>
+                <option value="beginner">Beginner (0-2 years)</option>
+                <option value="intermediate">Intermediate (2-5 years)</option>
+                <option value="advanced">Advanced (5+ years)</option>
+              </select>
+            </div>
+          </div>
+          
+          <button type="submit" class="btn btn-primary w-100">
+            <i class="fas fa-dna me-2"></i>
+            Analyze My Genetics
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- How It Works Section -->
+<div class="row mt-5 pt-5 justify-content-center fade-in" style="animation-delay: 0.3s">
+  <div class="col-12 text-center mb-4">
+    <h2>How It Works</h2>
+  </div>
+  
+  <div class="col-md-3 mb-4">
+    <div class="card h-100 text-center">
+      <div class="card-body">
+        <div class="d-flex align-items-center justify-content-center mb-3 mx-auto" style="width: 60px; height: 60px; background-color: rgba(255, 77, 77, 0.1); border-radius: 50%">
+          <i class="fas fa-upload text-primary"></i>
+        </div>
+        <h4>Upload Photos</h4>
+        <p class="text-muted">Upload clear front and back photos in neutral standing position</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-3 mb-4">
+    <div class="card h-100 text-center">
+      <div class="card-body">
+        <div class="d-flex align-items-center justify-content-center mb-3 mx-auto" style="width: 60px; height: 60px; background-color: rgba(255, 77, 77, 0.1); border-radius: 50%">
+          <i class="fas fa-brain text-primary"></i>
+        </div>
+        <h4>AI Analysis</h4>
+        <p class="text-muted">Our AI analyzes your body's structural traits</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-3 mb-4">
+    <div class="card h-100 text-center">
+      <div class="card-body">
+        <div class="d-flex align-items-center justify-content-center mb-3 mx-auto" style="width: 60px; height: 60px; background-color: rgba(255, 77, 77, 0.1); border-radius: 50%">
+          <i class="fas fa-chart-line text-primary"></i>
+        </div>
+        <h4>Get Results</h4>
+        <p class="text-muted">Get customized training recommendations</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-3 mb-4">
+    <div class="card h-100 text-center">
+      <div class="card-body">
+        <div class="d-flex align-items-center justify-content-center mb-3 mx-auto" style="width: 60px; height: 60px; background-color: rgba(255, 77, 77, 0.1); border-radius: 50%">
+          <i class="fas fa-dumbbell text-primary"></i>
+        </div>
+        <h4>Focus Training</h4>
+        <p class="text-muted">Focus your training effort where it matters most</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Form validation
+  (function() {
+    'use strict';
+    
+    const forms = document.querySelectorAll('.needs-validation');
+    
+    Array.from(forms).forEach(function(form) {
+      form.addEventListener('submit', function(event) {
+        if (!form.checkValidity()) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+        
+        form.classList.add('was-validated');
+      }, false);
+    });
+  })();
+</script>
+{% endblock %}

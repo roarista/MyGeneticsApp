@@ -371,9 +371,9 @@ def allowed_3d_file(filename):
 
 @app.route('/')
 def index():
-    """Render the main page with a simple UI that doesn't depend on AOS or session data"""
-    logger.info("Rendering simple index page")
-    return render_template('simple_index.html')
+    """Render the enhanced main page with proper styling and branding"""
+    logger.info("Rendering enhanced index page")
+    return render_template('enhanced_index.html')
     
 @app.route('/tailwind')
 def tailwind_index():
@@ -555,8 +555,12 @@ def results():
         # Calculate muscle building potential (simplified)
         muscle_potential = min(100, max(0, 100 - body_fat * 2))
         
+        # Save weight_kg in session for future visits to results page
+        session['weight_kg'] = weight_kg
+        session.modified = True
+        
         return render_template(
-            'results.html',
+            'enhanced_results.html',
             body_fat=body_fat,
             lean_mass=lean_mass,
             fat_mass_kg=fat_mass_kg,
