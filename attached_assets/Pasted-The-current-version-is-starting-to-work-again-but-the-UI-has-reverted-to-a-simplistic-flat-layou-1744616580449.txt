@@ -1,0 +1,95 @@
+The current version is starting to work again, but the UI has reverted to a **simplistic, flat layout** that doesn't match the original aesthetic. Please restore the following:
+
+---
+
+🎨 GLOBAL UI STYLING – Return to Original MyGenetics Branding
+
+See all screenshots previously shared for reference. Key details:
+- **Dark background** (HEX #0E0E0E or close), soft on eyes
+- Use **rounded cards** with box shadows for all UI blocks
+- Fonts should be **clean sans-serif** (e.g., Inter, Roboto)
+- Titles: bold and larger (20–24pt); body text smaller (14–16pt)
+- Section backgrounds: slightly lighter than page background (e.g., #121212 vs #0E0E0E)
+- All **graphs and progress bars** should be vivid, colorful, and match the original palette (red, yellow, green, blue, purple)
+
+---
+
+🍽️ PERSONALIZED NUTRITION PLAN PAGE
+
+Refer to:
+- `Personalized Nutrition plan page - upper part.png`
+- `Personalized nutrition plan page - lower part.png`
+
+Restore:
+- 🔢 **Macros Panel**
+  - Protein, Carbs, Fats (display g values + horizontal progress bars)
+- 🔥 **Caloric Needs**
+  - Maintenance + Target Calories (e.g., 1738 kcal/day)
+- 🕐 **Meal Timing Panel**: split into 5 time blocks
+  - Breakfast, Lunch, Pre/Post Workout, Evening Snack
+  - Shows: Calories %, Grams of Protein, Carbs, Fats
+- 🍗 **Recommended Foods**: protein/carb/fat columns with bullet lists
+- 💊 **Supplement Panel**: Protein Powder, Creatine, D3 (dosage + timing)
+- 📋 **Nutrition Tips** with checklist icons
+
+Each panel should be:
+- Card-style, full width or two-column layout
+- Uniform padding, bold headers, consistent background
+
+---
+
+🏋️ PERSONALIZED WORKOUT PLAN PAGE
+
+Refer to:
+- `Personalized workout plan upper part.png`
+- `Personalized workout plan middle part 2.png`
+
+Restore:
+- **Your Training Split Sidebar**:
+  - Weekly plan: Mon → Sun
+  - Each day shows muscle group (e.g., Monday: Chest, Shoulders, Triceps)
+- **Experience Toggle**: Beginner, Intermediate, Advanced
+- **Select Your Workout Buttons** (1–7)
+- **Workout Display** for selected day:
+  - Exercise boxes: Incline DB Press, Lat Pulldown, Pull-up, etc.
+  - Each box includes: Sets, Reps, Rest Time, and a Tag (e.g., “Average”)
+
+Styling:
+- Blue or purple gradient headline
+- Each day/exercise as a **rounded card** with colored dot tags
+- Show visually that the plan is based on the user’s weak/strong muscle groups
+
+---
+
+🔐 SIGN UP / LOGIN PAGE
+
+Create separate pages/routes:
+- `/signup` and `/login`
+
+Signup fields:
+- Name, Email, Password, Confirm Password
+- Optional: Gender, Age, Experience
+
+Login fields:
+- Email + Password
+
+Design:
+- Simple modal or centered card on black background
+- White text inputs, red action buttons, subtle shadows
+- Top left: MyGenetics logo in red + "ALPHA" badge in small caps
+
+Add redirect logic after login → homepage or /analyze.
+
+---
+
+📂 REFERENCE SCREENSHOTS INCLUDE:
+- "Personalized Nutrition plan page - upper/lower"
+- "Personalized workout plan upper/middle"
+- "Home page - upper/middle"
+- "Screenshot 2025-04-14 at 12.39.26 AM.png" (confirms current UI difference)
+- "Body Analysis page measurements.png" (shows proper styling for cards, metrics, tags)
+
+---
+
+✅ Objective:
+Restore all functionality and visual consistency exactly as shown in screenshots. Preserve any backend logic that was working, but ensure pages, layouts, and all interactive components reflect the **original UI design** — not the current simplified Replit style.

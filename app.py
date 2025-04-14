@@ -15,6 +15,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user, UserMixin
 
 # Replit-specific imports with fallback
 try:
@@ -89,6 +90,19 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(model_class=Base)
 db.init_app(app)
+
+# Initialize Flask-Login
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+
+# Import models and initialize db
+import models
+models.db = db
+
+@login_manager.user_loader
+def load_user(user_id):
+    return models.User.query.get(int(user_id))
 
 @app.before_request
 def make_session_permanent():
@@ -356,6 +370,79 @@ def results():
 
 def is_authenticated():
     return auth.is_authenticated
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+        
+        user = User.query.filter_by(email=email).first()
+        
+        if user and user.check_password(password):
+            login_user(user)
+            flash('Login successful!', 'success')
+            return redirect(url_for('index'))
+        else:
+            flash('Invalid email or password', 'danger')
+    
+    return render_template('login.html')
+
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        gender = request.form.get('gender')
+        age = request.form.get('age')
+        experience = request.form.get('experience')
+        
+        # Check if user with email already exists
+        existing_user = User.query.filter_by(email=email).first()
+        if existing_user:
+            flash('Email already registered', 'danger')
+            return render_template('signup.html')
+        
+        # Create new user
+        new_user = User(
+            username=username,
+            email=email,
+            gender=gender
+        )
+        new_user.set_password(password)
+        
+        if age:
+            new_user.age = int(age)
+        
+        if experience:
+            new_user.experience_level = experience
+        
+        # Save user to database
+        db.session.add(new_user)
+        db.session.commit()
+        
+        # Log the user in
+        login_user(new_user)
+        flash('Account created successfully!', 'success')
+        return redirect(url_for('index'))
+    
+    return render_template('signup.html')
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    flash('You have been logged out', 'info')
+    return redirect(url_for('index'))
+
+@app.route('/nutrition')
+def nutrition():
+    return render_template('nutrition.html')
+
+@app.route('/workout')
+def workout():
+    return render_template('workout.html')
 
 # Import admin_bp and register it after db is initialized
 from admin import admin_bp

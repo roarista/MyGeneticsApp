@@ -19,10 +19,10 @@
     :root {
       --primary-color: #FF4C4C;
       --secondary-color: #00AEEF;
-      --dark-bg: #000000;
-      --darker-bg: #0A0A0A;
-      --card-bg: #1A1A1A;
-      --card-border: #333;
+      --dark-bg: #0E0E0E;
+      --darker-bg: #050505;
+      --card-bg: #121212;
+      --card-border: #222;
       --text-light: #FFFFFF;
       --text-muted: #AAAAAA;
       --success-color: #28a745;
@@ -106,10 +106,16 @@
     
     .card {
       background-color: var(--card-bg);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.05);
       border-radius: 12px;
       overflow: hidden;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2), 0 4px 8px rgba(0, 0, 0, 0.15);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .card:hover {
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25), 0 6px 10px rgba(0, 0, 0, 0.2);
+      transform: translateY(-2px);
     }
     
     .card-header {
@@ -359,13 +365,26 @@
           </div>
         </a>
         
-        <nav>
-          <ul class="nav">
-            <li class="nav-item">
-              <a class="nav-link {% if request.endpoint == 'index' %}active{% endif %}" href="/">Home</a>
-            </li>
-          </ul>
-        </nav>
+        <div class="d-flex align-items-center">
+          <nav class="me-4">
+            <ul class="nav">
+              <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'index' %}active{% endif %}" href="/">Home</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == '3d_scanning' %}active{% endif %}" href="#">3D Scanning</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'learn' %}active{% endif %}" href="#">Learn</a>
+              </li>
+            </ul>
+          </nav>
+          
+          <div class="auth-buttons">
+            <a href="/signup" class="btn btn-sm btn-outline-light me-2">Sign Up</a>
+            <a href="/login" class="btn btn-sm btn-primary">Login</a>
+          </div>
+        </div>
       </div>
     </div>
   </header>

@@ -1,0 +1,931 @@
+{% extends "base.html" %}
+
+{% block title %}Personalized Workout Plan - MyGenetics{% endblock %}
+
+{% block head_extras %}
+<style>
+  /* Workout page specific styles */
+  .plan-title {
+    background: linear-gradient(to right, #4568DC, #B06AB3);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+  }
+  
+  .day-item {
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    transition: all 0.3s;
+  }
+  
+  .day-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: translateX(5px);
+  }
+  
+  .day-item.active {
+    background-color: rgba(179, 157, 219, 0.2);
+    border-left: 4px solid #9C27B0;
+  }
+  
+  .day-item i {
+    margin-right: 1rem;
+  }
+  
+  .day-content {
+    flex: 1;
+  }
+  
+  .day-title {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+  
+  .day-muscles {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+  
+  .dot-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 0.75rem;
+  }
+  
+  .dot-indicator.push {
+    background-color: #FF4C4C;
+  }
+  
+  .dot-indicator.pull {
+    background-color: #2196F3;
+  }
+  
+  .dot-indicator.legs {
+    background-color: #9C27B0;
+  }
+  
+  .dot-indicator.rest {
+    background-color: #4CAF50;
+  }
+  
+  .dot-indicator.focus {
+    background-color: #FF9800;
+  }
+  
+  .workout-selector {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+  
+  .workout-day-btn {
+    min-width: 80px;
+    text-align: center;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    background-color: rgba(15, 15, 15, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 0.5rem;
+    transition: all 0.3s;
+    cursor: pointer;
+  }
+  
+  .workout-day-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  }
+  
+  .workout-day-btn.active {
+    background-color: #1A1A1A;
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  }
+  
+  .workout-day-btn .day-number {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+  }
+  
+  .workout-day-btn .day-name {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+  
+  .workout-day-btn .day-type {
+    font-size: 0.8rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    margin-top: 0.5rem;
+    display: inline-block;
+  }
+  
+  .workout-day-btn .day-type.push {
+    background-color: rgba(255, 76, 76, 0.2);
+    color: #FF7676;
+  }
+  
+  .workout-day-btn .day-type.pull {
+    background-color: rgba(33, 150, 243, 0.2);
+    color: #42A5F5;
+  }
+  
+  .workout-day-btn .day-type.legs {
+    background-color: rgba(156, 39, 176, 0.2);
+    color: #BA68C8;
+  }
+  
+  .workout-day-btn .day-type.rest {
+    background-color: rgba(76, 175, 80, 0.2);
+    color: #81C784;
+  }
+  
+  .workout-day-btn .day-type.focus {
+    background-color: rgba(255, 152, 0, 0.2);
+    color: #FFB74D;
+  }
+  
+  .exercise-card {
+    background-color: rgba(15, 15, 15, 0.5);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: transform 0.3s, box-shadow 0.3s;
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .exercise-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+  }
+  
+  .exercise-info {
+    flex: 1;
+  }
+  
+  .exercise-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+  
+  .exercise-muscle {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+  }
+  
+  .exercise-details {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  
+  .exercise-detail {
+    margin-right: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .detail-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 0.25rem;
+  }
+  
+  .detail-value {
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+  
+  .exercise-tag {
+    position: relative;
+    top: -10px;
+  }
+  
+  .tag {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: #FFC107;
+  }
+  
+  .experience-tabs {
+    display: flex;
+    margin-bottom: 2rem;
+  }
+  
+  .experience-tab {
+    padding: 0.5rem 1.5rem;
+    border-radius: 30px;
+    margin-right: 0.5rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+    background-color: rgba(15, 15, 15, 0.5);
+  }
+  
+  .experience-tab:hover {
+    background-color: rgba(30, 30, 30, 0.8);
+  }
+  
+  .experience-tab.active {
+    background-color: rgba(255, 255, 255, 0.1);
+    font-weight: 600;
+  }
+  
+  .training-tip {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .training-tip:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+  
+  .tip-icon {
+    color: #4CAF50;
+    margin-right: 1rem;
+    margin-top: 0.15rem;
+  }
+  
+  .tip-content {
+    flex: 1;
+  }
+  
+  .muscle-item {
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    background-color: rgba(15, 15, 15, 0.5);
+    margin-bottom: 0.75rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .muscle-name {
+    font-weight: 500;
+  }
+  
+  .muscle-tag {
+    font-size: 0.75rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    background-color: rgba(255, 193, 7, 0.2);
+    color: #FFC107;
+  }
+  
+  .muscle-tag.needs-growth {
+    background-color: rgba(244, 67, 54, 0.2);
+    color: #F44336;
+  }
+  
+  .muscle-tag.average {
+    background-color: rgba(255, 193, 7, 0.2);
+    color: #FFC107;
+  }
+  
+  .muscle-tag.good {
+    background-color: rgba(76, 175, 80, 0.2);
+    color: #4CAF50;
+  }
+  
+  .muscle-tag.excellent {
+    background-color: rgba(33, 150, 243, 0.2);
+    color: #2196F3;
+  }
+  
+  .muscle-tag.elite {
+    background-color: rgba(156, 39, 176, 0.2);
+    color: #9C27B0;
+  }
+  
+  .workout-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+  
+  .workout-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+  }
+  
+  .workout-subtitle {
+    font-size: 1rem;
+    color: var(--text-muted);
+  }
+  
+  .workout-tag {
+    padding: 0.5rem 1.25rem;
+    border-radius: 50px;
+    background-color: rgba(156, 39, 176, 0.2);
+    color: #BA68C8;
+    font-weight: 500;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="py-5">
+  <div class="container">
+    <div class="row">
+      <!-- Left Sidebar: Training Split -->
+      <div class="col-lg-3 mb-4">
+        <!-- Training Split Card -->
+        <div class="card mb-4" data-aos="fade-right">
+          <div class="card-body">
+            <h4 class="card-title mb-4">Your Training Split</h4>
+            <p class="mb-3">Push/Pull/Legs Split</p>
+            
+            <!-- Monday -->
+            <div class="day-item active">
+              <div class="dot-indicator push"></div>
+              <div class="day-content">
+                <div class="day-title">Monday:</div>
+                <div class="day-muscles">Chest, Shoulders, Triceps</div>
+              </div>
+            </div>
+            
+            <!-- Tuesday -->
+            <div class="day-item">
+              <div class="dot-indicator pull"></div>
+              <div class="day-content">
+                <div class="day-title">Tuesday:</div>
+                <div class="day-muscles">Back, Biceps, Rear Delts</div>
+              </div>
+            </div>
+            
+            <!-- Wednesday -->
+            <div class="day-item">
+              <div class="dot-indicator legs"></div>
+              <div class="day-content">
+                <div class="day-title">Wednesday:</div>
+                <div class="day-muscles">Quadriceps, Hamstrings, Core</div>
+              </div>
+            </div>
+            
+            <!-- Thursday -->
+            <div class="day-item">
+              <div class="dot-indicator rest"></div>
+              <div class="day-content">
+                <div class="day-title">Thursday:</div>
+                <div class="day-muscles">Active Recovery</div>
+              </div>
+            </div>
+            
+            <!-- Friday -->
+            <div class="day-item">
+              <div class="dot-indicator push"></div>
+              <div class="day-content">
+                <div class="day-title">Friday:</div>
+                <div class="day-muscles">Chest, Shoulders, Triceps</div>
+              </div>
+            </div>
+            
+            <!-- Saturday -->
+            <div class="day-item">
+              <div class="dot-indicator pull"></div>
+              <div class="day-content">
+                <div class="day-title">Saturday:</div>
+                <div class="day-muscles">Back, Biceps, Rear Delts</div>
+              </div>
+            </div>
+            
+            <!-- Sunday -->
+            <div class="day-item">
+              <div class="dot-indicator focus"></div>
+              <div class="day-content">
+                <div class="day-title">Sunday:</div>
+                <div class="day-muscles">Posterior Chain Focus</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Experience Level Card -->
+        <div class="card mb-4" data-aos="fade-right" data-aos-delay="100">
+          <div class="card-body">
+            <h4 class="card-title mb-4">Experience Level</h4>
+            
+            <div class="mb-3">
+              <div class="dot-indicator push"></div>
+              <span class="ms-2">Beginner</span>
+            </div>
+            
+            <div class="experience-tabs">
+              <div class="experience-tab active">Beginner</div>
+              <div class="experience-tab">Intermediate</div>
+              <div class="experience-tab">Advanced</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Muscle Development Card -->
+        <div class="card" data-aos="fade-right" data-aos-delay="200">
+          <div class="card-body">
+            <h4 class="card-title mb-4">Muscle Development</h4>
+            <p class="text-muted mb-3">Based on your body analysis, we've assessed your muscle development:</p>
+            
+            <h6 class="mb-2 text-danger">Needs Growth:</h6>
+            <p class="text-muted small mb-3">No muscles in this category</p>
+            
+            <h6 class="mb-2 text-warning">Average:</h6>
+            
+            <!-- Arm -->
+            <div class="muscle-item">
+              <div class="muscle-name">Arm</div>
+              <div class="muscle-tag average">Average</div>
+            </div>
+            
+            <!-- Chest -->
+            <div class="muscle-item">
+              <div class="muscle-name">Chest</div>
+              <div class="muscle-tag average">Average</div>
+            </div>
+            
+            <!-- Back -->
+            <div class="muscle-item">
+              <div class="muscle-name">Back</div>
+              <div class="muscle-tag average">Average</div>
+            </div>
+            
+            <!-- Shoulder -->
+            <div class="muscle-item">
+              <div class="muscle-name">Shoulder</div>
+              <div class="muscle-tag average">Average</div>
+            </div>
+            
+            <!-- Quads -->
+            <div class="muscle-item">
+              <div class="muscle-name">Quads</div>
+              <div class="muscle-tag average">Average</div>
+            </div>
+            
+            <!-- Hamstrings -->
+            <div class="muscle-item">
+              <div class="muscle-name">Hamstrings</div>
+              <div class="muscle-tag average">Average</div>
+            </div>
+            
+            <!-- Calves -->
+            <div class="muscle-item">
+              <div class="muscle-name">Calves</div>
+              <div class="muscle-tag average">Average</div>
+            </div>
+            
+            <!-- Glutes -->
+            <div class="muscle-item">
+              <div class="muscle-name">Glutes</div>
+              <div class="muscle-tag average">Average</div>
+            </div>
+            
+            <!-- Core -->
+            <div class="muscle-item">
+              <div class="muscle-name">Core</div>
+              <div class="muscle-tag average">Average</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Right Content: Workout Plan -->
+      <div class="col-lg-9">
+        <!-- Main Title -->
+        <div class="text-center mb-4" data-aos="fade-up">
+          <h1 class="plan-title">Your Personalized Workout Plan</h1>
+          <p class="text-muted">Designed based on your body analysis and genetic potential</p>
+        </div>
+        
+        <!-- Training Split & Experience Level -->
+        <div class="row mb-4">
+          <div class="col-md-6 mb-3" data-aos="fade-up" data-aos-delay="100">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">Training Split</h5>
+                <p class="card-text">Push/Pull/Legs Split</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 mb-3" data-aos="fade-up" data-aos-delay="100">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">Experience Level</h5>
+                <p class="card-text">Beginner</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Select Your Workout -->
+        <div class="card mb-4" data-aos="fade-up" data-aos-delay="200">
+          <div class="card-body">
+            <h4 class="card-title mb-3">Select Your Workout</h4>
+            <p class="text-muted mb-4">Click on a day to view the specific workout routine</p>
+            
+            <div class="workout-selector">
+              <!-- Day 1 -->
+              <div class="workout-day-btn active">
+                <div class="day-number">1</div>
+                <div class="day-name">Monday</div>
+                <div class="day-type push">Push</div>
+              </div>
+              
+              <!-- Day 2 -->
+              <div class="workout-day-btn">
+                <div class="day-number">2</div>
+                <div class="day-name">Tuesday</div>
+                <div class="day-type pull">Pull</div>
+              </div>
+              
+              <!-- Day 3 -->
+              <div class="workout-day-btn">
+                <div class="day-number">3</div>
+                <div class="day-name">Wednesday</div>
+                <div class="day-type legs">Legs</div>
+              </div>
+              
+              <!-- Day 4 -->
+              <div class="workout-day-btn">
+                <div class="day-number">4</div>
+                <div class="day-name">Thursday</div>
+                <div class="day-type rest">Rest</div>
+              </div>
+              
+              <!-- Day 5 -->
+              <div class="workout-day-btn">
+                <div class="day-number">5</div>
+                <div class="day-name">Friday</div>
+                <div class="day-type push">Push</div>
+              </div>
+              
+              <!-- Day 6 -->
+              <div class="workout-day-btn">
+                <div class="day-number">6</div>
+                <div class="day-name">Saturday</div>
+                <div class="day-type pull">Pull</div>
+              </div>
+              
+              <!-- Day 7 -->
+              <div class="workout-day-btn">
+                <div class="day-number">7</div>
+                <div class="day-name">Sunday</div>
+                <div class="day-type legs">Legs</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Training Tips -->
+        <div class="card mb-4" data-aos="fade-up" data-aos-delay="300">
+          <div class="card-body">
+            <h4 class="card-title mb-4">Training Tips</h4>
+            
+            <div class="training-tip">
+              <div class="tip-icon">
+                <i class="fas fa-check-circle fa-lg"></i>
+              </div>
+              <div class="tip-content">
+                <p class="mb-0">Focus on proper form before increasing weight</p>
+              </div>
+            </div>
+            
+            <div class="training-tip">
+              <div class="tip-icon">
+                <i class="fas fa-check-circle fa-lg"></i>
+              </div>
+              <div class="tip-content">
+                <p class="mb-0">Ensure adequate hydration before, during, and after workouts</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Monday Workout -->
+        <div class="workout-day-content" id="monday-workout" data-aos="fade-up" data-aos-delay="400">
+          <div class="workout-header">
+            <div>
+              <h3 class="workout-title">Monday</h3>
+              <p class="workout-subtitle">Upper Body Day</p>
+            </div>
+            <div class="workout-tag">Upper Body</div>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <!-- Exercise 1 -->
+              <div class="exercise-card">
+                <div class="exercise-info">
+                  <h5 class="exercise-title">Incline DB Press</h5>
+                  <div class="exercise-muscle">Chest</div>
+                  <div class="exercise-details">
+                    <div class="exercise-detail">
+                      <div class="detail-label">Sets</div>
+                      <div class="detail-value">3</div>
+                    </div>
+                    <div class="exercise-detail">
+                      <div class="detail-label">Reps</div>
+                      <div class="detail-value">10-12</div>
+                    </div>
+                    <div class="exercise-detail">
+                      <div class="detail-label">Rest</div>
+                      <div class="detail-value">60-90s</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="exercise-tag">
+                  <div class="tag"></div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <!-- Exercise 2 -->
+              <div class="exercise-card">
+                <div class="exercise-info">
+                  <h5 class="exercise-title">Cable Crossover</h5>
+                  <div class="exercise-muscle">Chest</div>
+                  <div class="exercise-details">
+                    <div class="exercise-detail">
+                      <div class="detail-label">Sets</div>
+                      <div class="detail-value">3</div>
+                    </div>
+                    <div class="exercise-detail">
+                      <div class="detail-label">Reps</div>
+                      <div class="detail-value">10-12</div>
+                    </div>
+                    <div class="exercise-detail">
+                      <div class="detail-label">Rest</div>
+                      <div class="detail-value">60-90s</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="exercise-tag">
+                  <div class="tag"></div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <!-- Exercise 3 -->
+              <div class="exercise-card">
+                <div class="exercise-info">
+                  <h5 class="exercise-title">Lat Pulldown</h5>
+                  <div class="exercise-muscle">Back</div>
+                  <div class="exercise-details">
+                    <div class="exercise-detail">
+                      <div class="detail-label">Sets</div>
+                      <div class="detail-value">3</div>
+                    </div>
+                    <div class="exercise-detail">
+                      <div class="detail-label">Reps</div>
+                      <div class="detail-value">10-12</div>
+                    </div>
+                    <div class="exercise-detail">
+                      <div class="detail-label">Rest</div>
+                      <div class="detail-value">60-90s</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="exercise-tag">
+                  <div class="tag"></div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <!-- Exercise 4 -->
+              <div class="exercise-card">
+                <div class="exercise-info">
+                  <h5 class="exercise-title">Pull-Up</h5>
+                  <div class="exercise-muscle">Back</div>
+                  <div class="exercise-details">
+                    <div class="exercise-detail">
+                      <div class="detail-label">Sets</div>
+                      <div class="detail-value">3</div>
+                    </div>
+                    <div class="exercise-detail">
+                      <div class="detail-label">Reps</div>
+                      <div class="detail-value">10-12</div>
+                    </div>
+                    <div class="exercise-detail">
+                      <div class="detail-label">Rest</div>
+                      <div class="detail-value">60-90s</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="exercise-tag">
+                  <div class="tag"></div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <!-- Exercise 5 -->
+              <div class="exercise-card">
+                <div class="exercise-info">
+                  <h5 class="exercise-title">Pike Push-Up</h5>
+                  <div class="exercise-muscle">Shoulders</div>
+                  <div class="exercise-details">
+                    <div class="exercise-detail">
+                      <div class="detail-label">Sets</div>
+                      <div class="detail-value">3</div>
+                    </div>
+                    <div class="exercise-detail">
+                      <div class="detail-label">Reps</div>
+                      <div class="detail-value">10-12</div>
+                    </div>
+                    <div class="exercise-detail">
+                      <div class="detail-label">Rest</div>
+                      <div class="detail-value">60-90s</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="exercise-tag">
+                  <div class="tag"></div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <!-- Exercise 6 -->
+              <div class="exercise-card">
+                <div class="exercise-info">
+                  <h5 class="exercise-title">Lateral Raise</h5>
+                  <div class="exercise-muscle">Shoulders</div>
+                  <div class="exercise-details">
+                    <div class="exercise-detail">
+                      <div class="detail-label">Sets</div>
+                      <div class="detail-value">3</div>
+                    </div>
+                    <div class="exercise-detail">
+                      <div class="detail-label">Reps</div>
+                      <div class="detail-value">10-12</div>
+                    </div>
+                    <div class="exercise-detail">
+                      <div class="detail-label">Rest</div>
+                      <div class="detail-value">60-90s</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="exercise-tag">
+                  <div class="tag"></div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <!-- Exercise 7 -->
+              <div class="exercise-card">
+                <div class="exercise-info">
+                  <h5 class="exercise-title">Concentration Curl</h5>
+                  <div class="exercise-muscle">Arms</div>
+                  <div class="exercise-details">
+                    <div class="exercise-detail">
+                      <div class="detail-label">Sets</div>
+                      <div class="detail-value">3</div>
+                    </div>
+                    <div class="exercise-detail">
+                      <div class="detail-label">Reps</div>
+                      <div class="detail-value">10-12</div>
+                    </div>
+                    <div class="exercise-detail">
+                      <div class="detail-label">Rest</div>
+                      <div class="detail-value">60-90s</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="exercise-tag">
+                  <div class="tag"></div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <!-- Exercise 8 -->
+              <div class="exercise-card">
+                <div class="exercise-info">
+                  <h5 class="exercise-title">Bicep Curl</h5>
+                  <div class="exercise-muscle">Arms</div>
+                  <div class="exercise-details">
+                    <div class="exercise-detail">
+                      <div class="detail-label">Sets</div>
+                      <div class="detail-value">3</div>
+                    </div>
+                    <div class="exercise-detail">
+                      <div class="detail-label">Reps</div>
+                      <div class="detail-value">10-12</div>
+                    </div>
+                    <div class="exercise-detail">
+                      <div class="detail-label">Rest</div>
+                      <div class="detail-value">60-90s</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="exercise-tag">
+                  <div class="tag"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="row mt-4" data-aos="fade-up" data-aos-delay="500">
+          <div class="col-12 text-center">
+            <a href="/nutrition" class="btn btn-primary me-2">
+              <i class="fas fa-utensils me-2"></i>View Nutrition Plan
+            </a>
+            <a href="/results" class="btn btn-outline-light">
+              <i class="fas fa-chart-line me-2"></i>Body Analysis Results
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Toggle active workout day
+    const workoutDayButtons = document.querySelectorAll('.workout-day-btn');
+    
+    workoutDayButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        // Remove active class from all buttons
+        workoutDayButtons.forEach(btn => {
+          btn.classList.remove('active');
+        });
+        
+        // Add active class to clicked button
+        this.classList.add('active');
+        
+        // Here you would normally load the corresponding workout
+        // This is just a placeholder for the actual functionality
+        const dayNumber = this.querySelector('.day-number').textContent;
+        const dayName = this.querySelector('.day-name').textContent;
+        
+        console.log(`Selected day ${dayNumber}: ${dayName}`);
+        // You would now update the workout display based on the selected day
+      });
+    });
+    
+    // Toggle experience level
+    const experienceTabs = document.querySelectorAll('.experience-tab');
+    
+    experienceTabs.forEach(tab => {
+      tab.addEventListener('click', function() {
+        // Remove active class from all tabs
+        experienceTabs.forEach(t => {
+          t.classList.remove('active');
+        });
+        
+        // Add active class to clicked tab
+        this.classList.add('active');
+        
+        // Here you would update the workout plan based on the selected experience level
+        console.log(`Selected experience level: ${this.textContent}`);
+      });
+    });
+    
+    // Toggle active day in the sidebar
+    const dayItems = document.querySelectorAll('.day-item');
+    
+    dayItems.forEach(item => {
+      item.addEventListener('click', function() {
+        // Remove active class from all day items
+        dayItems.forEach(d => {
+          d.classList.remove('active');
+        });
+        
+        // Add active class to clicked day item
+        this.classList.add('active');
+        
+        // Get the day name from the day title
+        const dayName = this.querySelector('.day-title').textContent.split(':')[0];
+        
+        console.log(`Selected day from sidebar: ${dayName}`);
+        // You would now update the workout display based on the selected day
+      });
+    });
+  });
+</script>
+{% endblock %}

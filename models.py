@@ -10,8 +10,8 @@ from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.dialects.postgresql import JSON
 
-# Avoid circular imports by importing db this way
-from app import db
+# Import db from database.py
+from database import db
 
 
 class User(UserMixin, db.Model):

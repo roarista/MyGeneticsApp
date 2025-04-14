@@ -1,0 +1,615 @@
+{% extends "base.html" %}
+
+{% block title %}Personalized Nutrition Plan - MyGenetics{% endblock %}
+
+{% block head_extras %}
+<style>
+  /* Nutrition page specific styles */
+  .macros-bar {
+    height: 12px;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+  }
+  
+  .macro-protein {
+    background: linear-gradient(to right, #FF4C4C, #FF6B6B);
+  }
+  
+  .macro-carbs {
+    background: linear-gradient(to right, #00AEEF, #36C2FF);
+  }
+  
+  .macro-fats {
+    background: linear-gradient(to right, #FFB300, #FFD54F);
+  }
+  
+  .macro-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-right: 0.5rem;
+  }
+  
+  .calorie-box {
+    text-align: center;
+    padding: 1.5rem 1rem;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.2);
+    margin-bottom: 1rem;
+  }
+  
+  .calorie-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #FFFFFF;
+    margin-bottom: 0.25rem;
+  }
+  
+  .calorie-label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  
+  .meal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .meal-time {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+  }
+  
+  .meal-percentage {
+    font-size: 0.85rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    background: rgba(43, 155, 220, 0.15);
+    color: #2B9BDC;
+  }
+  
+  .macro-meal-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+  }
+  
+  .macro-meal-label {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+  
+  .macro-meal-value {
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+  
+  .macro-meal-value.protein {
+    color: #FF6B6B;
+  }
+  
+  .macro-meal-value.carbs {
+    color: #36C2FF;
+  }
+  
+  .macro-meal-value.fats {
+    color: #FFD54F;
+  }
+  
+  .food-list {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 0;
+  }
+  
+  .food-list li {
+    position: relative;
+    padding-left: 1.5rem;
+    margin-bottom: 0.75rem;
+    line-height: 1.4;
+  }
+  
+  .food-list li:before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.5rem;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+  
+  .protein-source li:before {
+    background-color: #FF4C4C;
+  }
+  
+  .carb-source li:before {
+    background-color: #00AEEF;
+  }
+  
+  .fat-source li:before {
+    background-color: #FFB300;
+  }
+  
+  .supplement-card {
+    border-left: 3px solid #8E44AD;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background: rgba(142, 68, 173, 0.1);
+    border-radius: 0 8px 8px 0;
+  }
+  
+  .supplement-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+  
+  .supplement-desc {
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    color: var(--text-muted);
+  }
+  
+  .supplement-detail {
+    display: flex;
+    align-items: center;
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+  }
+  
+  .supplement-label {
+    min-width: 80px;
+    color: var(--text-muted);
+  }
+  
+  .nutrition-tip {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .nutrition-tip:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+  
+  .tip-icon {
+    color: #FF4C4C;
+    margin-right: 1rem;
+    margin-top: 0.25rem;
+  }
+  
+  .tip-content {
+    flex: 1;
+  }
+  
+  .plan-title {
+    background: linear-gradient(to right, #FF4C4C, #FF9800);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="py-5">
+  <div class="container">
+    <!-- Page Title -->
+    <div class="text-center mb-4" data-aos="fade-up">
+      <div class="d-flex align-items-center justify-content-center">
+        <i class="fas fa-balance-scale me-3" style="color: #FF4C4C;"></i>
+        <h1 class="plan-title">Your Personalized Nutrition Plan</h1>
+      </div>
+      <p class="text-muted">Optimize your nutrition based on your genetic profile and fitness goals.</p>
+    </div>
+    
+    <div class="row">
+      <!-- Daily Macros Card -->
+      <div class="col-lg-5 mb-4" data-aos="fade-right" data-aos-delay="100">
+        <div class="card h-100">
+          <div class="card-body">
+            <h3 class="card-title mb-4">
+              <i class="fas fa-chart-pie me-2" style="color: #FF4C4C;"></i>
+              Daily Macros
+            </h3>
+            
+            <!-- Protein -->
+            <div class="mb-4">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span>Protein</span>
+                <span class="macro-value">173g</span>
+              </div>
+              <div class="progress" style="height: 12px;">
+                <div class="progress-bar macro-protein" role="progressbar" style="width: 100%"></div>
+              </div>
+            </div>
+            
+            <!-- Carbohydrates -->
+            <div class="mb-4">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span>Carbohydrates</span>
+                <span class="macro-value">173g</span>
+              </div>
+              <div class="progress" style="height: 12px;">
+                <div class="progress-bar macro-carbs" role="progressbar" style="width: 100%"></div>
+              </div>
+            </div>
+            
+            <!-- Fats -->
+            <div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span>Fats</span>
+                <span class="macro-value">38g</span>
+              </div>
+              <div class="progress" style="height: 12px;">
+                <div class="progress-bar macro-fats" role="progressbar" style="width: 100%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Caloric Needs Card -->
+      <div class="col-lg-7 mb-4" data-aos="fade-left" data-aos-delay="100">
+        <div class="card h-100">
+          <div class="card-body">
+            <h3 class="card-title mb-4">
+              <i class="fas fa-bolt me-2" style="color: #FF4C4C;"></i>
+              Caloric Needs
+            </h3>
+            
+            <div class="row">
+              <div class="col-md-6">
+                <div class="calorie-box">
+                  <div class="calorie-value">1738</div>
+                  <div class="calorie-label">Maintenance</div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="calorie-box">
+                  <div class="calorie-value">1738</div>
+                  <div class="calorie-label">Target</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="mt-3">
+              <p class="text-muted">Calorie targets based on your body composition, activity level, and fitness goals.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Meal Timing Card -->
+      <div class="col-12 mb-4" data-aos="fade-up" data-aos-delay="200">
+        <div class="card">
+          <div class="card-body">
+            <h3 class="card-title mb-4">
+              <i class="far fa-clock me-2" style="color: #FF4C4C;"></i>
+              Meal Timing
+            </h3>
+            <p class="text-muted mb-4">Optimize your meal timing to support your training and recovery. Adjust based on your workout schedule.</p>
+            
+            <div class="row">
+              <!-- Breakfast -->
+              <div class="col-md-4 mb-4">
+                <div class="meal-wrapper">
+                  <div class="meal-header">
+                    <h5 class="mb-0">Breakfast</h5>
+                    <span class="meal-percentage">25% of daily total</span>
+                  </div>
+                  <div class="meal-time mb-3">7:00 - 8:00 AM</div>
+                  
+                  <div class="macro-meal-row">
+                    <span class="macro-meal-label">Protein:</span>
+                    <span class="macro-meal-value protein">25-30g</span>
+                  </div>
+                  <div class="macro-meal-row">
+                    <span class="macro-meal-label">Carbs:</span>
+                    <span class="macro-meal-value carbs">30-40g</span>
+                  </div>
+                  <div class="macro-meal-row">
+                    <span class="macro-meal-label">Fats:</span>
+                    <span class="macro-meal-value fats">10-15g</span>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Lunch -->
+              <div class="col-md-4 mb-4">
+                <div class="meal-wrapper">
+                  <div class="meal-header">
+                    <h5 class="mb-0">Lunch</h5>
+                    <span class="meal-percentage">30% of daily total</span>
+                  </div>
+                  <div class="meal-time mb-3">12:00 - 1:00 PM</div>
+                  
+                  <div class="macro-meal-row">
+                    <span class="macro-meal-label">Protein:</span>
+                    <span class="macro-meal-value protein">30-35g</span>
+                  </div>
+                  <div class="macro-meal-row">
+                    <span class="macro-meal-label">Carbs:</span>
+                    <span class="macro-meal-value carbs">40-50g</span>
+                  </div>
+                  <div class="macro-meal-row">
+                    <span class="macro-meal-label">Fats:</span>
+                    <span class="macro-meal-value fats">15-20g</span>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Pre-Workout -->
+              <div class="col-md-4 mb-4">
+                <div class="meal-wrapper">
+                  <div class="meal-header">
+                    <h5 class="mb-0">Pre-Workout</h5>
+                    <span class="meal-percentage">15% of daily total</span>
+                  </div>
+                  <div class="meal-time mb-3">3:00 - 4:00 PM</div>
+                  
+                  <div class="macro-meal-row">
+                    <span class="macro-meal-label">Protein:</span>
+                    <span class="macro-meal-value protein">20g</span>
+                  </div>
+                  <div class="macro-meal-row">
+                    <span class="macro-meal-label">Carbs:</span>
+                    <span class="macro-meal-value carbs">30-40g</span>
+                  </div>
+                  <div class="macro-meal-row">
+                    <span class="macro-meal-label">Fats:</span>
+                    <span class="macro-meal-value fats">5-10g</span>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Post-Workout -->
+              <div class="col-md-6 mb-4">
+                <div class="meal-wrapper">
+                  <div class="meal-header">
+                    <h5 class="mb-0">Post-Workout</h5>
+                    <span class="meal-percentage">20% of daily total</span>
+                  </div>
+                  <div class="meal-time mb-3">5:30 - 6:30 PM</div>
+                  
+                  <div class="macro-meal-row">
+                    <span class="macro-meal-label">Protein:</span>
+                    <span class="macro-meal-value protein">25-30g</span>
+                  </div>
+                  <div class="macro-meal-row">
+                    <span class="macro-meal-label">Carbs:</span>
+                    <span class="macro-meal-value carbs">30-40g</span>
+                  </div>
+                  <div class="macro-meal-row">
+                    <span class="macro-meal-label">Fats:</span>
+                    <span class="macro-meal-value fats">5-10g</span>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Evening Snack -->
+              <div class="col-md-6 mb-4">
+                <div class="meal-wrapper">
+                  <div class="meal-header">
+                    <h5 class="mb-0">Evening Snack</h5>
+                    <span class="meal-percentage">10% of daily total</span>
+                  </div>
+                  <div class="meal-time mb-3">8:00 - 9:00 PM</div>
+                  
+                  <div class="macro-meal-row">
+                    <span class="macro-meal-label">Protein:</span>
+                    <span class="macro-meal-value protein">15-20g</span>
+                  </div>
+                  <div class="macro-meal-row">
+                    <span class="macro-meal-label">Carbs:</span>
+                    <span class="macro-meal-value carbs">5-10g</span>
+                  </div>
+                  <div class="macro-meal-row">
+                    <span class="macro-meal-label">Fats:</span>
+                    <span class="macro-meal-value fats">5-10g</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Food Recommendations Card -->
+      <div class="col-md-7 mb-4" data-aos="fade-right" data-aos-delay="300">
+        <div class="card h-100">
+          <div class="card-body">
+            <h3 class="card-title mb-4">
+              <i class="fas fa-utensils me-2" style="color: #FF4C4C;"></i>
+              Recommended Foods
+            </h3>
+            <p class="text-muted mb-4">These foods are selected to optimize your nutrition based on your body type and genetic profile.</p>
+            
+            <div class="row">
+              <!-- Protein Sources -->
+              <div class="col-md-4 mb-4 mb-md-0">
+                <h5 class="text-primary">Protein Sources</h5>
+                <ul class="food-list protein-source">
+                  <li>Chicken Breast (100-150g)</li>
+                  <li>Lean Beef (100-150g)</li>
+                  <li>Egg Whites (4-6)</li>
+                  <li>Greek Yogurt (200-250g)</li>
+                  <li>White Fish (100-150g)</li>
+                </ul>
+              </div>
+              
+              <!-- Carbohydrate Sources -->
+              <div class="col-md-4 mb-4 mb-md-0">
+                <h5 class="text-info">Carbohydrate Sources</h5>
+                <ul class="food-list carb-source">
+                  <li>Brown Rice (50-75g uncooked)</li>
+                  <li>Sweet Potatoes (150-200g)</li>
+                  <li>Oats (40-60g uncooked)</li>
+                  <li>Fruits (1-2 pieces)</li>
+                  <li>Vegetables (unlimited greens)</li>
+                </ul>
+              </div>
+              
+              <!-- Healthy Fat Sources -->
+              <div class="col-md-4">
+                <h5 class="text-warning">Healthy Fat Sources</h5>
+                <ul class="food-list fat-source">
+                  <li>Avocado (½ - 1 medium)</li>
+                  <li>Nuts and Seeds (30g)</li>
+                  <li>Olive Oil (1-2 tablespoons)</li>
+                  <li>Fatty Fish (100-150g, 2-3x week)</li>
+                  <li>Nut Butters (1-2 tablespoons)</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Supplements Card -->
+      <div class="col-md-5 mb-4" data-aos="fade-left" data-aos-delay="300">
+        <div class="card h-100">
+          <div class="card-body">
+            <h3 class="card-title mb-4">
+              <i class="fas fa-pills me-2" style="color: #FF4C4C;"></i>
+              Supplement Recommendations
+            </h3>
+            <p class="text-muted mb-4">These supplements may enhance recovery and performance when combined with proper nutrition.</p>
+            
+            <!-- Protein Powder -->
+            <div class="supplement-card">
+              <h5 class="supplement-title">Protein Powder</h5>
+              <p class="supplement-desc">Supports muscle recovery and growth, especially when whole food protein sources are limited.</p>
+              <div class="supplement-detail">
+                <span class="supplement-label">Dosage:</span>
+                <span>20-30g per serving</span>
+              </div>
+              <div class="supplement-detail">
+                <span class="supplement-label">Timing:</span>
+                <span>Post-workout or between meals</span>
+              </div>
+            </div>
+            
+            <!-- Creatine -->
+            <div class="supplement-card">
+              <h5 class="supplement-title">Creatine Monohydrate</h5>
+              <p class="supplement-desc">Enhances strength, power output, and muscle cell volumization.</p>
+              <div class="supplement-detail">
+                <span class="supplement-label">Dosage:</span>
+                <span>5g daily</span>
+              </div>
+              <div class="supplement-detail">
+                <span class="supplement-label">Timing:</span>
+                <span>Any time of day, consistent daily use</span>
+              </div>
+            </div>
+            
+            <!-- Vitamin D3 -->
+            <div class="supplement-card">
+              <h5 class="supplement-title">Vitamin D3</h5>
+              <p class="supplement-desc">Supports immune function, bone health, and hormonal regulation.</p>
+              <div class="supplement-detail">
+                <span class="supplement-label">Dosage:</span>
+                <span>1000-5000 IU daily</span>
+              </div>
+              <div class="supplement-detail">
+                <span class="supplement-label">Timing:</span>
+                <span>With a meal containing fats</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Nutrition Tips Card -->
+      <div class="col-12 mb-4" data-aos="fade-up" data-aos-delay="400">
+        <div class="card">
+          <div class="card-body">
+            <h3 class="card-title mb-4">
+              <i class="fas fa-lightbulb me-2" style="color: #FF4C4C;"></i>
+              Nutrition Tips
+            </h3>
+            <p class="text-muted mb-4">Follow these recommendations to maximize your results and support your specific body type.</p>
+            
+            <div class="nutrition-tip">
+              <div class="tip-icon">
+                <i class="fas fa-check-circle fa-lg"></i>
+              </div>
+              <div class="tip-content">
+                <p class="mb-0">Prioritize protein intake with every meal to support muscle recovery and growth.</p>
+              </div>
+            </div>
+            
+            <div class="nutrition-tip">
+              <div class="tip-icon">
+                <i class="fas fa-check-circle fa-lg"></i>
+              </div>
+              <div class="tip-content">
+                <p class="mb-0">Time your carbohydrate intake around your training for optimal energy and recovery.</p>
+              </div>
+            </div>
+            
+            <div class="nutrition-tip">
+              <div class="tip-icon">
+                <i class="fas fa-check-circle fa-lg"></i>
+              </div>
+              <div class="tip-content">
+                <p class="mb-0">Stay hydrated by consuming at least 3-4 liters of water daily, more on training days.</p>
+              </div>
+            </div>
+            
+            <div class="nutrition-tip">
+              <div class="tip-icon">
+                <i class="fas fa-check-circle fa-lg"></i>
+              </div>
+              <div class="tip-content">
+                <p class="mb-0">Include a variety of vegetables daily to ensure micronutrient intake and support recovery.</p>
+              </div>
+            </div>
+            
+            <div class="nutrition-tip">
+              <div class="tip-icon">
+                <i class="fas fa-check-circle fa-lg"></i>
+              </div>
+              <div class="tip-content">
+                <p class="mb-0">Limit processed foods and added sugars to maintain insulin sensitivity and support body composition goals.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="row" data-aos="fade-up" data-aos-delay="450">
+      <div class="col-12 text-center">
+        <a href="/workout" class="btn btn-primary me-2">
+          <i class="fas fa-dumbbell me-2"></i>View Your Workout Plan
+        </a>
+        <a href="/results" class="btn btn-outline-light">
+          <i class="fas fa-chart-line me-2"></i>Body Analysis Results
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<!-- Any nutrition page specific scripts would go here -->
+<script>
+  // Example: Chart.js implementation for macro distribution if needed
+</script>
+{% endblock %}
