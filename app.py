@@ -462,7 +462,8 @@ def analyze():
             # enhanced_measurements and categorized_measurements are already initialized to empty dicts
         
         # Store all results
-        analysis_results[analysis_id] = {
+        analysis_data = {
+            'id': analysis_id,  # Include ID in the data for session fallback
             'front_image_path': front_image_path,
             'back_image_path': back_image_path,
             'traits': combined_traits,
@@ -482,6 +483,13 @@ def analyze():
             'bodybuilding_analysis': bodybuilding_analysis,
             'analysis_type': 'dual_photo'  # Flag to indicate this is a dual photo analysis
         }
+        
+        # Store in both in-memory dictionary and session for redundancy
+        analysis_results[analysis_id] = analysis_data
+        
+        # Also store in session as fallback mechanism
+        session['analysis_results'] = analysis_data
+        logger.debug(f"Analysis results stored with ID: {analysis_id}")
         
         # Clean up original uploads
         if os.path.exists(front_filepath):
@@ -518,11 +526,22 @@ def analyze():
 def results(analysis_id):
     """Display analysis results"""
     try:
-        if analysis_id not in analysis_results:
-            flash('Analysis not found', 'danger')
-            return redirect(url_for('index'))
+        # Log the session and analysis_id for debugging
+        logger.debug(f"Session contents: {session}")
+        logger.debug(f"Requested analysis_id: {analysis_id}")
         
-        result = analysis_results[analysis_id]
+        # First check if analysis exists in our in-memory dictionary
+        if analysis_id not in analysis_results:
+            logger.warning(f"Analysis ID {analysis_id} not found in analysis_results")
+            # Try to fall back to session if available
+            if 'analysis_results' in session and session['analysis_results'].get('id') == analysis_id:
+                logger.info(f"Found analysis {analysis_id} in session")
+                result = session['analysis_results']
+            else:
+                flash('Analysis not found. Please try again.', 'danger')
+                return redirect(url_for('index'))
+        else:
+            result = analysis_results[analysis_id]
         
         # Check what type of analysis this is
         analysis_type = result.get('analysis_type', 'single_photo')
@@ -767,7 +786,9 @@ def scan3d_upload():
             # For demo purposes, we'll use a placeholder image path
             image_path = os.path.join(TEMP_UPLOAD_FOLDER, f"3d_model_{analysis_id}.jpg")
             
-            analysis_results[analysis_id] = {
+            # Create analysis data
+            analysis_data = {
+                'id': analysis_id,  # Include ID in the data for session fallback
                 'image_path': image_path,
                 'traits': traits,
                 'recommendations': recommendations,
@@ -783,6 +804,13 @@ def scan3d_upload():
                 },
                 'analysis_type': '3d_scan'  # Flag to indicate this is a 3D scan analysis
             }
+            
+            # Store in both in-memory dictionary and session for redundancy
+            analysis_results[analysis_id] = analysis_data
+            
+            # Also store in session as fallback mechanism
+            session['analysis_results'] = analysis_data
+            logger.debug(f"3D Scan analysis results stored with ID: {analysis_id}")
             
             # For the prototype, we won't clean up the original 3D scan file
             # in case we need to access it again
@@ -800,15 +828,31 @@ def scan3d_upload():
 @app.route('/scan3d/results/<analysis_id>')
 def scan3d_results(analysis_id):
     """Display 3D scan analysis results"""
-    if analysis_id not in analysis_results:
-        flash('Analysis not found', 'danger')
-        return redirect(url_for('scan3d'))
-    
-    result = analysis_results[analysis_id]
-    
-    # Check if this is a 3D scan analysis
-    if result.get('analysis_type') != '3d_scan':
-        flash('Invalid analysis type', 'danger')
+    try:
+        # Log the session and analysis_id for debugging
+        logger.debug(f"Session contents: {session}")
+        logger.debug(f"Requested 3D scan analysis_id: {analysis_id}")
+        
+        # First check if analysis exists in our in-memory dictionary
+        if analysis_id not in analysis_results:
+            logger.warning(f"3D scan analysis ID {analysis_id} not found in analysis_results")
+            # Try to fall back to session if available
+            if 'analysis_results' in session and session['analysis_results'].get('id') == analysis_id:
+                logger.info(f"Found 3D scan analysis {analysis_id} in session")
+                result = session['analysis_results']
+            else:
+                flash('3D scan analysis not found. Please try again.', 'danger')
+                return redirect(url_for('scan3d'))
+        else:
+            result = analysis_results[analysis_id]
+        
+        # Check if this is a 3D scan analysis
+        if result.get('analysis_type') != '3d_scan':
+            flash('Invalid analysis type', 'danger')
+            return redirect(url_for('scan3d'))
+    except Exception as e:
+        logger.error(f"Error retrieving 3D scan analysis: {str(e)}")
+        flash('Error accessing 3D scan analysis. Please try again.', 'danger')
         return redirect(url_for('scan3d'))
     
     # For this prototype version, we'll use a placeholder image
@@ -984,10 +1028,21 @@ def scan3d_results(analysis_id):
 @app.route('/api/traits/<analysis_id>')
 def get_traits_data(analysis_id):
     """API endpoint to get trait data for charts"""
-    if analysis_id not in analysis_results:
-        return jsonify({'error': 'Analysis not found'}), 404
-    
-    result = analysis_results[analysis_id]
+    try:
+        # First check if analysis exists in our in-memory dictionary
+        if analysis_id not in analysis_results:
+            logger.warning(f"Analysis ID {analysis_id} not found in analysis_results for API")
+            # Try to fall back to session if available
+            if 'analysis_results' in session and session['analysis_results'].get('id') == analysis_id:
+                logger.info(f"Found analysis {analysis_id} in session for API")
+                result = session['analysis_results']
+            else:
+                return jsonify({'error': 'Analysis not found'}), 404
+        else:
+            result = analysis_results[analysis_id]
+    except Exception as e:
+        logger.error(f"Error retrieving analysis for API: {str(e)}")
+        return jsonify({'error': 'Server error retrieving analysis data'}), 500
     
     # Format trait data for charts
     chart_data = {
@@ -1273,12 +1328,23 @@ def account_settings():
 @app.route('/recommendations/<analysis_id>')
 def recommendations(analysis_id):
     """Display personalized recommendations based on analysis results"""
-    # Check if analysis exists
-    if analysis_id not in analysis_results:
-        flash('Analysis not found', 'danger')
+    try:
+        # First check if analysis exists in our in-memory dictionary
+        if analysis_id not in analysis_results:
+            logger.warning(f"Analysis ID {analysis_id} not found in analysis_results for recommendations")
+            # Try to fall back to session if available
+            if 'analysis_results' in session and session['analysis_results'].get('id') == analysis_id:
+                logger.info(f"Found analysis {analysis_id} in session for recommendations")
+                result = session['analysis_results']
+            else:
+                flash('Analysis not found. Please try again.', 'danger')
+                return redirect(url_for('profile'))
+        else:
+            result = analysis_results[analysis_id]
+    except Exception as e:
+        logger.error(f"Error retrieving analysis for recommendations: {str(e)}")
+        flash('Error accessing analysis data. Please try again.', 'danger')
         return redirect(url_for('profile'))
-    
-    result = analysis_results[analysis_id]
     
     # Process traits to include their units for display
     formatted_traits = {}
@@ -1739,14 +1805,20 @@ def workout(analysis_id):
         # Start with detailed logging
         logger.info(f"Accessing workout page for analysis_id: {analysis_id}")
         
-        # Check if analysis exists
+        # First check if analysis exists in our in-memory dictionary
         if analysis_id not in analysis_results:
-            logger.warning(f"Analysis not found with ID: {analysis_id}")
-            flash('Analysis not found', 'danger')
-            return redirect(url_for('profile'))
-        
-        # Get the result
-        result = analysis_results[analysis_id]
+            logger.warning(f"Analysis ID {analysis_id} not found in analysis_results for workout")
+            # Try to fall back to session if available
+            if 'analysis_results' in session and session['analysis_results'].get('id') == analysis_id:
+                logger.info(f"Found analysis {analysis_id} in session for workout")
+                result = session['analysis_results']
+            else:
+                logger.warning(f"Analysis not found with ID: {analysis_id}")
+                flash('Analysis not found. Please try again.', 'danger')
+                return redirect(url_for('profile'))
+        else:
+            # Get the result from in-memory dictionary
+            result = analysis_results[analysis_id]
         logger.debug(f"Retrieved analysis result for ID: {analysis_id}")
         
         # Import our new smart workout generator
@@ -1969,9 +2041,14 @@ def workout(analysis_id):
 def get_workout(analysis_id, day):
     """API endpoint to get a specific day's workout"""
     try:
-        # Check if analysis exists
+        # Check if analysis exists in in-memory dictionary
         if analysis_id not in analysis_results:
-            return jsonify({'error': 'Analysis not found'}), 404
+            logger.warning(f"Analysis ID {analysis_id} not found in analysis_results for workout API")
+            # Try to fall back to session if available
+            if 'analysis_results' in session and session['analysis_results'].get('id') == analysis_id:
+                logger.info(f"Found analysis {analysis_id} in session for workout API")
+            else:
+                return jsonify({'error': 'Analysis not found'}), 404
         
         # Get the workout plan from session if available
         if 'workout_data' in session and analysis_id in session['workout_data']:
@@ -2143,66 +2220,92 @@ def schedule_analysis():
     flash('Feature coming soon: Schedule your next analysis.', 'info')
     return redirect(url_for('profile'))
 
-@app.route('/debug-body-composition/<int:analysis_id>')
-@login_required
+@app.route('/debug-body-composition/<analysis_id>')
 def debug_body_composition(analysis_id):
     """Debug route to check body composition calculations and chart data"""
-    # Get the analysis details
-    analysis = Analysis.query.get_or_404(analysis_id)
-    
-    # Ensure the user can only view their own analyses
-    if analysis.user_id != current_user.id:
-        abort(403)
-    
-    # Get the analysis results
-    result = json.loads(analysis.traits) if analysis.traits else {}
-    
-    # Extract body composition data
-    body_fat_percentage = analysis.body_fat_percentage
-    lean_mass_percentage = 100.0 - body_fat_percentage if body_fat_percentage is not None else None
-    
-    # Get additional data
-    gender = None
-    if 'gender' in result:
-        gender = result['gender']
-    elif current_user.gender:
-        gender = current_user.gender
-    
-    # Get measurements and bodybuilding analysis
-    bodybuilding_analysis = result.get('bodybuilding_analysis', {})
-    basic_measurements = {}
-    enhanced_measurements = {}
-    
-    # Get the measurement dictionaries
-    for trait_name, trait_data in result.items():
-        if isinstance(trait_data, dict) and 'value' in trait_data:
-            basic_measurements[trait_name] = trait_data
-    
-    # Get enhanced measurements if available
-    if 'enhanced_measurements' in result:
-        enhanced_measurements = result['enhanced_measurements']
-    
-    # Get user info for calculations
-    user_info = {
-        'gender': gender,
-        'experience_level': current_user.experience_level or 'moderate'
-    }
-    
-    # Create debug information
-    body_fat_formula_used = result.get('body_fat_formula_used', 'Unknown')
-    
-    return render_template(
-        'debug_body_composition.html',
-        analysis=analysis,
-        body_fat_percentage=body_fat_percentage,
-        lean_mass_percentage=lean_mass_percentage,
-        gender=gender,
-        bodybuilding_analysis=bodybuilding_analysis,
-        basic_measurements=basic_measurements,
-        enhanced_measurements=enhanced_measurements,
-        user_info=user_info,
-        body_fat_formula_used=body_fat_formula_used
-    )
+    try:
+        # First check if analysis exists in our in-memory dictionary
+        if analysis_id not in analysis_results:
+            logger.warning(f"Analysis ID {analysis_id} not found in analysis_results for debug")
+            # Try to fall back to session if available
+            if 'analysis_results' in session and session['analysis_results'].get('id') == analysis_id:
+                logger.info(f"Found analysis {analysis_id} in session for debug")
+                result = session['analysis_results']
+            else:
+                flash('Analysis not found. Please try again.', 'danger')
+                return redirect(url_for('index'))
+        else:
+            # Get the result from in-memory dictionary
+            result = analysis_results[analysis_id]
+        
+        # Extract body composition data
+        body_fat_percentage = result.get('traits', {}).get('body_fat_percentage', 0)
+        if isinstance(body_fat_percentage, dict):
+            body_fat_percentage = body_fat_percentage.get('value', 0)
+        
+        lean_mass_percentage = 100.0 - body_fat_percentage if body_fat_percentage is not None else None
+        
+        # Get additional data
+        user_info = result.get('user_info', {})
+        gender = user_info.get('gender', 'male')
+        
+        # Get bodybuilding analysis
+        bodybuilding_analysis = result.get('bodybuilding_analysis', {})
+        
+        # Get traits and measurements
+        traits = result.get('traits', {})
+        
+        # Extract basic measurements from traits
+        basic_measurements = {}
+        for trait_name, trait_data in traits.items():
+            if isinstance(trait_data, dict) and 'value' in trait_data:
+                basic_measurements[trait_name] = trait_data
+            elif isinstance(trait_data, (int, float)):
+                basic_measurements[trait_name] = {'value': trait_data}
+        
+        # Get enhanced measurements if available
+        enhanced_measurements = result.get('enhanced_measurements', {})
+        if not enhanced_measurements and 'traits' in result:
+            # Add any measurements in traits that could be enhanced
+            for key, value in traits.items():
+                if '_ratio' in key or 'circumference' in key or 'width' in key:
+                    if key not in enhanced_measurements:
+                        enhanced_measurements[key] = value
+        
+        # User info for display
+        user_info_display = {
+            'gender': gender,
+            'experience_level': user_info.get('experience', 'moderate'),
+            'height': user_info.get('height', 170),
+            'weight': user_info.get('weight', 70)
+        }
+        
+        # Create debug information
+        body_fat_formula_used = result.get('body_fat_formula_used', 'Unknown')
+        
+        # Create analysis object for template
+        analysis = {
+            'id': analysis_id,
+            'body_fat_percentage': body_fat_percentage,
+            'date': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        }
+        
+        return render_template(
+            'debug_body_composition.html',
+            analysis=analysis,
+            body_fat_percentage=body_fat_percentage,
+            lean_mass_percentage=lean_mass_percentage,
+            gender=gender,
+            bodybuilding_analysis=bodybuilding_analysis,
+            basic_measurements=basic_measurements,
+            enhanced_measurements=enhanced_measurements,
+            user_info=user_info_display,
+            body_fat_formula_used=body_fat_formula_used
+        )
+    except Exception as e:
+        logger.error(f"Error in debug route: {str(e)}")
+        flash('Error debugging body composition. Please try again.', 'danger')
+        return redirect(url_for('index'))
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
