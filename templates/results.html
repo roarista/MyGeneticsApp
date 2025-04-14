@@ -75,9 +75,9 @@
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-lg-10">
-        <div class="text-center mb-5 fade-in">
+        <div class="text-center mb-4 fade-in">
           <h1 class="mb-2">Your Body Composition Results</h1>
-          <p class="text-muted">Detailed analysis based on your measurements and inputs</p>
+          <p class="text-muted">Here are your calculated body composition estimates:</p>
         </div>
         
         <!-- Main Results Card -->
@@ -86,6 +86,12 @@
             <h3 class="mb-0 fw-bold">Body Composition Analysis</h3>
           </div>
           <div class="card-body p-4">
+            {% if not body_fat %}
+              <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                No analysis results found. Please try again.
+              </div>
+            {% else %}
             <div class="row">
               <!-- Body Fat -->
               <div class="col-md-6 mb-4">
@@ -247,9 +253,10 @@
                 </div>
               </div>
             </div>
+            {% endif %}
             
             <div class="mt-4 text-center">
-              <a href="/" class="btn btn-secondary">
+              <a href="/" class="btn btn-info w-100">
                 <i class="fas fa-redo me-2"></i>
                 Calculate Again
               </a>

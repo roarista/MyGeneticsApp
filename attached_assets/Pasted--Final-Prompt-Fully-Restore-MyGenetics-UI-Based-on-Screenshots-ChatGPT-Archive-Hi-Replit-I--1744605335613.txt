@@ -1,0 +1,138 @@
+✅ Final Prompt: Fully Restore MyGenetics UI (Based on Screenshots + ChatGPT Archive)
+
+Hi Replit — I need you to restore the MyGenetics app design and UI to perfectly match the version shown in the screenshots at this link:
+🔗 Google Drive – MyGenetics UI screenshots
+
+This is a fitness analysis app that uses image uploads + personal data to analyze physique and show body composition results. The entire layout, branding, and visual polish were broken recently, and I'm working to recover the original premium design.
+
+🎯 GOAL
+
+Rebuild the homepage and results page to match the original design exactly. That includes:
+
+Fonts and font weights
+Color themes (dark mode + vivid accent colors)
+Spacing and padding
+Icon style and positioning
+Gradient styles
+Form layout
+Button shape and hover behavior
+Footer structure
+Responsive behavior
+🧬 HOMEPAGE LAYOUT ( / route or index.html )
+
+🔺 Navbar (Top Bar)
+Left: MyGenetics in bold red #FF4C4C
+Underneath: ALPHA in blue (#00AEEF), smaller font, slight vertical offset
+Right: single nav link: Home (red, top-aligned)
+Background color: dark navy (#0C0C1F)
+Padding: 16px vertical
+🖼 Hero Section
+Text Block:
+
+Large header: DISCOVER YOUR GENETIC POTENTIAL
+Font: "Poppins", sans-serif, weight 800
+“GENETIC POTENTIAL” has a horizontal gradient
+linear-gradient(to right, #FF4C4C, #FF9800)
+-webkit-background-clip: text; -webkit-text-fill-color: transparent;
+Subheading:
+Font-size: 18px, max-width: 680px
+Text: “Optimize your fitness routine based on your unique body structure…”
+🧠 Why Body Analysis Matters Section (Left Side)
+Heading: Why Body Analysis Matters
+Text: “Your body’s structure significantly affects how you should train…”
+Features list with 3 bullet-paired items:
+Muscle Insertions
+Icon in circle: light blue (#00C4FF)
+Limb Proportions
+Icon in circle: purple (#8E44AD)
+Bone Structure
+Icon in circle: teal (#1ABC9C)
+Each feature:
+Bold white heading + light gray description
+Icons: white SVGs in solid-colored circular backgrounds
+📋 Start Your Analysis Form (Right Side)
+Title: Start Your Analysis
+Form appears in a dark gray card with soft box-shadow
+Inputs:
+Two image file uploads: front + back
+Height (cm), Weight (kg), Age
+Gender dropdown
+Training Experience dropdown
+Inputs:
+Rounded corners, black background, white text, red focus border
+Validation:
+Inline red error messages below image upload if missing
+Submit button:
+Label: Analyze My Genetics
+Icon: hourglass
+Background: bright red #FF4C4C
+Hover: #e53935
+⚙️ How It Works Section
+Title: How It Works
+4 horizontally arranged cards:
+Upload Photos
+AI Analysis
+Get Results
+Focus Training
+Each card:
+Rounded, dark gray background
+Icon in colored circle:
+Upload: blue
+AI: indigo
+Results: green
+Training: orange
+Title in white
+Subtitle in light gray
+Spacing:
+16–20px padding inside each card
+16px margin between cards
+Fully responsive: stacks vertically on mobile
+🔻 Footer
+Dark navy background
+Left: © 2025 MyGenetics. All rights reserved.
+Right: Unlock your genetic potential
+Text color: #AAAAAA, slightly brighter than now
+Padding: 20px vertical
+📊 RESULTS PAGE
+
+Top Section:
+
+Blue banner header: Your Body Composition Results
+Subheading: “Here are your calculated body composition estimates:”
+Results Card Layout:
+
+Card 1: Body Fat %
+Big number ({{ body_fat }}) in blue
+Blue progress bar
+Card 2: Lean Mass %
+Big number ({{ lean_mass }}) in green
+Green progress bar
+Responsive layout: side-by-side on desktop, stacked on mobile
+Button:
+
+Calculate Again
+Full-width
+Background: blue #2D9CDB, white text
+🌐 GLOBAL STYLES
+
+Element	Style
+Font	"Poppins", sans-serif
+Text color	White (#FFFFFF)
+Background	Black (#0F0F0F)
+Accent Red	#FF4C4C
+Buttons	12px border-radius, smooth hover
+Input focus	Red border + light inner shadow
+Icons	SVG or Font Awesome in circular wrappers
+Max width	1280px or 80vw with centered margin
+🔧 TECHNICAL BEHAVIOR
+
+Use {% if analysis_results %} to prevent template errors
+Destroy any existing charts before rendering new ones
+Session values should update on each analysis, not persist old values
+Validate all inputs on both client and server side
+✅ Please walk through each section and match what’s shown in the screenshots.
+Let me know what files you change so I can version-control this properly.
+
+Once done, I’ll finalize the results page and the rest of the visual polish.
+
+Thanks!
