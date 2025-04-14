@@ -2143,5 +2143,66 @@ def schedule_analysis():
     flash('Feature coming soon: Schedule your next analysis.', 'info')
     return redirect(url_for('profile'))
 
+@app.route('/debug-body-composition/<int:analysis_id>')
+@login_required
+def debug_body_composition(analysis_id):
+    """Debug route to check body composition calculations and chart data"""
+    # Get the analysis details
+    analysis = Analysis.query.get_or_404(analysis_id)
+    
+    # Ensure the user can only view their own analyses
+    if analysis.user_id != current_user.id:
+        abort(403)
+    
+    # Get the analysis results
+    result = json.loads(analysis.traits) if analysis.traits else {}
+    
+    # Extract body composition data
+    body_fat_percentage = analysis.body_fat_percentage
+    lean_mass_percentage = 100.0 - body_fat_percentage if body_fat_percentage is not None else None
+    
+    # Get additional data
+    gender = None
+    if 'gender' in result:
+        gender = result['gender']
+    elif current_user.gender:
+        gender = current_user.gender
+    
+    # Get measurements and bodybuilding analysis
+    bodybuilding_analysis = result.get('bodybuilding_analysis', {})
+    basic_measurements = {}
+    enhanced_measurements = {}
+    
+    # Get the measurement dictionaries
+    for trait_name, trait_data in result.items():
+        if isinstance(trait_data, dict) and 'value' in trait_data:
+            basic_measurements[trait_name] = trait_data
+    
+    # Get enhanced measurements if available
+    if 'enhanced_measurements' in result:
+        enhanced_measurements = result['enhanced_measurements']
+    
+    # Get user info for calculations
+    user_info = {
+        'gender': gender,
+        'experience_level': current_user.experience_level or 'moderate'
+    }
+    
+    # Create debug information
+    body_fat_formula_used = result.get('body_fat_formula_used', 'Unknown')
+    
+    return render_template(
+        'debug_body_composition.html',
+        analysis=analysis,
+        body_fat_percentage=body_fat_percentage,
+        lean_mass_percentage=lean_mass_percentage,
+        gender=gender,
+        bodybuilding_analysis=bodybuilding_analysis,
+        basic_measurements=basic_measurements,
+        enhanced_measurements=enhanced_measurements,
+        user_info=user_info,
+        body_fat_formula_used=body_fat_formula_used
+    )
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

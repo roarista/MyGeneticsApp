@@ -1421,6 +1421,7 @@
                     </div>
                     <div class="text-xs text-gray-400 mt-2 text-center">
                         <p>This chart reflects your personalized body composition based on photo analysis and your input data.</p>
+                        <a href="{{ url_for('debug_body_composition', analysis_id=analysis_id) }}" class="text-blue-400 hover:underline text-xs mt-1 block">View debug data</a>
                     </div>
                     <!-- Hidden container for potential system messages -->
                     <div id="raw-debug-data" class="hidden"></div>
@@ -1492,15 +1493,16 @@ document.addEventListener('DOMContentLoaded', function() {
     {% set has_data = true %}
     {% set missing_data_message = "Insufficient data to calculate score" %}
     
-    {# Use confirmed real values instead of dynamically fetching them #}
-    {# Based on debug data, these are the actual values: #}
-    {% set body_fat_percentage = 31.9 %}
-    {% set lean_body_mass = 37.47 %}
-    {% set waist_circumference = 71.6 %}
-    {% set normalized_ffmi = 57.62 %}
+    {# Use dynamic values from the backend calculations #}
+    {# DO NOT override body_fat_percentage as it's already set from the backend #}
+    {# The body_fat_percentage variable is used by the body composition chart #}
+    {% set server_body_fat = body_fat_percentage %}
+    {% set lean_body_mass = enhanced_measurements.get('lean_body_mass', 37.47) %}
+    {% set waist_circumference = enhanced_measurements.get('waist_circumference_cm', 71.6) %}
+    {% set normalized_ffmi = enhanced_measurements.get('normalized_ffmi', 23.5) %}
     
     {# Normalize body fat percentage - lower is better (0-10 range) #}
-    {# For 31.9% body fat: #}
+    {# Use the dynamic body_fat_percentage from the backend #}
     {% set bf_score = max(0, 10 - (body_fat_percentage / 3.5)) %}
     
     {# Normalize lean body mass - higher is better (0-10 range) #}
