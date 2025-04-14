@@ -371,17 +371,18 @@ def allowed_3d_file(filename):
 
 @app.route('/')
 def index():
-    """Render the main page with the Tailwind UI"""
+    """Render the main page with a simple UI that doesn't depend on AOS or session data"""
+    logger.info("Rendering simple index page")
+    return render_template('simple_index.html')
+    
+@app.route('/tailwind')
+def tailwind_index():
+    """Render the Tailwind UI page (as an alternate option)"""
     return render_template('tailwind_index.html')
     
 @app.route('/modern')
 def modern_index():
     """Render the modernized UI main page"""
-    return render_template('tailwind_index.html')
-
-@app.route('/tailwind')
-def tailwind_index():
-    """Render the Tailwind-inspired UI main page"""
     return render_template('tailwind_index.html')
 
 @app.route('/analyze', methods=['GET', 'POST'])
