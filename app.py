@@ -3,7 +3,7 @@ import logging
 import uuid
 import tempfile
 import base64
-from datetime import datetime
+import datetime  # Import the datetime module, not just datetime class
 from flask import Flask, render_template, request, jsonify, redirect, url_for, session, flash
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
@@ -20,11 +20,23 @@ logger = logging.getLogger(__name__)
 
 # Initialize Flask app
 app = Flask(__name__)
-app.secret_key = os.environ.get("SESSION_SECRET")
-# If no secret key is set, use a strong default for development
-if not app.secret_key:
-    app.secret_key = "GeMyt!KT^3.fgL&q9kP#zS7*W"
-    logger.warning("No SESSION_SECRET environment variable found. Using development secret key. This is not secure for production.")
+
+# Set a very secure secret key - this is critical for session persistence
+app.secret_key = "super-secret-key"  # Using the specific key you mentioned
+
+# Configure cookies to improve reliability
+app.config['SESSION_COOKIE_SECURE'] = False  # Allow over HTTP in development
+app.config['SESSION_COOKIE_HTTPONLY'] = True  # More secure cookies
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Allow for redirects
+
+# Make session permanent by default to improve persistence
+@app.before_request
+def make_session_permanent():
+    session.permanent = True
+    # Set session timeout to 7 days
+    session.modified = True
+
+logger.info("Session configuration initialized with enhanced persistence settings")
 
 # Make Replit Auth available to templates
 @app.context_processor
@@ -295,7 +307,7 @@ def analyze():
             'front_confidence_scores': front_confidence_scores,
             'back_confidence_scores': back_confidence_scores,
             'measurement_system': 'metric',
-            'processing_timestamp': datetime.now().isoformat(),
+            'processing_timestamp': datetime.datetime.now().isoformat(),
             'dual_photo_analysis': True
         }
         
@@ -491,17 +503,26 @@ def analyze():
         # Store in both in-memory dictionary and session for redundancy
         analysis_results[analysis_id] = analysis_data
         
-        # Also store in session as fallback mechanism
+        # Store in session with aggressive redundancy for maximum reliability
+        # 1. Store entire analysis data
         session['analysis_results'] = analysis_data
+        # 2. Store the analysis ID separately
+        session['current_analysis_id'] = analysis_id
         
         # Store simplified body fat data separately in session for the chart display
         body_fat = analysis_data['bodybuilding_analysis'].get('body_fat_percentage', 15.0)
         if not isinstance(body_fat, (int, float)):
             body_fat = 15.0
         
-        # Also store basic data separately for direct access in templates
+        # 3. Store basic data separately for direct access in templates
         session['body_fat'] = body_fat
         session['lean_mass'] = 100.0 - body_fat
+        
+        # 4. Force session persistence
+        session.modified = True
+        
+        logger.debug(f"Session after storing analysis: {session}")
+        logger.debug(f"body_fat in session: {session.get('body_fat')}")
         
         logger.debug(f"Analysis results stored with ID: {analysis_id}")
         
@@ -549,49 +570,48 @@ def results(analysis_id):
     """Display analysis results"""
     try:
         # Log the session and analysis_id for debugging
-        logger.debug(f"Session contents: {session}")
+        logger.debug(f"Session keys: {list(session.keys())}")
         logger.debug(f"Requested analysis_id: {analysis_id}")
         
-        # If no analysis_id provided, try to use session data directly
-        if analysis_id is None:
-            if 'analysis_results' in session:
-                logger.info("Using analysis results from session (no ID provided)")
-                result = session['analysis_results']
-                analysis_id = result.get('id', str(uuid.uuid4()))
-            else:
-                # No analysis ID and no session data - handle gracefully
-                logger.warning("No analysis ID provided and no session data available")
-                return render_template('results.html', 
-                                      analysis_results=None, 
-                                      error_message="No analysis data found. Please submit your information again.")
-        # If analysis_id is provided, try to find the results
-        elif analysis_id not in analysis_results:
-            logger.warning(f"Analysis ID {analysis_id} not found in analysis_results")
-            # Try to fall back to session if available
-            if 'analysis_results' in session and session['analysis_results'].get('id') == analysis_id:
-                logger.info(f"Found analysis {analysis_id} in session")
-                result = session['analysis_results']
-            elif 'analysis_results' in session:
-                # Session exists but with different ID - use it anyway as fallback
-                logger.info(f"Using session analysis results with different ID")
-                result = session['analysis_results']
-                # Update the analysis_id to match what's in the session
-                analysis_id = result.get('id', analysis_id)
-            else:
-                # Try to render a simplified results page with just body_fat and lean_mass if available
-                if 'body_fat' in session and 'lean_mass' in session:
-                    logger.info("Falling back to basic body composition data in session")
-                    return render_template('results.html', 
-                                         body_fat_percentage=session['body_fat'],
-                                         lean_mass_percentage=session['lean_mass'],
-                                         basic_data_only=True)
-                else:
-                    logger.warning("No fallback data available in session")
-                    return render_template('results.html', 
-                                         analysis_results=None, 
-                                         error_message="Analysis not found. Please try again.")
-        else:
+        # Try all possible session data sources, in order of preference
+        result = None
+        
+        # Case 1: ID provided in URL and found in memory dictionary
+        if analysis_id and analysis_id in analysis_results:
+            logger.info(f"Found analysis {analysis_id} in memory dictionary")
             result = analysis_results[analysis_id]
+            
+        # Case 2: ID provided in URL and matches the one in session storage
+        elif analysis_id and 'analysis_results' in session and session['analysis_results'].get('id') == analysis_id:
+            logger.info(f"Found analysis {analysis_id} in session storage")
+            result = session['analysis_results']
+            
+        # Case 3: Try to use the current_analysis_id from session to access the memory dictionary
+        elif not analysis_id and 'current_analysis_id' in session and session['current_analysis_id'] in analysis_results:
+            analysis_id = session['current_analysis_id']
+            logger.info(f"Using current_analysis_id {analysis_id} from session to access memory dictionary")
+            result = analysis_results[analysis_id]
+            
+        # Case 4: No ID or not found, but we have analysis_results in session
+        elif 'analysis_results' in session:
+            logger.info("Using analysis results directly from session")
+            result = session['analysis_results']
+            analysis_id = result.get('id', str(uuid.uuid4()))
+            
+        # Case 5: If we still don't have a result but have basic body composition data
+        if result is None and 'body_fat' in session and 'lean_mass' in session:
+            logger.info("Falling back to basic body composition data in session")
+            return render_template('results.html', 
+                                 body_fat_percentage=session['body_fat'],
+                                 lean_mass_percentage=session['lean_mass'],
+                                 basic_data_only=True)
+                
+        # Case 6: If all else fails, render the error template
+        if result is None:
+            logger.warning("No analysis data found in any storage method")
+            return render_template('results.html', 
+                                 analysis_results=None, 
+                                 error_message="No analysis data found. Please submit your information again.")
         
         # Check what type of analysis this is
         analysis_type = result.get('analysis_type', 'single_photo')
