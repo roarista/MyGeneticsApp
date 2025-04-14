@@ -111,10 +111,12 @@ function initBodyCompositionChart() {
     // This overrides any existing leanMassPercentage value for mathematical consistency
     let leanMassPercentage = 100 - fatPercentage;
     
-    // Light logging to track chart initialization
-    console.log('Body composition values:');
-    console.log('- Body Fat %:', fatPercentage.toFixed(1));
-    console.log('- Lean Mass %:', leanMassPercentage.toFixed(1));
+    // Enhanced debugging to track chart initialization
+    console.log('BODY COMPOSITION CHART DEBUG:');
+    console.log('- Body Fat % (raw):', bodyFatPercentage);
+    console.log('- Body Fat % (parsed):', fatPercentage.toFixed(1));
+    console.log('- Lean Mass % (calculated):', leanMassPercentage.toFixed(1));
+    console.log('- Data array being used:', [fatPercentage, leanMassPercentage]);
     
     // Mark container as having data
     const container = ctx.closest('.chart-container');

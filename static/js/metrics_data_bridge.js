@@ -39,7 +39,15 @@ function initMetricsFromServer(data) {
     if (data.weightKg) weightKg = data.weightKg;
     if (data.activityLevel) activityLevel = data.activityLevel;
     
-    console.log('Metrics initialized with real data:', data);
+    console.log('METRICS DATA BRIDGE: Data received from server:');
+    // Log each metric separately for clarity
+    console.log('- bodyFatPercentage:', bodyFatPercentage);
+    console.log('- leanMassPercentage:', leanMassPercentage);
+    console.log('- gender:', gender);
+    console.log('- bodyType:', bodyType);
+    
+    // Log the complete data object
+    console.log('Complete metrics data:', data);
     
     // Only after all metrics are loaded, initialize the charts
     if (typeof initAllFitnessCharts === 'function') {

@@ -1,0 +1,98 @@
+{% extends 'tailwind_layout.html' %}
+
+{% block title %}Debug Body Composition{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-2xl font-bold mb-4">Body Composition Debug</h1>
+    
+    <div class="bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
+        <h2 class="text-xl font-bold mb-2">Raw Values</h2>
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <h3 class="font-semibold">User Inputs</h3>
+                <p>Gender: {{ gender|default('Not set') }}</p>
+                <p>Height: {{ enhanced_measurements.get('height_cm', 'Not set') }} cm</p>
+                <p>Weight: {{ enhanced_measurements.get('weight_kg', 'Not set') }} kg</p>
+                <p>Age: {{ basic_measurements.get('Age', {}).get('value', 'Not set') }}</p>
+                <p>Experience: {{ user_info.get('experience_level', 'Not set') }}</p>
+            </div>
+            <div>
+                <h3 class="font-semibold">Calculated Values</h3>
+                <p>Body Fat %: <span class="font-bold text-red-500">{{ body_fat_percentage|default('Not calculated') }}</span></p>
+                <p>Lean Mass %: <span class="font-bold text-green-500">{{ lean_mass_percentage|default('Not calculated') }}</span></p>
+                <p>Formula Used: {{ body_fat_formula_used|default('Unknown') }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
+        <h2 class="text-xl font-bold mb-2">Calculations Check</h2>
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-gray-700 rounded-lg">
+                <thead>
+                    <tr>
+                        <th class="px-4 py-2">Variable</th>
+                        <th class="px-4 py-2">Value</th>
+                        <th class="px-4 py-2">Expected Formula</th>
+                        <th class="px-4 py-2">Validation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="border px-4 py-2">Body Fat %</td>
+                        <td class="border px-4 py-2">{{ body_fat_percentage|default('N/A') }}</td>
+                        <td class="border px-4 py-2">
+                            {% if gender == 'male' %}
+                                Navy Formula (Male)<br>
+                                86.01 × log10(waist - neck) - 70.041 × log10(height) + 36.76
+                            {% elif gender == 'female' %}
+                                Navy Formula (Female)<br>
+                                163.205 × log10(waist + hip - neck) - 97.684 × log10(height) - 78.387
+                            {% else %}
+                                BMI-based (Fallback)
+                            {% endif %}
+                        </td>
+                        <td class="border px-4 py-2">
+                            {% if body_fat_percentage > 0 %}
+                                ✅ Calculation worked
+                            {% else %}
+                                ❌ Calculation failed
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="border px-4 py-2">Lean Mass %</td>
+                        <td class="border px-4 py-2">{{ lean_mass_percentage|default('N/A') }}</td>
+                        <td class="border px-4 py-2">100 - Body Fat %</td>
+                        <td class="border px-4 py-2">
+                            {% if lean_mass_percentage|default(0) + body_fat_percentage|default(0) == 100 %}
+                                ✅ Sums to 100%
+                            {% else %}
+                                ❌ Doesn't sum to 100%
+                            {% endif %}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <div class="bg-gray-800 rounded-lg shadow-lg p-6">
+        <h2 class="text-xl font-bold mb-2">JavaScript Chart Data</h2>
+        <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto">
+const metricsData = {
+    bodyFatPercentage: {{ body_fat_percentage|default(15.0) }},
+    leanMassPercentage: {{ (100.0 - body_fat_percentage|default(15.0))|float }},
+    gender: '{{ gender|default("male") }}',
+};
+
+// This should be exactly what the chart receives
+datasets: [{
+    data: [{{ body_fat_percentage|default(15.0) }}, {{ (100.0 - body_fat_percentage|default(15.0))|float }}],
+    backgroundColor: ['#ef4444', '#10b981']
+}]
+        </pre>
+    </div>
+</div>
+{% endblock %}
