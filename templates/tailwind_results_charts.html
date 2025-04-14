@@ -39,127 +39,22 @@
                 <h2 class="text-xl font-semibold text-white mb-4 px-1 border-b border-gray-800 pb-2">Body Composition</h2>
                 
                 <div class="space-y-6">
+                    <!-- Body Fat Percentage --> 
+                    <div class="p-4 flex items-center justify-center">
+                        <div class="flex-shrink-0 mr-3">
+                            <i class="fas fa-percentage text-red-500 text-2xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-3xl font-bold text-white">
+                                {{ '{:.1f}'.format(analysis_results.body_fat|default(15.0)) }}% <span class="text-gray-400 text-lg">Body Fat</span>
+                            </p>
+                        </div>
+                    </div>
+                    
                     <!-- Body Composition Doughnut Chart --> 
                     <div class="p-3 bg-gray-800 rounded-lg">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <!-- Left side: Chart -->
-                            <div class="chart-container mx-auto" style="position: relative; height: 150px; max-width: 150px;">
-                                <canvas id="bodyCompDoughnutChart"></canvas>
-                            </div>
-                            
-                            <!-- Right side: Text values -->
-                            <div class="flex flex-col justify-center space-y-3">
-                                <!-- Body Fat -->
-                                <div class="flex items-center space-x-2">
-                                    <div class="w-3 h-3 rounded-full bg-red-500"></div>
-                                    <p class="text-lg font-bold text-white">
-                                        {% if enhanced_measurements and enhanced_measurements.get('body_fat_percentage') %}
-                                            {{ '{:.1f}'.format(enhanced_measurements.get('body_fat_percentage')) }}%
-                                        {% elif bodybuilding_analysis %}
-                                            {% if bodybuilding_analysis.body_fat_percentage is defined %}
-                                                {{ '{:.1f}'.format(bodybuilding_analysis.body_fat_percentage) }}%
-                                            {% elif bodybuilding_analysis.get('body_fat_percentage') %}
-                                                {{ '{:.1f}'.format(bodybuilding_analysis.get('body_fat_percentage')) }}%
-                                            {% elif bodybuilding_analysis.get('body_composition', {}).get('body_fat_percentage') %}
-                                                {{ '{:.1f}'.format(bodybuilding_analysis.get('body_composition', {}).get('body_fat_percentage')) }}%
-                                            {% else %}
-                                                --
-                                            {% endif %}
-                                        {% else %}
-                                            --
-                                        {% endif %}
-                                    </p>
-                                    <p class="text-gray-400">Body Fat</p>
-                                </div>
-                                
-                                <!-- Lean Mass -->
-                                <div class="flex items-center space-x-2">
-                                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
-                                    <p class="text-lg font-bold text-white">
-                                        {% if enhanced_measurements and enhanced_measurements.get('body_fat_percentage') %}
-                                            {{ '{:.1f}'.format(100 - enhanced_measurements.get('body_fat_percentage')) }}%
-                                        {% elif bodybuilding_analysis %}
-                                            {% if bodybuilding_analysis.body_fat_percentage is defined %}
-                                                {{ '{:.1f}'.format(100 - bodybuilding_analysis.body_fat_percentage) }}%
-                                            {% elif bodybuilding_analysis.get('body_fat_percentage') %}
-                                                {{ '{:.1f}'.format(100 - bodybuilding_analysis.get('body_fat_percentage')) }}%
-                                            {% elif bodybuilding_analysis.get('body_composition', {}).get('body_fat_percentage') %}
-                                                {{ '{:.1f}'.format(100 - bodybuilding_analysis.get('body_composition', {}).get('body_fat_percentage')) }}%
-                                            {% else %}
-                                                --
-                                            {% endif %}
-                                        {% else %}
-                                            --
-                                        {% endif %}
-                                    </p>
-                                    <p class="text-gray-400">Lean Mass</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Body Type -->
-                    <div class="flex items-center justify-between p-3 bg-gray-800 rounded-lg">
-                        <div class="flex items-center space-x-3">
-                            <div class="flex-shrink-0">
-                                <i class="fas fa-dna text-purple-400 text-xl"></i>
-                            </div>
-                            <div>
-                                <p class="text-2xl font-bold text-white">
-                                    {% if bodybuilding_analysis %}
-                                        {% if bodybuilding_analysis.body_type is defined and bodybuilding_analysis.body_type != 'Unknown' %}
-                                            {{ bodybuilding_analysis.body_type }}
-                                        {% elif bodybuilding_analysis.get('body_type') and bodybuilding_analysis.get('body_type') != 'Unknown' %}
-                                            {{ bodybuilding_analysis.get('body_type') }}
-                                        {% elif bodybuilding_analysis.get('body_composition', {}).get('body_fat_category') %}
-                                            {{ bodybuilding_analysis.get('body_composition', {}).get('body_fat_category') }}
-                                        {% else %}
-                                            --
-                                        {% endif %}
-                                    {% else %}
-                                        --
-                                    {% endif %}
-                                </p>
-                                <p class="text-gray-400">Body Type Classification</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Muscle Building Potential -->
-                    <div class="flex items-center justify-between p-3 bg-gray-800 rounded-lg">
-                        <div class="flex items-center space-x-3">
-                            <div class="flex-shrink-0">
-                                <i class="fas fa-dumbbell text-green-400 text-xl"></i>
-                            </div>
-                            <div>
-                                <p class="text-2xl font-bold text-white">
-                                    {% if bodybuilding_analysis %}
-                                        {% if bodybuilding_analysis.muscle_building_potential is defined %}
-                                            {{ '{:.1f}'.format(bodybuilding_analysis.muscle_building_potential) }}/10
-                                        {% elif bodybuilding_analysis.get('muscle_building_potential') %}
-                                            {{ '{:.1f}'.format(bodybuilding_analysis.get('muscle_building_potential')) }}/10
-                                        {% elif bodybuilding_analysis.get('genetic_potential', {}).get('rating') %}
-                                            {% set rating = bodybuilding_analysis.get('genetic_potential', {}).get('rating') %}
-                                            {% if rating == 'excellent' %}
-                                                9.0/10
-                                            {% elif rating == 'above_average' %}
-                                                7.5/10
-                                            {% elif rating == 'average' %}
-                                                5.0/10
-                                            {% elif rating == 'below_average' %}
-                                                3.0/10
-                                            {% else %}
-                                                5.0/10
-                                            {% endif %}
-                                        {% else %}
-                                            --
-                                        {% endif %}
-                                    {% else %}
-                                        --
-                                    {% endif %}
-                                </p>
-                                <p class="text-gray-400">Muscle Building Potential</p>
-                            </div>
+                        <div class="chart-container mx-auto" style="position: relative; height: 150px; max-width: 150px;">
+                            <canvas id="bodyCompDoughnutChart"></canvas>
                         </div>
                     </div>
                 </div>
@@ -2645,6 +2540,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Pass data from server to JavaScript
     // Define metrics data for charts 
+    const bodyFat = {{ analysis_results.body_fat|default(15.0) }};
+    const leanMass = 100 - bodyFat;
+    
     const metricsData = {
         bodyType: '{{ body_type|lower }}',
         bodyTypePosition: {{ position }},
@@ -2652,9 +2550,9 @@ document.addEventListener('DOMContentLoaded', function() {
         muscleBuilding: {{ bodybuilding_analysis.muscle_building_potential|default(5.0) }},
         recoveryCapacity: {{ recovery_capacity }},
         shoulderToWaistRatio: {{ shoulder_to_waist_ratio }},
-        bodyFatPercentage: {{ body_fat_percentage|default(15.0) }},
+        bodyFatPercentage: bodyFat,
         // CRITICAL FIX: Always calculate lean mass as 100 - body_fat% to ensure proper values
-        leanMassPercentage: {{ (100.0 - body_fat_percentage|default(15.0))|float }},
+        leanMassPercentage: leanMass,
         // Additional data for Fitness Age estimation
         userAge: {{ basic_measurements.get('Age', {}).get('value', 30)|int }},
         gender: '{{ gender|default("male") }}',

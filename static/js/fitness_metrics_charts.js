@@ -107,19 +107,12 @@ function initBodyCompositionChart() {
         return;
     }
     
-    // Get body composition percentages - ensure they're proper numbers, not strings
-    let fatPercentage = parseFloat(bodyFatPercentage) || 20;
-    
-    // Always calculate lean mass directly from body fat to ensure they sum to 100%
-    // This overrides any existing leanMassPercentage value for mathematical consistency
-    let leanMassPercentage = 100 - fatPercentage;
-    
-    // Enhanced debugging to track chart initialization
+    // Get body composition percentages directly from global variables set in HTML
+    // These are now set from analysis_results.body_fat as specified in the user's request
     console.log('BODY COMPOSITION CHART DEBUG:');
-    console.log('- Body Fat % (raw):', bodyFatPercentage);
-    console.log('- Body Fat % (parsed):', fatPercentage.toFixed(1));
-    console.log('- Lean Mass % (calculated):', leanMassPercentage.toFixed(1));
-    console.log('- Data array being used:', [fatPercentage, leanMassPercentage]);
+    console.log('- Using bodyFat variable:', bodyFat);
+    console.log('- Using leanMass variable:', leanMass);
+    console.log('- Data array being used:', [bodyFat, leanMass]);
     
     // Mark container as having data
     const container = ctx.closest('.chart-container');
