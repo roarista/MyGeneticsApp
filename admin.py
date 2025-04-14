@@ -6,7 +6,6 @@ like database initialization and user management.
 """
 
 from flask import Blueprint, render_template, redirect, url_for, flash
-from app import db
 from models import User, NotificationSetting, PrivacySetting
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
@@ -14,6 +13,9 @@ admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 @admin_bp.route('/init_db')
 def init_db():
     """Initialize database with essential data."""
+    # Import db here to avoid circular import
+    from app import db
+    
     # Create tables if they don't exist
     db.create_all()
     
@@ -83,6 +85,9 @@ def init_db():
 @admin_bp.route('/reset_db')
 def reset_db():
     """Reset database (drop all tables and recreate)."""
+    # Import db here to avoid circular import
+    from app import db
+    
     db.drop_all()
     db.create_all()
     flash('Database has been reset.', 'success')

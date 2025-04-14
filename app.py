@@ -31,26 +31,6 @@ from utils.bodybuilding_metrics import (
     estimate_bodyfat_from_measurements
 )
 from utils.body_scan_3d import process_3d_scan, is_valid_3d_scan_file
-from utils.body_analysis import analyze_body_traits
-from utils.recommendations import generate_recommendations
-from utils.measurement_validator import MeasurementValidator
-from utils.units import format_trait_value, get_unit
-from utils.measurement_estimator import estimate_measurements
-from utils.bodybuilding_metrics import complete_bodybuilding_analysis
-from utils.bodybuilding_metrics import (
-    calculate_body_fat_percentage, 
-    calculate_lean_body_mass, 
-    calculate_fat_free_mass_index,
-    calculate_normalized_ffmi,
-    analyze_shoulder_to_waist_ratio,
-    analyze_arm_symmetry,
-    analyze_muscle_balance,
-    analyze_bodybuilding_potential,
-    formulate_bodybuilding_recommendations,
-    estimate_bodyfat_from_measurements
-)
-from utils.body_scan_3d import process_3d_scan, is_valid_3d_scan_file
-from admin import admin_bp
 try:
     from google_auth import google_auth
 except ImportError:
@@ -62,6 +42,10 @@ except ImportError:
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Define the base class for SQLAlchemy models
+class Base(DeclarativeBase):
+    pass
+
 # Initialize Flask app
 app = Flask(__name__)
 app.secret_key = "super-secret-key"
@@ -70,6 +54,12 @@ app.secret_key = "super-secret-key"
 app.config['SESSION_COOKIE_SECURE'] = False
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+
+# Configure SQLAlchemy
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(model_class=Base)
+db.init_app(app)
 
 @app.before_request
 def make_session_permanent():
@@ -148,7 +138,11 @@ def results():
 def is_authenticated():
     return auth.is_authenticated
 
+# Import admin_bp and register it after db is initialized
+from admin import admin_bp
 app.register_blueprint(admin_bp)
+
+# Import and register google_auth if available
 try:
     app.register_blueprint(google_auth)
 except NameError:
