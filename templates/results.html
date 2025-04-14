@@ -1,9 +1,9 @@
-
 {% extends "base.html" %}
 
 {% block title %}Body Composition Results - MyGenetics{% endblock %}
 
 {% block head_extras %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@14.6.3/distribute/nouislider.min.css">
 <style>
   .result-value {
     font-size: 3.5rem;
@@ -15,6 +15,12 @@
     background-color: rgba(0, 0, 0, 0.3);
     border-radius: 10px;
     padding: 1.5rem;
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  
+  .card-inner:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
   }
 
   .metrics-row {
@@ -29,6 +35,121 @@
     transform: translateY(-5px);
     box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
   }
+  
+  .muscle-tag {
+    font-size: 0.8rem;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-weight: 600;
+    display: inline-block;
+    margin-top: 5px;
+  }
+  
+  .tag-elite {
+    background-color: rgba(138, 43, 226, 0.2);
+    color: #8a2be2;
+  }
+  
+  .tag-excellent {
+    background-color: rgba(0, 123, 255, 0.2);
+    color: #007bff;
+  }
+  
+  .tag-good {
+    background-color: rgba(40, 167, 69, 0.2);
+    color: #28a745;
+  }
+  
+  .tag-average {
+    background-color: rgba(255, 193, 7, 0.2);
+    color: #ffc107;
+  }
+  
+  .tag-needs-growth {
+    background-color: rgba(220, 53, 69, 0.2);
+    color: #dc3545;
+  }
+  
+  .slider-container {
+    margin: 20px 0;
+    padding: 0 10px;
+  }
+  
+  .chart-container {
+    position: relative;
+    height: 200px;
+    margin-bottom: 1rem;
+  }
+  
+  .metric-circle {
+    width: 160px;
+    height: 160px;
+    margin: 0 auto;
+    position: relative;
+    border-radius: 50%;
+    background: conic-gradient(var(--chart-color) var(--chart-percent), #2a2a2a var(--chart-percent));
+  }
+  
+  .metric-circle-inner {
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    background: #1E1E1E;
+    border-radius: 50%;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+  
+  .metric-value {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: var(--chart-color);
+  }
+  
+  .metric-label {
+    font-size: 0.7rem;
+    color: #aaa;
+    text-transform: uppercase;
+  }
+  
+  .metric-subtitle {
+    font-size: 0.9rem;
+    color: #ddd;
+    margin-top: 10px;
+    text-align: center;
+  }
+  
+  .activity-slider {
+    height: 15px;
+    margin: 30px 10px;
+  }
+  
+  .activity-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 5px;
+    color: #aaa;
+    font-size: 12px;
+  }
+  
+  .calorie-display {
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 20px 0 5px;
+    color: #4CAF50;
+    text-align: center;
+  }
+  
+  .calorie-label {
+    font-size: 0.8rem;
+    color: #aaa;
+    text-align: center;
+    margin-bottom: 15px;
+  }
 </style>
 {% endblock %}
 
@@ -36,12 +157,12 @@
 <section class="section py-5">
   <div class="container">
     <div class="row justify-content-center">
-      <div class="col-lg-10">
+      <div class="col-lg-11">
         <div class="text-center mb-4 fade-in">
           <h1 class="mb-2">Your Body Composition Results</h1>
-          <p class="text-muted">Here are your calculated body composition estimates:</p>
+          <p class="text-muted">Here's your comprehensive body analysis for optimizing your fitness approach:</p>
         </div>
-
+        
         <!-- Main Results Card -->
         <div class="card mb-5 fade-in" style="animation-delay: 0.1s">
           <div class="card-header bg-info text-white py-3">
@@ -83,7 +204,7 @@
                   </div>
                 </div>
               </div>
-
+              
               <!-- Lean Mass -->
               <div class="col-md-6 mb-4">
                 <div class="card-inner text-center">
@@ -113,9 +234,460 @@
                 </div>
               </div>
             </div>
-
+            
+            <div class="row mt-4">
+              <!-- Body Type Classification -->
+              <div class="col-md-6 mb-4">
+                <div class="card-inner">
+                  <h4 class="mb-3 text-center fw-bold">Body Type Classification</h4>
+                  <div class="text-center mb-3">
+                    <span class="badge 
+                      {% if body_type == 'Ectomorph' %}bg-info
+                      {% elif body_type == 'Mesomorph' %}bg-success
+                      {% else %}bg-danger{% endif %} p-2 fs-5">
+                      {{ body_type }}
+                    </span>
+                  </div>
+                  <div class="row text-center">
+                    <div class="col-4">
+                      <div class="d-inline-block p-2 rounded-circle mb-1
+                        {% if body_type == 'Ectomorph' %}bg-info{% else %}bg-dark{% endif %}">
+                        <i class="fas fa-running text-white"></i>
+                      </div>
+                      <div class="small {% if body_type == 'Ectomorph' %}text-info{% else %}text-muted{% endif %}">
+                        Ectomorph
+                      </div>
+                    </div>
+                    <div class="col-4">
+                      <div class="d-inline-block p-2 rounded-circle mb-1
+                        {% if body_type == 'Mesomorph' %}bg-success{% else %}bg-dark{% endif %}">
+                        <i class="fas fa-dumbbell text-white"></i>
+                      </div>
+                      <div class="small {% if body_type == 'Mesomorph' %}text-success{% else %}text-muted{% endif %}">
+                        Mesomorph
+                      </div>
+                    </div>
+                    <div class="col-4">
+                      <div class="d-inline-block p-2 rounded-circle mb-1
+                        {% if body_type == 'Endomorph' %}bg-danger{% else %}bg-dark{% endif %}">
+                        <i class="fas fa-weight text-white"></i>
+                      </div>
+                      <div class="small {% if body_type == 'Endomorph' %}text-danger{% else %}text-muted{% endif %}">
+                        Endomorph
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Muscle Building Potential -->
+              <div class="col-md-6 mb-4">
+                <div class="card-inner">
+                  <h4 class="mb-3 text-center fw-bold">Muscle Building Potential</h4>
+                  <div class="text-center">
+                    <div class="result-value mb-2" style="background: linear-gradient(to right, #FF4C4C, #FF9800); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                      {{ "%.1f"|format(muscle_potential) }}%
+                    </div>
+                    <div class="progress mb-3" style="height: 15px;">
+                      <div class="progress-bar" role="progressbar" 
+                        style="width: {{ muscle_potential }}%; background: linear-gradient(to right, #FF4C4C, #FF9800);" 
+                        aria-valuenow="{{ muscle_potential }}" 
+                        aria-valuemin="0" 
+                        aria-valuemax="100">
+                      </div>
+                    </div>
+                    <div class="text-muted">
+                      {% if muscle_potential > 85 %}
+                        Excellent potential for muscle gains
+                      {% elif muscle_potential > 70 %}
+                        Good potential for muscle gains
+                      {% elif muscle_potential > 55 %}
+                        Moderate potential for muscle gains
+                      {% else %}
+                        Focus on body recomposition first
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Metrics Visualization Row -->
+            <div class="row mt-4">
+              <div class="col-12">
+                <h4 class="mb-4 text-center fw-bold">Key Performance Metrics</h4>
+              </div>
+              
+              <!-- Proportion Ratio -->
+              <div class="col-md-4 mb-4">
+                <div class="card-inner text-center">
+                  <div class="chart-container">
+                    <div class="metric-circle" style="--chart-color: #2196F3; --chart-percent: {{ (proportion_ratio/1) * 100 }}%">
+                      <div class="metric-circle-inner">
+                        <div class="metric-value" style="color: #2196F3">{{ "%.2f"|format(proportion_ratio) }}</div>
+                        <div class="metric-label">Proportion Ratio</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="metric-subtitle">Shoulder to Waist Measurement</div>
+                </div>
+              </div>
+              
+              <!-- Symmetry Score -->
+              <div class="col-md-4 mb-4">
+                <div class="card-inner text-center">
+                  <div class="chart-container">
+                    <div class="metric-circle" style="--chart-color: #9C27B0; --chart-percent: {{ (symmetry_score/10) * 100 }}%">
+                      <div class="metric-circle-inner">
+                        <div class="metric-value" style="color: #9C27B0">{{ "%.1f"|format(symmetry_score) }}</div>
+                        <div class="metric-label">Symmetry Score</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="metric-subtitle">Left/Right Balance Rating</div>
+                </div>
+              </div>
+              
+              <!-- Metabolic Efficiency -->
+              <div class="col-md-4 mb-4">
+                <div class="card-inner text-center">
+                  <div class="chart-container">
+                    <div class="metric-circle" style="--chart-color: #FF9800; --chart-percent: {{ (metabolic_efficiency/10) * 100 }}%">
+                      <div class="metric-circle-inner">
+                        <div class="metric-value" style="color: #FF9800">{{ "%.1f"|format(metabolic_efficiency) }}</div>
+                        <div class="metric-label">Metabolic Efficiency</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="metric-subtitle">Fat Burning Capability</div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Fitness Age and Caloric Maintenance -->
+            <div class="row mt-4">
+              <!-- Fitness Age -->
+              <div class="col-md-6 mb-4">
+                <div class="card-inner text-center">
+                  <h4 class="mb-3 fw-bold">Fitness Age Assessment</h4>
+                  <div class="row align-items-center">
+                    <div class="col-6">
+                      <div class="d-flex flex-column align-items-center">
+                        <div class="small text-muted mb-1">Chronological Age</div>
+                        <div class="fs-1 fw-bold">{{ chronological_age }}</div>
+                      </div>
+                    </div>
+                    <div class="col-6">
+                      <div class="d-flex flex-column align-items-center">
+                        <div class="small text-muted mb-1">Fitness Age</div>
+                        <div class="fs-1 fw-bold {% if fitness_age < chronological_age %}text-success{% elif fitness_age > chronological_age %}text-danger{% else %}text-info{% endif %}">
+                          {{ fitness_age }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="mt-3 text-muted small">
+                    {% if fitness_age < chronological_age %}
+                      Your fitness levels are above average for your age! Great work!
+                    {% elif fitness_age > chronological_age %}
+                      Your fitness levels suggest room for improvement compared to your age.
+                    {% else %}
+                      Your fitness age matches your chronological age - right on track!
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Caloric Maintenance -->
+              <div class="col-md-6 mb-4">
+                <div class="card-inner">
+                  <h4 class="mb-3 text-center fw-bold">Daily Caloric Maintenance</h4>
+                  <div class="calorie-display" id="calorieDisplay">{{ maintenance_calories['moderate'] }}</div>
+                  <div class="calorie-label">calories per day</div>
+                  
+                  <div class="slider-container">
+                    <div id="activitySlider" class="activity-slider"></div>
+                    <div class="activity-labels">
+                      <span>Sedentary</span>
+                      <span>Light</span>
+                      <span>Moderate</span>
+                      <span>Active</span>
+                      <span>Very Active</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Muscle Group Development -->
+            <div class="row mt-4">
+              <div class="col-12">
+                <h4 class="mb-4 text-center fw-bold">Muscle Group Development</h4>
+              </div>
+              
+              <div class="col-md-4 mb-4">
+                <div class="card-inner">
+                  <h5 class="mb-3 text-center">Chest</h5>
+                  <div class="progress mb-2" style="height: 20px;">
+                    <div class="progress-bar 
+                      {% if muscle_groups['chest'] <= 3 %}bg-danger
+                      {% elif muscle_groups['chest'] <= 5 %}bg-warning
+                      {% elif muscle_groups['chest'] <= 7 %}bg-success
+                      {% elif muscle_groups['chest'] <= 9 %}bg-info
+                      {% else %}bg-primary{% endif %}" 
+                      role="progressbar" 
+                      style="width: {{ muscle_groups['chest'] * 10 }}%"
+                      aria-valuenow="{{ muscle_groups['chest'] }}" 
+                      aria-valuemin="0" 
+                      aria-valuemax="10">
+                      {{ muscle_groups['chest'] }}/10
+                    </div>
+                  </div>
+                  <div class="text-center">
+                    <span class="muscle-tag 
+                      {% if muscle_tags['chest'] == 'Elite' %}tag-elite
+                      {% elif muscle_tags['chest'] == 'Excellent' %}tag-excellent
+                      {% elif muscle_tags['chest'] == 'Good' %}tag-good
+                      {% elif muscle_tags['chest'] == 'Average' %}tag-average
+                      {% else %}tag-needs-growth{% endif %}">
+                      {{ muscle_tags['chest'] }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-md-4 mb-4">
+                <div class="card-inner">
+                  <h5 class="mb-3 text-center">Back</h5>
+                  <div class="progress mb-2" style="height: 20px;">
+                    <div class="progress-bar 
+                      {% if muscle_groups['back'] <= 3 %}bg-danger
+                      {% elif muscle_groups['back'] <= 5 %}bg-warning
+                      {% elif muscle_groups['back'] <= 7 %}bg-success
+                      {% elif muscle_groups['back'] <= 9 %}bg-info
+                      {% else %}bg-primary{% endif %}" 
+                      role="progressbar" 
+                      style="width: {{ muscle_groups['back'] * 10 }}%"
+                      aria-valuenow="{{ muscle_groups['back'] }}" 
+                      aria-valuemin="0" 
+                      aria-valuemax="10">
+                      {{ muscle_groups['back'] }}/10
+                    </div>
+                  </div>
+                  <div class="text-center">
+                    <span class="muscle-tag 
+                      {% if muscle_tags['back'] == 'Elite' %}tag-elite
+                      {% elif muscle_tags['back'] == 'Excellent' %}tag-excellent
+                      {% elif muscle_tags['back'] == 'Good' %}tag-good
+                      {% elif muscle_tags['back'] == 'Average' %}tag-average
+                      {% else %}tag-needs-growth{% endif %}">
+                      {{ muscle_tags['back'] }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-md-4 mb-4">
+                <div class="card-inner">
+                  <h5 class="mb-3 text-center">Shoulders</h5>
+                  <div class="progress mb-2" style="height: 20px;">
+                    <div class="progress-bar 
+                      {% if muscle_groups['shoulders'] <= 3 %}bg-danger
+                      {% elif muscle_groups['shoulders'] <= 5 %}bg-warning
+                      {% elif muscle_groups['shoulders'] <= 7 %}bg-success
+                      {% elif muscle_groups['shoulders'] <= 9 %}bg-info
+                      {% else %}bg-primary{% endif %}" 
+                      role="progressbar" 
+                      style="width: {{ muscle_groups['shoulders'] * 10 }}%"
+                      aria-valuenow="{{ muscle_groups['shoulders'] }}" 
+                      aria-valuemin="0" 
+                      aria-valuemax="10">
+                      {{ muscle_groups['shoulders'] }}/10
+                    </div>
+                  </div>
+                  <div class="text-center">
+                    <span class="muscle-tag 
+                      {% if muscle_tags['shoulders'] == 'Elite' %}tag-elite
+                      {% elif muscle_tags['shoulders'] == 'Excellent' %}tag-excellent
+                      {% elif muscle_tags['shoulders'] == 'Good' %}tag-good
+                      {% elif muscle_tags['shoulders'] == 'Average' %}tag-average
+                      {% else %}tag-needs-growth{% endif %}">
+                      {{ muscle_tags['shoulders'] }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-md-4 mb-4">
+                <div class="card-inner">
+                  <h5 class="mb-3 text-center">Arms</h5>
+                  <div class="progress mb-2" style="height: 20px;">
+                    <div class="progress-bar 
+                      {% if muscle_groups['arms'] <= 3 %}bg-danger
+                      {% elif muscle_groups['arms'] <= 5 %}bg-warning
+                      {% elif muscle_groups['arms'] <= 7 %}bg-success
+                      {% elif muscle_groups['arms'] <= 9 %}bg-info
+                      {% else %}bg-primary{% endif %}" 
+                      role="progressbar" 
+                      style="width: {{ muscle_groups['arms'] * 10 }}%"
+                      aria-valuenow="{{ muscle_groups['arms'] }}" 
+                      aria-valuemin="0" 
+                      aria-valuemax="10">
+                      {{ muscle_groups['arms'] }}/10
+                    </div>
+                  </div>
+                  <div class="text-center">
+                    <span class="muscle-tag 
+                      {% if muscle_tags['arms'] == 'Elite' %}tag-elite
+                      {% elif muscle_tags['arms'] == 'Excellent' %}tag-excellent
+                      {% elif muscle_tags['arms'] == 'Good' %}tag-good
+                      {% elif muscle_tags['arms'] == 'Average' %}tag-average
+                      {% else %}tag-needs-growth{% endif %}">
+                      {{ muscle_tags['arms'] }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-md-4 mb-4">
+                <div class="card-inner">
+                  <h5 class="mb-3 text-center">Legs</h5>
+                  <div class="progress mb-2" style="height: 20px;">
+                    <div class="progress-bar 
+                      {% if muscle_groups['legs'] <= 3 %}bg-danger
+                      {% elif muscle_groups['legs'] <= 5 %}bg-warning
+                      {% elif muscle_groups['legs'] <= 7 %}bg-success
+                      {% elif muscle_groups['legs'] <= 9 %}bg-info
+                      {% else %}bg-primary{% endif %}" 
+                      role="progressbar" 
+                      style="width: {{ muscle_groups['legs'] * 10 }}%"
+                      aria-valuenow="{{ muscle_groups['legs'] }}" 
+                      aria-valuemin="0" 
+                      aria-valuemax="10">
+                      {{ muscle_groups['legs'] }}/10
+                    </div>
+                  </div>
+                  <div class="text-center">
+                    <span class="muscle-tag 
+                      {% if muscle_tags['legs'] == 'Elite' %}tag-elite
+                      {% elif muscle_tags['legs'] == 'Excellent' %}tag-excellent
+                      {% elif muscle_tags['legs'] == 'Good' %}tag-good
+                      {% elif muscle_tags['legs'] == 'Average' %}tag-average
+                      {% else %}tag-needs-growth{% endif %}">
+                      {{ muscle_tags['legs'] }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-md-4 mb-4">
+                <div class="card-inner">
+                  <h5 class="mb-3 text-center">Core</h5>
+                  <div class="progress mb-2" style="height: 20px;">
+                    <div class="progress-bar 
+                      {% if muscle_groups['core'] <= 3 %}bg-danger
+                      {% elif muscle_groups['core'] <= 5 %}bg-warning
+                      {% elif muscle_groups['core'] <= 7 %}bg-success
+                      {% elif muscle_groups['core'] <= 9 %}bg-info
+                      {% else %}bg-primary{% endif %}" 
+                      role="progressbar" 
+                      style="width: {{ muscle_groups['core'] * 10 }}%"
+                      aria-valuenow="{{ muscle_groups['core'] }}" 
+                      aria-valuemin="0" 
+                      aria-valuemax="10">
+                      {{ muscle_groups['core'] }}/10
+                    </div>
+                  </div>
+                  <div class="text-center">
+                    <span class="muscle-tag 
+                      {% if muscle_tags['core'] == 'Elite' %}tag-elite
+                      {% elif muscle_tags['core'] == 'Excellent' %}tag-excellent
+                      {% elif muscle_tags['core'] == 'Good' %}tag-good
+                      {% elif muscle_tags['core'] == 'Average' %}tag-average
+                      {% else %}tag-needs-growth{% endif %}">
+                      {{ muscle_tags['core'] }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Your Composition Details -->
+            <div class="row mt-4">
+              <div class="col-md-6 mb-4">
+                <div class="card-inner">
+                  <h4 class="mb-3 text-center fw-bold">Estimated Composition</h4>
+                  <div class="d-flex justify-content-between mb-3">
+                    <span>Body Fat Mass:</span>
+                    <span class="fw-bold">{{ "%.1f"|format(fat_mass_kg) }} kg</span>
+                  </div>
+                  <div class="d-flex justify-content-between mb-3">
+                    <span>Lean Body Mass:</span>
+                    <span class="fw-bold">{{ "%.1f"|format(lean_mass_kg) }} kg</span>
+                  </div>
+                  <div class="d-flex justify-content-between">
+                    <span>Body Mass Index (BMI):</span>
+                    <span class="fw-bold">{{ "%.1f"|format(bmi) }}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-md-6 mb-4">
+                <div class="card-inner">
+                  <h4 class="mb-3 text-center fw-bold">Recommended Approach</h4>
+                  <div class="mb-3">
+                    <div class="d-flex">
+                      {% if body_fat > 25 %}
+                        <i class="fas fa-fire text-danger mt-1 me-2"></i>
+                        <div>
+                          <strong>Focus on fat loss</strong>
+                          <div class="text-muted small">Prioritize caloric deficit and cardio training</div>
+                        </div>
+                      {% elif body_fat > 15 and body_fat <= 25 %}
+                        <i class="fas fa-exchange-alt text-info mt-1 me-2"></i>
+                        <div>
+                          <strong>Body recomposition</strong>
+                          <div class="text-muted small">Build muscle while gradually losing fat</div>
+                        </div>
+                      {% else %}
+                        <i class="fas fa-plus-circle text-success mt-1 me-2"></i>
+                        <div>
+                          <strong>Focus on muscle building</strong>
+                          <div class="text-muted small">Lean bulk with slight caloric surplus</div>
+                        </div>
+                      {% endif %}
+                    </div>
+                  </div>
+                  
+                  <div class="mt-4">
+                    <div class="d-flex">
+                      {% if body_type == 'Ectomorph' %}
+                        <i class="fas fa-utensils text-warning mt-1 me-2"></i>
+                        <div>
+                          <strong>Caloric surplus with higher carbs</strong>
+                          <div class="text-muted small">Frequent meals, focus on overall volume</div>
+                        </div>
+                      {% elif body_type == 'Mesomorph' %}
+                        <i class="fas fa-balance-scale text-info mt-1 me-2"></i>
+                        <div>
+                          <strong>Balanced macronutrient approach</strong>
+                          <div class="text-muted small">Even protein/carb/fat distribution</div>
+                        </div>
+                      {% else %}
+                        <i class="fas fa-carrot text-success mt-1 me-2"></i>
+                        <div>
+                          <strong>Higher protein, moderate carbs</strong>
+                          <div class="text-muted small">Focus on nutrient timing and quality</div>
+                        </div>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
             <div class="mt-4 text-center">
-              <a href="/" class="btn btn-info w-100">
+              <a href="/" class="btn btn-primary w-100 py-3" style="font-size: 18px;">
                 <i class="fas fa-redo me-2"></i>
                 Calculate Again
               </a>
@@ -130,9 +702,69 @@
 {% endblock %}
 
 {% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/nouislider@14.6.3/distribute/nouislider.min.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    console.log('Results page loaded successfully');
+    // Initialize activity slider for caloric maintenance
+    const activitySlider = document.getElementById('activitySlider');
+    if (activitySlider) {
+      const calorieDisplay = document.getElementById('calorieDisplay');
+      const calorieValues = {
+        0: {{ maintenance_calories['sedentary'] }},
+        25: {{ maintenance_calories['light'] }},
+        50: {{ maintenance_calories['moderate'] }},
+        75: {{ maintenance_calories['active'] }},
+        100: {{ maintenance_calories['very_active'] }}
+      };
+      
+      noUiSlider.create(activitySlider, {
+        start: 50, // Start at moderate activity level
+        connect: 'lower',
+        range: {
+          'min': 0,
+          'max': 100
+        },
+        step: 25,
+        pips: {
+          mode: 'positions',
+          values: [0, 25, 50, 75, 100],
+          density: 10
+        }
+      });
+      
+      activitySlider.noUiSlider.on('update', function(values, handle) {
+        const value = Math.round(values[handle]);
+        const closestKey = Object.keys(calorieValues).reduce((prev, curr) => {
+          return Math.abs(curr - value) < Math.abs(prev - value) ? curr : prev;
+        });
+        
+        calorieDisplay.textContent = calorieValues[closestKey];
+        
+        // Highlight the correct activity level label
+        const labels = document.querySelectorAll('.activity-labels span');
+        labels.forEach((label, index) => {
+          if (index * 25 === parseInt(closestKey)) {
+            label.style.fontWeight = 'bold';
+            label.style.color = '#fff';
+          } else {
+            label.style.fontWeight = 'normal';
+            label.style.color = '#aaa';
+          }
+        });
+      });
+    }
+    
+    // Animation for metric circles (optional)
+    const metricCircles = document.querySelectorAll('.metric-circle');
+    metricCircles.forEach(circle => {
+      const value = parseFloat(circle.style.getPropertyValue('--chart-percent'));
+      circle.style.setProperty('--chart-percent', '0%');
+      
+      setTimeout(() => {
+        circle.style.transition = 'background 1.5s ease-in-out';
+        circle.style.setProperty('--chart-percent', value);
+      }, 300);
+    });
   });
 </script>
 {% endblock %}
