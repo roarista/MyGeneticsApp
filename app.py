@@ -373,7 +373,7 @@ def allowed_3d_file(filename):
 def index():
     """Render the main page with proper styling and branding"""
     logger.info("Rendering index page")
-    return render_template('index.html')
+    return render_template('index_new.html')
     
 @app.route('/tailwind')
 def tailwind_index():
@@ -560,7 +560,7 @@ def results():
         session.modified = True
         
         return render_template(
-            'results.html',
+            'results_new.html',
             body_fat=body_fat,
             lean_mass=lean_mass,
             fat_mass_kg=fat_mass_kg,

@@ -1,0 +1,202 @@
+{% extends "base_new.html" %}
+
+{% block title %}Body Composition Results - MyGenetics{% endblock %}
+
+{% block content %}
+<section class="section py-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-10">
+        <div class="text-center mb-4 fade-in">
+          <h1 class="mb-2">Your Body Composition Results</h1>
+          <p class="text-muted">Here are your calculated body composition estimates:</p>
+        </div>
+        
+        <!-- Main Results Card -->
+        <div class="card mb-5 fade-in">
+          <div class="card-header bg-info text-white">
+            <h3 class="mb-0 fw-bold">Body Composition Analysis</h3>
+          </div>
+          <div class="card-body">
+            {% if not body_fat %}
+              <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                No analysis results found. Please try again.
+              </div>
+            {% else %}
+            <div class="row">
+              <!-- Body Fat -->
+              <div class="col-md-6 mb-4">
+                <div class="card-inner text-center">
+                  <h4 class="mb-3 fw-bold">Body Fat Percentage</h4>
+                  <div class="result-value text-info mb-2">{{ "%.1f"|format(body_fat) }}%</div>
+                  <div class="progress mb-3" style="height: 15px;">
+                    <div class="progress-bar bg-info" role="progressbar" 
+                      style="width: {{ body_fat }}%" 
+                      aria-valuenow="{{ body_fat }}" 
+                      aria-valuemin="0" 
+                      aria-valuemax="100">
+                    </div>
+                  </div>
+                  <div class="text-muted">
+                    {% if body_fat < 10 %}
+                      Essential fat range (athletic)
+                    {% elif body_fat < 15 %}
+                      Athletic range
+                    {% elif body_fat < 20 %}
+                      Fitness range
+                    {% elif body_fat < 25 %}
+                      Average range
+                    {% else %}
+                      Above average range
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Lean Mass -->
+              <div class="col-md-6 mb-4">
+                <div class="card-inner text-center">
+                  <h4 class="mb-3 fw-bold">Lean Mass Percentage</h4>
+                  <div class="result-value text-success mb-2">{{ "%.1f"|format(lean_mass) }}%</div>
+                  <div class="progress mb-3" style="height: 15px;">
+                    <div class="progress-bar bg-success" role="progressbar" 
+                      style="width: {{ lean_mass }}%" 
+                      aria-valuenow="{{ lean_mass }}" 
+                      aria-valuemin="0" 
+                      aria-valuemax="100">
+                    </div>
+                  </div>
+                  <div class="text-muted">
+                    {% if lean_mass > 85 %}
+                      Excellent lean mass
+                    {% elif lean_mass > 80 %}
+                      Very good lean mass
+                    {% elif lean_mass > 75 %}
+                      Good lean mass
+                    {% elif lean_mass > 70 %}
+                      Average lean mass
+                    {% else %}
+                      Below average lean mass
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="row mt-4">
+              <!-- Body Type Classification -->
+              <div class="col-md-6 mb-4">
+                <div class="card-inner text-center">
+                  <h4 class="mb-3 fw-bold">Body Type Classification</h4>
+                  <div class="body-type-badge 
+                    {% if body_type == 'Ectomorph' %}ectomorph
+                    {% elif body_type == 'Mesomorph' %}mesomorph
+                    {% else %}endomorph{% endif %}">
+                    {{ body_type }}
+                  </div>
+                  <div class="row">
+                    <div class="col-4 text-center">
+                      <div class="d-inline-block p-2 rounded-circle mb-1
+                        {% if body_type == 'Ectomorph' %}bg-info{% else %}bg-dark{% endif %}">
+                        <i class="fas fa-running text-white"></i>
+                      </div>
+                      <div class="small {% if body_type == 'Ectomorph' %}text-info{% else %}text-muted{% endif %}">Ectomorph</div>
+                    </div>
+                    <div class="col-4 text-center">
+                      <div class="d-inline-block p-2 rounded-circle mb-1
+                        {% if body_type == 'Mesomorph' %}bg-success{% else %}bg-dark{% endif %}">
+                        <i class="fas fa-dumbbell text-white"></i>
+                      </div>
+                      <div class="small {% if body_type == 'Mesomorph' %}text-success{% else %}text-muted{% endif %}">Mesomorph</div>
+                    </div>
+                    <div class="col-4 text-center">
+                      <div class="d-inline-block p-2 rounded-circle mb-1
+                        {% if body_type == 'Endomorph' %}bg-danger{% else %}bg-dark{% endif %}">
+                        <i class="fas fa-weight text-white"></i>
+                      </div>
+                      <div class="small {% if body_type == 'Endomorph' %}text-danger{% else %}text-muted{% endif %}">Endomorph</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Muscle Building Potential -->
+              <div class="col-md-6 mb-4">
+                <div class="card-inner text-center">
+                  <h4 class="mb-3 fw-bold">Muscle Building Potential</h4>
+                  <div class="result-value gradient-text mb-2">{{ "%.1f"|format(muscle_potential) }}%</div>
+                  <div class="muscle-potential-meter">
+                    <div class="muscle-potential-fill" style="width: {{ muscle_potential }}%"></div>
+                  </div>
+                  <div class="text-muted">
+                    {% if muscle_potential > 85 %}
+                      Excellent potential for muscle gains
+                    {% elif muscle_potential > 70 %}
+                      Good potential for muscle gains
+                    {% elif muscle_potential > 55 %}
+                      Moderate potential for muscle gains
+                    {% else %}
+                      Focus on body recomposition first
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="row mt-4">
+              <!-- Absolute Values -->
+              <div class="col-md-6 mb-4">
+                <div class="card-inner">
+                  <h4 class="mb-3 text-center fw-bold">Estimated Composition</h4>
+                  <div class="d-flex justify-content-between mb-2">
+                    <span>Estimated Fat Mass:</span>
+                    <span class="fw-bold">{{ "%.1f"|format(fat_mass_kg) }} kg</span>
+                  </div>
+                  <div class="d-flex justify-content-between">
+                    <span>Estimated Lean Mass:</span>
+                    <span class="fw-bold">{{ "%.1f"|format(lean_mass_kg) }} kg</span>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Next Steps -->
+              <div class="col-md-6 mb-4">
+                <div class="card-inner">
+                  <h4 class="mb-3 text-center fw-bold">Recommended Approach</h4>
+                  <div class="mb-3">
+                    {% if body_fat > 25 %}
+                      <i class="fas fa-fire text-danger me-2"></i> Focus on fat loss before muscle building
+                    {% elif body_fat > 15 and body_fat <= 25 %}
+                      <i class="fas fa-exchange-alt text-info me-2"></i> Body recomposition (build muscle while losing fat)
+                    {% else %}
+                      <i class="fas fa-plus-circle text-success me-2"></i> Focus on muscle building (lean bulk)
+                    {% endif %}
+                  </div>
+                  <div>
+                    {% if body_type == 'Ectomorph' %}
+                      <i class="fas fa-utensils text-warning me-2"></i> Caloric surplus with higher carbs
+                    {% elif body_type == 'Mesomorph' %}
+                      <i class="fas fa-balance-scale text-info me-2"></i> Balanced macronutrient approach
+                    {% else %}
+                      <i class="fas fa-carrot text-success me-2"></i> Higher protein, moderate carbs
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+            
+            <div class="mt-4 text-center">
+              <a href="/" class="btn btn-primary w-100">
+                <i class="fas fa-redo me-2"></i>
+                Calculate Again
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

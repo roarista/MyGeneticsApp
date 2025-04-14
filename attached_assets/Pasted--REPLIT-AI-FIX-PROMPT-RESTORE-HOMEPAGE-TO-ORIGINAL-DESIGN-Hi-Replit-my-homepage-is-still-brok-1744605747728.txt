@@ -1,0 +1,91 @@
+🛠 REPLIT AI FIX PROMPT — RESTORE HOMEPAGE TO ORIGINAL DESIGN
+
+Hi Replit — my homepage is still broken visually. It does not look like it used to. Please stop tweaking individual elements, and instead fully reset and rebuild the homepage layout to match my original design.
+
+🎯 GOAL: Match original UI seen here
+(Screenshots & video were already reviewed)
+
+The homepage must return to its original premium layout and polish, including:
+
+Bold gradient title
+Left-right 2-column layout
+Dark themed input form
+Vivid, readable icons
+Clean card layout under “How It Works”
+Proper font, padding, and spacing
+🔧 FIX INSTRUCTIONS — PLEASE REBUILD AS FOLLOWS
+
+✅ GLOBAL STYLES
+Font: "Poppins", sans-serif
+Text color: White #FFFFFF
+Page background: Black #0F0F0F
+Button red: #FF4C4C
+Border radius (global): 12px
+Max width: 1280px, center aligned
+Form inputs: Rounded, black background, white placeholder
+🔺 NAVBAR
+Left side: MyGenetics (bold red #FF4C4C), ALPHA below it in small blue
+Right side: Home link (in red)
+Background: dark navy (#0C0C1F)
+Spacing: top/bottom padding 16px
+🧬 HERO SECTION
+<h1>
+  DISCOVER YOUR <span class="gradient-text">GENETIC POTENTIAL</span>
+</h1>
+Style:
+
+Font-size: 40px
+Font-weight: 800
+Gradient:
+.gradient-text {
+  background: linear-gradient(to right, #FF4C4C, #FF9800);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+Subtext:
+
+Font-size: 18px, width max 700px, center aligned
+📚 LEFT COLUMN – Why Body Analysis Matters
+Heading: Why Body Analysis Matters
+3 features, each with:
+Colored icon inside a circle
+White bold title
+Small light-gray description
+Icon colors:
+Muscle Insertions: #00C4FF
+Limb Proportions: #8E44AD
+Bone Structure: #1ABC9C
+🧾 RIGHT COLUMN – Start Your Analysis (Form)
+Card background: dark gray #1A1A1A
+Form elements:
+Front View Photo (file input)
+Back View Photo (file input)
+Height, Weight, Age
+Gender (dropdown)
+Training Experience (dropdown)
+Error validation text: bright red
+Submit button:
+<button type="submit">
+  <i class="fa fa-hourglass-half"></i> Analyze My Genetics
+</button>
+Background: #FF4C4C, hover: #e53935
+⚙️ HOW IT WORKS SECTION
+4 horizontal cards:
+Upload Photos → icon: upload → bg: blue
+AI Analysis → icon: circuit → bg: indigo
+Get Results → icon: chart → bg: teal
+Focus Training → icon: dumbbell → bg: orange
+Icons must be white on vivid circular backgrounds
+Card background: dark (#1E1E1E), padding: 24px
+🔻 FOOTER
+Dark navy background
+Left: © 2025 MyGenetics. All rights reserved.
+Right: Unlock your genetic potential
+Text color: #AAAAAA, font-size: 14px
+Layout: side-by-side on large screens, stacked on mobile
+🧠 NOTE TO AI
+✅ Please do not partially override.
+✅ Rebuild layout completely from the top.
+✅ Use the original screenshots for spacing, color, and structure reference.
+✅ Tell me what files you changed.
+
