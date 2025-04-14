@@ -153,26 +153,38 @@
           <a href="{{ url_for('index') }}" class="nav-link {% if request.endpoint == 'index' or request.endpoint == 'tailwind_index' or request.endpoint == 'modern_index' %}active{% endif %}">
             Home
           </a>
-          <a href="{{ url_for('scan3d') }}" class="nav-link {% if request.endpoint == 'scan3d' %}active{% endif %}">
+          <!-- 3D scanning is temporarily unavailable 
+          <a href="{{ url_for('index') }}" class="nav-link disabled">
             3D Scanning
           </a>
-          <a href="{{ url_for('education') }}" class="nav-link {% if request.endpoint == 'education' %}active{% endif %}">
+          -->
+          
+          <!-- Education section is temporarily unavailable 
+          <a href="{{ url_for('index') }}" class="nav-link disabled">
             Learn
           </a>
+          -->
+          
           {% if is_authenticated() %}
-          <a href="{{ url_for('profile') }}" class="nav-link {% if request.endpoint == 'profile' %}active{% endif %}">
+          <!-- Profile section is temporarily unavailable 
+          <a href="{{ url_for('index') }}" class="nav-link disabled">
             Profile
           </a>
+          -->
           {% endif %}
         </div>
 
         <!-- Auth Buttons -->
         <div class="hidden md:flex items-center space-x-4">
           {% if is_authenticated() %}
-          <a href="{{ url_for('logout') }}" class="btn-outline">Logout</a>
+          <!-- Logout is temporarily unavailable 
+          <a href="{{ url_for('index') }}" class="btn-outline">Logout</a>
+          -->
           {% else %}
-          <a href="{{ url_for('signup', ui='tailwind') }}" class="btn-primary">Sign Up</a>
-          <a href="{{ url_for('login', ui='tailwind') }}" class="btn-outline">Login</a>
+          <!-- Auth buttons are temporarily unavailable
+          <a href="{{ url_for('index') }}" class="btn-primary">Sign Up</a>
+          <a href="{{ url_for('index') }}" class="btn-outline">Login</a>
+          -->
           {% endif %}
         </div>
 
@@ -194,28 +206,40 @@
         <a href="{{ url_for('index') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800">
           Home
         </a>
-        <a href="{{ url_for('scan3d') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800">
+        <!-- 3D scanning is temporarily unavailable 
+        <a href="{{ url_for('index') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800 opacity-50">
           3D Scanning
         </a>
-        <a href="{{ url_for('education') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800">
+        -->
+        
+        <!-- Education is temporarily unavailable 
+        <a href="{{ url_for('index') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800 opacity-50">
           Learn
         </a>
+        -->
+        
         {% if is_authenticated() %}
-        <a href="{{ url_for('profile') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800">
+        <!-- Profile is temporarily unavailable 
+        <a href="{{ url_for('index') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800 opacity-50">
           Profile
         </a>
+        -->
         {% endif %}
         {% if is_authenticated() %}
-        <a href="{{ url_for('logout') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800">
+        <!-- Logout is temporarily unavailable 
+        <a href="{{ url_for('index') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800">
           Logout
         </a>
+        -->
         {% else %}
-        <a href="{{ url_for('signup', ui='tailwind') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800">
+        <!-- Auth buttons are temporarily unavailable
+        <a href="{{ url_for('index') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800">
           Sign Up
         </a>
-        <a href="{{ url_for('login', ui='tailwind') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800">
+        <a href="{{ url_for('index') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800">
           Login
         </a>
+        -->
         {% endif %}
       </div>
     </div>

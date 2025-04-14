@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MyGenetics - Unlock Your Genetic Potential</title>
+  
+  <!-- External CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+  <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+  
+  <!-- Custom CSS -->
+  <style>
+    body {
+      background-color: #0f0f0f;
+      color: #f0f0f0;
+      font-family: 'Inter', sans-serif;
+    }
+    
+    .btn-primary {
+      @apply bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300;
+    }
+    
+    .btn-outline {
+      @apply border border-red-600 text-red-600 hover:bg-red-600 hover:text-white font-bold py-2 px-4 rounded-lg transition duration-300;
+    }
+    
+    .nav-link {
+      @apply text-gray-300 hover:text-white transition duration-300;
+    }
+    
+    .nav-link.active {
+      @apply text-white border-b-2 border-red-500;
+    }
+    
+    .card {
+      @apply bg-gray-900 rounded-xl overflow-hidden shadow-lg;
+    }
+    
+    .card-gradient {
+      background: linear-gradient(135deg, rgba(20,20,20,1) 0%, rgba(40,40,40,1) 100%);
+    }
+    
+    .text-gradient {
+      background: linear-gradient(90deg, #ff4d4d, #f9cb28);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .disabled {
+      @apply opacity-50 cursor-not-allowed;
+    }
+    
+    /* DNA animation */
+    @keyframes dnaRotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .dna-icon {
+      animation: dnaRotate 4s linear infinite;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+  <!-- Navigation -->
+  <nav class="bg-black border-b border-gray-800 fixed w-full z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <!-- Logo and brand -->
+        <a href="{{ url_for('index') }}" class="flex items-center space-x-2">
+          <svg class="h-8 w-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          <div>
+            <div class="text-xl font-bold text-white">MyGenetics</div>
+            <div class="text-xs text-red-500 uppercase tracking-wider">ALPHA</div>
+          </div>
+        </a>
+
+        <!-- Desktop Navigation -->
+        <div class="hidden md:flex items-center space-x-8">
+          <a href="{{ url_for('index') }}" class="nav-link {% if request.endpoint == 'index' or request.endpoint == 'tailwind_index' or request.endpoint == 'modern_index' %}active{% endif %}">
+            Home
+          </a>
+        </div>
+
+        <!-- Mobile menu button -->
+        <div class="md:hidden">
+          <button type="button" id="mobile-menu-button" class="text-gray-400 hover:text-white">
+            <span class="sr-only">Open menu</span>
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile menu -->
+    <div class="md:hidden hidden" id="mobile-menu">
+      <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-black border-b border-gray-800">
+        <a href="{{ url_for('index') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800">
+          Home
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="pt-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="mb-4 p-4 rounded-lg {% if category == 'error' or category == 'danger' %}bg-red-500/10 text-red-500{% else %}bg-green-500/10 text-green-500{% endif %}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-black border-t border-gray-800 py-8 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row justify-between items-center">
+        <div class="flex items-center mb-4 md:mb-0">
+          <svg class="h-8 w-8 text-red-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          <div>
+            <div class="text-xl font-bold text-white">MyGenetics</div>
+            <div class="text-xs text-red-500 uppercase tracking-wider">ALPHA</div>
+          </div>
+        </div>
+        <div class="text-gray-400 text-sm">
+          <p>&copy; 2025 MyGenetics. All rights reserved.</p>
+          <p class="mt-1">Unlock your genetic potential</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize AOS
+      if (typeof AOS !== 'undefined') {
+        AOS.init({
+          duration: 800,
+          once: true,
+          offset: 100
+        });
+      }
+
+      // Mobile menu toggle
+      const mobileMenuButton = document.getElementById('mobile-menu-button');
+      const mobileMenu = document.getElementById('mobile-menu');
+      
+      if (mobileMenuButton && mobileMenu) {
+        mobileMenuButton.addEventListener('click', function() {
+          mobileMenu.classList.toggle('hidden');
+        });
+      }
+    });
+  </script>
+  
+  {% block scripts %}{% endblock %}
+</body>
+</html>
