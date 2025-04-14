@@ -5,6 +5,7 @@
 {% block head_extras %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@14.6.3/distribute/nouislider.min.css">
 <style>
+  /* Results page styles - Updated to match screenshots */
   .result-value {
     font-size: 3.5rem;
     font-weight: 700;
@@ -12,10 +13,11 @@
   }
 
   .card-inner {
-    background-color: rgba(0, 0, 0, 0.3);
+    background-color: rgba(15, 15, 15, 0.5);
     border-radius: 10px;
     padding: 1.5rem;
     transition: transform 0.3s, box-shadow 0.3s;
+    border: 1px solid rgba(255, 255, 255, 0.05);
   }
   
   .card-inner:hover {
@@ -94,7 +96,7 @@
     position: absolute;
     width: 120px;
     height: 120px;
-    background: #1E1E1E;
+    background: #1A1A1A;
     border-radius: 50%;
     top: 20px;
     left: 20px;
@@ -150,6 +152,127 @@
     text-align: center;
     margin-bottom: 15px;
   }
+
+  /* New chart styles for progress bars */
+  .horizontal-bar-container {
+    height: 30px;
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+
+  .muscle-score {
+    float: right;
+    margin-right: 8px;
+    font-weight: bold;
+  }
+
+  .measurement-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .measurement-label {
+    flex: 1;
+    font-weight: 500;
+  }
+
+  .measurement-value {
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .development-indicator {
+    display: flex;
+    margin-top: 10px;
+  }
+
+  .indicator-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 3px;
+  }
+
+  .active-dot {
+    background-color: currentColor;
+  }
+
+  .inactive-dot {
+    background-color: rgba(255, 255, 255, 0.15);
+  }
+
+  .body-type-slider {
+    position: relative;
+    height: 30px;
+    background: linear-gradient(to right, #2196F3, #4CAF50, #FF9800);
+    border-radius: 15px;
+    margin: 20px 0;
+  }
+
+  .slider-thumb {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background-color: white;
+    border-radius: 50%;
+    top: 0px;
+    transform: translateX(-50%);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  }
+
+  .body-type-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+  }
+
+  /* Gentic traits styles */
+  .trait-card {
+    background-color: #1A1A1A;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  
+  .trait-accordion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    cursor: pointer;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    margin-bottom: 10px;
+  }
+  
+  .trait-accordion-body {
+    padding: 0 5px;
+  }
+
+  /* Growth potential bars */
+  .growth-bar {
+    height: 25px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    background: linear-gradient(to right, #FF4C4C, #FF9800);
+    position: relative;
+  }
+  
+  .growth-bar-label {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: white;
+    font-weight: bold;
+    font-size: 0.9rem;
+  }
 </style>
 {% endblock %}
 
@@ -158,13 +281,13 @@
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-lg-11">
-        <div class="text-center mb-4 fade-in">
+        <div class="text-center mb-4" data-aos="fade-up">
           <h1 class="mb-2">Your Body Composition Results</h1>
           <p class="text-muted">Here's your comprehensive body analysis for optimizing your fitness approach:</p>
         </div>
         
         <!-- Main Results Card -->
-        <div class="card mb-5 fade-in" style="animation-delay: 0.1s">
+        <div class="card mb-5" data-aos="fade-up" data-aos-delay="100">
           <div class="card-header bg-info text-white py-3">
             <h3 class="mb-0 fw-bold">Body Composition Analysis</h3>
           </div>
@@ -177,7 +300,7 @@
             {% else %}
             <div class="row">
               <!-- Body Fat -->
-              <div class="col-md-6 mb-4">
+              <div class="col-md-6 mb-4" data-aos="fade-right" data-aos-delay="150">
                 <div class="card-inner text-center">
                   <h4 class="mb-3 fw-bold">Body Fat Percentage</h4>
                   <div class="result-value text-info mb-2">{{ "%.1f"|format(body_fat) }}%</div>

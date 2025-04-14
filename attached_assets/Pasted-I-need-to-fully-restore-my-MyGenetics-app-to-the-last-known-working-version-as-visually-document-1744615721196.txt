@@ -1,0 +1,147 @@
+I need to **fully restore** my MyGenetics app to the last known working version as visually documented in these screenshots. These represent a **completed MVP** that broke due to recent changes in code and layout. Do not preserve any recent changes — revert everything to match the screenshots below and reinstate all lost or broken functionality, visuals, and logic exactly as described.
+
+---
+
+🧬 **GENERAL APP DESCRIPTION:**
+MyGenetics is a fitness and health AI web app that takes user body photos and inputs, then generates detailed physique analysis, personalized workout and nutrition plans, and visual graphs using HTML/CSS, JS, and Python (Flask). All pages have a clean, dark UI with rounded cards and consistent spacing. Users should be able to upload data, get their results, and interact with the insights.
+
+---
+
+📌 **HOMEPAGE – "DISCOVER YOUR GENETIC POTENTIAL"**
+File: `"Home page upper part.png"`, `"Home page - middle part.png"`
+- Gradient headline: **"Discover Your Genetic Potential"**
+- Subtitle: Encourages users to upload photos to analyze genetic traits and unlock recommendations
+- 3 buttons with icons: **Quick Analysis**, **3D Scanning**, **Learn**
+- Styled black background with large center-aligned text
+- Starts the onboarding flow → input page
+
+---
+
+📸 **BODY ANALYSIS INPUT PAGE**
+File: `"Body analysis page - upper part 2.png"`, `"Body analysis page - middle part.png"`
+- Allows users to upload **Front View** and **Back View** photos
+- Input fields:
+  - Height (cm), Weight (kg), Age (years)
+  - Gender dropdown (Male, Female, Other)
+  - Training Experience dropdown (0–2 yrs, Intermediate, Advanced)
+- Button: **“Analyze My Genetics”**
+- Text above inputs explains why body structure matters (muscle insertions, proportions, bone structure)
+
+---
+
+📊 **BODY ANALYSIS RESULTS PAGE**
+Files: `"Body analysis page middle part 3.png"`, `"Body analysis page measurements.png"`, `"Body analysis page - lower part 2.png"`, `"Metabolic Efficiency Score.png"`
+
+**LEFT SIDE:**
+- **Body Composition**
+  - Body Fat % (e.g., 21.1%)
+  - Lean Mass % (e.g., 78.9%)
+  - Fitness Tag: e.g., “Fit”
+  - Muscle Building Potential score (e.g., 9.0/10)
+  - Dual-photo display (front + back)
+- **Metabolic Efficiency Score**
+  - Score from 0–10 (e.g., 4.9/10)
+  - Description explaining efficiency of fat-to-lean mass balance
+
+**RIGHT SIDE:**
+- **Muscle Development Summary (Bars)**
+  - Arms, Chest, Shoulders, Back, Legs, Core
+  - Size measurements (e.g., Chest: 92.8 cm)
+  - Tags: “Well Developed,” “Average,” “Needs Growth” (Red, Yellow, Green system)
+- **Genetic Traits Sections**
+  - Muscle Fiber Type (Fast vs. Slow-twitch), Bone Structure, Insertion Points, Recovery Profile
+  - Recovery Radar Chart with: Nervous, Hormonal, Muscular, Metabolic, Joint
+
+---
+
+📈 **GENETIC TRAITS + CHARTS**
+Files: `"Body Analysis page - botton part.png"`, `"Body analysis page - lower part 2.png"`
+- **Body Proportion Ratios Chart**
+  - Shoulder-to-Waist, Waist-to-Hip, Leg-to-Torso, Arm-to-Torso (bar chart)
+- **Muscle Dominance Chart**
+  - Compares overdeveloped/underdeveloped areas
+- **Growth Potential by Muscle Group**
+  - Red gradient bars from 1–10
+  - Dynamic tooltip showing score when hovered
+- **Body Type Matching**
+  - Horizontal slider showing placement from Ectomorph → Mesomorph → Endomorph
+- **Body Composition Pie Chart**
+  - Fat % vs Lean Mass %
+
+---
+
+📋 **ENHANCED BODYBUILDING MEASUREMENTS PANEL**
+Files: `"Enhanced Bodybuilding Measurements.png"`, `"file-6sK1ybAjS3vEmDpTsdFNJd-Screenshot 2025-04-10 at 10.20.15 PM.png"`
+- Tabs: Body Composition, Torso, Arms, Legs, Proportions, Aesthetic Scores, Basic Info
+- Metrics:
+  - FFMI, Lean Body Mass, BMI, Body Fat %
+  - Confidence ratings: Low / Medium / High (colored dots)
+
+---
+
+💪 **PERSONALIZED WORKOUT PLAN PAGE**
+Files: `"Personalized workout plan upper part.png"`, `"Personalized workout plan middle part 2.png"`
+
+**LEFT PANEL:**
+- Weekly **Training Split (Push/Pull/Legs)**:
+  - Monday: Chest, Shoulders, Triceps
+  - Tuesday: Back, Biceps, Rear Delts
+  - Wednesday: Quads, Hamstrings, Core
+  - Thursday: Rest
+  - Friday: Repeat
+  - Sunday: Posterior Chain
+- Toggle: **Experience Level (Beginner / Intermediate / Advanced)**
+
+**RIGHT PANEL:**
+- Dynamic section based on selected day
+- Exercises listed per muscle group with:
+  - Name, Sets, Reps, Rest (e.g., “Incline DB Press – 3x10–12, Rest 60–90s”)
+  - Yellow dot + “Average” tag for each muscle
+
+---
+
+🍽️ **PERSONALIZED NUTRITION PLAN PAGE**
+Files: `"Personalized Nutrition plan page - upper part.png"`, `"Personalized nutrition plan page - lower part.png"`
+
+**LEFT COLUMN:**
+- **Daily Macros**: Protein, Carbs, Fats (grams + bars)
+- **Caloric Needs Box**:
+  - Maintenance + Target Calories (e.g., 1738 kcal/day)
+  - Activity level used in calculation
+
+**RIGHT COLUMNS:**
+- **Meal Timing**:
+  - Breakfast, Lunch, Pre-workout, Post-workout, Evening Snack
+  - Time slots, calories %, and macro targets (e.g., 30–35g protein)
+- **Supplement Recommendations**:
+  - Protein Powder, Creatine, Vitamin D3 (dosage + timing)
+
+**BOTTOM PANEL:**
+- **Recommended Foods Table**
+  - Columns: Protein, Carbs, Fats with bullet lists
+- **Nutrition Tips** with priority icons (e.g., checkmarks, warnings)
+
+---
+
+🎨 **STYLING & UI CONVENTIONS**
+- Black background with white and neon-colored text
+- Rounded edge cards, light shadows, consistent padding
+- Graphs: vibrant color-coded bars, sliders, donut charts, radar charts
+- Navigation Bar: Home | 3D Scanning | Learn | Sign Up | Login
+
+---
+
+✅ **KEY FUNCTIONALITY TO RESTORE**
+- User can input data and upload photos → receive full analysis
+- Backend logic calculates FFMI, Body Fat %, Proportions, etc.
+- Graphs dynamically render based on computed metrics
+- Conditional styling based on scores (color tags, dot markers)
+- Drop-downs for activity level + training experience
+- Navigation between Home → Upload → Results → Plan works smoothly
+
+---
+
+🎯 **GOAL**
+Restore all code, styling, and functionality to match the state visually documented in the uploaded screenshots. Revert all recent broken changes and reinstate the full UX flow.
+
+DO NOT preserve any edits made after April 11 — only bring back the version that looks and functions **exactly like the reference screenshots**.

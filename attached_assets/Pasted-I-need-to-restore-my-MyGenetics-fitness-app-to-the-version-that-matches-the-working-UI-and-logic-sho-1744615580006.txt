@@ -1,0 +1,50 @@
+I need to restore my MyGenetics fitness app to the version that matches the working UI and logic shown in these screenshots. Each image represents how different sections of the app were laid out before it broke.
+
+🔧 Please use this as a reference to rebuild both the **layout and logic**:
+
+🏠 Home Page:
+- Includes a headline: “Discover Your Genetic Potential”
+- CTA buttons for Quick Analysis, 3D Scanning, and Learn
+- Smooth dark background and gradient font
+
+📸 Analysis Input Page:
+- Upload inputs for front and back photos
+- Fields for: height, weight, age, gender, and experience level
+- “Analyze My Genetics” button
+
+📊 Body Analysis Results Page:
+- Breakdown of muscle group sizes (e.g., Arm: 14.1 cm, Chest: 92.8 cm)
+- Development tags: “Well Developed,” “Needs Growth,” “Average”
+- Body composition stats (Body Fat %, FFMI, BMI)
+- Muscle group scoring: charts for “Growth Potential,” “Body Proportion Ratios,” “Metabolic Efficiency Score,” and “Recovery Profile”
+
+📈 Enhanced Bodybuilding Measurements:
+- Tabs for Body, Torso, Arm, Leg, Proportion, and Aesthetic
+- Values like FFMI, BMI, Lean Mass with confidence levels
+
+💪 Personalized Workout Plan:
+- Weekly training split (Push/Pull/Legs)
+- Experience level toggles (Beginner/Intermediate/Advanced)
+- Muscle-specific exercises listed by weekday (e.g., Monday = Incline DB Press, Cable Crossover, Pull-Ups)
+- “Average” indicators per exercise group
+
+🥗 Personalized Nutrition Plan:
+- Caloric Needs + Macros Breakdown
+- Meal Timing by schedule (Breakfast, Lunch, Pre/Post Workout, Snack)
+- Recommended Foods panel (Protein, Carbs, Healthy Fats)
+- Supplement recommendations and nutrition tips
+
+🎯 Style and layout:
+- Black/dark background
+- Modular cards with rounded corners and shadow
+- Consistent font size, icons, and spacing across pages
+- Graphs are color-coded and match the labels in screenshots
+
+📂 Screenshots available (visually confirm restored layout):
+- “Body Analysis page - upper/middle/lower part”
+- “Personalized Nutrition Plan - upper/lower”
+- “Personalized Workout Plan - upper/middle”
+- “Home page - upper/middle”
+- “Metabolic Efficiency Score,” “Measurements,” and “Genetic Traits Analysis”
+
+Please rebuild everything exactly as it was — all routes, layouts, interactive logic, and calculations — matching the screenshots. Only restore previous working state — do not keep the most recent breaking edits.
