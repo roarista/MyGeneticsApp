@@ -12,8 +12,11 @@ function initAllFitnessCharts() {
     // Initialize recovery capacity chart with calculated values
     initRecoveryCapacityChart();
     
-    // Initialize body composition estimation chart
+    // Initialize body composition estimation chart (full analysis section)
     initBodyCompositionChart();
+    
+    // Initialize main body composition doughnut chart (top of page)
+    initBodyCompDoughnutChart();
 }
 
 function initRecoveryCapacityChart() {
@@ -308,6 +311,73 @@ function getRecoveryRatingColor(score) {
     if (score >= 5.0) return '#f59e0b'; // amber
     if (score >= 3.5) return '#f97316'; // orange
     return '#ef4444'; // red
+}
+
+// Function to initialize the body composition doughnut chart at the top of the page
+function initBodyCompDoughnutChart() {
+    const ctx = document.getElementById('bodyCompDoughnutChart');
+    if (!ctx) {
+        console.error('Body composition doughnut chart canvas not found!');
+        return; 
+    }
+    
+    // Force clear any existing charts to prevent conflicts
+    if (window.bodyCompDoughnutChart) {
+        window.bodyCompDoughnutChart.destroy();
+    }
+    
+    const context2d = ctx.getContext('2d');
+    if (!context2d) {
+        console.error('Could not get 2D context for body composition doughnut chart');
+        return;
+    }
+    
+    // Get body composition percentages - ensure they're proper numbers, not strings
+    let fatPercentage = parseFloat(bodyFatPercentage) || 20;
+    
+    // Always calculate lean mass directly from body fat to ensure they sum to 100%
+    let leanMassPercentage = 100 - fatPercentage;
+    
+    console.log('BODY COMP DOUGHNUT CHART DEBUG:');
+    console.log('- Body Fat %:', fatPercentage.toFixed(1));
+    console.log('- Lean Mass %:', leanMassPercentage.toFixed(1));
+    
+    // Create body composition donut chart with guaranteed numeric values
+    window.bodyCompDoughnutChart = new Chart(context2d, {
+        type: 'doughnut',
+        data: {
+            labels: ['Body Fat', 'Lean Mass'],
+            datasets: [{
+                data: [fatPercentage, leanMassPercentage],
+                backgroundColor: [
+                    '#ef4444', // red for fat
+                    '#10b981'  // green for lean mass
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '70%',
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const value = context.raw;
+                            return `${context.label}: ${value.toFixed(1)}%`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    // Log success
+    console.log('Body composition doughnut chart successfully initialized');
 }
 
 // Calculate training volume response based on metrics
