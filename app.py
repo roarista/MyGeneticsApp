@@ -489,6 +489,16 @@ def analyze():
         
         # Also store in session as fallback mechanism
         session['analysis_results'] = analysis_data
+        
+        # Store simplified body fat data separately in session for the chart display
+        body_fat = analysis_data['bodybuilding_analysis'].get('body_fat_percentage', 15.0)
+        if not isinstance(body_fat, (int, float)):
+            body_fat = 15.0
+        
+        # Also store basic data separately for direct access in templates
+        session['body_fat'] = body_fat
+        session['lean_mass'] = 100.0 - body_fat
+        
         logger.debug(f"Analysis results stored with ID: {analysis_id}")
         
         # Clean up original uploads
@@ -810,6 +820,15 @@ def scan3d_upload():
             
             # Also store in session as fallback mechanism
             session['analysis_results'] = analysis_data
+            
+            # Also store basic body composition data separately for direct access in templates
+            body_fat = scan_results.get('body_composition', {}).get('body_fat_percentage', 15.0)
+            if not isinstance(body_fat, (int, float)):
+                body_fat = 15.0
+                
+            session['body_fat'] = body_fat
+            session['lean_mass'] = 100.0 - body_fat
+            
             logger.debug(f"3D Scan analysis results stored with ID: {analysis_id}")
             
             # For the prototype, we won't clean up the original 3D scan file
