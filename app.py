@@ -759,25 +759,29 @@ def analyze():
             return redirect(url_for('results'))
         
     except Exception as e:
-        logger.error(f"Error during analysis: {str(e)}")
+        import traceback
+        error_trace = traceback.format_exc()
+        
+        # Log detailed error information
+        logger.error(f"❌ ERROR in /analyze route: {str(e)}")
+        logger.error(f"❌ TRACEBACK: {error_trace}")
+        print(f"❌ ERROR in /analyze route: {str(e)}")
+        print(f"❌ TRACEBACK: {error_trace}")
+        
+        # Log session state for debugging
+        logger.debug(f"Session before error: {list(session.keys())}")
+        print(f"Session before error: {list(session.keys())}")
+        
         # Clean up any remaining files
         try:
             for filepath in [front_filepath, back_filepath]:
-                if os.path.exists(filepath):
+                if filepath and os.path.exists(filepath):
                     os.remove(filepath)
         except Exception as cleanup_error:
             logger.warning(f"Failed to clean up files after error: {str(cleanup_error)}")
         
-        flash(f'Error during analysis: {str(e)}', 'danger')
-        
-        # Clean up any files that might have been created
-        try:
-            if front_filepath and os.path.exists(front_filepath):
-                os.remove(front_filepath)
-            if back_filepath and os.path.exists(back_filepath):
-                os.remove(back_filepath)
-        except Exception as cleanup_error:
-            logger.error(f"Error during file cleanup: {str(cleanup_error)}")
+        # Show user-friendly error message
+        flash(f'We encountered an error during analysis: {str(e)}', 'danger')
         
         return redirect(url_for('index'))
 
@@ -993,11 +997,42 @@ def results(analysis_id):
         return render_template('tailwind_results_charts.html', **template_data)
         
     except Exception as e:
-        logger.error(f"Error displaying results: {str(e)}")
+        import traceback
+        error_trace = traceback.format_exc()
+        
+        # Log detailed error information
+        logger.error(f"❌ ERROR in /results route: {str(e)}")
+        logger.error(f"❌ TRACEBACK: {error_trace}")
+        print(f"❌ ERROR in /results route: {str(e)}")
+        print(f"❌ TRACEBACK: {error_trace}")
+        
+        # Log session state for debugging
+        logger.debug(f"Session keys at error time: {list(session.keys())}")
+        print(f"Session keys at error time: {list(session.keys())}")
+        
+        # Create a basic fallback template data
+        basic_template_data = {
+            'analysis_id': None,
+            'analysis': {
+                'body_fat_percentage': 15.0,
+                'body_type': 'Unknown',
+                'muscle_building_potential': 5.0
+            },
+            'traits': {},
+            'bodybuilding_analysis': {
+                'body_fat_percentage': 15.0,
+                'lean_body_mass': 85.0,
+                'body_type': 'Unknown',
+                'muscle_building_potential': 5.0
+            },
+            'gender': 'male',
+            'body_fat_percentage': 15.0,
+            'lean_mass_percentage': 85.0,
+            'error_message': f"Error displaying analysis results: {str(e)}. Please try again with new photos."
+        }
+        
         # Instead of redirecting with flash message, render the error template directly
-        return render_template('results.html', 
-                             analysis_results=None, 
-                             error_message="Error displaying analysis results. Please try again with new photos.")
+        return render_template('results.html', **basic_template_data)
     
 @app.route('/education')
 def education():
