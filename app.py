@@ -387,6 +387,40 @@ def tailwind_index():
 @app.route('/analyze', methods=['GET', 'POST'])
 def analyze():
     """Process uploaded front and back photos for comprehensive body analysis including 50 bodybuilding measurements"""
+    try:
+        weight = float(request.form.get('weight', 0))
+        height = float(request.form.get('height', 0)) / 100  # convert cm to meters
+        age = int(request.form.get('age', 0))
+        sex = 1 if request.form.get('sex', '').lower() == 'male' else 0
+
+        print("📥 Received input:", weight, height, age, sex)
+        print("📥 FULL FORM DATA:", request.form)
+
+        body_fat, lean_mass = calculate_body_composition(weight, height, age, sex)
+        print("📊 Computed:", body_fat, lean_mass)
+
+        session['analysis_results'] = {
+            'body_fat': body_fat,
+            'lean_mass': lean_mass
+        }
+        
+        # Also store directly in session for redundancy
+        session['body_fat'] = body_fat
+        session['lean_mass'] = lean_mass
+        session.modified = True
+
+        print("💾 Session contents:", session['analysis_results'])
+        print("💾 Session keys:", list(session.keys()))
+
+        return redirect(url_for('results'))
+
+    except Exception as e:
+        import traceback
+        error_trace = traceback.format_exc()
+        print("❌ ERROR in /analyze:", str(e))
+        print("❌ TRACEBACK:", error_trace)
+        print("❌ FORM DATA:", request.form)
+        return redirect(url_for('index'))
     # If it's a GET request, redirect to the homepage
     if request.method == 'GET':
         return redirect(url_for('index'))
