@@ -5,13 +5,13 @@
 
 {% block content %}
 <!-- Hero Section -->
-<section class="hero-section pt-5 pb-4">
+<section class="hero-section py-5">
   <div class="container">
     <div class="row justify-content-center text-center">
-      <div class="col-lg-8" data-aos="fade-up">
-        <h1 class="hero-title"><span class="gradient-text">DISCOVER YOUR GENETIC POTENTIAL</span></h1>
-        <p class="lead mb-5" style="font-size: 18px; max-width: 600px; margin-left: auto; margin-right: auto;">
-          Optimize your fitness routine based on your unique body structure. Upload photos to analyze your genetic traits and get personalized workout recommendations.
+      <div class="col-lg-10" data-aos="fade-up">
+        <h1 class="hero-title mb-4"><span class="gradient-text">DISCOVER YOUR GENETIC POTENTIAL</span></h1>
+        <p class="lead mb-5" style="font-size: 18px; max-width: 700px; margin-left: auto; margin-right: auto; color: rgba(255,255,255,0.9);">
+          Optimize your fitness routine based on your unique body structure. Upload photos to analyze your genetic traits and get personalized workout recommendations tailored to your body type.
         </p>
       </div>
     </div>
@@ -64,77 +64,86 @@
       
       <!-- Right Column - Analysis Form -->
       <div class="col-lg-7" data-aos="fade-left" data-aos-delay="200">
-        <div class="card">
-          <div class="card-header text-center py-3" style="background-color: #1A1A1A; border-bottom: 1px solid rgba(255,255,255,0.1);">
-            <div class="text-center mb-2">
-              <div style="width: 64px; height: 64px; background-color: rgba(255, 76, 76, 0.2); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;">
-                <i class="fas fa-camera" style="color: #FF4C4C; font-size: 24px;"></i>
+        <div class="glow-card">
+          <div class="glow-card-inner">
+            <div class="text-center mb-4">
+              <div class="icon-circle upload-icon mx-auto">
+                <i class="fas fa-camera fs-4"></i>
               </div>
+              <h3 class="fw-bold mb-2">Ready to Start?</h3>
+              <p class="text-secondary mb-0">Upload your front and back photos for comprehensive analysis</p>
             </div>
-            <h3 class="mb-0 fw-bold">Ready to Start?</h3>
-            <p class="text-muted mt-2 mb-0">Upload your front and back photos for comprehensive analysis</p>
-          </div>
-          <div class="card-body">
+            
             <form action="{{ url_for('analyze') }}" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
               <!-- Photo Upload Section -->
-              <div class="mb-4">
+              <div class="form-group mb-4">
                 <label for="front_photo" class="form-label">Front View Photo:</label>
                 <input class="form-control" type="file" id="front_photo" name="front_photo" accept="image/*" required>
-                <div class="text-muted small mt-1">Upload a clear, front-view photo in good lighting</div>
+                <div class="form-text">Upload a clear, front-view photo in good lighting</div>
                 <div class="invalid-feedback">Please upload a front view photo.</div>
               </div>
               
-              <div class="mb-4">
+              <div class="form-group mb-4">
                 <label for="back_photo" class="form-label">Back View Photo:</label>
                 <input class="form-control" type="file" id="back_photo" name="back_photo" accept="image/*" required>
-                <div class="text-muted small mt-1">Upload a clear, back-view photo in good lighting</div>
+                <div class="form-text">Upload a clear, back-view photo in good lighting</div>
                 <div class="invalid-feedback">Please upload a back view photo.</div>
               </div>
               
               <!-- Measurements Section -->
               <div class="row mb-3">
                 <div class="col-md-4">
-                  <label for="height" class="form-label fw-medium">Height (cm):</label>
-                  <input type="number" name="height" id="height" class="form-control" min="120" max="220" value="170" required>
-                  <div class="invalid-feedback text-danger">
-                    Please enter a valid height.
+                  <div class="form-group">
+                    <label for="height" class="form-label fw-medium">Height (cm):</label>
+                    <input type="number" name="height" id="height" class="form-control" min="120" max="220" value="170" required>
+                    <div class="invalid-feedback">
+                      Please enter a valid height.
+                    </div>
                   </div>
                 </div>
                 <div class="col-md-4">
-                  <label for="weight" class="form-label fw-medium">Weight (kg):</label>
-                  <input type="number" name="weight" id="weight" class="form-control" min="40" max="180" value="70" required>
-                  <div class="invalid-feedback text-danger">
-                    Please enter a valid weight.
+                  <div class="form-group">
+                    <label for="weight" class="form-label fw-medium">Weight (kg):</label>
+                    <input type="number" name="weight" id="weight" class="form-control" min="40" max="180" value="70" required>
+                    <div class="invalid-feedback">
+                      Please enter a valid weight.
+                    </div>
                   </div>
                 </div>
                 <div class="col-md-4">
-                  <label for="age" class="form-label fw-medium">Age (years):</label>
-                  <input type="number" name="age" id="age" class="form-control" min="16" max="90" value="30" required>
-                  <div class="invalid-feedback text-danger">
-                    Please enter a valid age.
+                  <div class="form-group">
+                    <label for="age" class="form-label fw-medium">Age (years):</label>
+                    <input type="number" name="age" id="age" class="form-control" min="16" max="90" value="30" required>
+                    <div class="invalid-feedback">
+                      Please enter a valid age.
+                    </div>
                   </div>
                 </div>
               </div>
               
               <div class="row mb-4">
                 <div class="col-md-6">
-                  <label for="gender" class="form-label fw-medium">Gender:</label>
-                  <select name="gender" id="gender" class="form-select" required>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                  </select>
+                  <div class="form-group">
+                    <label for="gender" class="form-label fw-medium">Gender:</label>
+                    <select name="gender" id="gender" class="form-select" required>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                    </select>
+                  </div>
                 </div>
                 <div class="col-md-6">
-                  <label for="experience" class="form-label fw-medium">Training Experience:</label>
-                  <select name="experience" id="experience" class="form-select" required>
-                    <option value="beginner">Beginner (0-2 years)</option>
-                    <option value="intermediate">Intermediate (2-5 years)</option>
-                    <option value="advanced">Advanced (5+ years)</option>
-                  </select>
+                  <div class="form-group">
+                    <label for="experience" class="form-label fw-medium">Training Experience:</label>
+                    <select name="experience" id="experience" class="form-select" required>
+                      <option value="beginner">Beginner (0-2 years)</option>
+                      <option value="intermediate">Intermediate (2-5 years)</option>
+                      <option value="advanced">Advanced (5+ years)</option>
+                    </select>
+                  </div>
                 </div>
               </div>
               
-              <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">
+              <button type="submit" class="btn btn-primary w-100 py-3 fw-bold">
                 <i class="fas fa-dna me-2"></i>
                 Analyze My Genetics
               </button>
@@ -151,55 +160,56 @@
   <div class="container">
     <div class="row justify-content-center mb-5">
       <div class="col-12 text-center" data-aos="fade-up">
-        <h2 class="fw-bold">How It Works</h2>
+        <h2 class="fw-bold gradient-text">How It Works</h2>
+        <p class="text-secondary mt-3 mb-4">Four simple steps to unlock your fitness potential</p>
       </div>
     </div>
     
     <div class="row gx-4">
       <div class="col-md-3 mb-4" data-aos="fade-up" data-aos-delay="100">
-        <div class="card h-100 text-center">
-          <div class="card-body">
-            <div class="icon-circle upload-icon">
+        <div class="glow-card h-100">
+          <div class="glow-card-inner text-center">
+            <div class="icon-circle upload-icon mx-auto">
               <i class="fas fa-upload"></i>
             </div>
             <h5 class="fw-bold mb-2">Enter Data</h5>
-            <p class="text-muted small">Enter your basic measurements and fitness details</p>
+            <p class="text-secondary small">Enter your basic measurements and fitness details</p>
           </div>
         </div>
       </div>
       
       <div class="col-md-3 mb-4" data-aos="fade-up" data-aos-delay="200">
-        <div class="card h-100 text-center">
-          <div class="card-body">
-            <div class="icon-circle ai-icon">
+        <div class="glow-card h-100">
+          <div class="glow-card-inner text-center">
+            <div class="icon-circle ai-icon mx-auto">
               <i class="fas fa-brain"></i>
             </div>
             <h5 class="fw-bold mb-2">AI Analysis</h5>
-            <p class="text-muted small">Our AI analyzes your body's structural traits</p>
+            <p class="text-secondary small">Our AI analyzes your body's structural traits</p>
           </div>
         </div>
       </div>
       
       <div class="col-md-3 mb-4" data-aos="fade-up" data-aos-delay="300">
-        <div class="card h-100 text-center">
-          <div class="card-body">
-            <div class="icon-circle results-icon">
+        <div class="glow-card h-100">
+          <div class="glow-card-inner text-center">
+            <div class="icon-circle results-icon mx-auto">
               <i class="fas fa-chart-line"></i>
             </div>
             <h5 class="fw-bold mb-2">Get Results</h5>
-            <p class="text-muted small">Get customized training recommendations</p>
+            <p class="text-secondary small">Get customized training recommendations</p>
           </div>
         </div>
       </div>
       
       <div class="col-md-3 mb-4" data-aos="fade-up" data-aos-delay="400">
-        <div class="card h-100 text-center">
-          <div class="card-body">
-            <div class="icon-circle training-icon">
+        <div class="glow-card h-100">
+          <div class="glow-card-inner text-center">
+            <div class="icon-circle training-icon mx-auto">
               <i class="fas fa-dumbbell"></i>
             </div>
             <h5 class="fw-bold mb-2">Focus Training</h5>
-            <p class="text-muted small">Focus your training effort where it matters most</p>
+            <p class="text-secondary small">Focus your training effort where it matters most</p>
           </div>
         </div>
       </div>

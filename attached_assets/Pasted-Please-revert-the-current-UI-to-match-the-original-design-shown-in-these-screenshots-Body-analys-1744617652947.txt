@@ -1,0 +1,80 @@
+Please revert the current UI to match the original design shown in these screenshots:
+- "Body analysis page - middle part.png"
+- "Personalized Nutrition plan page - upper part.png"
+- "Home page upper part.png"
+- "Workout Plan upper part.png"
+- "Screenshot 2025-04-14 at 12.39.26 AM.png" (shows the *wrong* current version for comparison)
+
+🧠 Design Philosophy:
+- **Professional dark mode** with high contrast, fitness/tech-inspired aesthetic
+- **Consistent padding and margins** across all components
+- Emphasis on **data visualization** with graphs, progress bars, tags, and score badges
+
+---
+
+✅ GLOBAL UI REQUIREMENTS
+
+1. **Background Color:** Use a deep matte black or very dark gray (`#0e0e0e`)
+2. **Card Containers:** 
+   - Rounded corners (`border-radius: 16px`)
+   - Shadow: `box-shadow: 0 2px 6px rgba(0,0,0,0.5)`
+   - Background: slightly lighter black (`#121212`)
+3. **Fonts:**
+   - Use `Inter`, `Roboto`, or similar clean sans-serif
+   - Titles: bold, white, 22–28px
+   - Labels: gray or light gray
+   - Body text: white, 14–16px
+4. **Color Accents:**
+   - Red: highlight buttons, warning tags
+   - Green: success/”Well Developed” tag
+   - Yellow/Orange: “Average” or “Needs Growth” indicators
+   - Blue, Pink, Purple: Graph bars, chart legends
+
+5. **Buttons:**
+   - Rounded corners, soft hover effect
+   - Gradient or glow hover (mimic buttons in “Nutrition Plan” screenshot)
+
+6. **Navigation Bar:**
+   - Logo on left ("MyGenetics" in red + "ALPHA" in small caps)
+   - White links: Home | 3D Scanning | Learn | Login | Signup
+   - Black background, sticky to top
+
+---
+
+📊 COMPONENTS TO STYLE BACK PROPERLY
+
+1. **Graph Cards (Muscle Dominance, Proportion Ratios, Growth Potential):**
+   - White or bold title
+   - High-contrast horizontal bars
+   - Colored legends
+   - Hover tooltips
+
+2. **Body Metric Blocks:**
+   - Rounded black/dark cards
+   - Icons beside titles (e.g., fire for metabolism, dumbbell for muscle)
+
+3. **Tags for development level:**
+   - "Well Developed" = green dot + text
+   - "Average" = yellow
+   - "Needs Growth" = red dot
+
+4. **Charts and Meters:**
+   - Use animated progress arcs or clean radial bars
+   - Radar chart (Recovery Profile) should be vivid, no pixelation
+   - Sliders should be modern, with thumb indicator and label (e.g., Caloric Maintenance)
+
+---
+
+🔁 RESTORE THE OLD HTML/CSS/JS FILES
+
+If you previously generated layout using HTML templates with external CSS:
+- Please check older versions in the Replit History or reference files from:
+  `Personalized workout plan upper part.png`, `Body analysis page middle part 3.png`, `Screenshot 2025-04-11 at 10.46.06 PM.png`
+
+Make sure the new pages **reuse old layout structure** — do not replace with generic Bootstrap or flat components.
+
+---
+
+🎯 Goal: Match the previous design shown in all screenshots. Make it bold, visually engaging, and brand-consistent — like a futuristic fitness assistant, not a default form layout.
+
+Do not use flat borders, standard input buttons, or plain div containers. Bring back the advanced, glowing, card-based UI from before.
