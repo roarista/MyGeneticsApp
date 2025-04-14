@@ -1,0 +1,80 @@
+# 📄 app.py
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+from utils.body_analysis import calculate_body_composition
+
+app = Flask(__name__)
+app.secret_key = 'super-secret-key'
+
+@app.route('/')
+def home():
+    return render_template('index.html')
+
+@app.route('/analyze', methods=['POST'])
+def analyze():
+    try:
+        # Clear old session results
+        session.pop('analysis_results', None)
+
+        # Parse inputs
+        weight = float(request.form.get('weight', 0))
+        height = float(request.form.get('height', 0)) / 100
+        age = int(request.form.get('age', 0))
+        sex = 1 if request.form.get('sex', '').lower() == 'male' else 0
+
+        print("Parsed Inputs:", weight, height, age, sex)
+
+        # Run analysis
+        body_fat, lean_mass = calculate_body_composition(weight, height, age, sex)
+        print("Calculated:", body_fat, lean_mass)
+
+        # Save to session
+        session['analysis_results'] = {
+            'body_fat': body_fat,
+            'lean_mass': lean_mass
+        }
+
+        return redirect(url_for('results'))
+
+    except Exception as e:
+        print("Error:", e)
+        return redirect(url_for('home'))
+
+@app.route('/results')
+def results():
+    return render_template('results.html', analysis_results=session.get('analysis_results'))
+
+@app.route('/test')
+def test():
+    bf, lm = calculate_body_composition(75, 1.78, 28, 1)
+    return jsonify({'body_fat': bf, 'lean_mass': lm})
+
+# 📄 utils/body_analysis.py
+def calculate_body_composition(weight_kg, height_m, age, sex):
+    bmi = weight_kg / (height_m ** 2)
+    body_fat = (1.20 * bmi) + (0.23 * age) - (10.8 * sex) - 5.4
+    body_fat = max(5, min(50, body_fat))
+    lean_mass = 100 - body_fat
+    return round(body_fat, 1), round(lean_mass, 1)
+
+# 📄 templates/results.html (relevant part)
+<script>
+const bodyComposition = {
+  bodyFat: {{ analysis_results.body_fat|float }},
+  leanMass: {{ analysis_results.lean_mass|float }}
+};
+
+const chart = new Chart(document.getElementById("compChart"), {
+  type: 'doughnut',
+  data: {
+    labels: ["Body Fat", "Lean Mass"],
+    datasets: [{
+      data: [bodyComposition.bodyFat, bodyComposition.leanMass],
+      backgroundColor: ["#FF6384", "#36A2EB"]
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { position: 'bottom' } }
+  }
+});
+</script>

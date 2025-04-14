@@ -10,7 +10,9 @@ import time
 
 from utils.body_analysis import calculate_body_composition, analyze_body_traits
 from utils.navy_body_fat import calculate_body_fat_navy_derived
+import logging
 
+# Configure logging
 logger = logging.getLogger(__name__)
 
 test_routes = Blueprint('test_routes', __name__)
