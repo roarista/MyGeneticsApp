@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}MyGenetics - Unlock Your Genetic Potential{% endblock %}</title>
+  
+  <!-- External CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Chart.js for results visualization -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Custom CSS -->
+  <style>
+    :root {
+      --primary-color: #FF4C4C;
+      --secondary-color: #2D9CDB;
+      --dark-bg: #0F0F0F;
+      --darker-bg: #0C0C1F;
+      --card-bg: #1E1E1E;
+      --card-border: #333;
+      --text-light: #FFFFFF;
+      --text-muted: #AAAAAA;
+      --success-color: #28a745;
+      --info-color: #2D9CDB;
+      --gradient-start: #FF4C4C;
+      --gradient-end: #FF9D4A;
+    }
+    
+    body {
+      background-color: var(--dark-bg);
+      color: var(--text-light);
+      font-family: 'Inter', 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .header {
+      background-color: var(--darker-bg);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 0.75rem 0;
+    }
+    
+    .logo-container {
+      display: flex;
+      align-items: center;
+    }
+    
+    .logo {
+      color: var(--primary-color);
+      font-weight: 700;
+      font-size: 1.5rem;
+      text-decoration: none;
+      font-family: 'Poppins', sans-serif;
+    }
+    
+    .logo-sub {
+      font-size: 0.7rem;
+      color: var(--secondary-color);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      display: block;
+      margin-top: -5px;
+      font-weight: 600;
+    }
+    
+    .btn-primary {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .btn-primary:hover {
+      background-color: #e64545;
+      border-color: #e64545;
+    }
+    
+    .btn-secondary {
+      background-color: var(--secondary-color);
+      border-color: var(--secondary-color);
+      font-weight: 600;
+    }
+    
+    .btn-secondary:hover {
+      background-color: #258ac4;
+      border-color: #258ac4;
+    }
+    
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .card-header {
+      background-color: var(--info-color);
+      color: white;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      font-weight: 600;
+    }
+    
+    .hero-title {
+      font-size: 3rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 1.5rem;
+      text-transform: uppercase;
+      font-family: 'Poppins', sans-serif;
+      letter-spacing: 0.5px;
+    }
+    
+    .gradient-text {
+      background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: inline-block;
+    }
+    
+    .form-control, .form-select {
+      background-color: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: var(--text-light);
+      border-radius: 8px;
+    }
+    
+    .form-control:focus, .form-select:focus {
+      background-color: rgba(0, 0, 0, 0.6);
+      border-color: var(--primary-color);
+      color: var(--text-light);
+      box-shadow: 0 0 0 0.25rem rgba(255, 76, 76, 0.25);
+    }
+    
+    .form-control::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .custom-file-upload {
+      position: relative;
+      display: inline-block;
+      width: 100%;
+    }
+    
+    .file-feedback {
+      margin-top: 0.25rem;
+      font-size: 0.875em;
+      color: var(--text-muted);
+    }
+    
+    footer {
+      margin-top: auto;
+      background-color: var(--darker-bg);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 1.25rem 0;
+    }
+    
+    /* Progress bar styles for results page */
+    .progress {
+      background-color: rgba(255, 255, 255, 0.1);
+      height: 1.5rem;
+      border-radius: 1rem;
+    }
+    
+    .progress-bar {
+      border-radius: 1rem;
+    }
+    
+    .display-4 {
+      font-weight: 700;
+    }
+    
+    .metrics-card {
+      transition: transform 0.2s;
+    }
+    
+    .metrics-card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .nav-link {
+      color: var(--text-muted);
+      transition: color 0.3s;
+    }
+    
+    .nav-link:hover {
+      color: var(--primary-color);
+    }
+    
+    .nav-link.active {
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    /* Icon circles */
+    .icon-circle {
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background-color: rgba(45, 156, 219, 0.15);
+      margin-bottom: 1rem;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    .icon-circle i {
+      color: var(--secondary-color);
+      font-size: 1.5rem;
+    }
+    
+    .feature-icon {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background-color: rgba(45, 156, 219, 0.15);
+      margin-right: 1rem;
+    }
+    
+    .feature-icon i {
+      color: var(--secondary-color);
+      font-size: 1.25rem;
+    }
+    
+    /* Section spacing */
+    .section {
+      padding: 4rem 0;
+    }
+    
+    /* Animation class for fade-ins */
+    .fade-in {
+      animation: fadeIn 0.8s ease-in-out;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+  
+  {% block head_extras %}{% endblock %}
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-center">
+        <a href="/" class="logo-container">
+          <div>
+            <span class="logo">MyGenetics</span>
+            <span class="logo-sub">ALPHA</span>
+          </div>
+        </a>
+        
+        <nav>
+          <ul class="nav">
+            <li class="nav-item">
+              <a class="nav-link {% if request.endpoint == 'index' %}active{% endif %}" href="/">Home</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="container mt-3">
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }} mb-4 alert-dismissible fade show">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-md-6">
+          <p class="mb-0">&copy; 2025 MyGenetics. All rights reserved.</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+          <p class="mb-0 text-muted">Unlock your genetic potential</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JavaScript -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    // Basic validation for file inputs
+    document.addEventListener('DOMContentLoaded', function() {
+      // Setup file validation if upload fields exist
+      const frontPhotoInput = document.getElementById('front_photo');
+      const backPhotoInput = document.getElementById('back_photo');
+      const submitButton = document.querySelector('button[type="submit"]');
+      
+      if (frontPhotoInput && backPhotoInput && submitButton) {
+        function validateFiles() {
+          const frontValid = frontPhotoInput.files.length > 0;
+          const backValid = backPhotoInput.files.length > 0;
+          
+          if (!frontValid) {
+            frontPhotoInput.classList.add('is-invalid');
+          } else {
+            frontPhotoInput.classList.remove('is-invalid');
+          }
+          
+          if (!backValid) {
+            backPhotoInput.classList.add('is-invalid');
+          } else {
+            backPhotoInput.classList.remove('is-invalid');
+          }
+          
+          submitButton.disabled = !(frontValid && backValid);
+        }
+        
+        frontPhotoInput.addEventListener('change', validateFiles);
+        backPhotoInput.addEventListener('change', validateFiles);
+        
+        // Initial validation
+        validateFiles();
+      }
+    });
+  </script>
+  
+  {% block scripts %}{% endblock %}
+</body>
+</html>

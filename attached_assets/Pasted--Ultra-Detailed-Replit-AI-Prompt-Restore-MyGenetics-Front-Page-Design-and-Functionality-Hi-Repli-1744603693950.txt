@@ -1,0 +1,102 @@
+🛠 Ultra-Detailed Replit AI Prompt: Restore MyGenetics Front Page Design and Functionality
+
+Hi Replit — I need your help restoring the exact look, structure, and behavior of my fitness app homepage. The current version is halfway there, but multiple parts of the layout, alignment, and design are still broken or degraded.
+
+I have screenshots and a full video showing how it originally looked, and this prompt includes pixel-accurate instructions to match it perfectly.
+
+✅ PAGE SECTIONS TO REBUILD (In Order from Top to Bottom)
+
+1. 🔺 Top Navigation Bar
+Logo: MyGenetics (bold red) with “ALPHA” in blue below it
+Navigation Button: Home (top right, red hover state)
+Background color: dark navy (#0C0C1F or similar)
+Height: fixed, slim padding
+2. 🧬 Hero Section: Main Call to Action
+Headline: DISCOVER YOUR GENETIC POTENTIAL
+“GENETIC POTENTIAL” should be styled with a bold pink–orange gradient (left to right)
+Font: all-caps, large, modern sans-serif (e.g., Poppins or Inter)
+Subheadline: “Optimize your fitness routine based on your unique body structure…”
+Centered, max-width ~60%
+Text color: white, font-size: ~18px
+Spacing: Enough vertical padding to make it feel like a clean hero area
+Background: Solid black or very dark gray (#0F0F0F)
+3. 💡 Information Block: “Why Body Analysis Matters”
+Left column with heading: Why Body Analysis Matters
+Subtext: “Your body’s structure significantly affects how you should train…”
+Bullet-style sections (icon + title + subtitle), each with:
+Icon (e.g. dumbbell, bone, etc.)
+Section titles:
+Muscle Insertions
+Limb Proportions
+Bone Structure
+Each with 1–2 line descriptions
+Icons: circular button-style, lightly colored (e.g., blue/purple)
+Text: white, font-size: 14–16px
+Spacing: Add right margin to this section so it doesn’t clash with the form
+4. 🧾 Input Form Section: “Start Your Analysis”
+Right-aligned card layout with rounded corners and subtle shadow
+Background color: dark gray (#1E1E1E)
+Input fields:
+Front Photo (File Input)
+Back Photo (File Input)
+Height (cm)
+Weight (kg)
+Age
+Gender (dropdown)
+Training Experience (dropdown)
+Validation messages in red (e.g., “Please upload a front view photo”)
+Input styling:
+Dark mode (black or dark gray background, white placeholder text)
+Clean border and focus outline
+Button:
+Label: Analyze My Genetics
+Style: Full-width, blue background with hourglass icon
+Rounded corners, hover state
+5. ⚙️ Section: “How It Works”
+Four horizontally spaced cards with the following titles:
+Upload Photos
+AI Analysis
+Get Results
+Focus Training
+Each card includes:
+Circular icon at top (purple/blue theme)
+Title in white
+Subtext (light gray): 1–2 lines per card
+Card layout:
+Same height, even spacing, margin between cards
+Rounded corners, light shadow
+Align vertically under form section
+6. 🔻 Footer
+Full-width, dark navy or black
+Text left-aligned and right-aligned if screen allows
+Left: © 2025 MyGenetics. All rights reserved.
+Right: Unlock your genetic potential
+Font: light gray or muted white
+Padding: 20px
+🎨 GLOBAL STYLING NOTES
+
+Font: Poppins, Inter, or system sans-serif (no Times or serif fonts)
+Text color: white with occasional accents (red, orange, blue)
+Inputs: consistent dark styling with white labels
+Buttons: use red (#FF4C4C) or blue (#2D9CDB) depending on action
+Consistent padding, margins, and border-radius (8px–12px)
+💻 TECHNICAL REQUIREMENTS
+
+Ensure / renders correctly with or without session variables
+Use {% if %} conditionals around analysis data to avoid template errors
+JS/Chart rendering should be disabled on the homepage — only enable on results
+Separate layout blocks into base.html for reuse (navbar + footer)
+🧠 FILES TO DOUBLE CHECK
+templates/index.html (main homepage template)
+static/style.css (if present, link it in base.html)
+base.html (layout inheritance structure)
+Icons should use Font Awesome or SVGs if possible
+✅ FINAL GOAL:
+
+Rebuild the full front page with:
+
+Modern fitness-brand visuals
+Balanced layout between info and form
+Crisp visual hierarchy
+Flawless responsiveness across screen sizes
+Please walk through each section and restore based on this prompt. Let me know which files you change.
