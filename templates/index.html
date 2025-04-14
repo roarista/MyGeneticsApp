@@ -4,7 +4,7 @@
 
 {% block content %}
 <!-- Hero Section -->
-<section class="section pt-5 pb-4">
+<section class="hero-section pt-5 pb-4">
   <div class="container">
     <div class="row justify-content-center text-center">
       <div class="col-lg-8 fade-in">
@@ -22,7 +22,7 @@
   <div class="container">
     <div class="row">
       <!-- Left Column - Benefits -->
-      <div class="col-lg-5 mb-5 mb-lg-0 fade-in" style="animation-delay: 0.1s">
+      <div class="col-lg-5 mb-5 mb-lg-0 fade-in pe-lg-4" style="animation-delay: 0.1s">
         <h2 class="mb-4 fw-bold">Why Body Analysis Matters</h2>
         <p class="mb-4">
           Your body's structure significantly affects how you should train. Everyone has genetic advantages and limitations.
@@ -30,7 +30,7 @@
         
         <div class="mb-4">
           <div class="d-flex mb-4">
-            <div class="feature-icon">
+            <div class="feature-icon feature-1">
               <i class="fas fa-dna"></i>
             </div>
             <div>
@@ -40,7 +40,7 @@
           </div>
           
           <div class="d-flex mb-4">
-            <div class="feature-icon">
+            <div class="feature-icon feature-2">
               <i class="fas fa-ruler"></i>
             </div>
             <div>
@@ -50,7 +50,7 @@
           </div>
           
           <div class="d-flex">
-            <div class="feature-icon">
+            <div class="feature-icon feature-3">
               <i class="fas fa-bone"></i>
             </div>
             <div>
@@ -67,7 +67,7 @@
           <div class="card-header bg-dark text-center py-3">
             <h3 class="mb-0 fw-bold">Start Your Analysis</h3>
           </div>
-          <div class="card-body p-4">
+          <div class="card-body">
             <form action="{{ url_for('analyze') }}" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
               <!-- Front Photo Upload -->
               <div class="mb-3">
@@ -135,7 +135,7 @@
                 </div>
               </div>
               
-              <button type="submit" class="btn btn-secondary w-100 py-2">
+              <button type="submit" class="btn btn-primary w-100 py-2">
                 <i class="fas fa-hourglass-half me-2"></i>
                 Analyze My Genetics
               </button>
@@ -156,11 +156,11 @@
       </div>
     </div>
     
-    <div class="row">
+    <div class="row gx-4">
       <div class="col-md-3 mb-4 fade-in" style="animation-delay: 0.3s">
         <div class="card h-100 text-center">
-          <div class="card-body p-4">
-            <div class="icon-circle">
+          <div class="card-body">
+            <div class="icon-circle upload-icon">
               <i class="fas fa-upload"></i>
             </div>
             <h5 class="fw-bold mb-2">Upload Photos</h5>
@@ -171,8 +171,8 @@
       
       <div class="col-md-3 mb-4 fade-in" style="animation-delay: 0.4s">
         <div class="card h-100 text-center">
-          <div class="card-body p-4">
-            <div class="icon-circle">
+          <div class="card-body">
+            <div class="icon-circle ai-icon">
               <i class="fas fa-brain"></i>
             </div>
             <h5 class="fw-bold mb-2">AI Analysis</h5>
@@ -183,8 +183,8 @@
       
       <div class="col-md-3 mb-4 fade-in" style="animation-delay: 0.5s">
         <div class="card h-100 text-center">
-          <div class="card-body p-4">
-            <div class="icon-circle">
+          <div class="card-body">
+            <div class="icon-circle results-icon">
               <i class="fas fa-chart-line"></i>
             </div>
             <h5 class="fw-bold mb-2">Get Results</h5>
@@ -195,8 +195,8 @@
       
       <div class="col-md-3 mb-4 fade-in" style="animation-delay: 0.6s">
         <div class="card h-100 text-center">
-          <div class="card-body p-4">
-            <div class="icon-circle">
+          <div class="card-body">
+            <div class="icon-circle training-icon">
               <i class="fas fa-dumbbell"></i>
             </div>
             <h5 class="fw-bold mb-2">Focus Training</h5>

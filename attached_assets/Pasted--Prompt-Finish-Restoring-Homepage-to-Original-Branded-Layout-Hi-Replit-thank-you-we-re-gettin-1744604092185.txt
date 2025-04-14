@@ -1,0 +1,76 @@
+🔧 Prompt: Finish Restoring Homepage to Original Branded Layout
+
+Hi Replit — thank you, we’re getting really close. But I need help finalizing the visual design of the homepage to match how it originally looked. Here's a section-by-section breakdown of what’s still off and how to fix it:
+
+🧬 1. HEADER (NAVBAR)
+Increase padding (top and bottom) around MyGenetics ALPHA
+Use a bolder font for “MyGenetics”, and a smaller, blue-colored sublabel for ALPHA
+Increase left margin slightly
+Keep background dark navy (#0C0C1F)
+Ensure "Home" link on right stays aligned vertically
+🖼 2. HERO SECTION (MAIN TITLE + SUBTEXT)
+Current Issues:
+
+Text is cramped vertically
+Gradient on “GENETIC POTENTIAL” is washed out
+Font is slightly small and not bold enough
+Fix:
+
+Use a larger font size (~36–40px for the main heading)
+Add 40–60px vertical padding above and below
+Apply a bolder, smoother gradient:
+background: linear-gradient(to right, #ff416c, #ffae00);
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+font-weight: 800;
+📚 3. “WHY BODY ANALYSIS MATTERS” SECTION
+Fixes Needed:
+
+Increase vertical spacing above and below this block
+Add horizontal padding between the text section (left) and the form section (right)
+Icons need to pop visually:
+Use colored circular backgrounds with white icons inside
+E.g., #2D9CDB for one, #6C5CE7 for another, #00CEC9 for third
+Increase text brightness for the paragraph under each title
+🧾 4. FORM CARD ("START YOUR ANALYSIS")
+Adjustments:
+
+Add padding inside the form card — ~24px on all sides
+Make “Analyze My Genetics” button bright red (#FF4C4C)
+Add button hover effect:
+button:hover {
+  background-color: #e53935;
+  cursor: pointer;
+}
+Ensure file input labels and error messages have some vertical margin (they feel cramped)
+⚙️ 5. “HOW IT WORKS” SECTION
+Fixes:
+
+Brighten icon colors:
+Upload → Blue (#3498db)
+AI → Indigo (#6C5CE7)
+Get Results → Teal (#1ABC9C)
+Focus Training → Orange (#F39C12)
+Center-align text under each icon
+Lighten description text (currently too dark against gray background)
+Add 16–24px of padding inside each card
+Add horizontal margin between cards so they don’t feel crowded
+🔻 6. FOOTER
+Fix:
+
+Brighten the text color (#CCCCCC or white)
+Add more vertical padding
+Fix alignment of “Unlock your genetic potential” so it's visible on mobile
+Ensure it doesn’t overflow or get hidden at certain resolutions
+✨ GLOBAL STYLING
+Use consistent font across all text (Poppins, Inter, or system sans-serif)
+Buttons and inputs should use consistent border-radius (8px)
+Responsive layout: make sure everything stacks properly on tablet/mobile views
+✅ GOAL:
+Restore everything to match how the app originally looked:
+
+Visually strong branding
+Legible, clean layout
+Balanced color contrasts
+Professional and premium appearance
+Once this is done, I’ll move on to polishing the results page. Please show me any changes you make so I can keep versioning them.
