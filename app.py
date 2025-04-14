@@ -20,7 +20,11 @@ logger = logging.getLogger(__name__)
 
 # Initialize Flask app
 app = Flask(__name__)
-app.secret_key = os.environ.get("SESSION_SECRET", "dev_secret_key")
+app.secret_key = os.environ.get("SESSION_SECRET")
+# If no secret key is set, use a strong default for development
+if not app.secret_key:
+    app.secret_key = "GeMyt!KT^3.fgL&q9kP#zS7*W"
+    logger.warning("No SESSION_SECRET environment variable found. Using development secret key. This is not secure for production.")
 
 # Make Replit Auth available to templates
 @app.context_processor
@@ -753,8 +757,10 @@ def results(analysis_id):
         
     except Exception as e:
         logger.error(f"Error displaying results: {str(e)}")
-        flash('Error displaying analysis results. Please try again.', 'danger')
-        return redirect(url_for('index'))
+        # Instead of redirecting with flash message, render the error template directly
+        return render_template('results.html', 
+                             analysis_results=None, 
+                             error_message="Error displaying analysis results. Please try again with new photos.")
     
 @app.route('/education')
 def education():
