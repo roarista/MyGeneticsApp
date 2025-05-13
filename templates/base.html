@@ -22,7 +22,7 @@
   
   {% block head_extras %}{% endblock %}
 </head>
-<body class="bg-pattern animated-bg">
+<body class="bg-pattern animated-bg" style="display: block;">
   <!-- Header -->
   <header class="header">
     <div class="container">
@@ -59,7 +59,7 @@
   </header>
 
   <!-- Main Content -->
-  <main>
+  <main style="min-height: calc(100vh - 160px); display: block; overflow: visible;">
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         <div class="container mt-3">
