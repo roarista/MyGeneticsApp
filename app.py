@@ -594,5 +594,48 @@ except (ImportError, NameError):
     logger.warning("Google authentication module not available, skipping registration")
 
 
+@app.route('/test_results')
+def test_results():
+    """Test route to view the template with sample data"""
+    bodybuilding = {
+        'body_fat_percentage': 15.5,
+        'body_fat_confidence': 0.85,
+        'body_type': 'Mesomorph',
+        'muscle_building_potential': 7.8
+    }
+    
+    measurements = {
+        'shoulder_width': 47.5,
+        'waist_circumference': 81.0,
+        'arm_circumference': 35.0,
+        'thigh_circumference': 59.0,
+        'chest_circumference': 98.0,
+        'calf_circumference': 38.0
+    }
+    
+    traits = {
+        'fast_twitch_percentage': 65,
+        'frame_size': 'Medium',
+        'bicep_insertion': 'Low',
+        'calf_insertion': 'High'
+    }
+    
+    # Sample values for template testing
+    return render_template(
+        'lovable_results.html',
+        analysis_id='test123',
+        bodybuilding=bodybuilding,
+        measurements=measurements,
+        traits=traits,
+        image_data=None,
+        front_image=None,
+        back_image=None,
+        is_dual_photo=False,
+        is_3d_scan=False,
+        categorized_measurements={},
+        has_enhanced_measurements=False
+    )
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
