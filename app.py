@@ -233,8 +233,15 @@ def analyze():
         logger.info(f"💾 Session set with keys: {list(session.keys())}")
         logger.info(f"💾 analysis_results: {session['analysis_results']}")
 
-        # Redirect to results page
-        return redirect(url_for('results'))
+        # Get analysis ID from the results
+        analysis_id = session['analysis_results'].get('id', 'unknown')
+        
+        # Redirect to detailed results page with the analysis ID
+        if analysis_id and analysis_id != 'unknown':
+            return redirect(url_for('view_analysis_results', analysis_id=analysis_id))
+        else:
+            # Fallback to original results page if ID not available
+            return redirect(url_for('results'))
 
     except Exception as e:
         import traceback
@@ -366,6 +373,103 @@ def results():
         logger.error(f"❌ TRACEBACK: {error_trace}")
         
         flash("Error displaying results. Please try again.", "danger")
+        return redirect(url_for('index'))
+
+@app.route('/results/<analysis_id>')
+def view_analysis_results(analysis_id):
+    """Display detailed analysis results using the lovable_results.html template."""
+    try:
+        logger.info(f"📊 Accessing detailed results page for analysis ID: {analysis_id}")
+        
+        # Get analysis from database by ID
+        from models import Analysis, db
+        analysis = Analysis.query.get(analysis_id)
+        
+        if not analysis:
+            logger.error(f"❌ Analysis with ID {analysis_id} not found")
+            flash('Analysis not found. Please try again.', 'warning')
+            return redirect(url_for('index'))
+            
+        logger.info(f"📊 Found analysis for user ID: {analysis.user_id}")
+        
+        # Create bodybuilding object to match template requirements
+        bodybuilding = {
+            'body_fat_percentage': analysis.body_fat_percentage,
+            'body_fat_confidence': 0.85,  # Default confidence value
+            'body_type': analysis.body_type,
+            'muscle_building_potential': analysis.muscle_building_potential
+        }
+        
+        # Get measurements from JSON field
+        measurements = analysis.measurements or {}
+        
+        # Get traits from JSON field
+        traits = analysis.traits or {}
+        
+        # Check if this is a dual photo analysis
+        is_dual_photo = analysis.analysis_type == 'dual_photo'
+        
+        # Check if this is a 3D scan
+        is_3d_scan = analysis.analysis_type == '3d_scan'
+        
+        # Setup image data - would normally be base64 encoded image from file
+        image_data = None
+        front_image = None
+        back_image = None
+        
+        # If we have an image path, try to convert it to base64
+        if analysis.image_path:
+            try:
+                import os
+                import base64
+                
+                if os.path.exists(analysis.image_path):
+                    with open(analysis.image_path, "rb") as img_file:
+                        image_data = base64.b64encode(img_file.read()).decode('utf-8')
+            except Exception as e:
+                logger.error(f"❌ Error loading image: {str(e)}")
+        
+        # Define the organized categories of measurements if enhanced measurements are available
+        has_enhanced_measurements = len(measurements) > 5  # Arbitrary threshold
+        
+        categorized_measurements = {}
+        if has_enhanced_measurements:
+            # Group measurements into logical categories
+            categorized_measurements = {
+                "Body Composition": {k: v for k, v in measurements.items() if k in ['weight', 'height', 'bmi']},
+                "Upper Body": {k: v for k, v in measurements.items() if k in [
+                    'shoulder_width', 'chest_circumference', 'arm_circumference', 'bicep_circumference', 
+                    'forearm_circumference', 'wrist_circumference'
+                ]},
+                "Torso": {k: v for k, v in measurements.items() if k in [
+                    'waist_circumference', 'hip_circumference', 'neck_circumference'
+                ]},
+                "Lower Body": {k: v for k, v in measurements.items() if k in [
+                    'thigh_circumference', 'calf_circumference', 'ankle_circumference'
+                ]}
+            }
+        
+        return render_template(
+            'lovable_results.html',
+            analysis_id=analysis_id,
+            bodybuilding=bodybuilding,
+            measurements=measurements,
+            traits=traits,
+            image_data=image_data,
+            front_image=front_image,
+            back_image=back_image,
+            is_dual_photo=is_dual_photo,
+            is_3d_scan=is_3d_scan,
+            categorized_measurements=categorized_measurements,
+            has_enhanced_measurements=has_enhanced_measurements
+        )
+        
+    except Exception as e:
+        import traceback
+        error_trace = traceback.format_exc()
+        logger.error(f"❌ ERROR in /results/{analysis_id}: {str(e)}")
+        logger.error(f"❌ TRACEBACK: {error_trace}")
+        flash('An error occurred while displaying your results. Please try again.', 'danger')
         return redirect(url_for('index'))
 
 def is_authenticated():
