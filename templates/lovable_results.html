@@ -70,6 +70,18 @@
                     </div>
                 </div>
 
+                <!-- Body Metrics Charts -->
+                <div class="card mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Body Metrics Overview</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="symmetryChart" height="200"></canvas>
+                        <canvas id="dominanceChart" height="200" class="mt-4"></canvas>
+                        <canvas id="fiberChart" height="200" class="mt-4"></canvas>
+                    </div>
+                </div>
+
                 <!-- Uploaded Images -->
                 <div class="card">
                     <div class="card-header">
@@ -441,6 +453,10 @@
 {% endblock %}
 
 {% block scripts %}
+<script src="{{ url_for('static', filename='js/body_type_fixes.js') }}"></script>
+<script src="{{ url_for('static', filename='js/chart_utils.js') }}"></script>
+<script src="{{ url_for('static', filename='js/improved_body_type_charts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/fitness_metrics_charts.js') }}"></script>
 <script>
     // Chart.js setup for visualizations (if needed)
     document.addEventListener('DOMContentLoaded', function() {
