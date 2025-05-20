@@ -617,7 +617,49 @@ def test_results():
         'fast_twitch_percentage': 65,
         'frame_size': 'Medium',
         'bicep_insertion': 'Low',
-        'calf_insertion': 'High'
+        'calf_insertion': 'High',
+        'body_fat_percentage': 15.5,
+        'lean_mass_percentage': 84.5,
+        'muscle_building_potential': 7.8,
+        'body_type': 'Mesomorph',
+        'bmi': 23.9,
+        'metabolic_efficiency': 7.2,
+        'recovery_capacity': 8.5,
+        'symmetry': {
+            'upper_body': 85,
+            'lower_body': 78,
+            'left_right': 92
+        },
+        'muscle_fiber_composition': {
+            'fast_twitch': 65,
+            'slow_twitch': 35
+        },
+        'dominant_areas': {
+            'chest': 82,
+            'back': 75,
+            'shoulders': 78,
+            'arms': 80,
+            'core': 76,
+            'legs': 73
+        }
+    }
+    
+    recommendations = {
+        'training': {
+            'style': 'Hypertrophy-focused with strength elements',
+            'frequency': '4-5 days per week',
+            'volume': 'Moderate to high (12-16 sets per muscle group weekly)',
+            'intensity': '70-85% of 1RM for main lifts'
+        },
+        'exercises': {
+            'prioritize': ['Incline bench press', 'Weighted pull-ups', 'Hack squats'],
+            'limit': ['Traditional deadlifts', 'Behind-neck presses']
+        },
+        'nutrition': {
+            'protein': '2.0-2.2g per kg bodyweight',
+            'carbs': 'Moderate to high (4-5g per kg on training days)',
+            'timing': 'Focus on pre/post workout nutrition window'
+        }
     }
     
     # Sample values for template testing
@@ -627,6 +669,7 @@ def test_results():
         bodybuilding=bodybuilding,
         measurements=measurements,
         traits=traits,
+        recommendations=recommendations,
         image_data=None,
         front_image=None,
         back_image=None,

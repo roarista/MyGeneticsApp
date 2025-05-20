@@ -453,6 +453,13 @@
 {% endblock %}
 
 {% block scripts %}
+<script>
+    // Embed data for JavaScript charts
+    window.traits = {{ traits|tojson }};
+    window.recommendations = {{ recommendations|tojson if recommendations is defined else {}|tojson }};
+    window.measurements = {{ measurements|tojson }};
+    window.bodybuilding = {{ bodybuilding|tojson }};
+</script>
 <script src="{{ url_for('static', filename='js/body_type_fixes.js') }}"></script>
 <script src="{{ url_for('static', filename='js/chart_utils.js') }}"></script>
 <script src="{{ url_for('static', filename='js/improved_body_type_charts.js') }}"></script>
@@ -461,6 +468,7 @@
     // Chart.js setup for visualizations (if needed)
     document.addEventListener('DOMContentLoaded', function() {
         // Any additional JavaScript for the results page
+        console.log('Data loaded:', { traits: window.traits, measurements: window.measurements, bodybuilding: window.bodybuilding });
     });
 </script>
 {% endblock %}
