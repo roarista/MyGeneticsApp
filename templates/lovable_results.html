@@ -1,458 +1,236 @@
-{% extends "base.html" %}
+{% extends "tailwind_layout.html" %}
 
-{% block title %}Analysis Results - MyGenetics{% endblock %}
+{% block title %}Your Body Analysis Results{% endblock %}
 
 {% block content %}
-<section class="section py-5">
-    <div class="container">
-        <!-- Header -->
-        <div class="text-center mb-5" data-aos="fade-up">
-            <h1 class="hero-title mb-3"><span class="gradient-text">YOUR GENETIC ANALYSIS RESULTS</span></h1>
-            <p class="text-secondary">Based on your uploaded photos and measurements</p>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  <!-- Page Header -->
+  <div class="text-center mb-12">
+    <h1 class="text-4xl font-bold text-white mb-2">Your Body Analysis Results</h1>
+    <p class="text-gray-400">Genetic insights based on your uploaded photos and measurements</p>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Left Panel: Your Analysis & Key Metrics -->
+    <div class="space-y-6">
+      <!-- Analysis Image & Description -->
+      <div class="bg-gray-800 rounded-xl shadow-lg p-6">
+        <h2 class="text-2xl font-semibold text-white mb-4">Your Analysis</h2>
+        <img src="data:image/jpeg;base64,{{ image_data }}" alt="Body Analysis" class="w-full h-auto rounded-lg">
+        <div class="mt-4">
+          <span class="inline-block bg-blue-600 text-white px-3 py-1 rounded-full">Body Type: {{ traits.body_type }}</span>
         </div>
+        <p class="text-gray-300 mt-4">{{ traits.description }}</p>
+      </div>
 
-        <div class="row">
-            <!-- Left Panel - Body Composition -->
-            <div class="col-lg-6 mb-4">
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h2 class="card-title">Body Composition</h2>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <!-- Body Fat -->
-                            <div class="col-md-6 mb-4">
-                                <div class="metric-card">
-                                    <div class="metric-value">
-                                        {% if bodybuilding is defined and bodybuilding and bodybuilding.body_fat_percentage %}
-                                            {{ '{:.1f}'.format(bodybuilding.body_fat_percentage) }}%
-                                        {% else %}
-                                            N/A
-                                        {% endif %}
-                                    </div>
-                                    <div class="metric-label">Body Fat Percentage</div>
-                                    {% if bodybuilding is defined and bodybuilding and bodybuilding.body_fat_confidence %}
-                                    <div class="text-info">
-                                        Confidence: {{ '{:.0f}'.format(bodybuilding.body_fat_confidence * 100) }}%
-                                    </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-
-                            <!-- Body Type -->
-                            <div class="col-md-6 mb-4">
-                                <div class="metric-card">
-                                    <div class="metric-value">
-                                        {% if bodybuilding is defined and bodybuilding and bodybuilding.body_type and bodybuilding.body_type != 'Unknown' %}
-                                            {{ bodybuilding.body_type }}
-                                        {% else %}
-                                            N/A
-                                        {% endif %}
-                                    </div>
-                                    <div class="metric-label">Body Type Classification</div>
-                                </div>
-                            </div>
-
-                            <!-- Muscle Building Potential -->
-                            <div class="col-md-12 mb-4">
-                                <div class="metric-card">
-                                    <div class="metric-value">
-                                        {% if bodybuilding is defined and bodybuilding and bodybuilding.muscle_building_potential %}
-                                            {{ '{:.1f}'.format(bodybuilding.muscle_building_potential) }}/10
-                                        {% else %}
-                                            N/A
-                                        {% endif %}
-                                    </div>
-                                    <div class="metric-label">Muscle Building Potential</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Body Metrics Charts -->
-                <div class="card mb-4">
-                    <div class="card-header bg-info text-white">
-                        <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Body Metrics Overview</h5>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="symmetryChart" height="200"></canvas>
-                        <canvas id="dominanceChart" height="200" class="mt-4"></canvas>
-                        <canvas id="fiberChart" height="200" class="mt-4"></canvas>
-                    </div>
-                </div>
-
-                <!-- Uploaded Images -->
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">Your Upload</h2>
-                    </div>
-                    <div class="card-body">
-                        {% if is_dual_photo %}
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <h4 class="fw-semibold text-white mb-2 text-center">Front View</h4>
-                                    <div class="rounded-lg overflow-hidden">
-                                        <img src="data:image/jpeg;base64,{{ front_image }}" alt="Front View" class="img-fluid rounded">
-                                    </div>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <h4 class="fw-semibold text-white mb-2 text-center">Back View</h4>
-                                    <div class="rounded-lg overflow-hidden">
-                                        <img src="data:image/jpeg;base64,{{ back_image }}" alt="Back View" class="img-fluid rounded">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="alert alert-info mt-3">
-                                <div class="d-flex">
-                                    <div class="me-2">
-                                        <i class="fas fa-info-circle"></i>
-                                    </div>
-                                    <div>
-                                        <p class="mb-0">
-                                            Our dual-photo analysis combines data from both views for the most accurate measurements possible.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        {% else %}
-                            <div class="rounded overflow-hidden">
-                                {% if is_3d_scan %}
-                                    <div class="bg-secondary p-4 rounded text-center">
-                                        <i class="fas fa-cube fa-3x text-muted mb-2"></i>
-                                        <p class="text-muted">3D Scan Analysis</p>
-                                    </div>
-                                {% else %}
-                                    {% if image_data %}
-                                        <img src="data:image/jpeg;base64,{{ image_data }}" alt="Analysis Photo" class="img-fluid rounded">
-                                    {% else %}
-                                        <div class="bg-secondary p-4 rounded text-center">
-                                            <i class="fas fa-image fa-3x text-muted mb-2"></i>
-                                            <p class="text-muted">Image Not Available</p>
-                                        </div>
-                                    {% endif %}
-                                {% endif %}
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-
-            <!-- Right Panel - Key Measurements -->
-            <div class="col-lg-6 mb-4">
-                <!-- Core Measurements -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h2 class="card-title">Key Measurements</h2>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            {% if measurements %}
-                                <!-- Shoulders -->
-                                <div class="col-md-6 mb-4">
-                                    <div class="metric-card">
-                                        <div class="metric-value">
-                                            {% if measurements.shoulder_width %}
-                                                {{ measurements.shoulder_width }} cm
-                                            {% else %}
-                                                N/A
-                                            {% endif %}
-                                        </div>
-                                        <div class="metric-label">Shoulder Width</div>
-                                        <div class="position-absolute top-0 end-0 p-2">
-                                            <i class="fas fa-ruler text-primary"></i>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Waist -->
-                                <div class="col-md-6 mb-4">
-                                    <div class="metric-card">
-                                        <div class="metric-value">
-                                            {% if measurements.waist_circumference %}
-                                                {{ measurements.waist_circumference }} cm
-                                            {% else %}
-                                                N/A
-                                            {% endif %}
-                                        </div>
-                                        <div class="metric-label">Waist Circumference</div>
-                                        <div class="position-absolute top-0 end-0 p-2">
-                                            <i class="fas fa-ruler text-primary"></i>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Arms -->
-                                <div class="col-md-6 mb-4">
-                                    <div class="metric-card">
-                                        <div class="metric-value">
-                                            {% if measurements.arm_circumference %}
-                                                {{ measurements.arm_circumference }} cm
-                                            {% else %}
-                                                N/A
-                                            {% endif %}
-                                        </div>
-                                        <div class="metric-label">Arm Circumference</div>
-                                        <div class="position-absolute top-0 end-0 p-2">
-                                            <i class="fas fa-dumbbell text-primary"></i>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Thighs -->
-                                <div class="col-md-6 mb-4">
-                                    <div class="metric-card">
-                                        <div class="metric-value">
-                                            {% if measurements.thigh_circumference %}
-                                                {{ measurements.thigh_circumference }} cm
-                                            {% else %}
-                                                N/A
-                                            {% endif %}
-                                        </div>
-                                        <div class="metric-label">Thigh Circumference</div>
-                                        <div class="position-absolute top-0 end-0 p-2">
-                                            <i class="fas fa-walking text-primary"></i>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Chest -->
-                                <div class="col-md-6 mb-4">
-                                    <div class="metric-card">
-                                        <div class="metric-value">
-                                            {% if measurements.chest_circumference %}
-                                                {{ measurements.chest_circumference }} cm
-                                            {% else %}
-                                                N/A
-                                            {% endif %}
-                                        </div>
-                                        <div class="metric-label">Chest Circumference</div>
-                                        <div class="position-absolute top-0 end-0 p-2">
-                                            <i class="fas fa-heartbeat text-primary"></i>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Calves -->
-                                <div class="col-md-6 mb-4">
-                                    <div class="metric-card">
-                                        <div class="metric-value">
-                                            {% if measurements.calf_circumference %}
-                                                {{ measurements.calf_circumference }} cm
-                                            {% else %}
-                                                N/A
-                                            {% endif %}
-                                        </div>
-                                        <div class="metric-label">Calf Circumference</div>
-                                        <div class="position-absolute top-0 end-0 p-2">
-                                            <i class="fas fa-running text-primary"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            {% else %}
-                                <div class="col-12 text-center py-4 text-muted">
-                                    <i class="fas fa-ruler-combined fa-3x mb-3 text-muted"></i>
-                                    <p>No measurement data available</p>
-                                </div>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Genetic Traits -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h2 class="card-title">Genetic Traits</h2>
-                    </div>
-                    <div class="card-body">
-                        {% if traits %}
-                            <div class="accordion" id="geneticTraitsAccordion">
-                                <!-- Muscle Fiber Composition -->
-                                <div class="accordion-item bg-card mb-3">
-                                    <h2 class="accordion-header" id="muscleCompositionHeading">
-                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#muscleCompositionCollapse" aria-expanded="false" aria-controls="muscleCompositionCollapse">
-                                            <span class="fw-medium">Muscle Fiber Composition</span>
-                                        </button>
-                                    </h2>
-                                    <div id="muscleCompositionCollapse" class="accordion-collapse collapse" aria-labelledby="muscleCompositionHeading" data-bs-parent="#geneticTraitsAccordion">
-                                        <div class="accordion-body">
-                                            <div class="d-flex align-items-center justify-content-between mb-2">
-                                                <span class="text-secondary">Fast-Twitch Dominant</span>
-                                                <span class="fw-medium">{{ traits.get('fast_twitch_percentage', 'Unknown') }}%</span>
-                                            </div>
-                                            <div class="progress mb-2">
-                                                <div class="progress-bar progress-bar-primary" role="progressbar" style="width: {{ traits.get('fast_twitch_percentage', 0) }}%" aria-valuenow="{{ traits.get('fast_twitch_percentage', 0) }}" aria-valuemin="0" aria-valuemax="100"></div>
-                                            </div>
-                                            <p class="mt-2 small text-secondary">
-                                                {% if traits.get('fast_twitch_percentage', 0) > 60 %}
-                                                Your body appears to have more fast-twitch muscle fibers, making you naturally better at explosive movements and strength training.
-                                                {% elif traits.get('fast_twitch_percentage', 0) < 40 %}
-                                                Your body appears to have more slow-twitch muscle fibers, giving you better endurance capabilities.
-                                                {% else %}
-                                                You have a balanced muscle fiber composition, making you adaptable to various types of training.
-                                                {% endif %}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Frame Structure -->
-                                <div class="accordion-item bg-card mb-3">
-                                    <h2 class="accordion-header" id="frameStructureHeading">
-                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#frameStructureCollapse" aria-expanded="false" aria-controls="frameStructureCollapse">
-                                            <span class="fw-medium">Frame Size & Bone Structure</span>
-                                        </button>
-                                    </h2>
-                                    <div id="frameStructureCollapse" class="accordion-collapse collapse" aria-labelledby="frameStructureHeading" data-bs-parent="#geneticTraitsAccordion">
-                                        <div class="accordion-body">
-                                            <div class="mb-2">
-                                                <span class="fw-medium">{{ traits.get('frame_size', 'Medium') }}</span>
-                                            </div>
-                                            <p class="small text-secondary">
-                                                {% if traits.get('frame_size') == 'Large' %}
-                                                You have a naturally large frame, which typically supports more muscle mass and strength development.
-                                                {% elif traits.get('frame_size') == 'Small' %}
-                                                You have a naturally compact frame, which may lead to better definition and proportions at lower muscle mass.
-                                                {% else %}
-                                                You have a medium frame size, which provides a balanced foundation for both muscle building and definition.
-                                                {% endif %}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Muscle Insertions -->
-                                <div class="accordion-item bg-card">
-                                    <h2 class="accordion-header" id="muscleInsertionsHeading">
-                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#muscleInsertionsCollapse" aria-expanded="false" aria-controls="muscleInsertionsCollapse">
-                                            <span class="fw-medium">Muscle Insertion Points</span>
-                                        </button>
-                                    </h2>
-                                    <div id="muscleInsertionsCollapse" class="accordion-collapse collapse" aria-labelledby="muscleInsertionsHeading" data-bs-parent="#geneticTraitsAccordion">
-                                        <div class="accordion-body">
-                                            <div class="mb-3">
-                                                <div class="mb-2">
-                                                    <span class="text-secondary me-2">Biceps</span>
-                                                    <span class="badge 
-                                                        {% if traits.get('bicep_insertion') == 'High' %}bg-info
-                                                        {% elif traits.get('bicep_insertion') == 'Low' %}bg-primary
-                                                        {% else %}bg-secondary{% endif %}">
-                                                        {{ traits.get('bicep_insertion', 'Medium') }}
-                                                    </span>
-                                                </div>
-                                                <div>
-                                                    <span class="text-secondary me-2">Calves</span>
-                                                    <span class="badge
-                                                        {% if traits.get('calf_insertion') == 'High' %}bg-info
-                                                        {% elif traits.get('calf_insertion') == 'Low' %}bg-primary
-                                                        {% else %}bg-secondary{% endif %}">
-                                                        {{ traits.get('calf_insertion', 'Medium') }}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <p class="mt-2 small text-secondary">
-                                                Your muscle insertion points affect how your muscles appear when developed. Low insertions typically create fuller-looking muscles.
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        {% else %}
-                            <div class="text-center py-4 text-muted">
-                                <i class="fas fa-dna fa-3x mb-3"></i>
-                                <p>No genetic trait data available</p>
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
+      <!-- Key Measurements -->
+      <div class="bg-gray-800 rounded-xl shadow-lg p-6">
+        <h2 class="text-2xl font-semibold text-white mb-4">Key Measurements</h2>
+        <div class="grid grid-cols-2 gap-4">
+          {% if measurements.shoulder_width %}
+          <div class="space-y-1">
+            <div class="text-white font-bold">{{ measurements.shoulder_width }} cm</div>
+            <div class="text-gray-400 text-sm">Shoulder Width</div>
+          </div>
+          {% endif %}
+          {% if measurements.waist_circumference %}
+          <div class="space-y-1">
+            <div class="text-white font-bold">{{ measurements.waist_circumference }} cm</div>
+            <div class="text-gray-400 text-sm">Waist Circumference</div>
+          </div>
+          {% endif %}
+          {% if bodybuilding.body_fat_percentage %}
+          <div class="space-y-1">
+            <div class="text-white font-bold">{{ '{:.1f}'.format(bodybuilding.body_fat_percentage) }}%</div>
+            <div class="text-gray-400 text-sm">Body Fat %</div>
+          </div>
+          {% endif %}
+          {% if measurements.arm_circumference %}
+          <div class="space-y-1">
+            <div class="text-white font-bold">{{ measurements.arm_circumference }} cm</div>
+            <div class="text-gray-400 text-sm">Arm Circumference</div>
+          </div>
+          {% endif %}
         </div>
+      </div>
 
-        <!-- Enhanced Bodybuilding Measurements (if available) -->
-        {% if has_enhanced_measurements %}
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="card mb-4">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h2 class="card-title">Enhanced Bodybuilding Measurements</h2>
-                        <span class="badge bg-primary">50-Point Analysis</span>
-                    </div>
-                    <div class="card-body">
-                        <!-- Tab Navigation -->
-                        <ul class="nav nav-tabs mb-4" id="measurementTabs" role="tablist">
-                            {% for category in categorized_measurements %}
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link {% if loop.first %}active{% endif %}" 
-                                        id="tab-{{ category.lower().replace(' ', '-') }}" 
-                                        data-bs-toggle="tab" 
-                                        data-bs-target="#content-{{ category.lower().replace(' ', '-') }}" 
-                                        type="button" 
-                                        role="tab" 
-                                        aria-controls="content-{{ category.lower().replace(' ', '-') }}" 
-                                        aria-selected="{% if loop.first %}true{% else %}false{% endif %}">
-                                    {{ category }}
-                                </button>
-                            </li>
-                            {% endfor %}
-                        </ul>
-                        
-                        <!-- Tab Content -->
-                        <div class="tab-content" id="measurementTabsContent">
-                            {% for category, measurements in categorized_measurements.items() %}
-                            <div class="tab-pane fade {% if loop.first %}show active{% endif %}" 
-                                 id="content-{{ category.lower().replace(' ', '-') }}" 
-                                 role="tabpanel" 
-                                 aria-labelledby="tab-{{ category.lower().replace(' ', '-') }}">
-                                
-                                <div class="row">
-                                    {% for key, data in measurements.items() %}
-                                    <div class="col-md-6 mb-4">
-                                        <div class="metric-card">
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <div>
-                                                    <div class="metric-value">{{ data.value }}</div>
-                                                    <div class="metric-label">{{ key }}</div>
-                                                </div>
-                                                <div class="position-relative" data-bs-toggle="tooltip" title="{{ data.confidence|capitalize }} confidence">
-                                                    <span class="d-inline-block rounded-circle" style="width: 12px; height: 12px; 
-                                                        background-color: {% if data.confidence == 'high' %}var(--success-color)
-                                                        {% elif data.confidence == 'medium' %}var(--warning-color)
-                                                        {% else %}var(--text-muted){% endif %}">
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {% endfor %}
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% endif %}
-
-        <!-- Action Buttons -->
-        <div class="row mt-5 mb-4">
-            <div class="col-12 text-center">
-                <a href="/recommendations/{{ analysis_id }}" class="btn btn-primary me-2 mb-2">
-                    <i class="fas fa-lightbulb me-2"></i> View Personalized Recommendations
-                </a>
-                <a href="/workout/{{ analysis_id }}" class="btn btn-secondary me-2 mb-2">
-                    <i class="fas fa-dumbbell me-2"></i> Get Workout Plan
-                </a>
-                <a href="/nutrition/{{ analysis_id }}" class="btn btn-outline-light mb-2">
-                    <i class="fas fa-utensils me-2"></i> Nutrition Guidelines
-                </a>
-            </div>
-        </div>
+      <!-- Body Metrics Charts -->
+      <div class="bg-gray-800 rounded-xl shadow-lg p-6">
+        <h2 class="text-2xl font-semibold text-white mb-4"><i class="fas fa-chart-bar mr-2"></i>Body Metrics Overview</h2>
+        <canvas id="symmetryChart" height="200"></canvas>
+        <canvas id="dominanceChart" height="200" class="mt-4"></canvas>
+        <canvas id="fiberChart" height="200" class="mt-4"></canvas>
+      </div>
     </div>
-</section>
+
+    <!-- Right Panel: Genetic Traits & Recommendations -->
+    <div class="lg:col-span-2 space-y-6">
+      <!-- Genetic Structure Traits Table -->
+      <div class="bg-gray-800 rounded-xl shadow-lg p-6 overflow-auto">
+        <h2 class="text-2xl font-semibold text-white mb-4">Genetic Structure Traits</h2>
+        <table class="min-w-full table-auto">
+          <thead class="bg-gray-700">
+            <tr>
+              <th class="px-4 py-2 text-left text-gray-300">Trait</th>
+              <th class="px-4 py-2 text-left text-gray-300">Value</th>
+              <th class="px-4 py-2 text-left text-gray-300">Rating</th>
+              <th class="px-4 py-2 text-left text-gray-300">Impact</th>
+            </tr>
+          </thead>
+          <tbody class="bg-gray-900">
+            {% if traits.get('bicep_insertion') %}
+            <tr class="border-b border-gray-700">
+              <td class="px-4 py-3 text-white">Bicep Insertion</td>
+              <td class="px-4 py-3 text-gray-300">{{ traits.get('bicep_insertion') }}</td>
+              <td class="px-4 py-3">
+                <span class="px-2 py-1 rounded-full text-xs
+                  {% if traits.get('bicep_insertion')=='High' %}bg-green-500
+                  {% elif traits.get('bicep_insertion')=='Low' %}bg-blue-500
+                  {% else %}bg-yellow-500{% endif %}">
+                  {{ 'Excellent' if traits.get('bicep_insertion')=='Low' else 'Good' }}
+                </span>
+              </td>
+              <td class="px-4 py-3 text-gray-300">Affects bicep peak and overall arm appearance</td>
+            </tr>
+            {% endif %}
+            {% if traits.get('fast_twitch_percentage') %}
+            <tr class="border-b border-gray-700">
+              <td class="px-4 py-3 text-white">Fast-Twitch Dominant</td>
+              <td class="px-4 py-3 text-gray-300">{{ traits.get('fast_twitch_percentage') }}%</td>
+              <td class="px-4 py-3">
+                <span class="px-2 py-1 rounded-full text-xs
+                  {% if traits.get('fast_twitch_percentage', 0) > 60 %}bg-green-500
+                  {% elif traits.get('fast_twitch_percentage', 0) < 40 %}bg-red-500
+                  {% else %}bg-yellow-500{% endif %}">
+                  {{ 'Excellent' if traits.get('fast_twitch_percentage', 0) > 60 else 'Average' if traits.get('fast_twitch_percentage', 0) >= 40 else 'Fair' }}
+                </span>
+              </td>
+              <td class="px-4 py-3 text-gray-300">Determines strength vs endurance potential</td>
+            </tr>
+            {% endif %}
+            {% if traits.get('frame_size') %}
+            <tr class="border-b border-gray-700">
+              <td class="px-4 py-3 text-white">Frame Size</td>
+              <td class="px-4 py-3 text-gray-300">{{ traits.get('frame_size') }}</td>
+              <td class="px-4 py-3">
+                <span class="px-2 py-1 rounded-full text-xs
+                  {% if traits.get('frame_size')=='Large' %}bg-green-500
+                  {% elif traits.get('frame_size')=='Small' %}bg-red-500
+                  {% else %}bg-yellow-500{% endif %}">
+                  {{ 'Excellent' if traits.get('frame_size')=='Large' else 'Average' if traits.get('frame_size')=='Medium' else 'Fair' }}
+                </span>
+              </td>
+              <td class="px-4 py-3 text-gray-300">Influences overall muscle mass potential</td>
+            </tr>
+            {% endif %}
+            {% if traits.get('muscle_building_potential') %}
+            <tr class="border-b border-gray-700">
+              <td class="px-4 py-3 text-white">Muscle Potential</td>
+              <td class="px-4 py-3 text-gray-300">{{ '{:.1f}'.format(traits.get('muscle_building_potential')) }}/10</td>
+              <td class="px-4 py-3">
+                <span class="px-2 py-1 rounded-full text-xs
+                  {% if traits.get('muscle_building_potential', 0) > 7.5 %}bg-green-500
+                  {% elif traits.get('muscle_building_potential', 0) < 5 %}bg-red-500
+                  {% else %}bg-yellow-500{% endif %}">
+                  {{ 'Excellent' if traits.get('muscle_building_potential', 0) > 7.5 else 'Average' if traits.get('muscle_building_potential', 0) >= 5 else 'Fair' }}
+                </span>
+              </td>
+              <td class="px-4 py-3 text-gray-300">Overall genetic predisposition for hypertrophy</td>
+            </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Recommendations Section -->
+      <div class="bg-gray-800 rounded-xl shadow-lg p-6">
+        <h2 class="text-2xl font-semibold text-white mb-4">Personalized Recommendations</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <h3 class="text-lg font-medium text-blue-400 mb-2">Genetic Strengths</h3>
+            <ul class="list-disc list-inside text-gray-300 space-y-1">
+              {% if traits.get('fast_twitch_percentage', 0) > 60 %}
+                <li>Excellent power/strength development</li>
+              {% endif %}
+              {% if bodybuilding.get('muscle_building_potential', 0) > 7 %}
+                <li>Above-average muscle building genetics</li>
+              {% endif %}
+              {% if traits.get('frame_size') == 'Large' %}
+                <li>Large frame supports more overall muscle</li>
+              {% endif %}
+              {% if measurements.shoulder_width and measurements.shoulder_width > 45 %}
+                <li>Wide shoulders create an aesthetic V-taper</li>
+              {% endif %}
+            </ul>
+          </div>
+          <div>
+            <h3 class="text-lg font-medium text-yellow-400 mb-2">Areas to Focus On</h3>
+            <ul class="list-disc list-inside text-gray-300 space-y-1">
+              {% if traits.get('fast_twitch_percentage', 0) < 40 %}
+                <li>Strength training (compensate for lower fast-twitch %)</li>
+              {% endif %}
+              {% if bodybuilding.body_fat_percentage > 18 %}
+                <li>Fat loss protocols to improve definition</li>
+              {% endif %}
+              {% if measurements.waist_circumference and measurements.waist_circumference > 90 %}
+                <li>Core strengthening and waist reduction</li>
+              {% endif %}
+              {% if traits.get('frame_size') == 'Small' %}
+                <li>Focus on creating illusion of size through proportions</li>
+              {% endif %}
+            </ul>
+          </div>
+        </div>
+        <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div>
+            <h3 class="text-lg font-medium text-green-400 mb-2">Training Tips</h3>
+            <ul class="list-disc list-inside text-gray-300 space-y-1">
+              {% if traits.get('fast_twitch_percentage', 0) > 60 %}
+                <li>Emphasize heavy, compound movements</li>
+                <li>Lower rep ranges (4-8) for maximum growth</li>
+              {% elif traits.get('fast_twitch_percentage', 0) < 40 %}
+                <li>Include both strength and endurance protocols</li>
+                <li>Moderate rep ranges (8-12) with shorter rest</li>
+              {% else %}
+                <li>Balanced training approach with periodization</li>
+                <li>Varied rep ranges to stimulate all fiber types</li>
+              {% endif %}
+            </ul>
+          </div>
+          <div>
+            <h3 class="text-lg font-medium text-red-400 mb-2">Nutrition Tips</h3>
+            <ul class="list-disc list-inside text-gray-300 space-y-1">
+              {% if bodybuilding.body_fat_percentage > 18 %}
+                <li>Moderate caloric deficit (300-500 calories)</li>
+                <li>Higher protein intake (1.8-2.2g per kg bodyweight)</li>
+              {% elif bodybuilding.body_fat_percentage < 10 %}
+                <li>Caloric surplus for muscle growth (300-500 calories)</li>
+                <li>Carb timing around workouts for performance</li>
+              {% else %}
+                <li>Maintenance calories with nutrient cycling</li>
+                <li>Protein intake of 1.6-2.0g per kg bodyweight</li>
+              {% endif %}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="mt-8 flex flex-wrap justify-center gap-4">
+    <a href="/workout/{{ analysis_id }}" class="btn-primary">
+      <i class="fas fa-dumbbell mr-2"></i> Get Workout Plan
+    </a>
+    <a href="/nutrition/{{ analysis_id }}" class="btn-outline">
+      <i class="fas fa-utensils mr-2"></i> Nutrition Guidelines
+    </a>
+  </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     // Embed data for JavaScript charts
     window.traits = {{ traits|tojson }};
@@ -465,9 +243,8 @@
 <script src="{{ url_for('static', filename='js/improved_body_type_charts.js') }}"></script>
 <script src="{{ url_for('static', filename='js/fitness_metrics_charts.js') }}"></script>
 <script>
-    // Chart.js setup for visualizations (if needed)
+    // Chart.js setup for visualizations
     document.addEventListener('DOMContentLoaded', function() {
-        // Any additional JavaScript for the results page
         console.log('Data loaded:', { traits: window.traits, measurements: window.measurements, bodybuilding: window.bodybuilding });
     });
 </script>

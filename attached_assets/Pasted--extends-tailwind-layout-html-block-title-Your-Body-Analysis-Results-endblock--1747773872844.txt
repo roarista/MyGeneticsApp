@@ -1,0 +1,138 @@
+{% extends "tailwind_layout.html" %}
+
+{% block title %}Your Body Analysis Results{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  <!-- Page Header -->
+  <div class="text-center mb-12">
+    <h1 class="text-4xl font-bold text-white mb-2">Your Body Analysis Results</h1>
+    <p class="text-gray-400">Genetic insights based on your uploaded photos and measurements</p>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Left Panel: Your Analysis & Key Metrics -->
+    <div class="space-y-6">
+      <!-- Analysis Image & Description -->
+      <div class="bg-gray-800 rounded-xl shadow-lg p-6">
+        <h2 class="text-2xl font-semibold text-white mb-4">Your Analysis</h2>
+        <img src="data:image/jpeg;base64,{{ image_data }}" alt="Body Analysis" class="w-full h-auto rounded-lg">
+        <div class="mt-4">
+          <span class="inline-block bg-blue-600 text-white px-3 py-1 rounded-full">Body Type: {{ traits.body_type }}</span>
+        </div>
+        <p class="text-gray-300 mt-4">{{ traits.description }}</p>
+      </div>
+
+      <!-- Key Measurements -->
+      <div class="bg-gray-800 rounded-xl shadow-lg p-6">
+        <h2 class="text-2xl font-semibold text-white mb-4">Key Measurements</h2>
+        <div class="grid grid-cols-2 gap-4">
+          {% if measurements.shoulder_width %}
+          <div class="space-y-1">
+            <div class="text-white font-bold">{{ measurements.shoulder_width }} cm</div>
+            <div class="text-gray-400 text-sm">Shoulder Width</div>
+          </div>
+          {% endif %}
+          {% if measurements.waist_circumference %}
+          <div class="space-y-1">
+            <div class="text-white font-bold">{{ measurements.waist_circumference }} cm</div>
+            <div class="text-gray-400 text-sm">Waist Circumference</div>
+          </div>
+          {% endif %}
+          {% if measurements.body_fat_percentage %}
+          <div class="space-y-1">
+            <div class="text-white font-bold">{{ measurements.body_fat_percentage }}%</div>
+            <div class="text-gray-400 text-sm">Body Fat %</div>
+          </div>
+          {% endif %}
+          {% if measurements.lean_body_mass %}
+          <div class="space-y-1">
+            <div class="text-white font-bold">{{ measurements.lean_body_mass }} kg</div>
+            <div class="text-gray-400 text-sm">Lean Body Mass</div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Panel: Genetic Traits & Recommendations -->
+    <div class="lg:col-span-2 space-y-6">
+      <!-- Genetic Structure Traits Table -->
+      <div class="bg-gray-800 rounded-xl shadow-lg p-6 overflow-auto">
+        <h2 class="text-2xl font-semibold text-white mb-4">Genetic Structure Traits</h2>
+        <table class="min-w-full table-auto">
+          <thead class="bg-gray-700">
+            <tr>
+              <th class="px-4 py-2 text-left text-gray-300">Trait</th>
+              <th class="px-4 py-2 text-left text-gray-300">Value</th>
+              <th class="px-4 py-2 text-left text-gray-300">Rating</th>
+              <th class="px-4 py-2 text-left text-gray-300">Impact</th>
+            </tr>
+          </thead>
+          <tbody class="bg-gray-900">
+            {% for trait, data in traits.items() %}
+              {% if data is mapping and data.value is defined %}
+              <tr class="border-b border-gray-700">
+                <td class="px-4 py-3 text-white">{{ trait.replace('_',' ').title() }}</td>
+                <td class="px-4 py-3 text-gray-300">{{ data.display_value or data.value }}</td>
+                <td class="px-4 py-3">
+                  <span class="px-2 py-1 rounded-full text-xs
+                    {% if data.rating=='excellent' %}bg-green-500
+                    {% elif data.rating=='good' %}bg-blue-500
+                    {% elif data.rating=='average' %}bg-yellow-500
+                    {% else %}bg-red-500{% endif %}">
+                    {{ data.rating.title().replace('_',' ') }}
+                  </span>
+                </td>
+                <td class="px-4 py-3 text-gray-300">{{ data.impact }}</td>
+              </tr>
+              {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Recommendations Section -->
+      <div class="bg-gray-800 rounded-xl shadow-lg p-6">
+        <h2 class="text-2xl font-semibold text-white mb-4">Personalized Recommendations</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <h3 class="text-lg font-medium text-blue-400 mb-2">Genetic Strengths</h3>
+            <ul class="list-disc list-inside text-gray-300 space-y-1">
+              {% for s in recommendations.strengths %}
+              <li>{{ s }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+          <div>
+            <h3 class="text-lg font-medium text-yellow-400 mb-2">Areas to Focus On</h3>
+            <ul class="list-disc list-inside text-gray-300 space-y-1">
+              {% for f in recommendations.focus_areas %}
+              <li>{{ f }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+        <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div>
+            <h3 class="text-lg font-medium text-green-400 mb-2">Training Tips</h3>
+            <ul class="list-disc list-inside text-gray-300 space-y-1">
+              {% for tip in recommendations.training_tips %}
+              <li>{{ tip }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+          <div>
+            <h3 class="text-lg font-medium text-red-400 mb-2">Nutrition Tips</h3>
+            <ul class="list-disc list-inside text-gray-300 space-y-1">
+              {% for tip in recommendations.nutrition_tips %}
+              <li>{{ tip }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
