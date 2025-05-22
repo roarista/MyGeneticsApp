@@ -1,0 +1,149 @@
+{% extends "tailwind_layout.html" %}
+
+{% block title %}Your Profile - MyGenetics{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto py-10 px-4">
+  <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+    <!-- Profile Card -->
+    <aside class="space-y-6">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+        <div class="flex flex-col items-center">
+          <div class="relative">
+            <img src="{{ user.avatar_url or url_for('static', filename='img/default-profile.svg') }}" alt="Profile Picture" class="w-24 h-24 rounded-full border-4 border-indigo-500 shadow-md"/>
+            <button type="button" class="absolute bottom-0 right-0 bg-indigo-500 text-white p-2 rounded-full hover:bg-indigo-600 transition">
+              <i class="fas fa-camera"></i>
+            </button>
+          </div>
+          <h2 class="mt-4 text-xl font-semibold text-gray-900 dark:text-gray-100">{{ user.fullname }}</h2>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Member since {{ user.joined }}</p>
+        </div>
+        <div class="mt-6 space-y-4">
+          <div class="flex justify-between">
+            <span class="text-gray-600 dark:text-gray-400">Email</span>
+            <span class="text-gray-900 dark:text-gray-100">{{ user.email }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600 dark:text-gray-400">Member Type</span>
+            <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">{{ user.type|capitalize }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600 dark:text-gray-400">Analyses</span>
+            <span class="text-gray-900 dark:text-gray-100">{{ user.analyses|length }}</span>
+          </div>
+        </div>
+        <div class="mt-6 space-y-2">
+          <a href="{{ url_for('account_settings') }}" class="block text-center w-full py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition">Account Settings</a>
+          <a href="{{ url_for('logout') }}" class="block text-center w-full py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">Log Out</a>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="lg:col-span-3 space-y-6">
+      <!-- Body Information -->
+      <section class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Body Information</h3>
+        <form id="body-info-form" action="{{ url_for('update_body_info') }}" method="post" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label for="height" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Height (cm)</label>
+            <input type="number" name="height" id="height" value="{{ user.height }}" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500" required>
+          </div>
+          <div>
+            <label for="weight" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Weight (kg)</label>
+            <input type="number" name="weight" id="weight" value="{{ user.weight }}" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500" required>
+          </div>
+          <div>
+            <label for="gender" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Gender</label>
+            <select name="gender" id="gender" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500" required>
+              <option value="male" {{ 'selected' if user.gender=='male' }}>Male</option>
+              <option value="female" {{ 'selected' if user.gender=='female' }}>Female</option>
+            </select>
+          </div>
+          <div>
+            <label for="experience" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Fitness Experience</label>
+            <select name="experience" id="experience" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500" required>
+              <option value="beginner" {{ 'selected' if user.experience=='beginner' }}>Beginner (0-1 yrs)</option>
+              <option value="intermediate" {{ 'selected' if user.experience=='intermediate' }}>Intermediate (1-3 yrs)</option>
+              <option value="advanced" {{ 'selected' if user.experience=='advanced' }}>Advanced (3+ yrs)</option>
+            </select>
+          </div>
+          <div>
+            <label for="age" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Age</label>
+            <input type="number" name="age" id="age" value="{{ user.age }}" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500" required>
+          </div>
+          <div class="md:col-span-2">
+            <label for="goal" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Primary Goal</label>
+            <select name="goal" id="goal" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500" required>
+              <option value="lose_fat" {{ 'selected' if user.goal=='lose_fat' }}>Lose Fat</option>
+              <option value="gain_muscle" {{ 'selected' if user.goal=='gain_muscle' }}>Gain Muscle</option>
+              <option value="maintain" {{ 'selected' if user.goal=='maintain' }}>Maintain</option>
+              <option value="recomp" {{ 'selected' if user.goal=='recomp' }}>Body Recomp</option>
+            </select>
+          </div>
+          <div class="md:col-span-2 text-right">
+            <button type="submit" class="inline-flex items-center px-6 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition">
+              <i class="fas fa-save mr-2"></i>Save Information
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Body Analysis Options -->
+      <section class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Body Analysis Options</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <!-- Photo Analysis -->
+          <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 text-center hover:shadow-md transition">
+            <i class="fas fa-camera fa-2x text-indigo-500 mb-4"></i>
+            <h4 class="font-semibold text-gray-900 dark:text-gray-100 mb-2">Photo Analysis</h4>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Upload photo for AI body analysis and genetic trait identification.</p>
+            <a href="{{ url_for('analyze') }}" class="inline-flex items-center px-4 py-2 border border-indigo-500 text-indigo-500 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-600 transition">
+              <span>Start Photo Analysis</span><i class="fas fa-arrow-right ml-2"></i>
+            </a>
+          </div>
+          <!-- 3D Scan -->
+          <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 text-center hover:shadow-md transition">
+            <i class="fas fa-cube fa-2x text-indigo-500 mb-4"></n            <h4 class="font-semibold text-gray-900 dark:text-gray-100 mb-2">3D Body Scan</h4>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Upload 3D scan for precise measurements and composition.</p>
+            <a href="{{ url_for('scan3d_page') }}" class="inline-flex items-center px-4 py-2 border border-indigo-500 text-indigo-500 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-600 transition">
+              <span>Start 3D Analysis</span><i class="fas fa-arrow-right ml-2"></i>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {% if user.analyses %}
+      <!-- Analysis History -->
+      <section class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 overflow-x-auto">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Analysis History</h3>
+        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          <thead class="bg-gray-50 dark:bg-gray-700">
+            <tr>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Date</th>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Type</th>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            {% for analysis in user.analyses %}
+            <tr>
+              <td class="px-4 py-2 text-gray-900 dark:text-gray-100">{{ analysis.date }}</td>
+              <td class="px-4 py-2"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-indigo-100 text-indigo-800">{{ analysis.type.title() }}</span></td>
+              <td class="px-4 py-2"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Completed</span></td>
+              <td class="px-4 py-2 space-x-2">
+                <a href="{{ url_for('results', analysis_id=analysis.id) }}" class="text-indigo-500 hover:text-indigo-700">View</a>
+                <a href="{{ url_for('nutrition', analysis_id=analysis.id) }}" class="text-green-500 hover:text-green-700">Nutrition</a>
+                <a href="{{ url_for('workout', analysis_id=analysis.id) }}" class="text-red-500 hover:text-red-700">Workout</a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </section>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

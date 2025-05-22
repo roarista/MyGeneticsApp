@@ -1,0 +1,192 @@
+import React from 'react';
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
+
+export default function NutritionPlan({
+  macros = { protein: 173, carbs: 173, fats: 38 },
+  calories = { maintenance: 1738, target: 1738 },
+  meals = [],
+  foodRecommendations = { proteinSources: [], carbSources: [], fatSources: [] },
+  supplements = { essential: [], optional: [] }
+}) {
+  return (
+    <div className="max-w-7xl mx-auto p-6 space-y-8">
+      {/* Header */}
+      <header className="text-center space-y-2">
+        <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-400">
+          Your Personalized Nutrition Plan
+        </h1>
+        <p className="text-muted-foreground">Optimize your nutrition based on your genetic profile and fitness goals.</p>
+      </header>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Left Column */}
+        <section className="lg:col-span-4 space-y-6">
+          {/* Daily Macros Card */}
+          <Card>
+            <CardHeader>
+              <h2 className="text-lg font-semibold flex items-center gap-2">
+                Daily Macros
+              </h2>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Protein */}
+              <div>
+                <div className="flex justify-between">
+                  <span>Protein</span>
+                  <span>{macros.protein}g</span>
+                </div>
+                <Progress value={100} className="mt-1 h-2 rounded-full bg-red-200" />
+              </div>
+
+              {/* Carbs */}
+              <div>
+                <div className="flex justify-between">
+                  <span>Carbohydrates</span>
+                  <span>{macros.carbs}g</span>
+                </div>
+                <Progress value={100} className="mt-1 h-2 rounded-full bg-blue-200" />
+              </div>
+
+              {/* Fats */}
+              <div>
+                <div className="flex justify-between">
+                  <span>Fats</span>
+                  <span>{macros.fats}g</span>
+                </div>
+                <Progress value={100} className="mt-1 h-2 rounded-full bg-yellow-200" />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Caloric Needs Card */}
+          <Card>
+            <CardHeader>
+              <h2 className="text-lg font-semibold flex items-center gap-2">
+                Caloric Needs
+              </h2>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-center p-4 bg-gray-100 rounded-lg">
+                  <p className="text-sm text-muted-foreground">Maintenance</p>
+                  <p className="text-2xl font-bold">{calories.maintenance}</p>
+                </div>
+                <div className="text-center p-4 bg-gray-100 rounded-lg">
+                  <p className="text-sm text-muted-foreground">Target</p>
+                  <p className="text-2xl font-bold text-green-600">{calories.target}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Supplements Card */}
+          <Card>
+            <CardHeader>
+              <h2 className="text-lg font-semibold flex items-center gap-2">
+                Supplement Recommendations
+              </h2>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="text-sm text-muted-foreground">
+                These supplements may enhance recovery and performance when combined with proper nutrition.
+              </div>
+              {/* Essential */}
+              <div>
+                <h3 className="font-bold text-green-600 mb-2">Essential</h3>
+                <ul className="list-disc list-inside space-y-1">
+                  {supplements.essential.map((sup, idx) => (
+                    <li key={idx}>{sup.name} – {sup.dosage} ({sup.timing})</li>
+                  ))}
+                </ul>
+              </div>
+              {/* Optional */}
+              <div>
+                <h3 className="font-bold text-blue-600 mb-2">Optional</h3>
+                <ul className="list-disc list-inside space-y-1">
+                  {supplements.optional.map((sup, idx) => (
+                    <li key={idx}>{sup.name} – {sup.dosage} ({sup.timing})</li>
+                  ))}
+                </ul>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+
+        {/* Right Column */}
+        <section className="lg:col-span-8 space-y-6">
+          {/* Meal Timing */}
+          <Card>
+            <CardHeader>
+              <h2 className="text-lg font-semibold flex items-center gap-2">
+                Meal Timing
+              </h2>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Optimize your meal timing to support your training and recovery.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {meals.map((meal, i) => (
+                  <div key={i} className="p-4 bg-gray-50 rounded-lg">
+                    <h4 className="font-semibold">{meal.name}</h4>
+                    <p className="text-sm text-muted-foreground mb-2">{meal.timing}</p>
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-sm">
+                        <span>Protein:</span><span>{meal.protein}g</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span>Carbs:</span><span>{meal.carbs}g</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span>Fats:</span><span>{meal.fats}g</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Recommended Foods */}
+          <Card>
+            <CardHeader>
+              <h2 className="text-lg font-semibold flex items-center gap-2">
+                Recommended Foods
+              </h2>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Protein */}
+                <div>
+                  <h4 className="font-bold text-red-500 mb-2">Protein Sources</h4>
+                  <ul className="list-disc list-inside space-y-1">
+                    {foodRecommendations.proteinSources.map((f, i) => <li key={i}>{f}</li>)}
+                  </ul>
+                </div>
+                {/* Carbs */}
+                <div>
+                  <h4 className="font-bold text-blue-500 mb-2">Carb Sources</h4>
+                  <ul className="list-disc list-inside space-y-1">
+                    {foodRecommendations.carbSources.map((f, i) => <li key={i}>{f}</li>)}
+                  </ul>
+                </div>
+                {/* Fats */}
+                <div>
+                  <h4 className="font-bold text-yellow-500 mb-2">Healthy Fats</h4>
+                  <ul className="list-disc list-inside space-y-1">
+                    {foodRecommendations.fatSources.map((f, i) => <li key={i}>{f}</li>)}
+                  </ul>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+      </div>
+
+      <Separator />
+    </div>
+  );
+}
