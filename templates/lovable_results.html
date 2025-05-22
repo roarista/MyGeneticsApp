@@ -116,6 +116,87 @@
       </div>
     </div>
 
+    <!-- Data Visualizations Section -->
+    <div class="mt-12 space-y-8">
+      <h2 class="text-2xl font-bold text-white text-center mb-8">Detailed Analysis & Metrics</h2>
+      
+      <!-- Charts Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        
+        <!-- Body Proportion Ratios -->
+        <div class="bg-gray-800 rounded-xl p-6 shadow-lg">
+          <h3 class="text-lg font-semibold text-white mb-4">Body Proportion Ratios</h3>
+          <canvas id="bodyProportionChart" class="w-full h-64"></canvas>
+        </div>
+
+        <!-- Muscle Dominance Chart -->
+        <div class="bg-gray-800 rounded-xl p-6 shadow-lg">
+          <h3 class="text-lg font-semibold text-white mb-4">Muscle Dominance</h3>
+          <canvas id="muscleDominanceChart" class="w-full h-64"></canvas>
+        </div>
+
+        <!-- Body Composition Estimation -->
+        <div class="bg-gray-800 rounded-xl p-6 shadow-lg">
+          <h3 class="text-lg font-semibold text-white mb-4">Body Composition</h3>
+          <canvas id="bodyCompositionChart" class="w-full h-64"></canvas>
+        </div>
+
+        <!-- Growth Potential by Muscle Group -->
+        <div class="bg-gray-800 rounded-xl p-6 shadow-lg">
+          <h3 class="text-lg font-semibold text-white mb-4">Growth Potential</h3>
+          <canvas id="growthPotentialChart" class="w-full h-64"></canvas>
+        </div>
+
+        <!-- Muscle Fiber Composition -->
+        <div class="bg-gray-800 rounded-xl p-6 shadow-lg">
+          <h3 class="text-lg font-semibold text-white mb-4">Muscle Fiber Type</h3>
+          <canvas id="fiberCompositionChart" class="w-full h-64"></canvas>
+        </div>
+
+        <!-- Recovery Profile -->
+        <div class="bg-gray-800 rounded-xl p-6 shadow-lg">
+          <h3 class="text-lg font-semibold text-white mb-4">Recovery Profile</h3>
+          <canvas id="recoveryProfileChart" class="w-full h-64"></canvas>
+        </div>
+      </div>
+
+      <!-- Body Type Spectrum -->
+      <div class="bg-gray-800 rounded-xl p-6 shadow-lg">
+        <h3 class="text-lg font-semibold text-white mb-4">Body Type Classification</h3>
+        <div class="relative">
+          <div class="flex justify-between text-sm text-gray-400 mb-2">
+            <span>Ectomorph</span>
+            <span>Mesomorph</span>
+            <span>Endomorph</span>
+          </div>
+          <div class="w-full bg-gray-700 rounded-full h-4 relative">
+            <div class="absolute inset-0 bg-gradient-to-r from-blue-500 via-green-500 to-red-500 rounded-full"></div>
+            <div class="absolute top-0 h-4 w-4 bg-white rounded-full border-2 border-gray-800 transform -translate-x-2" 
+                 style="left: {% if bodybuilding.body_type == 'Ectomorph' %}16%{% elif bodybuilding.body_type == 'Mesomorph' %}50%{% else %}84%{% endif %}"></div>
+          </div>
+          <div class="text-center mt-2">
+            <span class="inline-block bg-blue-500 text-white px-3 py-1 rounded-full text-sm">{{ bodybuilding.body_type }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Confidence Badges -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-gray-800 rounded-xl p-4 text-center">
+          <div class="text-2xl font-bold text-green-400 mb-1">{{ '%.0f'|format(bodybuilding.body_fat_confidence * 100) }}%</div>
+          <div class="text-gray-400 text-sm">Analysis Confidence</div>
+        </div>
+        <div class="bg-gray-800 rounded-xl p-4 text-center">
+          <div class="text-2xl font-bold text-blue-400 mb-1">{{ '%.1f'|format(bodybuilding.muscle_building_potential) }}</div>
+          <div class="text-gray-400 text-sm">Muscle Building Score</div>
+        </div>
+        <div class="bg-gray-800 rounded-xl p-4 text-center">
+          <div class="text-2xl font-bold text-purple-400 mb-1">{{ traits.metabolic_efficiency }}</div>
+          <div class="text-gray-400 text-sm">Metabolic Efficiency</div>
+        </div>
+      </div>
+    </div>
+
     <!-- Recommendations -->
     <div class="mt-12 space-y-6">
       <h2 class="text-2xl font-bold text-white text-center">Your Customized Fitness Plan</h2>
@@ -181,19 +262,16 @@
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-// Traits Chart
-const ctx = document.getElementById('traitsChart').getContext('2d');
-const traitsChart = new Chart(ctx, {
+// Chart.js global configuration
+Chart.defaults.color = '#d1d5db';
+Chart.defaults.borderColor = '#374151';
+
+// 1. Traits Chart (Radar)
+const traitsCtx = document.getElementById('traitsChart').getContext('2d');
+new Chart(traitsCtx, {
     type: 'radar',
     data: {
-        labels: [
-            'Muscle Building',
-            'Recovery Capacity', 
-            'Metabolic Efficiency',
-            'Body Composition',
-            'Frame Size',
-            'Muscle Insertions'
-        ],
+        labels: ['Muscle Building', 'Recovery Capacity', 'Metabolic Efficiency', 'Body Composition', 'Frame Size', 'Muscle Insertions'],
         datasets: [{
             label: 'Your Traits',
             data: [
@@ -201,43 +279,202 @@ const traitsChart = new Chart(ctx, {
                 {% if traits.recovery_capacity %}{{ traits.recovery_capacity }}{% else %}5{% endif %},
                 {% if traits.metabolic_efficiency %}{{ traits.metabolic_efficiency }}{% else %}5{% endif %},
                 {% if traits.body_fat_percentage %}{{ 10 - (traits.body_fat_percentage/5) }}{% else %}5{% endif %},
-                5, // Frame size placeholder
-                5  // Muscle insertions placeholder
+                5, 5
             ],
             backgroundColor: 'rgba(59, 130, 246, 0.2)',
             borderColor: 'rgb(59, 130, 246)',
-            borderWidth: 2,
-            pointBackgroundColor: 'rgb(59, 130, 246)',
-            pointBorderColor: '#fff',
-            pointHoverBackgroundColor: '#fff',
-            pointHoverBorderColor: 'rgb(59, 130, 246)'
+            borderWidth: 2
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            r: {
+                angleLines: { color: '#374151' },
+                grid: { color: '#374151' },
+                pointLabels: { color: '#d1d5db' },
+                ticks: { color: '#9ca3af', backdropColor: 'transparent' },
+                suggestedMin: 0,
+                suggestedMax: 10
+            }
+        }
+    }
+});
+
+// 2. Body Proportion Ratios (Horizontal Bar)
+const proportionCtx = document.getElementById('bodyProportionChart').getContext('2d');
+new Chart(proportionCtx, {
+    type: 'bar',
+    data: {
+        labels: ['Shoulder-to-Waist', 'Waist-to-Hip', 'Leg-to-Torso', 'Arm-to-Torso'],
+        datasets: [{
+            label: 'Ratio',
+            data: [
+                {% if measurements.shoulder_width and measurements.waist_circumference %}{{ measurements.shoulder_width / measurements.waist_circumference }}{% else %}1.4{% endif %},
+                {% if measurements.waist_circumference and measurements.thigh_circumference %}{{ measurements.waist_circumference / measurements.thigh_circumference }}{% else %}1.2{% endif %},
+                {% if measurements.thigh_circumference and measurements.chest_circumference %}{{ measurements.thigh_circumference / measurements.chest_circumference }}{% else %}0.8{% endif %},
+                {% if measurements.arm_circumference and measurements.chest_circumference %}{{ measurements.arm_circumference / measurements.chest_circumference }}{% else %}0.4{% endif %}
+            ],
+            backgroundColor: '#60A5FA',
+            borderColor: '#3B82F6',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+            x: { grid: { color: '#374151' }, ticks: { color: '#9ca3af' } },
+            y: { grid: { color: '#374151' }, ticks: { color: '#9ca3af' } }
+        }
+    }
+});
+
+// 3. Muscle Dominance Chart (Horizontal Bar)
+const dominanceCtx = document.getElementById('muscleDominanceChart').getContext('2d');
+new Chart(dominanceCtx, {
+    type: 'bar',
+    data: {
+        labels: ['Upper Body', 'Lower Body', 'Core', 'Posterior Chain'],
+        datasets: [{
+            label: 'Dominance Score',
+            data: [
+                {% if measurements.chest_circumference and measurements.arm_circumference %}{{ (measurements.chest_circumference + measurements.arm_circumference) / 20 }}{% else %}7{% endif %},
+                {% if measurements.thigh_circumference and measurements.calf_circumference %}{{ (measurements.thigh_circumference + measurements.calf_circumference) / 15 }}{% else %}6{% endif %},
+                {% if measurements.waist_circumference %}{{ 10 - (measurements.waist_circumference / 10) }}{% else %}5{% endif %},
+                {% if traits.recovery_capacity %}{{ traits.recovery_capacity * 0.8 }}{% else %}6{% endif %}
+            ],
+            backgroundColor: ['#EF4444', '#10B981', '#F59E0B', '#8B5CF6'],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+            x: { max: 10, grid: { color: '#374151' }, ticks: { color: '#9ca3af' } },
+            y: { grid: { color: '#374151' }, ticks: { color: '#9ca3af' } }
+        }
+    }
+});
+
+// 4. Body Composition (Doughnut)
+const compositionCtx = document.getElementById('bodyCompositionChart').getContext('2d');
+new Chart(compositionCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Body Fat', 'Lean Mass'],
+        datasets: [{
+            data: [
+                {% if bodybuilding.body_fat_percentage %}{{ bodybuilding.body_fat_percentage }}{% else %}15{% endif %},
+                {% if bodybuilding.body_fat_percentage %}{{ 100 - bodybuilding.body_fat_percentage }}{% else %}85{% endif %}
+            ],
+            backgroundColor: ['#EF4444', '#10B981'],
+            borderColor: '#1f2937',
+            borderWidth: 2
         }]
     },
     options: {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-            legend: {
-                labels: {
-                    color: '#d1d5db'
-                }
-            }
-        },
+            legend: { position: 'bottom', labels: { color: '#d1d5db', padding: 20 } }
+        }
+    }
+});
+
+// 5. Growth Potential by Muscle Group (Horizontal Bar)
+const growthCtx = document.getElementById('growthPotentialChart').getContext('2d');
+new Chart(growthCtx, {
+    type: 'bar',
+    data: {
+        labels: ['Chest', 'Back', 'Shoulders', 'Arms', 'Legs', 'Core'],
+        datasets: [{
+            label: 'Growth Potential',
+            data: [
+                {% if bodybuilding.muscle_building_potential %}{{ bodybuilding.muscle_building_potential * 0.12 }}{% else %}7{% endif %},
+                {% if bodybuilding.muscle_building_potential %}{{ bodybuilding.muscle_building_potential * 0.14 }}{% else %}8{% endif %},
+                {% if bodybuilding.muscle_building_potential %}{{ bodybuilding.muscle_building_potential * 0.10 }}{% else %}6{% endif %},
+                {% if bodybuilding.muscle_building_potential %}{{ bodybuilding.muscle_building_potential * 0.08 }}{% else %}5{% endif %},
+                {% if bodybuilding.muscle_building_potential %}{{ bodybuilding.muscle_building_potential * 0.16 }}{% else %}9{% endif %},
+                {% if bodybuilding.muscle_building_potential %}{{ bodybuilding.muscle_building_potential * 0.06 }}{% else %}4{% endif %}
+            ],
+            backgroundColor: '#8B5CF6',
+            borderColor: '#7C3AED',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+            x: { max: 10, grid: { color: '#374151' }, ticks: { color: '#9ca3af' } },
+            y: { grid: { color: '#374151' }, ticks: { color: '#9ca3af' } }
+        }
+    }
+});
+
+// 6. Muscle Fiber Composition (Doughnut)
+const fiberCtx = document.getElementById('fiberCompositionChart').getContext('2d');
+new Chart(fiberCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Fast-Twitch', 'Slow-Twitch'],
+        datasets: [{
+            data: [
+                {% if traits.fast_twitch_percentage %}{{ traits.fast_twitch_percentage }}{% else %}50{% endif %},
+                {% if traits.fast_twitch_percentage %}{{ 100 - traits.fast_twitch_percentage }}{% else %}50{% endif %}
+            ],
+            backgroundColor: ['#F59E0B', '#06B6D4'],
+            borderColor: '#1f2937',
+            borderWidth: 2
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { position: 'bottom', labels: { color: '#d1d5db', padding: 20 } }
+        }
+    }
+});
+
+// 7. Recovery Profile (Radar)
+const recoveryCtx = document.getElementById('recoveryProfileChart').getContext('2d');
+new Chart(recoveryCtx, {
+    type: 'radar',
+    data: {
+        labels: ['Sleep Quality', 'Stress Management', 'Nutrition Recovery', 'Active Recovery', 'Rest Days'],
+        datasets: [{
+            label: 'Recovery Score',
+            data: [
+                {% if traits.recovery_capacity %}{{ traits.recovery_capacity }}{% else %}7{% endif %},
+                {% if traits.metabolic_efficiency %}{{ traits.metabolic_efficiency }}{% else %}6{% endif %},
+                {% if traits.recovery_capacity %}{{ traits.recovery_capacity * 0.9 }}{% else %}6{% endif %},
+                {% if traits.recovery_capacity %}{{ traits.recovery_capacity * 1.1 }}{% else %}8{% endif %},
+                {% if traits.recovery_capacity %}{{ traits.recovery_capacity }}{% else %}7{% endif %}
+            ],
+            backgroundColor: 'rgba(16, 185, 129, 0.2)',
+            borderColor: 'rgb(16, 185, 129)',
+            borderWidth: 2
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
         scales: {
             r: {
-                angleLines: {
-                    color: '#374151'
-                },
-                grid: {
-                    color: '#374151'
-                },
-                pointLabels: {
-                    color: '#d1d5db'
-                },
-                ticks: {
-                    color: '#9ca3af',
-                    backdropColor: 'transparent'
-                },
+                angleLines: { color: '#374151' },
+                grid: { color: '#374151' },
+                pointLabels: { color: '#d1d5db' },
+                ticks: { color: '#9ca3af', backdropColor: 'transparent' },
                 suggestedMin: 0,
                 suggestedMax: 10
             }
