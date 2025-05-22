@@ -1,0 +1,133 @@
+{% extends "tailwind_layout.html" %}
+
+{% block title %}Your Genetic Analysis Results - Physique Genesis{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-900 py-12">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="text-center mb-12">
+      <h1 class="text-4xl font-bold text-white mb-2">Your Genetic Analysis Results</h1>
+      <p class="text-gray-400">Based on your uploaded photos and measurements</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <!-- Left Panel: Body Composition + Upload Preview -->
+      <div class="space-y-8">
+        <!-- Body Composition Card -->
+        <div class="bg-gray-800 rounded-xl shadow-lg p-6">
+          <h2 class="text-xl font-semibold text-white mb-4">Body Composition</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div class="text-center">
+              <div class="text-3xl font-bold text-white mb-1">
+                {% if bodybuilding.body_fat_percentage %}{{ '%.1f'|format(bodybuilding.body_fat_percentage) }}%{% else %}N/A{% endif %}
+              </div>
+              <div class="text-gray-400">Body Fat</div>
+            </div>
+            <div class="text-center">
+              <div class="text-3xl font-bold text-white mb-1">{{ bodybuilding.body_type or 'N/A' }}</div>
+              <div class="text-gray-400">Body Type</div>
+            </div>
+            <div class="text-center">
+              <div class="text-3xl font-bold text-white mb-1">
+                {% if bodybuilding.muscle_building_potential %}{{ '%.1f'|format(bodybuilding.muscle_building_potential) }}/10{% else %}N/A{% endif %}
+              </div>
+              <div class="text-gray-400">Muscle Potential</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Upload Preview -->
+        <div class="bg-gray-800 rounded-xl shadow-lg p-6">
+          <h2 class="text-xl font-semibold text-white mb-4">Your Upload</h2>
+          {% if is_dual_photo %}
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <p class="text-gray-200 text-center mb-2">Front View</p>
+                <img src="data:image/jpeg;base64,{{ front_image }}" alt="Front" class="w-full rounded-lg" />
+              </div>
+              <div>
+                <p class="text-gray-200 text-center mb-2">Back View</p>
+                <img src="data:image/jpeg;base64,{{ back_image }}" alt="Back" class="w-full rounded-lg" />
+              </div>
+            </div>
+          {% else %}
+            <img src="data:image/jpeg;base64,{{ image_data }}" alt="Upload" class="w-full rounded-lg object-cover" />
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Right Panel: Measurements & Traits -->
+      <div class="space-y-8">
+        <!-- Measurements Card -->
+        <div class="bg-gray-800 rounded-xl shadow-lg p-6">
+          <h2 class="text-xl font-semibold text-white mb-4">Key Measurements</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {% for key, value in measurements.items() %}
+            <div class="bg-gray-700 rounded-lg p-4 relative">
+              <div class="text-2xl font-bold text-white mb-1">
+                {{ value or 'N/A' }}
+              </div>
+              <div class="text-gray-400">{{ key.replace('_',' ').title() }}</div>
+              <div class="absolute top-4 right-4 text-gray-500">
+                <!-- icon mapping, e.g. shoulder icon -->
+                <i class="fas fa-ruler"></i>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Genetic Traits Card -->
+        <div class="bg-gray-800 rounded-xl shadow-lg p-6">
+          <h2 class="text-xl font-semibold text-white mb-4">Genetic Traits</h2>
+          <div class="space-y-4">
+            {% for trait, data in traits.items() %}
+            <div x-data="{open: false}" class="bg-gray-700 rounded-lg">
+              <button @click="open = !open" class="w-full flex justify-between items-center p-4">
+                <span class="text-white font-medium capitalize">{{ trait.replace('_',' ') }}</span>
+                <i :class="open ? 'transform rotate-180' : ''" class="fas fa-chevron-down text-gray-400"></i>
+              </button>
+              <div x-show="open" class="px-4 pb-4 text-gray-300">
+                <p>Value: {{ data.value or data.display_value }}</p>
+                <p>Rating: {{ data.rating }}</p>
+                {% if data.description %}<p class="mt-2">{{ data.description }}</p>{% endif %}
+              </div>
+            </div>
+            {% else %}
+            <p class="text-gray-400">No trait data available.</p>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recommendations Section -->
+    <div class="mt-12 space-y-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-gray-800 rounded-xl shadow-lg p-6">
+          <h3 class="text-lg font-semibold text-white mb-3">Genetic Strengths</h3>
+          <ul class="list-disc list-inside text-gray-300">
+            {% for s in recommendations.strengths %}<li>{{ s }}</li>{% endfor %}
+          </ul>
+        </div>
+        <div class="bg-gray-800 rounded-xl shadow-lg p-6">
+          <h3 class="text-lg font-semibold text-white mb-3">Areas to Focus On</h3>
+          <ul class="list-disc list-inside text-gray-300">
+            {% for f in recommendations.focus_areas %}<li>{{ f }}</li>{% endfor %}
+          </ul>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <a href="/workout/{{ analysis_id }}" class="block bg-blue-600 hover:bg-blue-500 text-white rounded-xl shadow-lg p-6 text-center font-semibold">
+          Get Your Workout Plan
+        </a>
+        <a href="/nutrition/{{ analysis_id }}" class="block bg-green-600 hover:bg-green-500 text-white rounded-xl shadow-lg p-6 text-center font-semibold">
+          View Nutrition Guidelines
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

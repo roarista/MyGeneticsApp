@@ -577,6 +577,47 @@ def logout():
 def nutrition():
     return render_template('nutrition.html')
 
+@app.route('/nutrition/<analysis_id>')
+def nutrition_with_analysis(analysis_id):
+    """Display nutrition plan for a specific analysis"""
+    # Get analysis data from session or database
+    analysis_data = session.get('analysis_results', {})
+    
+    # Generate personalized nutrition data based on analysis
+    if analysis_data:
+        # Calculate personalized macros based on user data
+        user_info = analysis_data.get('user_info', {})
+        maintenance_calories = analysis_data.get('maintenance_calories', {})
+        
+        # Determine goal-based calories (example: slight deficit for fat loss)
+        target_calories = maintenance_calories.get('moderate', 2200) - 300
+        
+        # Calculate macros (example: 1.8g protein per kg, 25% fat, rest carbs)
+        weight_kg = user_info.get('weight', 70)
+        protein_g = int(weight_kg * 1.8)
+        fat_g = int((target_calories * 0.25) / 9)
+        carb_g = int((target_calories - (protein_g * 4) - (fat_g * 9)) / 4)
+        
+        macros = {
+            'protein': protein_g,
+            'carbs': carb_g,
+            'fats': fat_g
+        }
+        
+        calories = {
+            'maintenance': maintenance_calories.get('moderate', 2200),
+            'target': target_calories
+        }
+    else:
+        # Default values if no analysis data
+        macros = None
+        calories = None
+    
+    return render_template('nutrition.html', 
+                         analysis_id=analysis_id,
+                         macros=macros,
+                         calories=calories)
+
 @app.route('/workout')
 def workout():
     return render_template('workout.html')
