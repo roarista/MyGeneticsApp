@@ -1,0 +1,148 @@
+{% extends "tailwind_layout.html" %}
+
+{% block title %}Body Analysis Results - Physique Genesis{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-dark-900 py-12">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="text-center mb-12">
+      <h1 class="text-4xl font-bold text-white mb-4 flex items-center justify-center gap-2">
+        <svg class="w-8 h-8 text-primary-400" fill="currentColor" viewBox="0 0 20 20"><path d="M2 5a2 2 0 012-2h3.586A2 2 0 019 2.586L10.414 4H16a2 2 0 012 2v3.586a2 2 0 01-.586 1.414L16 12.414V16a2 2 0 01-2 2h-3.586a2 2 0 01-1.414-.586L8 16.414 6.586 18H4a2 2 0 01-2-2V5z"/></svg>
+        Body Analysis Results
+      </h1>
+      <p class="text-gray-400">These results identify your genetic traits to help optimize your training. Genetics are one factor—consistency and form matter too!</p>
+    </div>
+
+    <div class="grid gap-8 lg:grid-cols-2">
+      <!-- Left Panel: Image & Summary -->
+      <div class="space-y-6">
+        <div class="bg-dark-800 rounded-xl shadow-lg overflow-hidden">
+          <img src="data:image/jpeg;base64,{{ image_data }}" alt="Body Analysis" class="w-full object-cover" style="max-height:400px;">
+          <div class="p-6">
+            <div class="flex flex-col items-center space-y-2">
+              <span class="inline-block bg-primary-500 text-white px-4 py-1 rounded-full text-lg font-semibold">Body Type: {{ traits.body_type }}</span>
+              <p class="text-gray-300 text-center mt-2">{{ traits.description }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Key Info -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="bg-dark-800 rounded-xl p-6 shadow">
+            <h3 class="text-xl font-semibold text-white mb-4">Your Info</h3>
+            <ul class="space-y-3 text-gray-300">
+              {% if user_info.height %}<li><strong>Height:</strong> {{ user_info.height }} cm</li>{% endif %}
+              {% if user_info.weight %}<li><strong>Weight:</strong> {{ user_info.weight }} kg</li>{% endif %}
+              <li><strong>Experience:</strong> {{ user_info.experience|capitalize }}</li>
+            </ul>
+          </div>
+
+          <div class="bg-dark-800 rounded-xl p-6 shadow">
+            <h3 class="text-xl font-semibold text-white mb-4">Upload Type</h3>
+            <p class="text-gray-300">{% if is_dual_photo %}Dual-Photo Analysis{% elif is_3d_scan %}3D Scan Analysis{% else %}Single Photo Analysis{% endif %}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Panel: Traits & Metrics -->
+      <div class="space-y-6">
+        <!-- Genetic Traits Chart Area Placeholder -->
+        <div class="bg-dark-800 rounded-xl p-6 shadow">
+          <h3 class="text-xl font-semibold text-white mb-4">Genetic Structural Traits</h3>
+          <canvas id="traitsChart" class="w-full h-64"></canvas>
+        </div>
+
+        <!-- Structural & Composition Tables -->
+        <div class="bg-dark-800 rounded-xl p-6 shadow space-y-6">
+          <!-- Structure -->
+          <div>
+            <h4 class="text-lg font-semibold text-white mb-3">Structure Metrics</h4>
+            <table class="w-full text-left text-gray-300">
+              <thead><tr><th class="pb-2">Trait</th><th class="pb-2">Value</th><th class="pb-2">Rating</th></tr></thead>
+              <tbody class="divide-y divide-gray-700">
+                {% for trait, data in traits.items() %}
+                  {% if data.mapping %}
+                  <tr>
+                    <td class="py-2">{{ trait.replace('_',' ').title() }}</td>
+                    <td class="py-2">{{ data.display_value or data.value }}</td>
+                    <td class="py-2">
+                      <span class="px-2 py-1 rounded-full text-sm 
+                        {% if data.rating=='excellent' %}bg-green-600 text-white
+                        {% elif data.rating=='good' %}bg-blue-600 text-white
+                        {% elif data.rating=='average' %}bg-yellow-600 text-white
+                        {% else %}bg-red-600 text-white{% endif %}"> {{ data.rating.title() }} </span>
+                    </td>
+                  </tr>
+                  {% endif %}
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Composition -->
+          {% if traits.body_fat_percentage or traits.bmi %}
+          <div>
+            <h4 class="text-lg font-semibold text-white mb-3">Body Composition</h4>
+            <table class="w-full text-left text-gray-300">
+              <thead><tr><th class="pb-2">Metric</th><th class="pb-2">Value</th><th class="pb-2">Rating</th></tr></thead>
+              <tbody class="divide-y divide-gray-700">
+                {% if traits.bmi %}
+                <tr><td>BMI</td><td>{{ traits.bmi.display_value }}</td><td><!-- similar badges --></td></tr>
+                {% endif %}
+                {% if traits.body_fat_percentage %}
+                <tr><td>Body Fat %</td><td>{{ traits.body_fat_percentage.display_value }}</td><td></td></tr>
+                {% endif %}
+                {% if traits.lean_body_mass %}
+                <tr><td>Lean Body Mass</td><td>{{ traits.lean_body_mass.display_value }}</td><td><span class="badge bg-gray-600">Info</span></td></tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Recommendations -->
+    <div class="mt-12 space-y-6">
+      <h2 class="text-2xl font-bold text-white text-center">Your Customized Fitness Plan</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Strengths -->
+        <div class="bg-dark-800 rounded-xl p-6 shadow">
+          <h4 class="text-lg font-semibold text-green-400 mb-3">Genetic Strengths</h4>
+          <ul class="list-disc list-inside text-gray-300 space-y-2">
+            {% for s in recommendations.strengths %}<li>{{ s }}</li>{% endfor %}
+          </ul>
+        </div>
+        <!-- Focus Areas -->
+        <div class="bg-dark-800 rounded-xl p-6 shadow">
+          <h4 class="text-lg font-semibold text-yellow-400 mb-3">Areas to Focus</h4>
+          <ul class="list-disc list-inside text-gray-300 space-y-2">
+            {% for f in recommendations.focus_areas %}<li>{{ f }}</li>{% endfor %}
+          </ul>
+        </div>
+        <!-- Training -->
+        <div class="bg-dark-800 rounded-xl p-6 shadow">
+          <h4 class="text-lg font-semibold text-blue-400 mb-3">Recommended Training</h4>
+          <ul class="list-disc list-inside text-gray-300 space-y-2">
+            {% for ex in recommendations.exercise_recommendations %}<li>{{ ex }}</li>{% endfor %}
+          </ul>
+        </div>
+        <!-- Nutrition -->
+        <div class="bg-dark-800 rounded-xl p-6 shadow">
+          <h4 class="text-lg font-semibold text-red-400 mb-3">Nutrition Tips</h4>
+          <ul class="list-disc list-inside text-gray-300 space-y-2">
+            {% for tip in recommendations.nutrition_tips %}<li>{{ tip }}</li>{% endfor %}
+          </ul>
+        </div>
+      </div>
+
+      <div class="flex justify-center mt-8 space-x-4">
+        <a href="/workout/{{ analysis_id }}" class="px-6 py-3 bg-primary-500 text-white rounded-lg shadow hover:bg-primary-600">Get Workout Plan</a>
+        <a href="/nutrition/{{ analysis_id }}" class="px-6 py-3 bg-secondary-500 text-white rounded-lg shadow hover:bg-secondary-600">Nutrition Guide</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
