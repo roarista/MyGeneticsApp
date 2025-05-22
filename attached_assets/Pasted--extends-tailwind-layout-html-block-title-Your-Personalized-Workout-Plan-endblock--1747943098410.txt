@@ -1,0 +1,235 @@
+{% extends "tailwind_layout.html" %}
+
+{% block title %}Your Personalized Workout Plan{% endblock %}
+
+{% block head %}
+<style>
+  /* Custom styles for workout page */
+  .push-badge {
+    background: linear-gradient(45deg, #ff5858, #ee2c2c);
+  }
+  
+  .pull-badge {
+    background: linear-gradient(45deg, #3a7bd5, #3d9df8);
+  }
+  
+  .legs-badge {
+    background: linear-gradient(45deg, #9d50bb, #6e48aa);
+  }
+  
+  .rest-badge {
+    background: linear-gradient(45deg, #52c234, #061700);
+  }
+
+  .core-badge {
+    background: linear-gradient(45deg, #4b6cb7, #182848);
+  }
+  
+  .workout-card {
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .workout-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+  }
+  
+  .workout-day {
+    border-left: 4px solid transparent;
+    transition: all 0.3s ease;
+  }
+  
+  /* Priority exercise highlight */
+  .priority-exercise {
+    border-left: 4px solid #ff5000;
+    position: relative;
+  }
+  
+  .priority-exercise::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(255, 80, 0, 0.1) 0%, rgba(0, 0, 0, 0) 100%);
+    pointer-events: none;
+  }
+  
+  /* Development status indicators */
+  .status-needs-growth {
+    background-color: #991b1b;
+    color: #fecaca;
+  }
+  
+  .status-developed {
+    background-color: #166534;
+    color: #bbf7d0;
+  }
+  
+  .status-normal {
+    background-color: #854d0e;
+    color: #fef3c7;
+  }
+  
+  .status-badge {
+    font-size: 0.7rem;
+    padding: 0.1rem 0.5rem;
+    border-radius: 9999px;
+  }
+  
+  /* Loading animation for workouts */
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .animate-spin {
+    animation: spin 1s linear infinite;
+  }
+  }
+  
+  .workout-day.push {
+    border-left-color: #ee2c2c;
+  }
+  
+  .workout-day.pull {
+    border-left-color: #3d9df8;
+  }
+  
+  .workout-day.legs {
+    border-left-color: #9d50bb;
+  }
+  
+  .workout-day.rest {
+    border-left-color: #52c234;
+  }
+  
+  .exercise-card {
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .exercise-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  }
+  
+  .set-rep-badge {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 2px 8px;
+    font-size: 0.85rem;
+  }
+  
+  .progress-bar {
+    height: 8px;
+    border-radius: 4px;
+    margin: 8px 0;
+    background: rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+  }
+  
+  .progress-fill {
+    height: 100%;
+    border-radius: 4px;
+  }
+  
+  .sidebar {
+    position: sticky;
+    top: 2rem;
+  }
+  
+  .tip-card {
+    transition: all 0.3s ease;
+  }
+  
+  .tip-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  }
+  
+  .day-button {
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .day-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  }
+  
+  .day-button.active {
+    border-color: rgba(99, 102, 241, 0.8);
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+  }
+  
+  .day-button.push-day:hover, .day-button.push-day.active {
+    border-color: rgba(238, 44, 44, 0.8);
+    box-shadow: 0 0 15px rgba(238, 44, 44, 0.4);
+  }
+  
+  .day-button.pull-day:hover, .day-button.pull-day.active {
+    border-color: rgba(61, 157, 248, 0.8);
+    box-shadow: 0 0 15px rgba(61, 157, 248, 0.4);
+  }
+  
+  .day-button.legs-day:hover, .day-button.legs-day.active {
+    border-color: rgba(157, 80, 187, 0.8);
+    box-shadow: 0 0 15px rgba(157, 80, 187, 0.4);
+  }
+  
+  .day-button.rest-day:hover, .day-button.rest-day.active {
+    border-color: rgba(82, 194, 52, 0.8);
+    box-shadow: 0 0 15px rgba(82, 194, 52, 0.4);
+  }
+  
+  .priority-exercise {
+    border-left: 4px solid #ffd700;
+  }
+  
+  .status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-left: 0.5rem;
+  }
+  
+  .status-needs-growth {
+    background-color: rgba(239, 68, 68, 0.2);
+    color: rgb(239, 68, 68);
+  }
+  
+  .status-developed {
+    background-color: rgba(34, 197, 94, 0.2);
+    color: rgb(34, 197, 94);
+  }
+  
+  .status-normal {
+    background-color: rgba(234, 179, 8, 0.2);
+    color: rgb(234, 179, 8);
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Get the analysis ID from the page
+    const analysisId = "{{ analysis_id }}";
+    
+    // Initialize the workout display area
+    const selectedWorkoutDisplay = document.getElementById('selected-workout-display');
+    
+    // Function to fetch and display workout for a specific day
+    async function fetchWorkout(day) {
+      try {
+        // Show loading state
+        selectedWorkoutDisplay.innerHTML = `
+          <div class=

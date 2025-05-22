@@ -581,6 +581,103 @@ def nutrition():
 def workout():
     return render_template('workout.html')
 
+@app.route('/workout/<analysis_id>')
+def workout_with_analysis(analysis_id):
+    """Display workout plan for a specific analysis"""
+    return render_template('workout.html', analysis_id=analysis_id)
+
+@app.route('/api/workout/<analysis_id>/<day>')
+def api_workout_day(analysis_id, day):
+    """API endpoint to get workout data for a specific day"""
+    try:
+        # Define workout plans for each day
+        workout_plans = {
+            'Monday': {
+                'type': 'Push',
+                'exercises': [
+                    {'name': 'Bench Press', 'focus': 'Chest, Triceps, Shoulders', 'sets': '3', 'reps': '8-10', 'rest': '90s'},
+                    {'name': 'Overhead Press', 'focus': 'Shoulders, Triceps', 'sets': '3', 'reps': '8-10', 'rest': '90s'},
+                    {'name': 'Incline Dumbbell Press', 'focus': 'Upper Chest, Shoulders', 'sets': '3', 'reps': '10-12', 'rest': '60s'},
+                    {'name': 'Dips', 'focus': 'Triceps, Lower Chest', 'sets': '3', 'reps': '8-12', 'rest': '60s'},
+                    {'name': 'Lateral Raises', 'focus': 'Side Delts', 'sets': '3', 'reps': '12-15', 'rest': '45s'},
+                    {'name': 'Tricep Pushdowns', 'focus': 'Triceps', 'sets': '3', 'reps': '10-12', 'rest': '45s'}
+                ]
+            },
+            'Tuesday': {
+                'type': 'Pull',
+                'exercises': [
+                    {'name': 'Pull-ups', 'focus': 'Lats, Biceps, Rear Delts', 'sets': '3', 'reps': '6-10', 'rest': '90s'},
+                    {'name': 'Barbell Rows', 'focus': 'Mid Traps, Rhomboids, Lats', 'sets': '3', 'reps': '8-10', 'rest': '90s'},
+                    {'name': 'Lat Pulldowns', 'focus': 'Lats, Biceps', 'sets': '3', 'reps': '10-12', 'rest': '60s'},
+                    {'name': 'Cable Rows', 'focus': 'Mid Traps, Rhomboids', 'sets': '3', 'reps': '10-12', 'rest': '60s'},
+                    {'name': 'Face Pulls', 'focus': 'Rear Delts, Mid Traps', 'sets': '3', 'reps': '12-15', 'rest': '45s'},
+                    {'name': 'Bicep Curls', 'focus': 'Biceps', 'sets': '3', 'reps': '10-12', 'rest': '45s'}
+                ]
+            },
+            'Wednesday': {
+                'type': 'Legs',
+                'exercises': [
+                    {'name': 'Squats', 'focus': 'Quads, Glutes, Core', 'sets': '3', 'reps': '8-10', 'rest': '2min'},
+                    {'name': 'Romanian Deadlifts', 'focus': 'Hamstrings, Glutes', 'sets': '3', 'reps': '8-10', 'rest': '90s'},
+                    {'name': 'Bulgarian Split Squats', 'focus': 'Quads, Glutes', 'sets': '3', 'reps': '10-12 each', 'rest': '60s'},
+                    {'name': 'Leg Curls', 'focus': 'Hamstrings', 'sets': '3', 'reps': '10-12', 'rest': '60s'},
+                    {'name': 'Calf Raises', 'focus': 'Calves', 'sets': '4', 'reps': '15-20', 'rest': '45s'},
+                    {'name': 'Plank', 'focus': 'Core', 'sets': '3', 'reps': '30-60s', 'rest': '45s'}
+                ]
+            },
+            'Thursday': {
+                'type': 'Rest',
+                'exercises': [
+                    {'name': 'Light Walking', 'focus': 'Active Recovery', 'sets': '1', 'reps': '20-30 min', 'rest': 'N/A'},
+                    {'name': 'Stretching', 'focus': 'Flexibility', 'sets': '1', 'reps': '15-20 min', 'rest': 'N/A'},
+                    {'name': 'Foam Rolling', 'focus': 'Recovery', 'sets': '1', 'reps': '10-15 min', 'rest': 'N/A'}
+                ]
+            },
+            'Friday': {
+                'type': 'Push',
+                'exercises': [
+                    {'name': 'Incline Barbell Press', 'focus': 'Upper Chest, Shoulders', 'sets': '3', 'reps': '8-10', 'rest': '90s'},
+                    {'name': 'Dumbbell Shoulder Press', 'focus': 'Shoulders, Triceps', 'sets': '3', 'reps': '8-10', 'rest': '90s'},
+                    {'name': 'Decline Dumbbell Press', 'focus': 'Lower Chest', 'sets': '3', 'reps': '10-12', 'rest': '60s'},
+                    {'name': 'Close-Grip Bench Press', 'focus': 'Triceps, Chest', 'sets': '3', 'reps': '8-10', 'rest': '90s'},
+                    {'name': 'Arnold Press', 'focus': 'Shoulders', 'sets': '3', 'reps': '10-12', 'rest': '60s'},
+                    {'name': 'Overhead Tricep Extension', 'focus': 'Triceps', 'sets': '3', 'reps': '10-12', 'rest': '45s'}
+                ]
+            },
+            'Saturday': {
+                'type': 'Pull',
+                'exercises': [
+                    {'name': 'Deadlifts', 'focus': 'Posterior Chain, Traps', 'sets': '3', 'reps': '5-8', 'rest': '2min'},
+                    {'name': 'Wide-Grip Pulldowns', 'focus': 'Lats, Rear Delts', 'sets': '3', 'reps': '8-10', 'rest': '90s'},
+                    {'name': 'T-Bar Rows', 'focus': 'Mid Traps, Lats', 'sets': '3', 'reps': '10-12', 'rest': '60s'},
+                    {'name': 'Reverse Flyes', 'focus': 'Rear Delts', 'sets': '3', 'reps': '12-15', 'rest': '45s'},
+                    {'name': 'Hammer Curls', 'focus': 'Biceps, Forearms', 'sets': '3', 'reps': '10-12', 'rest': '45s'},
+                    {'name': 'Shrugs', 'focus': 'Upper Traps', 'sets': '3', 'reps': '12-15', 'rest': '45s'}
+                ]
+            },
+            'Sunday': {
+                'type': 'Legs',
+                'exercises': [
+                    {'name': 'Front Squats', 'focus': 'Quads, Core', 'sets': '3', 'reps': '8-10', 'rest': '90s'},
+                    {'name': 'Stiff Leg Deadlifts', 'focus': 'Hamstrings, Glutes', 'sets': '3', 'reps': '10-12', 'rest': '90s'},
+                    {'name': 'Walking Lunges', 'focus': 'Quads, Glutes', 'sets': '3', 'reps': '12-15 each', 'rest': '60s'},
+                    {'name': 'Leg Extensions', 'focus': 'Quads', 'sets': '3', 'reps': '12-15', 'rest': '45s'},
+                    {'name': 'Seated Calf Raises', 'focus': 'Calves', 'sets': '4', 'reps': '15-20', 'rest': '45s'},
+                    {'name': 'Russian Twists', 'focus': 'Core', 'sets': '3', 'reps': '20-30', 'rest': '45s'}
+                ]
+            }
+        }
+        
+        workout_data = workout_plans.get(day)
+        if not workout_data:
+            return jsonify({'error': f'No workout found for {day}'}), 404
+            
+        return jsonify(workout_data)
+        
+    except Exception as e:
+        logger.error(f"Error fetching workout for {day}: {str(e)}")
+        return jsonify({'error': 'Failed to load workout data'}), 500
+
 # Import admin_bp and register it after db is initialized
 from admin import admin_bp
 app.register_blueprint(admin_bp)

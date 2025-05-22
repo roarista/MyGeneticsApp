@@ -1,0 +1,216 @@
+{% extends "tailwind_layout.html" %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/workout-tabs.css') }}">
+<style>
+    /* Custom classes for workout visibility */
+    .workout-hidden {
+        display: none !important;
+    }
+    .workout-visible {
+        display: block !important;
+    }
+    /* Day button styling */
+    .day-tab.active {
+        background: linear-gradient(to right, #ff5858, #ee2c2c);
+        color: white;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    /* Override the default display none for better control */
+    .day-content {
+        display: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <div class="fitness-card bg-gray-800/80 backdrop-blur-sm p-6 rounded-xl border border-gray-700 shadow-lg" data-aos="fade-up">
+        <div class="flex items-center gap-4 mb-5">
+            <svg class="icon text-red-500 h-8 w-8">
+                <use xlink:href="#icon-dumbbell"></use>
+            </svg>
+            <h1 class="text-3xl font-bold text-white bg-gradient-to-r from-red-500 to-pink-500 bg-clip-text text-transparent">Personalized Workout Plan</h1>
+        </div>
+        
+        <div class="bg-gray-700/60 p-5 rounded-lg border border-gray-600 shadow-md mt-4">
+            <div class="flex items-start gap-3">
+                <svg class="icon text-red-400 flex-shrink-0 mt-1">
+                    <use xlink:href="#icon-info"></use>
+                </svg>
+                <p class="text-gray-200">
+                    This workout plan is customized based on your body structure, weak points, and genetic traits.
+                    Follow this program consistently while pairing it with your nutrition plan for optimal results.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+    <div class="md:col-span-5">
+        <!-- User Information -->
+        <div class="fitness-card bg-gray-800/80 backdrop-blur-sm p-6 rounded-xl border border-gray-700 shadow-lg mb-6" data-aos="fade-up" data-aos-delay="100">
+            <div class="flex items-center gap-3 mb-5">
+                <svg class="icon text-red-500">
+                    <use xlink:href="#icon-user"></use>
+                </svg>
+                <h3 class="text-xl font-bold text-white">Your Profile</h3>
+            </div>
+            
+            <div class="bg-gray-700/60 p-4 rounded-lg border border-gray-600 shadow-md mb-5">
+                <p class="text-gray-300">
+                    Your training plan has been personalized based on the body metrics and goals you provided. 
+                    This profile information helps us target your specific needs for optimal results.
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 w-full mt-4">
+                <div class="bg-gray-700/80 backdrop-blur-sm p-4 rounded-xl border border-gray-600 shadow-lg">
+                    <div class="flex items-center gap-2 mb-3">
+                        <svg class="icon icon-sm text-blue-400">
+                            <use xlink:href="#icon-clipboard"></use>
+                        </svg>
+                        <h4 class="font-bold text-blue-400">Training Info</h4>
+                    </div>
+                    <ul class="text-gray-200 space-y-3">
+                        <li class="flex justify-between items-center border-b border-gray-600 pb-2">
+                            <span>Experience</span>
+                            <span class="font-medium capitalize bg-blue-900/40 px-3 py-1 rounded-lg">{{ user_info.experience }}</span>
+                        </li>
+                        <li class="flex justify-between items-center border-b border-gray-600 pb-2">
+                            <span>Training Split</span>
+                            <span class="font-medium bg-blue-900/40 px-3 py-1 rounded-lg">Push/Pull/Legs</span>
+                        </li>
+                        <li class="flex justify-between items-center pt-1">
+                            <span>Body Type</span>
+                            <span class="font-medium bg-blue-900/40 px-3 py-1 rounded-lg">{{ traits.body_type.value }}</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="bg-gray-700/80 backdrop-blur-sm p-4 rounded-xl border border-gray-600 shadow-lg">
+                    <div class="flex items-center gap-2 mb-3">
+                        <svg class="icon icon-sm text-red-400">
+                            <use xlink:href="#icon-target"></use>
+                        </svg>
+                        <h4 class="font-bold text-red-400">Body Metrics</h4>
+                    </div>
+                    <ul class="text-gray-200 space-y-3">
+                        {% if traits.body_fat_percentage.value is defined %}
+                        <li class="flex justify-between items-center border-b border-gray-600 pb-2">
+                            <span>Body Fat %</span>
+                            <span class="font-medium bg-red-900/40 px-3 py-1 rounded-lg">{{ format_value('body_fat_percentage', traits.body_fat_percentage.value) }}%</span>
+                        </li>
+                        {% endif %}
+                        {% if traits.muscle_building_potential.value is defined %}
+                        <li class="flex justify-between items-center border-b border-gray-600 pb-2">
+                            <span>Muscle Potential</span>
+                            <span class="font-medium bg-red-900/40 px-3 py-1 rounded-lg">{{ format_value('muscle_building_potential', traits.muscle_building_potential.value) }}</span>
+                        </li>
+                        {% endif %}
+                        <li class="flex justify-between items-center pt-1">
+                            <span>Training Focus</span>
+                            <span class="font-medium bg-red-900/40 px-3 py-1 rounded-lg">Weak Point Targeting</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Weak Points Section -->
+        <div class="fitness-card bg-gray-800/80 backdrop-blur-sm p-6 rounded-xl border border-gray-700 shadow-lg" data-aos="fade-up" data-aos-delay="200">
+            <div class="flex items-center gap-3 mb-5">
+                <svg class="icon text-red-500">
+                    <use xlink:href="#icon-alert-triangle"></use>
+                </svg>
+                <h3 class="text-xl font-bold text-white">Areas to Prioritize</h3>
+            </div>
+            {% if weak_points|length > 0 %}
+            <ul class="space-y-4 mt-3">
+                {% for wp in weak_points %}
+                <li class="bg-gray-700/60 p-4 rounded-lg border border-gray-600 hover:bg-gray-700/80 transition-colors duration-300 shadow-md">
+                    <div class="flex items-start gap-3">
+                        <svg class="icon icon-sm text-red-400 mt-1 flex-shrink-0">
+                            <use xlink:href="#icon-target"></use>
+                        </svg>
+                        <div>
+                            <span class="font-medium text-red-400 text-lg">{{ wp.name }}</span>
+                            <div class="mt-2 w-full bg-gray-800 rounded-full h-2.5">
+                                <div class="bg-gradient-to-r from-red-600 to-red-400 h-2.5 rounded-full" style="width: {{ wp.intensity }}%"></div>
+                            </div>
+                            <p class="text-gray-300 mt-2">This area shows potential for improvement. Specialized exercises will target this weak point.</p>
+                        </div>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <div class="bg-gray-700/60 p-4 rounded-lg text-center text-gray-300">No significant weak points detected. Balanced development is recommended.</div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="md:col-span-7">
+        <!-- Main Title -->
+        <div class="text-center mb-4" data-aos="fade-up">
+            <h1 class="text-4xl font-bold text-white">Your Personalized Workout Plan</h1>
+            <p class="text-gray-400">Designed based on your body analysis and genetic potential</p>
+        </div>
+        
+        <!-- Day selector buttons -->
+        <div class="card mb-4 p-6" data-aos="fade-up" data-aos-delay="200">
+            <h4 class="card-title mb-3">Select Your Workout</h4>
+            <p class="text-gray-400 mb-4">Click on a day to view the specific workout routine</p>
+            <div class="workout-selector flex flex-wrap gap-3">
+                {% for day, w in workout_plan.items() %}
+                <button class="day-tab w-20 p-3 rounded-lg bg-gray-700 text-white {% if loop.first %}active{% endif %}" onclick="showWorkout('{{ day }}')">
+                    <div class="font-bold">{{ day }}</div>
+                    <div class="text-sm capitalize">{{ w.category }}</div>
+                </button>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Training Tips -->
+        <div class="card mb-4 p-6" data-aos="fade-up" data-aos-delay="300">
+            <h4 class="card-title mb-4">Training Tips</h4>
+            <div class="space-y-3 text-gray-300">
+                {% for tip in training_tips %}<p>• {{ tip }}</p>{% endfor %}
+            </div>
+        </div>
+
+        <!-- Workout Content -->
+        <div id="workout-container" class="space-y-6">
+            {% for day, w in workout_plan.items() %}
+            <div id="workout-{{ day }}" class="day-content {% if loop.first %}workout-visible{% else %}workout-hidden{% endif %}" data-aos="fade-up" data-aos-delay="400">
+                <h3 class="text-2xl font-semibold text-white mb-3">{{ day }}: {{ w.category|capitalize }}</h3>
+                <p class="text-gray-400 mb-4">{{ w.focus }}</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% for ex in w.exercises %}
+                    <div class="exercise-card bg-gray-800 p-4 rounded-lg">
+                        <h5 class="text-white font-medium mb-1">{{ ex.name }}</h5>
+                        <p class="text-gray-500 text-sm mb-2">{{ ex.muscle }}</p>
+                        <div class="flex gap-3 flex-wrap text-gray-300 text-sm">
+                            <span>Sets: {{ ex.sets }}</span>
+                            <span>Reps: {{ ex.reps }}</span>
+                            <span>Rest: {{ ex.rest }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+  function showWorkout(day) {
+    document.querySelectorAll('.day-content').forEach(el => el.classList.add('workout-hidden'));
+    document.getElementById('workout-'+day).classList.replace('workout-hidden','workout-visible');
+    document.querySelectorAll('.day-tab').forEach(btn => btn.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+  }
+</script>
+{% endblock %}

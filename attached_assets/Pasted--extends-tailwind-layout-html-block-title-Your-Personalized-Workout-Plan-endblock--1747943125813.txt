@@ -1,0 +1,213 @@
+{% extends "tailwind_layout.html" %}
+
+{% block title %}Your Personalized Workout Plan{% endblock %}
+
+{% block head %}
+<style>
+  /* Custom styles for workout page */
+  .push-badge {
+    background: linear-gradient(45deg, #ff5858, #ee2c2c);
+  }
+  
+  .pull-badge {
+    background: linear-gradient(45deg, #3a7bd5, #3d9df8);
+  }
+  
+  .legs-badge {
+    background: linear-gradient(45deg, #9d50bb, #6e48aa);
+  }
+  
+  .rest-badge {
+    background: linear-gradient(45deg, #52c234, #061700);
+  }
+
+  .core-badge {
+    background: linear-gradient(45deg, #4b6cb7, #182848);
+  }
+  
+  .workout-card {
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .workout-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+  }
+  
+  .workout-day {
+    border-left: 4px solid transparent;
+    transition: all 0.3s ease;
+  }
+  
+  .workout-day.push {
+    border-left-color: #ee2c2c;
+  }
+  
+  .workout-day.pull {
+    border-left-color: #3d9df8;
+  }
+  
+  .exercise-card {
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .exercise-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  }
+  
+  .set-rep-badge {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 2px 8px;
+    font-size: 0.85rem;
+  }
+  
+  .progress-bar {
+    height: 8px;
+    border-radius: 4px;
+    margin: 8px 0;
+    background: rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+  }
+  
+  .progress-fill {
+    height: 100%;
+    border-radius: 4px;
+  }
+  
+  .sidebar {
+    position: sticky;
+    top: 2rem;
+  }
+  
+  .tip-card {
+    transition: all 0.3s ease;
+  }
+  
+  .tip-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  }
+  
+  .day-button {
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .day-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  }
+  
+  .day-button.active {
+    border-color: rgba(99, 102, 241, 0.8);
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+  }
+  
+  .day-button.push-day:hover, .day-button.push-day.active {
+    border-color: rgba(238, 44, 44, 0.8);
+    box-shadow: 0 0 15px rgba(238, 44, 44, 0.4);
+  }
+  
+  .day-button.pull-day:hover, .day-button.pull-day.active {
+    border-color: rgba(61, 157, 248, 0.8);
+    box-shadow: 0 0 15px rgba(61, 157, 248, 0.4);
+  }
+  
+  .day-button.legs-day:hover, .day-button.legs-day.active {
+    border-color: rgba(157, 80, 187, 0.8);
+    box-shadow: 0 0 15px rgba(157, 80, 187, 0.4);
+  }
+  
+  .day-button.rest-day:hover, .day-button.rest-day.active {
+    border-color: rgba(82, 194, 52, 0.8);
+    box-shadow: 0 0 15px rgba(82, 194, 52, 0.4);
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Get the analysis ID from the page
+    const analysisId = "{{ analysis_id }}";
+    const selectedWorkoutDisplay = document.getElementById('selected-workout-display');
+    
+    async function fetchWorkout(day) {
+      try {
+        selectedWorkoutDisplay.innerHTML = `
+          <div class="bg-gray-800 rounded-xl p-6 shadow-lg" data-aos="fade-up">
+            <div class="flex items-center justify-center p-8">
+              <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+              <span class="ml-3 text-white">Loading workout for ${day}...</span>
+            </div>
+          </div>
+        `;
+        const response = await fetch(`/api/workout/${analysisId}/${day}`);
+        if (!response.ok) throw new Error(response.statusText);
+        const { exercises, type } = await response.json();
+        if (!exercises.length) {
+          selectedWorkoutDisplay.innerHTML = `<div class="bg-gray-800 rounded-xl p-6 shadow-lg" data-aos="fade-up"><p class="text-gray-400 text-center py-8">No workout available for ${day}.</p></div>`;
+          return;
+        }
+        let html = `
+          <div class="bg-gray-800 rounded-xl p-6 shadow-lg" data-aos="fade-up">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
+              <div><h3 class="text-2xl font-bold text-white">${day}</h3><p class="text-gray-300">${type} Day</p></div>
+              <span class="mt-2 sm:mt-0 px-4 py-1 rounded-full text-sm font-medium ${type==='Push'?'push-badge':type==='Pull'?'pull-badge':type==='Legs'?'legs-badge':'rest-badge'}">${type}</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        `;
+        exercises.forEach(ex => {
+          html += `
+            <div class="exercise-card bg-gray-900 rounded-lg p-4">
+              <h4 class="text-lg font-semibold text-white mb-1">${ex.name}</h4>
+              <p class="text-gray-400 text-sm mb-2">${ex.focus}</p>
+              <div class="flex flex-wrap gap-2">
+                <span class="set-rep-badge">Sets: ${ex.sets}</span>
+                <span class="set-rep-badge">Reps: ${ex.reps}</span>
+                <span class="set-rep-badge">Rest: ${ex.rest}</span>
+              </div>
+            </div>
+          `;
+        });
+        html += `</div></div>`;
+        selectedWorkoutDisplay.innerHTML = html;
+      } catch(error) {
+        selectedWorkoutDisplay.innerHTML = `<div class="bg-gray-800 rounded-xl p-6 shadow-lg" data-aos="fade-up"><p class="text-red-400 text-center py-8">Error loading workout for ${day}. ${error.message}</p></div>`;
+      }
+    }
+    
+    window.showWorkout = day => {
+      document.querySelectorAll('.day-button').forEach(btn => btn.classList.toggle('active', btn.dataset.day===day));
+      fetchWorkout(day);
+    };
+  });
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="container px-4 mx-auto py-8">
+  <div class="flex flex-col md:flex-row gap-6">
+    <!-- Sidebar -->
+    <div class="md:w-1/3 lg:w-1/4 sidebar space-y-6">...sidebar content...</div>
+    <!-- Main -->
+    <div class="md:w-2/3 lg:w-3/4 space-y-8">
+      <!-- Header -->
+      <div class="p-6 bg-gray-800 rounded-xl shadow-lg">...header content...</div>
+      <!-- Day selector -->
+      <div class="p-6 bg-gray-800 rounded-xl shadow-lg">
+        <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2">
+          {% for day, workout in workout_plan.items() %}
+          <button data-day="{{ day }}" onclick="showWorkout('{{ day }}')" class="day-button {{ workout.category }}-day bg-gray-900 rounded-lg p-3 flex flex-col items-center">...day btn...</button>
+          {% endfor %}
+        </div>
+      </div>
+      <!-- Display -->
+      <div id="selected-workout-display" class="mt-6">Select a day above to view your workout.</div>
+    </div>
+  </div>
+</div>
+{% endblock %}
