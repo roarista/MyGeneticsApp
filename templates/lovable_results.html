@@ -122,40 +122,52 @@
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         
         <!-- Body Proportion Ratios -->
-        <div class="bg-gray-800 rounded-xl p-6 shadow-lg">
+        <div class="bg-gray-800 rounded-xl p-6 shadow-lg h-80 max-h-80">
           <h3 class="text-lg font-semibold text-white mb-4">Body Proportion Ratios</h3>
-          <canvas id="bodyProportionChart" class="w-full h-64"></canvas>
+          <div class="h-56 overflow-hidden">
+            <canvas id="bodyProportionChart" class="w-full h-full" style="max-height: 224px;"></canvas>
+          </div>
         </div>
 
         <!-- Muscle Dominance Chart -->
-        <div class="bg-gray-800 rounded-xl p-6 shadow-lg">
+        <div class="bg-gray-800 rounded-xl p-6 shadow-lg h-80 max-h-80">
           <h3 class="text-lg font-semibold text-white mb-4">Muscle Dominance</h3>
-          <canvas id="muscleDominanceChart" class="w-full h-64"></canvas>
+          <div class="h-56 overflow-hidden">
+            <canvas id="muscleDominanceChart" class="w-full h-full" style="max-height: 224px;"></canvas>
+          </div>
         </div>
 
         <!-- Body Composition Estimation -->
-        <div class="bg-gray-800 rounded-xl p-6 shadow-lg">
+        <div class="bg-gray-800 rounded-xl p-6 shadow-lg h-80 max-h-80">
           <h3 class="text-lg font-semibold text-white mb-4">Body Composition</h3>
-          <canvas id="bodyCompositionChart" class="w-full h-64"></canvas>
+          <div class="h-56 overflow-hidden">
+            <canvas id="bodyCompositionChart" class="w-full h-full" style="max-height: 224px;"></canvas>
+          </div>
         </div>
 
         <!-- Recovery Capacity -->
-        <div class="bg-gray-800 rounded-xl p-6 shadow-lg">
+        <div class="bg-gray-800 rounded-xl p-6 shadow-lg h-80 max-h-80">
           <h3 class="text-lg font-semibold text-white mb-4">Recovery Capacity</h3>
-          <canvas id="recoveryCapacityChart" class="w-full h-64"></canvas>
+          <div class="h-56 overflow-hidden">
+            <canvas id="recoveryCapacityChart" class="w-full h-full" style="max-height: 224px;"></canvas>
+          </div>
         </div>
 
         <!-- Muscle Fiber Composition -->
-        <div class="bg-gray-800 rounded-xl p-6 shadow-lg">
+        <div class="bg-gray-800 rounded-xl p-6 shadow-lg h-80 max-h-80">
           <h3 class="text-lg font-semibold text-white mb-4">Muscle Fiber Type</h3>
-          <canvas id="fiberCompositionChart" class="w-full h-64"></canvas>
+          <div class="h-56 overflow-hidden">
+            <canvas id="fiberCompositionChart" class="w-full h-full" style="max-height: 224px;"></canvas>
+          </div>
         </div>
       </div>
 
       <!-- Body Type Spectrum -->
-      <div class="bg-gray-800 rounded-xl p-6 shadow-lg">
+      <div class="bg-gray-800 rounded-xl p-6 shadow-lg h-32 max-h-32">
         <h3 class="text-lg font-semibold text-white mb-4">Body Type Classification</h3>
-        <canvas id="bodyTypeSpectrum" class="w-full h-20"></canvas>
+        <div class="h-16 overflow-hidden">
+          <canvas id="bodyTypeSpectrum" class="w-full h-full" style="max-height: 64px;"></canvas>
+        </div>
         <div class="text-center mt-2">
           <span class="inline-block bg-blue-500 text-white px-3 py-1 rounded-full text-sm">{{ bodybuilding.body_type }}</span>
         </div>
@@ -240,36 +252,216 @@
   </div>
 </div>
 
-<!-- Expose data for existing chart files -->
-<script>
-// Data for existing JavaScript chart files
-window.chartData = {{ chart_data | tojson }};
-
-// Initialize metrics from server data (required by metrics_data_bridge.js)
-window.addEventListener('DOMContentLoaded', function() {
-    console.log('Initializing metrics from server data:', window.chartData);
-    
-    if (typeof initMetricsFromServer === 'function') {
-        initMetricsFromServer(window.chartData);
-    }
-    
-    // Initialize charts after data is loaded
-    setTimeout(function() {
-        if (typeof initAllFitnessCharts === 'function') {
-            initAllFitnessCharts();
-        }
-    }, 100);
-});
-</script>
-
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<!-- Load existing chart JavaScript files -->
-<script src="{{ url_for('static', filename='js/metrics_data_bridge.js') }}"></script>
-<script src="{{ url_for('static', filename='js/fitness_metrics_charts.js') }}"></script>
-<script src="{{ url_for('static', filename='js/improved_body_type_charts.js') }}"></script>
-<script src="{{ url_for('static', filename='js/body_type_fixes.js') }}"></script>
-<script src="{{ url_for('static', filename='js/chart_utils.js') }}"></script>
+<script>
+// Chart data from server
+const chartData = {{ chart_data | tojson }};
+const measurements = {{ measurements | tojson }};
+const traits = {{ traits | tojson }};
+const bodybuilding = {{ bodybuilding | tojson }};
+
+console.log('Chart initialization starting with data:', { chartData, measurements, traits, bodybuilding });
+
+// Chart.js global configuration for dark theme
+Chart.defaults.color = '#d1d5db';
+Chart.defaults.borderColor = '#374151';
+
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // Helper function to create charts with error handling
+    function createChart(canvasId, config, chartName) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) {
+            console.error(`Canvas ${canvasId} not found for ${chartName}`);
+            return null;
+        }
+        
+        try {
+            console.log(`Creating ${chartName} chart...`);
+            const ctx = canvas.getContext('2d');
+            return new Chart(ctx, {
+                ...config,
+                options: {
+                    ...config.options,
+                    responsive: true,
+                    maintainAspectRatio: false,
+                }
+            });
+        } catch (error) {
+            console.error(`Error creating ${chartName}:`, error);
+            return null;
+        }
+    }
+
+    // 1. Body Proportion Ratios Chart
+    const proportionData = {
+        labels: ['Shoulder-to-Waist', 'Waist-to-Hip', 'Leg-to-Torso', 'Arm-to-Torso'],
+        datasets: [{
+            label: 'Ratio',
+            data: [
+                measurements.shoulder_width && measurements.waist_circumference ? 
+                    (measurements.shoulder_width / measurements.waist_circumference).toFixed(2) : 1.4,
+                measurements.waist_circumference && measurements.thigh_circumference ? 
+                    (measurements.waist_circumference / measurements.thigh_circumference).toFixed(2) : 1.2,
+                measurements.thigh_circumference && measurements.chest_circumference ? 
+                    (measurements.thigh_circumference / measurements.chest_circumference).toFixed(2) : 0.8,
+                measurements.arm_circumference && measurements.chest_circumference ? 
+                    (measurements.arm_circumference / measurements.chest_circumference).toFixed(2) : 0.4
+            ],
+            backgroundColor: '#60A5FA',
+            borderColor: '#3B82F6',
+            borderWidth: 1
+        }]
+    };
+
+    createChart('bodyProportionChart', {
+        type: 'bar',
+        data: proportionData,
+        options: {
+            indexAxis: 'y',
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { grid: { color: '#374151' }, ticks: { color: '#9ca3af' } },
+                y: { grid: { color: '#374151' }, ticks: { color: '#9ca3af' } }
+            }
+        }
+    }, 'Body Proportion Ratios');
+
+    // 2. Muscle Dominance Chart
+    createChart('muscleDominanceChart', {
+        type: 'bar',
+        data: {
+            labels: ['Upper Body', 'Lower Body', 'Core', 'Posterior Chain'],
+            datasets: [{
+                label: 'Dominance Score',
+                data: [
+                    traits.muscle_building_potential ? traits.muscle_building_potential * 0.7 : 7,
+                    traits.muscle_building_potential ? traits.muscle_building_potential * 0.8 : 6,
+                    traits.recovery_capacity ? traits.recovery_capacity * 0.6 : 5,
+                    traits.recovery_capacity ? traits.recovery_capacity * 0.8 : 6
+                ],
+                backgroundColor: ['#EF4444', '#10B981', '#F59E0B', '#8B5CF6']
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { max: 10, grid: { color: '#374151' }, ticks: { color: '#9ca3af' } },
+                y: { grid: { color: '#374151' }, ticks: { color: '#9ca3af' } }
+            }
+        }
+    }, 'Muscle Dominance');
+
+    // 3. Body Composition Chart
+    createChart('bodyCompositionChart', {
+        type: 'doughnut',
+        data: {
+            labels: ['Body Fat', 'Lean Mass'],
+            datasets: [{
+                data: [
+                    bodybuilding.body_fat_percentage ? bodybuilding.body_fat_percentage.toFixed(1) : 15,
+                    bodybuilding.body_fat_percentage ? (100 - bodybuilding.body_fat_percentage).toFixed(1) : 85
+                ],
+                backgroundColor: ['#EF4444', '#10B981'],
+                borderColor: '#1f2937',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            plugins: {
+                legend: { position: 'bottom', labels: { color: '#d1d5db', padding: 20 } }
+            }
+        }
+    }, 'Body Composition');
+
+    // 4. Recovery Capacity Chart
+    createChart('recoveryCapacityChart', {
+        type: 'radar',
+        data: {
+            labels: ['Sleep Quality', 'Stress Management', 'Nutrition Recovery', 'Active Recovery', 'Rest Days'],
+            datasets: [{
+                label: 'Recovery Score',
+                data: [
+                    traits.recovery_capacity || 7,
+                    traits.metabolic_efficiency || 6,
+                    (traits.recovery_capacity || 7) * 0.9,
+                    (traits.recovery_capacity || 7) * 1.1,
+                    traits.recovery_capacity || 7
+                ],
+                backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                borderColor: 'rgb(16, 185, 129)',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            scales: {
+                r: {
+                    angleLines: { color: '#374151' },
+                    grid: { color: '#374151' },
+                    pointLabels: { color: '#d1d5db' },
+                    ticks: { color: '#9ca3af', backdropColor: 'transparent' },
+                    suggestedMin: 0,
+                    suggestedMax: 10
+                }
+            }
+        }
+    }, 'Recovery Capacity');
+
+    // 5. Muscle Fiber Composition Chart
+    createChart('fiberCompositionChart', {
+        type: 'doughnut',
+        data: {
+            labels: ['Fast-Twitch', 'Slow-Twitch'],
+            datasets: [{
+                data: [
+                    traits.fast_twitch_percentage || 50,
+                    100 - (traits.fast_twitch_percentage || 50)
+                ],
+                backgroundColor: ['#F59E0B', '#06B6D4'],
+                borderColor: '#1f2937',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            plugins: {
+                legend: { position: 'bottom', labels: { color: '#d1d5db', padding: 20 } }
+            }
+        }
+    }, 'Muscle Fiber Type');
+
+    // 6. Body Type Spectrum Chart
+    const bodyTypePosition = chartData.bodyTypePosition || 50;
+    createChart('bodyTypeSpectrum', {
+        type: 'bar',
+        data: {
+            labels: ['Ectomorph', 'Mesomorph', 'Endomorph'],
+            datasets: [{
+                data: [
+                    bodyTypePosition < 33 ? 80 : bodyTypePosition < 66 ? 40 : 20,
+                    bodyTypePosition >= 33 && bodyTypePosition <= 66 ? 80 : 40,
+                    bodyTypePosition > 66 ? 80 : bodyTypePosition > 33 ? 40 : 20
+                ],
+                backgroundColor: function(context) {
+                    const value = context.parsed.y;
+                    return value === 80 ? '#3B82F6' : value === 40 ? '#60A5FA' : '#9CA3AF';
+                }
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { display: false },
+                y: { grid: { display: false }, ticks: { color: '#9ca3af' } }
+            }
+        }
+    }, 'Body Type Spectrum');
+
+    console.log('All charts initialized successfully');
+});
+</script>
 
 {% endblock %}
