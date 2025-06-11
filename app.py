@@ -478,6 +478,48 @@ def view_analysis_results(analysis_id):
             # Debug categorized measurements
             logger.info(f"DEBUG - Categorized measurements keys: {list(categorized_measurements.keys())}")
             
+            # Prepare chart data for existing JavaScript files
+            user_info = results.get('user_info', {})
+            chart_data = {
+                'bodyType': results.get('body_type', 'balanced'),
+                'bodyTypePosition': 50 if results.get('body_type') == 'Mesomorph' else (20 if results.get('body_type') == 'Ectomorph' else 80),
+                'metabolicEfficiency': traits.get('metabolic_efficiency', 6.5),
+                'muscleBuilding': traits.get('muscle_building_potential', 7.0),
+                'recoveryCapacity': traits.get('recovery_capacity', 8.0),
+                'shoulderToWaistRatio': measurements['shoulder_width'] / measurements['waist_circumference'],
+                'bodyFatPercentage': results.get('body_fat', 15.0),
+                'leanMassPercentage': results.get('lean_mass', 85.0),
+                'userAge': user_info.get('age', 25),
+                'gender': user_info.get('gender', 'male'),
+                'heightCm': user_info.get('height', 170),
+                'weightKg': user_info.get('weight', 70),
+                'activityLevel': user_info.get('experience', 'moderate')
+            }
+            
+            # Generate recommendations based on body type and traits
+            recommendations = {
+                'strengths': [
+                    f"Good {traits.get('body_type', 'balanced')} characteristics",
+                    f"Recovery capacity of {traits.get('recovery_capacity', 8)}/10",
+                    f"Metabolic efficiency rated {traits.get('metabolic_efficiency', 6.5)}/10"
+                ],
+                'focus_areas': [
+                    "Maintain consistent training schedule",
+                    "Focus on progressive overload",
+                    "Monitor recovery between sessions"
+                ],
+                'exercise_recommendations': [
+                    "Compound movements (squats, deadlifts)",
+                    "Balanced push/pull exercises",
+                    "Progressive resistance training"
+                ],
+                'nutrition_tips': [
+                    f"Adequate protein intake ({user_info.get('weight', 70) * 1.8:.0f}g daily)",
+                    "Balanced macronutrient distribution",
+                    "Stay hydrated throughout training"
+                ]
+            }
+
             return render_template(
                 'lovable_results.html',
                 analysis_id=analysis_id,
@@ -490,7 +532,10 @@ def view_analysis_results(analysis_id):
                 is_dual_photo=is_dual_photo,
                 is_3d_scan=is_3d_scan,
                 categorized_measurements=categorized_measurements,
-                has_enhanced_measurements=has_enhanced_measurements
+                has_enhanced_measurements=has_enhanced_measurements,
+                chart_data=chart_data,
+                recommendations=recommendations,
+                user_info=user_info
             )
         else:
             logger.error(f"❌ No analysis results found in session")

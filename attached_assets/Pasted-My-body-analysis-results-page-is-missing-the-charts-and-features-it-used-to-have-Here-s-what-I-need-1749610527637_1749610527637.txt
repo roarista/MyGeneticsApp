@@ -1,0 +1,35 @@
+My body analysis results page is missing the charts and features it used to have. Here’s what I need restored, using my existing chart JS files:
+Add all necessary <canvas> elements with unique IDs (for body proportion ratios, muscle dominance, fiber type, recovery radar, etc.) in lovable_results.html (or the current results template).
+Inject the required data into the template context using Flask/Jinja and expose as JS variables, e.g.:
+<script>
+  window.proportionData = {{ proportion_ratios | tojson }};
+  window.dominanceData = {{ dominance | tojson }};
+  window.fiberData = {{ fiber_composition | tojson }};
+  window.recoveryData = {{ recovery_profile | tojson }};
+  // etc
+</script>
+At the bottom of the template, ensure all chart JS files are loaded:
+<script src=\"{{ url_for('static', filename='js/fitness_metrics_charts.js') }}\"></script>
+<script src=\"{{ url_for('static', filename='js/improved_body_type_charts.js') }}\"></script>
+<script src=\"{{ url_for('static', filename='js/body_type_fixes.js') }}\"></script>
+<script src=\"{{ url_for('static', filename='js/main.js') }}\"></script>
+In app.py, pass all necessary data to the template so every chart has real data (not placeholder).
+The result should look like the old version (with all 6+ charts, color badges, and dynamic results).
+If a chart doesn’t render, add console.log statements or error handling to identify what’s missing.
+Do not revert to Bootstrap—keep all styling in Tailwind as now.
+Explain exactly what changes you make.
+If You Need Example Chart <canvas> Placement
+
+Add this block in your results page (inside a grid):
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+  <div class="bg-gray-800 p-4 rounded-xl shadow">
+    <h3 class="text-white font-bold mb-2">Body Proportion Ratios</h3>
+    <canvas id="proportionChart" class="w-full h-60"></canvas>
+  </div>
+  <div class="bg-gray-800 p-4 rounded-xl shadow">
+    <h3 class="text-white font-bold mb-2">Muscle Dominance</h3>
+    <canvas id="dominanceChart" class="w-full h-60"></canvas>
+  </div>
+  <!-- Repeat for other charts... -->
+</div>
