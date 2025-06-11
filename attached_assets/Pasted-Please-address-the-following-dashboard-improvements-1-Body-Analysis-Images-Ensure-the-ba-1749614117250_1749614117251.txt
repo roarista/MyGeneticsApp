@@ -1,0 +1,31 @@
+Please address the following dashboard improvements:
+
+**1. Body Analysis Images:**  
+- Ensure the backend passes both front and back body image URLs (with overlays, if possible) as `front_image_url` and `back_image_url` to the template.
+- In the template, stack these vertically (one above the other), using classes like `w-auto h-96 mx-auto mb-4 rounded-lg shadow`.
+- If images are missing, show a clear “No image uploaded” message, not just an icon.
+
+**2. Spread Out Charts & Fill Empty Spaces:**  
+- Rearrange the grid so that graphs and key metrics are distributed throughout the dashboard, not just at the bottom.
+- Use a responsive grid (`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4`) for all cards (images, metrics, graphs, summaries).
+- If there would otherwise be empty space, move relevant charts or insights up, so the dashboard is visually balanced and there are no large blank areas.
+
+**3. No Large Empty Spaces:**  
+- Make sure every section of the dashboard has meaningful content (graph, image, or summary).
+- Adjust Tailwind grid/flex as needed to ensure no column/row is left mostly blank.
+
+**4. Strengths and Weaknesses Analysis:**  
+- In the backend, for each major muscle group (chest, back, shoulders, arms, legs, core), generate a category: `well_developed`, `average`, or `needs_growth` (based on score thresholds).
+- Pass this info to the template as a dictionary or list.
+- In the UI, add a card “Muscle Strengths & Weaknesses” (or similar) that displays each muscle with a color-coded badge:
+    - Green = Well Developed
+    - Yellow = Average
+    - Red = Needs Growth
+- Add a short summary: “Your strengths are: … Your areas to focus: …” based on which categories the user falls into.
+
+**General:**  
+- Use only Tailwind, not Bootstrap.
+- Make the overall visual flow professional and actionable.
+- Explain what you changed and why.
+
+After you’re done, every column and row should be full, images should show (vertically), and users should see their strengths and weaknesses called out in a clear, visual way.

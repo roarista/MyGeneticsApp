@@ -14,285 +14,224 @@
       <p class="text-gray-400">These results identify your genetic traits to help optimize your training. Genetics are one factor—consistency and form matter too!</p>
     </div>
 
-    <div class="grid gap-8 lg:grid-cols-2">
-      <!-- Left Panel: Image & Summary -->
-      <div class="space-y-6">
-        <!-- Analysis Images -->
-        <div class="bg-gray-800 rounded-xl shadow-lg p-6">
-          <h3 class="text-xl font-semibold text-white mb-4">Body Analysis Images</h3>
-          <div class="grid grid-cols-2 gap-4">
-            <!-- Front Analysis -->
-            <div class="text-center">
-              <div class="bg-gray-700 rounded-lg p-4 h-48 flex items-center justify-center mb-2">
-                {% if front_image %}
-                <img src="{{ front_image }}" alt="Front Analysis" class="max-h-full max-w-full object-contain">
-                {% else %}
-                <div class="text-gray-400">
-                  <svg class="w-12 h-12 mx-auto mb-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path>
-                  </svg>
-                  <p class="text-xs">Front View</p>
-                </div>
-                {% endif %}
+    <!-- Responsive Grid Layout - Distributing All Content -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      
+      <!-- Body Analysis Images -->
+      <div class="bg-gray-800 rounded-xl shadow-lg p-6">
+        <h3 class="text-xl font-semibold text-white mb-4">Body Analysis Images</h3>
+        <div class="space-y-4">
+          <!-- Front Analysis (Stacked Vertically) -->
+          <div class="text-center">
+            {% if front_image_url %}
+            <img src="{{ front_image_url }}" alt="Front Analysis" class="w-auto h-96 mx-auto mb-4 rounded-lg shadow">
+            {% else %}
+            <div class="w-full h-48 bg-gray-700 rounded-lg flex items-center justify-center mb-4">
+              <div class="text-gray-400 text-center">
+                <svg class="w-16 h-16 mx-auto mb-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path>
+                </svg>
+                <p class="text-sm font-medium">No front image uploaded</p>
               </div>
-              <p class="text-sm text-gray-400">Front Analysis</p>
             </div>
-            <!-- Back Analysis -->
-            <div class="text-center">
-              <div class="bg-gray-700 rounded-lg p-4 h-48 flex items-center justify-center mb-2">
-                {% if back_image %}
-                <img src="{{ back_image }}" alt="Back Analysis" class="max-h-full max-w-full object-contain">
-                {% else %}
-                <div class="text-gray-400">
-                  <svg class="w-12 h-12 mx-auto mb-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path>
-                  </svg>
-                  <p class="text-xs">Back View</p>
-                </div>
-                {% endif %}
-              </div>
-              <p class="text-sm text-gray-400">Back Analysis</p>
-            </div>
-          </div>
-          {% if not front_image and not back_image %}
-          <div class="mt-4 text-center">
-            <p class="text-sm text-gray-400">Upload photos in the main app to see measurement overlays</p>
-          </div>
-          {% endif %}
-        </div>
-
-        <!-- Body Type Summary -->
-        <div class="bg-gray-800 rounded-xl shadow-lg p-6">
-          <div class="flex flex-col items-center space-y-2">
-            <span class="inline-block bg-blue-500 text-white px-4 py-1 rounded-full text-lg font-semibold">Body Type: {{ bodybuilding.body_type or 'N/A' }}</span>
-            {% if traits.description %}
-            <p class="text-gray-300 text-center mt-2">{{ traits.description }}</p>
             {% endif %}
+            <p class="text-sm text-gray-400">Front Analysis</p>
           </div>
-        </div>
-
-        <!-- Key Info -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div class="bg-gray-800 rounded-xl p-6 shadow">
-            <h3 class="text-xl font-semibold text-white mb-4">Your Info</h3>
-            <ul class="space-y-3 text-gray-300">
-              {% if user_info.height %}<li><strong>Height:</strong> {{ user_info.height }} cm</li>{% endif %}
-              {% if user_info.weight %}<li><strong>Weight:</strong> {{ user_info.weight }} kg</li>{% endif %}
-              <li><strong>Experience:</strong> {{ user_info.experience|capitalize }}</li>
-            </ul>
-          </div>
-
-          <div class="bg-gray-800 rounded-xl p-6 shadow">
-            <h3 class="text-xl font-semibold text-white mb-4">Upload Type</h3>
-            <p class="text-gray-300">{% if is_dual_photo %}Dual-Photo Analysis{% elif is_3d_scan %}3D Scan Analysis{% else %}Single Photo Analysis{% endif %}</p>
+          
+          <!-- Back Analysis (Stacked Vertically) -->
+          <div class="text-center">
+            {% if back_image_url %}
+            <img src="{{ back_image_url }}" alt="Back Analysis" class="w-auto h-96 mx-auto mb-4 rounded-lg shadow">
+            {% else %}
+            <div class="w-full h-48 bg-gray-700 rounded-lg flex items-center justify-center mb-4">
+              <div class="text-gray-400 text-center">
+                <svg class="w-16 h-16 mx-auto mb-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path>
+                </svg>
+                <p class="text-sm font-medium">No back image uploaded</p>
+              </div>
+            </div>
+            {% endif %}
+            <p class="text-sm text-gray-400">Back Analysis</p>
           </div>
         </div>
       </div>
 
-      <!-- Right Panel: Traits & Metrics -->
-      <div class="space-y-6">
-        <!-- Genetic Structural Traits -->
-        <div class="bg-gray-800 rounded-xl p-6 shadow">
-          <h3 class="text-xl font-semibold text-white mb-4">Genetic Structural Traits</h3>
-          <div class="space-y-3">
-            {% for trait in genetic_traits %}
-            <div class="flex justify-between items-start">
-              <div class="flex-1">
-                <div class="text-white font-medium">{{ trait.label }}</div>
-                <div class="text-sm text-gray-400">{{ trait.impact }}</div>
-              </div>
-              <div class="text-blue-400 font-semibold ml-4">{{ trait.value }}</div>
+      <!-- Body Type & Key Info -->
+      <div class="bg-gray-800 rounded-xl shadow-lg p-6">
+        <h3 class="text-xl font-semibold text-white mb-4">Your Profile</h3>
+        <div class="space-y-4">
+          <div class="text-center">
+            <span class="inline-block bg-blue-500 text-white px-4 py-2 rounded-full text-lg font-semibold mb-3">{{ bodybuilding.body_type or 'N/A' }}</span>
+          </div>
+          
+          <div class="space-y-2">
+            {% if user_info.height %}<div class="flex justify-between"><span class="text-gray-400">Height:</span><span class="text-white">{{ user_info.height }} cm</span></div>{% endif %}
+            {% if user_info.weight %}<div class="flex justify-between"><span class="text-gray-400">Weight:</span><span class="text-white">{{ user_info.weight }} kg</span></div>{% endif %}
+            <div class="flex justify-between"><span class="text-gray-400">Experience:</span><span class="text-white">{{ user_info.experience|capitalize }}</span></div>
+            <div class="flex justify-between"><span class="text-gray-400">Body Fat:</span><span class="text-white">{{ '%.1f'|format(bodybuilding.body_fat_percentage) }}%</span></div>
+            <div class="flex justify-between"><span class="text-gray-400">Lean Mass:</span><span class="text-white">{{ '%.1f'|format(traits.lean_mass_percentage) }}%</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Muscle Strengths & Weaknesses -->
+      <div class="bg-gray-800 rounded-xl shadow-lg p-6">
+        <h3 class="text-xl font-semibold text-white mb-4">Muscle Development Analysis</h3>
+        <div class="space-y-4">
+          <!-- Muscle Group Ratings -->
+          <div class="grid grid-cols-2 gap-2">
+            {% for muscle, data in muscle_analysis.items() %}
+            <div class="flex items-center justify-between">
+              <span class="text-white text-sm">{{ muscle.title() }}</span>
+              <span class="px-2 py-1 rounded-full text-xs
+                {% if data.color == 'green' %}bg-green-600 text-white
+                {% elif data.color == 'yellow' %}bg-yellow-600 text-white
+                {% elif data.color == 'red' %}bg-red-600 text-white
+                {% else %}bg-gray-600 text-white{% endif %}">
+                {{ data.label }}
+              </span>
             </div>
             {% endfor %}
           </div>
+          
+          <!-- Summary -->
+          <div class="pt-3 border-t border-gray-700">
+            <p class="text-sm text-green-400 mb-2">{{ strengths_summary }}</p>
+            <p class="text-sm text-yellow-400">{{ weaknesses_summary }}</p>
+          </div>
         </div>
+      </div>
 
-        <!-- Structural & Composition Tables -->
-        <div class="bg-gray-800 rounded-xl p-6 shadow space-y-6">
-          <!-- Structure -->
-          <div>
-            <h4 class="text-lg font-semibold text-white mb-3">Structure Metrics</h4>
-            <table class="w-full text-left text-gray-300">
-              <thead><tr><th class="pb-2">Trait</th><th class="pb-2">Value</th><th class="pb-2">Rating</th></tr></thead>
-              <tbody class="divide-y divide-gray-700">
-                {% for trait, data in traits.items() %}
-                  <tr>
-                    <td class="py-2">{{ trait.replace('_',' ').title() }}</td>
-                    <td class="py-2">
-                      {% if data is mapping %}
-                        {{ data.display_value or data.value }}
-                      {% else %}
-                        {{ data }}
-                      {% endif %}
-                    </td>
-                    <td class="py-2">
-                      {% if data is mapping and data.rating %}
-                      <span class="px-2 py-1 rounded-full text-sm 
-                        {% if data.rating=='excellent' %}bg-green-600 text-white
-                        {% elif data.rating=='good' %}bg-blue-600 text-white
-                        {% elif data.rating=='average' %}bg-yellow-600 text-white
-                        {% else %}bg-red-600 text-white{% endif %}"> {{ data.rating.title() }} </span>
-                      {% else %}
-                      <span class="px-2 py-1 rounded-full text-sm bg-gray-600 text-white">Info</span>
-                      {% endif %}
-                    </td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
+      <!-- Body Proportion Ratios Chart -->
+      <div class="bg-gray-800 rounded-xl p-6 shadow-lg h-80 max-h-80">
+        <h3 class="text-lg font-semibold text-white mb-4">Body Proportion Ratios</h3>
+        <div class="h-56 overflow-hidden">
+          <canvas id="bodyProportionChart" class="w-full h-full" style="max-height: 224px;"></canvas>
+        </div>
+      </div>
 
-          <!-- Composition -->
-          <div>
-            <h4 class="text-lg font-semibold text-white mb-3">Body Measurements</h4>
-            <table class="w-full text-left text-gray-300">
-              <thead><tr><th class="pb-2">Metric</th><th class="pb-2">Value</th><th class="pb-2">Rating</th></tr></thead>
-              <tbody class="divide-y divide-gray-700">
-                {% for category, measurements in categorized_measurements.items() %}
-                  {% for measurement_name, measurement_data in measurements.items() %}
-                  <tr>
-                    <td class="py-2">{{ measurement_name.replace('_',' ').title() }}</td>
-                    <td class="py-2">{{ measurement_data.value }} {{ measurement_data.unit }}</td>
-                    <td class="py-2">
-                      <span class="px-2 py-1 rounded-full text-sm 
-                        {% if measurement_data.color == 'green' %}bg-green-600 text-white
-                        {% elif measurement_data.color == 'yellow' %}bg-yellow-600 text-white
-                        {% elif measurement_data.color == 'red' %}bg-red-600 text-white
-                        {% else %}bg-gray-600 text-white{% endif %}">
-                        {{ measurement_data.rating }}
-                      </span>
-                    </td>
-                  </tr>
-                  {% endfor %}
-                {% endfor %}
-              </tbody>
-            </table>
+      <!-- Genetic Structural Traits -->
+      <div class="bg-gray-800 rounded-xl p-6 shadow">
+        <h3 class="text-xl font-semibold text-white mb-4">Genetic Structural Traits</h3>
+        <div class="space-y-3">
+          {% for trait in genetic_traits %}
+          <div class="flex justify-between items-start">
+            <div class="flex-1">
+              <div class="text-white font-medium text-sm">{{ trait.label }}</div>
+              <div class="text-xs text-gray-400">{{ trait.impact }}</div>
+            </div>
+            <div class="text-blue-400 font-semibold ml-4 text-sm">{{ trait.value }}</div>
           </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Body Composition Chart -->
+      <div class="bg-gray-800 rounded-xl p-6 shadow-lg h-80 max-h-80">
+        <h3 class="text-lg font-semibold text-white mb-4">Body Composition</h3>
+        <div class="h-56 overflow-hidden">
+          <canvas id="bodyCompositionChart" class="w-full h-full" style="max-height: 224px;"></canvas>
+        </div>
+      </div>
+
+      <!-- Recovery Capacity Chart -->
+      <div class="bg-gray-800 rounded-xl p-6 shadow-lg h-80 max-h-80">
+        <h3 class="text-lg font-semibold text-white mb-4">Recovery Capacity</h3>
+        <div class="h-56 overflow-hidden">
+          <canvas id="recoveryCapacityChart" class="w-full h-full" style="max-height: 224px;"></canvas>
+        </div>
+      </div>
+
+      <!-- Muscle Dominance Chart -->
+      <div class="bg-gray-800 rounded-xl p-6 shadow-lg h-80 max-h-80">
+        <h3 class="text-lg font-semibold text-white mb-4">Muscle Dominance</h3>
+        <div class="h-56 overflow-hidden">
+          <canvas id="muscleDominanceChart" class="w-full h-full" style="max-height: 224px;"></canvas>
+        </div>
+      </div>
+
+      <!-- Caloric Requirements Chart -->
+      <div class="bg-gray-800 rounded-xl p-6 shadow-lg h-80 max-h-80">
+        <h3 class="text-lg font-semibold text-white mb-4">Caloric Requirements</h3>
+        <div class="h-56 overflow-hidden">
+          <canvas id="caloricMaintenanceChart" class="w-full h-full" style="max-height: 224px;"></canvas>
+        </div>
+      </div>
+
+      <!-- Fitness Age Chart -->
+      <div class="bg-gray-800 rounded-xl p-6 shadow-lg h-80 max-h-80">
+        <h3 class="text-lg font-semibold text-white mb-4">Fitness Age</h3>
+        <div class="h-56 overflow-hidden">
+          <canvas id="fitnessAgeChart" class="w-full h-full" style="max-height: 224px;"></canvas>
+        </div>
+      </div>
+
+      <!-- Growth Potential Chart -->
+      <div class="bg-gray-800 rounded-xl p-6 shadow-lg h-80 max-h-80">
+        <h3 class="text-lg font-semibold text-white mb-4">Growth Potential</h3>
+        <div class="h-56 overflow-hidden">
+          <canvas id="growthPotentialChart" class="w-full h-full" style="max-height: 224px;"></canvas>
+        </div>
+      </div>
+
+      <!-- Muscle Fiber Type Chart -->
+      <div class="bg-gray-800 rounded-xl p-6 shadow-lg h-80 max-h-80">
+        <h3 class="text-lg font-semibold text-white mb-4">Muscle Fiber Type</h3>
+        <div class="h-56 overflow-hidden">
+          <canvas id="fiberCompositionChart" class="w-full h-full" style="max-height: 224px;"></canvas>
+        </div>
+      </div>
+
+      <!-- Body Symmetry Chart -->
+      <div class="bg-gray-800 rounded-xl p-6 shadow-lg h-80 max-h-80">
+        <h3 class="text-lg font-semibold text-white mb-4">Body Symmetry</h3>
+        <div class="h-56 overflow-hidden">
+          <canvas id="symmetryScoreChart" class="w-full h-full" style="max-height: 224px;"></canvas>
         </div>
       </div>
     </div>
 
-    <!-- Data Visualizations Section -->
-    <div class="mt-12 space-y-8">
-      <h2 class="text-2xl font-bold text-white text-center mb-8">Detailed Analysis & Metrics</h2>
+    <!-- Body Type Spectrum - Full Width -->
+    <div class="mt-8 bg-gray-800 rounded-xl p-6 shadow-lg">
+      <h3 class="text-lg font-semibold text-white mb-4 text-center">Body Type Classification</h3>
       
-      <!-- Charts Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Gradient Body Type Bar -->
+      <div class="relative mb-4">
+        <div class="w-full h-8 rounded-full bg-gradient-to-r from-blue-500 via-green-500 to-red-500 relative overflow-hidden">
+          <!-- Position Marker -->
+          <div class="absolute top-0 h-full w-1 bg-white shadow-lg transform -translate-x-1/2" 
+               style="left: {{ chart_data.bodyTypePosition or 50 }}%;">
+          </div>
+        </div>
         
-        <!-- Body Proportion Ratios -->
-        <div class="bg-gray-800 rounded-xl p-6 shadow-lg h-80 max-h-80">
-          <h3 class="text-lg font-semibold text-white mb-4">Body Proportion Ratios</h3>
-          <div class="h-56 overflow-hidden">
-            <canvas id="bodyProportionChart" class="w-full h-full" style="max-height: 224px;"></canvas>
-          </div>
-        </div>
-
-        <!-- Muscle Dominance Chart -->
-        <div class="bg-gray-800 rounded-xl p-6 shadow-lg h-80 max-h-80">
-          <h3 class="text-lg font-semibold text-white mb-4">Muscle Dominance</h3>
-          <div class="h-56 overflow-hidden">
-            <canvas id="muscleDominanceChart" class="w-full h-full" style="max-height: 224px;"></canvas>
-          </div>
-        </div>
-
-        <!-- Body Composition Estimation -->
-        <div class="bg-gray-800 rounded-xl p-6 shadow-lg h-80 max-h-80">
-          <h3 class="text-lg font-semibold text-white mb-4">Body Composition</h3>
-          <div class="h-56 overflow-hidden">
-            <canvas id="bodyCompositionChart" class="w-full h-full" style="max-height: 224px;"></canvas>
-          </div>
-        </div>
-
-        <!-- Recovery Capacity -->
-        <div class="bg-gray-800 rounded-xl p-6 shadow-lg h-80 max-h-80">
-          <h3 class="text-lg font-semibold text-white mb-4">Recovery Capacity</h3>
-          <div class="h-56 overflow-hidden">
-            <canvas id="recoveryCapacityChart" class="w-full h-full" style="max-height: 224px;"></canvas>
-          </div>
-        </div>
-
-        <!-- Muscle Fiber Composition -->
-        <div class="bg-gray-800 rounded-xl p-6 shadow-lg h-80 max-h-80">
-          <h3 class="text-lg font-semibold text-white mb-4">Muscle Fiber Type</h3>
-          <div class="h-56 overflow-hidden">
-            <canvas id="fiberCompositionChart" class="w-full h-full" style="max-height: 224px;"></canvas>
-          </div>
-        </div>
-
-        <!-- Fitness Age -->
-        <div class="bg-gray-800 rounded-xl p-6 shadow-lg h-80 max-h-80">
-          <h3 class="text-lg font-semibold text-white mb-4">Fitness Age</h3>
-          <div class="h-56 overflow-hidden">
-            <canvas id="fitnessAgeChart" class="w-full h-full" style="max-height: 224px;"></canvas>
-          </div>
-        </div>
-
-        <!-- Caloric Maintenance -->
-        <div class="bg-gray-800 rounded-xl p-6 shadow-lg h-80 max-h-80">
-          <h3 class="text-lg font-semibold text-white mb-4">Caloric Requirements</h3>
-          <div class="h-56 overflow-hidden">
-            <canvas id="caloricMaintenanceChart" class="w-full h-full" style="max-height: 224px;"></canvas>
-          </div>
-        </div>
-
-        <!-- Symmetry Score -->
-        <div class="bg-gray-800 rounded-xl p-6 shadow-lg h-80 max-h-80">
-          <h3 class="text-lg font-semibold text-white mb-4">Body Symmetry</h3>
-          <div class="h-56 overflow-hidden">
-            <canvas id="symmetryScoreChart" class="w-full h-full" style="max-height: 224px;"></canvas>
-          </div>
-        </div>
-
-        <!-- Growth Potential -->
-        <div class="bg-gray-800 rounded-xl p-6 shadow-lg h-80 max-h-80">
-          <h3 class="text-lg font-semibold text-white mb-4">Growth Potential</h3>
-          <div class="h-56 overflow-hidden">
-            <canvas id="growthPotentialChart" class="w-full h-full" style="max-height: 224px;"></canvas>
-          </div>
+        <!-- Labels -->
+        <div class="flex justify-between mt-2 text-sm text-gray-400">
+          <span>Ectomorph</span>
+          <span>Mesomorph</span>
+          <span>Endomorph</span>
         </div>
       </div>
-
-      <!-- Body Type Spectrum -->
-      <div class="bg-gray-800 rounded-xl p-6 shadow-lg">
-        <h3 class="text-lg font-semibold text-white mb-4">Body Type Classification</h3>
-        
-        <!-- Gradient Body Type Bar -->
-        <div class="relative mb-4">
-          <div class="w-full h-8 rounded-full bg-gradient-to-r from-blue-500 via-green-500 to-red-500 relative overflow-hidden">
-            <!-- Position Marker -->
-            <div class="absolute top-0 h-full w-1 bg-white shadow-lg transform -translate-x-1/2" 
-                 style="left: {{ chart_data.bodyTypePosition or 50 }}%;">
-            </div>
-          </div>
-          
-          <!-- Labels -->
-          <div class="flex justify-between mt-2 text-sm text-gray-400">
-            <span>Ectomorph</span>
-            <span>Mesomorph</span>
-            <span>Endomorph</span>
-          </div>
-        </div>
-        
-        <div class="text-center">
-          <span class="inline-block bg-blue-500 text-white px-3 py-1 rounded-full text-sm">{{ bodybuilding.body_type }}</span>
-          <p class="text-xs text-gray-400 mt-2">Your position on the body type spectrum</p>
-        </div>
+      
+      <div class="text-center">
+        <span class="inline-block bg-blue-500 text-white px-3 py-1 rounded-full text-sm">{{ bodybuilding.body_type }}</span>
+        <p class="text-xs text-gray-400 mt-2">Your position on the body type spectrum</p>
       </div>
+    </div>
 
-      <!-- Confidence Badges -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="bg-gray-800 rounded-xl p-4 text-center">
-          <div class="text-2xl font-bold text-green-400 mb-1">{{ '%.0f'|format(bodybuilding.body_fat_confidence * 100) }}%</div>
-          <div class="text-gray-400 text-sm">Analysis Confidence</div>
-        </div>
-        <div class="bg-gray-800 rounded-xl p-4 text-center">
-          <div class="text-2xl font-bold text-blue-400 mb-1">{{ '%.1f'|format(bodybuilding.muscle_building_potential) }}</div>
-          <div class="text-gray-400 text-sm">Muscle Building Score</div>
-        </div>
-        <div class="bg-gray-800 rounded-xl p-4 text-center">
-          <div class="text-2xl font-bold text-purple-400 mb-1">{{ traits.metabolic_efficiency }}</div>
-          <div class="text-gray-400 text-sm">Metabolic Efficiency</div>
-        </div>
+    <!-- Key Metrics Row -->
+    <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="bg-gray-800 rounded-xl p-4 text-center">
+        <div class="text-2xl font-bold text-green-400 mb-1">{{ '%.0f'|format(bodybuilding.body_fat_confidence * 100) }}%</div>
+        <div class="text-gray-400 text-sm">Analysis Confidence</div>
+      </div>
+      <div class="bg-gray-800 rounded-xl p-4 text-center">
+        <div class="text-2xl font-bold text-blue-400 mb-1">{{ '%.1f'|format(bodybuilding.muscle_building_potential) }}</div>
+        <div class="text-gray-400 text-sm">Muscle Building Score</div>
+      </div>
+      <div class="bg-gray-800 rounded-xl p-4 text-center">
+        <div class="text-2xl font-bold text-purple-400 mb-1">{{ traits.metabolic_efficiency }}</div>
+        <div class="text-gray-400 text-sm">Metabolic Efficiency</div>
       </div>
     </div>
 

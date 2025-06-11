@@ -440,10 +440,14 @@ def view_analysis_results(analysis_id):
             # Check if this is a 3D scan (default to standard)
             is_3d_scan = False
             
-            # Setup image data - using a placeholder or empty
+            # Setup image data - provide placeholder URLs for demonstration
             image_data = None
-            front_image = None
-            back_image = None
+            front_image_url = "/static/placeholder-front.jpg"  # Would be actual analysis image URL
+            back_image_url = "/static/placeholder-back.jpg"    # Would be actual analysis image URL
+            
+            # In a real implementation, these would come from the analysis results
+            # front_image_url = results.get('front_analysis_image_url')
+            # back_image_url = results.get('back_analysis_image_url')
             
             # Define enhanced measurements with more metrics
             has_enhanced_measurements = True
@@ -531,6 +535,36 @@ def view_analysis_results(analysis_id):
                     'impact': 'Better recovery allows more frequent and intense training'
                 }
             ]
+
+            # Muscle strengths and weaknesses analysis
+            def calculate_muscle_development(score):
+                """Calculate muscle development category based on score"""
+                if score >= 8.0:
+                    return {'category': 'well_developed', 'color': 'green', 'label': 'Well Developed'}
+                elif score >= 6.0:
+                    return {'category': 'average', 'color': 'yellow', 'label': 'Average'}
+                else:
+                    return {'category': 'needs_growth', 'color': 'red', 'label': 'Needs Growth'}
+
+            # Calculate muscle group scores based on user's actual data
+            muscle_building_potential = traits.get('muscle_building_potential', 7.0)
+            recovery_capacity = traits.get('recovery_capacity', 7.0)
+            
+            muscle_analysis = {
+                'chest': calculate_muscle_development(muscle_building_potential * 0.9),
+                'back': calculate_muscle_development(recovery_capacity * 0.95),
+                'shoulders': calculate_muscle_development(measurements.get('shoulder_width', 48) / 6),
+                'arms': calculate_muscle_development(measurements.get('arm_circumference', 35) / 4.5),
+                'legs': calculate_muscle_development(measurements.get('thigh_circumference', 55) / 7),
+                'core': calculate_muscle_development(10 - (measurements.get('waist_circumference', 80) / 10))
+            }
+
+            # Generate strengths and weaknesses summary
+            well_developed = [muscle for muscle, data in muscle_analysis.items() if data['category'] == 'well_developed']
+            needs_growth = [muscle for muscle, data in muscle_analysis.items() if data['category'] == 'needs_growth']
+            
+            strengths_summary = f"Your strengths are: {', '.join(well_developed).title()}" if well_developed else "Continue developing across all muscle groups"
+            weaknesses_summary = f"Areas to focus: {', '.join(needs_growth).title()}" if needs_growth else "Maintain current development across all areas"
             
             # Debug categorized measurements
             logger.info(f"DEBUG - Categorized measurements keys: {list(categorized_measurements.keys())}")
@@ -591,15 +625,19 @@ def view_analysis_results(analysis_id):
                 'measurements': measurements,
                 'traits': traits,
                 'image_data': image_data,
-                'front_image': front_image,
-                'back_image': back_image,
+                'front_image_url': front_image_url,
+                'back_image_url': back_image_url,
                 'is_dual_photo': is_dual_photo,
                 'is_3d_scan': is_3d_scan,
                 'categorized_measurements': categorized_measurements,
                 'has_enhanced_measurements': has_enhanced_measurements,
                 'chart_data': chart_data,
                 'recommendations': recommendations,
-                'user_info': user_info
+                'user_info': user_info,
+                'genetic_traits': genetic_traits,
+                'muscle_analysis': muscle_analysis,
+                'strengths_summary': strengths_summary,
+                'weaknesses_summary': weaknesses_summary
             }
             
             logger.info("=== TEMPLATE VARIABLES DEBUG ===")
@@ -624,8 +662,8 @@ def view_analysis_results(analysis_id):
                 measurements=measurements,
                 traits=traits,
                 image_data=image_data,
-                front_image=front_image,
-                back_image=back_image,
+                front_image_url=front_image_url,
+                back_image_url=back_image_url,
                 is_dual_photo=is_dual_photo,
                 is_3d_scan=is_3d_scan,
                 categorized_measurements=categorized_measurements,
@@ -633,7 +671,10 @@ def view_analysis_results(analysis_id):
                 chart_data=chart_data,
                 recommendations=recommendations,
                 user_info=user_info,
-                genetic_traits=genetic_traits
+                genetic_traits=genetic_traits,
+                muscle_analysis=muscle_analysis,
+                strengths_summary=strengths_summary,
+                weaknesses_summary=weaknesses_summary
             )
         else:
             logger.error(f"❌ No analysis results found in session")
