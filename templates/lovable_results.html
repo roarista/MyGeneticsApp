@@ -17,17 +17,57 @@
     <div class="grid gap-8 lg:grid-cols-2">
       <!-- Left Panel: Image & Summary -->
       <div class="space-y-6">
-        <div class="bg-gray-800 rounded-xl shadow-lg overflow-hidden">
-          {% if image_data %}
-          <img src="data:image/jpeg;base64,{{ image_data }}" alt="Body Analysis" class="w-full object-cover" style="max-height:400px;">
-          {% endif %}
-          <div class="p-6">
-            <div class="flex flex-col items-center space-y-2">
-              <span class="inline-block bg-blue-500 text-white px-4 py-1 rounded-full text-lg font-semibold">Body Type: {{ bodybuilding.body_type or 'N/A' }}</span>
-              {% if traits.description %}
-              <p class="text-gray-300 text-center mt-2">{{ traits.description }}</p>
-              {% endif %}
+        <!-- Analysis Images -->
+        <div class="bg-gray-800 rounded-xl shadow-lg p-6">
+          <h3 class="text-xl font-semibold text-white mb-4">Body Analysis Images</h3>
+          <div class="grid grid-cols-2 gap-4">
+            <!-- Front Analysis -->
+            <div class="text-center">
+              <div class="bg-gray-700 rounded-lg p-4 h-48 flex items-center justify-center mb-2">
+                {% if front_image %}
+                <img src="{{ front_image }}" alt="Front Analysis" class="max-h-full max-w-full object-contain">
+                {% else %}
+                <div class="text-gray-400">
+                  <svg class="w-12 h-12 mx-auto mb-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path>
+                  </svg>
+                  <p class="text-xs">Front View</p>
+                </div>
+                {% endif %}
+              </div>
+              <p class="text-sm text-gray-400">Front Analysis</p>
             </div>
+            <!-- Back Analysis -->
+            <div class="text-center">
+              <div class="bg-gray-700 rounded-lg p-4 h-48 flex items-center justify-center mb-2">
+                {% if back_image %}
+                <img src="{{ back_image }}" alt="Back Analysis" class="max-h-full max-w-full object-contain">
+                {% else %}
+                <div class="text-gray-400">
+                  <svg class="w-12 h-12 mx-auto mb-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path>
+                  </svg>
+                  <p class="text-xs">Back View</p>
+                </div>
+                {% endif %}
+              </div>
+              <p class="text-sm text-gray-400">Back Analysis</p>
+            </div>
+          </div>
+          {% if not front_image and not back_image %}
+          <div class="mt-4 text-center">
+            <p class="text-sm text-gray-400">Upload photos in the main app to see measurement overlays</p>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Body Type Summary -->
+        <div class="bg-gray-800 rounded-xl shadow-lg p-6">
+          <div class="flex flex-col items-center space-y-2">
+            <span class="inline-block bg-blue-500 text-white px-4 py-1 rounded-full text-lg font-semibold">Body Type: {{ bodybuilding.body_type or 'N/A' }}</span>
+            {% if traits.description %}
+            <p class="text-gray-300 text-center mt-2">{{ traits.description }}</p>
+            {% endif %}
           </div>
         </div>
 
@@ -178,16 +218,64 @@
             <canvas id="fiberCompositionChart" class="w-full h-full" style="max-height: 224px;"></canvas>
           </div>
         </div>
+
+        <!-- Fitness Age -->
+        <div class="bg-gray-800 rounded-xl p-6 shadow-lg h-80 max-h-80">
+          <h3 class="text-lg font-semibold text-white mb-4">Fitness Age</h3>
+          <div class="h-56 overflow-hidden">
+            <canvas id="fitnessAgeChart" class="w-full h-full" style="max-height: 224px;"></canvas>
+          </div>
+        </div>
+
+        <!-- Caloric Maintenance -->
+        <div class="bg-gray-800 rounded-xl p-6 shadow-lg h-80 max-h-80">
+          <h3 class="text-lg font-semibold text-white mb-4">Caloric Requirements</h3>
+          <div class="h-56 overflow-hidden">
+            <canvas id="caloricMaintenanceChart" class="w-full h-full" style="max-height: 224px;"></canvas>
+          </div>
+        </div>
+
+        <!-- Symmetry Score -->
+        <div class="bg-gray-800 rounded-xl p-6 shadow-lg h-80 max-h-80">
+          <h3 class="text-lg font-semibold text-white mb-4">Body Symmetry</h3>
+          <div class="h-56 overflow-hidden">
+            <canvas id="symmetryScoreChart" class="w-full h-full" style="max-height: 224px;"></canvas>
+          </div>
+        </div>
+
+        <!-- Growth Potential -->
+        <div class="bg-gray-800 rounded-xl p-6 shadow-lg h-80 max-h-80">
+          <h3 class="text-lg font-semibold text-white mb-4">Growth Potential</h3>
+          <div class="h-56 overflow-hidden">
+            <canvas id="growthPotentialChart" class="w-full h-full" style="max-height: 224px;"></canvas>
+          </div>
+        </div>
       </div>
 
       <!-- Body Type Spectrum -->
-      <div class="bg-gray-800 rounded-xl p-6 shadow-lg h-32 max-h-32">
+      <div class="bg-gray-800 rounded-xl p-6 shadow-lg">
         <h3 class="text-lg font-semibold text-white mb-4">Body Type Classification</h3>
-        <div class="h-16 overflow-hidden">
-          <canvas id="bodyTypeSpectrum" class="w-full h-full" style="max-height: 64px;"></canvas>
+        
+        <!-- Gradient Body Type Bar -->
+        <div class="relative mb-4">
+          <div class="w-full h-8 rounded-full bg-gradient-to-r from-blue-500 via-green-500 to-red-500 relative overflow-hidden">
+            <!-- Position Marker -->
+            <div class="absolute top-0 h-full w-1 bg-white shadow-lg transform -translate-x-1/2" 
+                 style="left: {{ chart_data.bodyTypePosition or 50 }}%;">
+            </div>
+          </div>
+          
+          <!-- Labels -->
+          <div class="flex justify-between mt-2 text-sm text-gray-400">
+            <span>Ectomorph</span>
+            <span>Mesomorph</span>
+            <span>Endomorph</span>
+          </div>
         </div>
-        <div class="text-center mt-2">
+        
+        <div class="text-center">
           <span class="inline-block bg-blue-500 text-white px-3 py-1 rounded-full text-sm">{{ bodybuilding.body_type }}</span>
+          <p class="text-xs text-gray-400 mt-2">Your position on the body type spectrum</p>
         </div>
       </div>
 
@@ -450,33 +538,112 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }, 'Muscle Fiber Type');
 
-    // 6. Body Type Spectrum Chart
-    const bodyTypePosition = chartData.bodyTypePosition || 50;
-    createChart('bodyTypeSpectrum', {
+    // 6. Fitness Age Chart
+    const actualAge = chartData.userAge || 25;
+    const fitnessAge = Math.max(actualAge - 5, actualAge - (traits.recovery_capacity || 7) + 3);
+    createChart('fitnessAgeChart', {
+        type: 'doughnut',
+        data: {
+            labels: ['Fitness Age', 'Chronological Age'],
+            datasets: [{
+                data: [fitnessAge, actualAge - fitnessAge],
+                backgroundColor: ['#10B981', '#6B7280'],
+                borderColor: '#1f2937',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            plugins: {
+                legend: { position: 'bottom', labels: { color: '#d1d5db', padding: 20 } }
+            }
+        }
+    }, 'Fitness Age');
+
+    // 7. Caloric Maintenance Chart
+    const maintenanceCalories = chartData.maintenanceCalories || { sedentary: 1800, light: 2000, moderate: 2200, active: 2400, very_active: 2600 };
+    createChart('caloricMaintenanceChart', {
         type: 'bar',
         data: {
-            labels: ['Ectomorph', 'Mesomorph', 'Endomorph'],
+            labels: ['Sedentary', 'Light', 'Moderate', 'Active', 'Very Active'],
             datasets: [{
+                label: 'Calories',
                 data: [
-                    bodyTypePosition < 33 ? 80 : bodyTypePosition < 66 ? 40 : 20,
-                    bodyTypePosition >= 33 && bodyTypePosition <= 66 ? 80 : 40,
-                    bodyTypePosition > 66 ? 80 : bodyTypePosition > 33 ? 40 : 20
+                    maintenanceCalories.sedentary || 1800,
+                    maintenanceCalories.light || 2000,
+                    maintenanceCalories.moderate || 2200,
+                    maintenanceCalories.active || 2400,
+                    maintenanceCalories.very_active || 2600
                 ],
-                backgroundColor: function(context) {
-                    const value = context.parsed.y;
-                    return value === 80 ? '#3B82F6' : value === 40 ? '#60A5FA' : '#9CA3AF';
+                backgroundColor: '#06B6D4',
+                borderColor: '#0891B2',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { grid: { color: '#374151' }, ticks: { color: '#9ca3af' } },
+                y: { grid: { color: '#374151' }, ticks: { color: '#9ca3af' } }
+            }
+        }
+    }, 'Caloric Maintenance');
+
+    // 8. Symmetry Score Chart
+    createChart('symmetryScoreChart', {
+        type: 'radar',
+        data: {
+            labels: ['Upper Left', 'Upper Right', 'Lower Left', 'Lower Right', 'Core'],
+            datasets: [{
+                label: 'Symmetry Score',
+                data: [8.5, 8.2, 7.8, 8.0, 8.3],
+                backgroundColor: 'rgba(139, 92, 246, 0.2)',
+                borderColor: 'rgb(139, 92, 246)',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            scales: {
+                r: {
+                    angleLines: { color: '#374151' },
+                    grid: { color: '#374151' },
+                    pointLabels: { color: '#d1d5db' },
+                    ticks: { color: '#9ca3af', backdropColor: 'transparent' },
+                    suggestedMin: 0,
+                    suggestedMax: 10
                 }
+            }
+        }
+    }, 'Symmetry Score');
+
+    // 9. Growth Potential Chart
+    createChart('growthPotentialChart', {
+        type: 'bar',
+        data: {
+            labels: ['Chest', 'Back', 'Shoulders', 'Arms', 'Legs', 'Core'],
+            datasets: [{
+                label: 'Growth Potential',
+                data: [
+                    traits.muscle_building_potential ? traits.muscle_building_potential * 0.12 : 7,
+                    traits.muscle_building_potential ? traits.muscle_building_potential * 0.14 : 8,
+                    traits.muscle_building_potential ? traits.muscle_building_potential * 0.10 : 6,
+                    traits.muscle_building_potential ? traits.muscle_building_potential * 0.08 : 5,
+                    traits.muscle_building_potential ? traits.muscle_building_potential * 0.16 : 9,
+                    traits.muscle_building_potential ? traits.muscle_building_potential * 0.06 : 4
+                ],
+                backgroundColor: '#8B5CF6',
+                borderColor: '#7C3AED',
+                borderWidth: 1
             }]
         },
         options: {
             indexAxis: 'y',
             plugins: { legend: { display: false } },
             scales: {
-                x: { display: false },
-                y: { grid: { display: false }, ticks: { color: '#9ca3af' } }
+                x: { max: 10, grid: { color: '#374151' }, ticks: { color: '#9ca3af' } },
+                y: { grid: { color: '#374151' }, ticks: { color: '#9ca3af' } }
             }
         }
-    }, 'Body Type Spectrum');
+    }, 'Growth Potential');
 
     console.log('All charts initialized successfully');
 });

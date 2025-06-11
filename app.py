@@ -550,7 +550,14 @@ def view_analysis_results(analysis_id):
                 'gender': user_info.get('gender', 'male'),
                 'heightCm': user_info.get('height', 170),
                 'weightKg': user_info.get('weight', 70),
-                'activityLevel': user_info.get('experience', 'moderate')
+                'activityLevel': user_info.get('experience', 'moderate'),
+                'maintenanceCalories': results.get('maintenance_calories', {
+                    'sedentary': 1800,
+                    'light': 2000,
+                    'moderate': 2200,
+                    'active': 2400,
+                    'very_active': 2600
+                })
             }
             
             # Generate recommendations based on body type and traits
