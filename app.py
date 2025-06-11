@@ -440,14 +440,27 @@ def view_analysis_results(analysis_id):
             # Check if this is a 3D scan (default to standard)
             is_3d_scan = False
             
-            # Setup image data - provide placeholder URLs for demonstration
-            image_data = None
-            front_image_url = "/static/placeholder-front.jpg"  # Would be actual analysis image URL
-            back_image_url = "/static/placeholder-back.jpg"    # Would be actual analysis image URL
+            # Setup image data from analysis results
+            image_data = results.get('image_data')
             
-            # In a real implementation, these would come from the analysis results
-            # front_image_url = results.get('front_analysis_image_url')
-            # back_image_url = results.get('back_analysis_image_url')
+            # Check for actual analysis images with overlays
+            front_image_url = None
+            back_image_url = None
+            
+            # Look for analysis images in the results
+            if 'front_analysis_image' in results:
+                front_image_url = results['front_analysis_image']
+            elif 'front_image_path' in results:
+                front_image_url = results['front_image_path']
+            
+            if 'back_analysis_image' in results:
+                back_image_url = results['back_analysis_image']
+            elif 'back_image_path' in results:
+                back_image_url = results['back_image_path']
+            
+            # Debug log the image URLs
+            logger.info(f"Front image URL: {front_image_url}")
+            logger.info(f"Back image URL: {back_image_url}")
             
             # Define enhanced measurements with more metrics
             has_enhanced_measurements = True
