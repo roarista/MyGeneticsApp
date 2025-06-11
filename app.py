@@ -520,6 +520,39 @@ def view_analysis_results(analysis_id):
                 ]
             }
 
+            # Debug: Print all variables before rendering template
+            template_vars = {
+                'analysis_id': analysis_id,
+                'bodybuilding': bodybuilding,
+                'measurements': measurements,
+                'traits': traits,
+                'image_data': image_data,
+                'front_image': front_image,
+                'back_image': back_image,
+                'is_dual_photo': is_dual_photo,
+                'is_3d_scan': is_3d_scan,
+                'categorized_measurements': categorized_measurements,
+                'has_enhanced_measurements': has_enhanced_measurements,
+                'chart_data': chart_data,
+                'recommendations': recommendations,
+                'user_info': user_info
+            }
+            
+            logger.info("=== TEMPLATE VARIABLES DEBUG ===")
+            for key, value in template_vars.items():
+                if value is None:
+                    logger.error(f"❌ {key} is None!")
+                else:
+                    logger.info(f"✓ {key}: {type(value)} - {str(value)[:100]}...")
+            
+            # Verify chart_data has all required fields
+            required_chart_fields = ['bodyType', 'bodyTypePosition', 'metabolicEfficiency', 'muscleBuilding', 'recoveryCapacity']
+            for field in required_chart_fields:
+                if field not in chart_data:
+                    logger.error(f"❌ Missing chart field: {field}")
+                else:
+                    logger.info(f"✓ Chart field {field}: {chart_data[field]}")
+
             return render_template(
                 'lovable_results.html',
                 analysis_id=analysis_id,
