@@ -51,10 +51,20 @@
 
       <!-- Right Panel: Traits & Metrics -->
       <div class="space-y-6">
-        <!-- Genetic Traits Chart Area Placeholder -->
+        <!-- Genetic Structural Traits -->
         <div class="bg-gray-800 rounded-xl p-6 shadow">
           <h3 class="text-xl font-semibold text-white mb-4">Genetic Structural Traits</h3>
-          <canvas id="traitsChart" class="w-full h-64"></canvas>
+          <div class="space-y-3">
+            {% for trait in genetic_traits %}
+            <div class="flex justify-between items-start">
+              <div class="flex-1">
+                <div class="text-white font-medium">{{ trait.label }}</div>
+                <div class="text-sm text-gray-400">{{ trait.impact }}</div>
+              </div>
+              <div class="text-blue-400 font-semibold ml-4">{{ trait.value }}</div>
+            </div>
+            {% endfor %}
+          </div>
         </div>
 
         <!-- Structural & Composition Tables -->
@@ -94,19 +104,27 @@
 
           <!-- Composition -->
           <div>
-            <h4 class="text-lg font-semibold text-white mb-3">Body Composition</h4>
+            <h4 class="text-lg font-semibold text-white mb-3">Body Measurements</h4>
             <table class="w-full text-left text-gray-300">
               <thead><tr><th class="pb-2">Metric</th><th class="pb-2">Value</th><th class="pb-2">Rating</th></tr></thead>
               <tbody class="divide-y divide-gray-700">
-                {% if traits.bmi %}
-                <tr><td>BMI</td><td>{{ traits.bmi }}</td><td><span class="px-2 py-1 rounded-full text-sm bg-gray-600 text-white">Info</span></td></tr>
-                {% endif %}
-                {% if bodybuilding.body_fat_percentage %}
-                <tr><td>Body Fat %</td><td>{{ '%.1f'|format(bodybuilding.body_fat_percentage) }}%</td><td><span class="px-2 py-1 rounded-full text-sm bg-gray-600 text-white">Info</span></td></tr>
-                {% endif %}
-                {% if traits.lean_mass_percentage %}
-                <tr><td>Lean Body Mass</td><td>{{ '%.1f'|format(traits.lean_mass_percentage) }}%</td><td><span class="px-2 py-1 rounded-full text-sm bg-gray-600 text-white">Info</span></td></tr>
-                {% endif %}
+                {% for category, measurements in categorized_measurements.items() %}
+                  {% for measurement_name, measurement_data in measurements.items() %}
+                  <tr>
+                    <td class="py-2">{{ measurement_name.replace('_',' ').title() }}</td>
+                    <td class="py-2">{{ measurement_data.value }} {{ measurement_data.unit }}</td>
+                    <td class="py-2">
+                      <span class="px-2 py-1 rounded-full text-sm 
+                        {% if measurement_data.color == 'green' %}bg-green-600 text-white
+                        {% elif measurement_data.color == 'yellow' %}bg-yellow-600 text-white
+                        {% elif measurement_data.color == 'red' %}bg-red-600 text-white
+                        {% else %}bg-gray-600 text-white{% endif %}">
+                        {{ measurement_data.rating }}
+                      </span>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                {% endfor %}
               </tbody>
             </table>
           </div>

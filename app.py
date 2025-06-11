@@ -448,32 +448,89 @@ def view_analysis_results(analysis_id):
             # Define enhanced measurements with more metrics
             has_enhanced_measurements = True
             
-            # Create categorized measurements
+            # Helper function to rate measurements
+            def get_measurement_rating(value, thresholds):
+                """Rate measurement based on thresholds [low, high]"""
+                if value < thresholds[0]:
+                    return {'rating': 'Underdeveloped', 'color': 'red'}
+                elif value < thresholds[1]:
+                    return {'rating': 'Average', 'color': 'yellow'}
+                else:
+                    return {'rating': 'Well Developed', 'color': 'green'}
+
+            # Define thresholds for different measurements
+            measurement_thresholds = {
+                'shoulder_width': [42, 50],
+                'chest_circumference': [90, 110],
+                'arm_circumference': [30, 38],
+                'waist_circumference': [70, 85],
+                'thigh_circumference': [50, 60],
+                'calf_circumference': [32, 40],
+                'bmi': [18.5, 25],
+                'weight': [55, 80],
+                'height': [160, 180]
+            }
+
+            # Create categorized measurements with ratings
             categorized_measurements = {
                 "Body Composition": {
-                    'weight': results.get('user_info', {}).get('weight', 70),
-                    'height': results.get('user_info', {}).get('height', 170),
-                    'bmi': results.get('bmi', 22)
+                    'weight': {'value': results.get('user_info', {}).get('weight', 70), 'unit': 'kg', **get_measurement_rating(results.get('user_info', {}).get('weight', 70), measurement_thresholds['weight'])},
+                    'height': {'value': results.get('user_info', {}).get('height', 170), 'unit': 'cm', **get_measurement_rating(results.get('user_info', {}).get('height', 170), measurement_thresholds['height'])},
+                    'bmi': {'value': round(results.get('bmi', 22), 1), 'unit': '', **get_measurement_rating(results.get('bmi', 22), measurement_thresholds['bmi'])}
                 },
                 "Upper Body": {
-                    'shoulder_width': 48.0,
-                    'chest_circumference': 100.0,
-                    'arm_circumference': 35.0,
-                    'bicep_circumference': 36.0,
-                    'forearm_circumference': 28.0,
-                    'wrist_circumference': 17.0
+                    'shoulder_width': {'value': 48.0, 'unit': 'cm', **get_measurement_rating(48.0, measurement_thresholds['shoulder_width'])},
+                    'chest_circumference': {'value': 100.0, 'unit': 'cm', **get_measurement_rating(100.0, measurement_thresholds['chest_circumference'])},
+                    'arm_circumference': {'value': 35.0, 'unit': 'cm', **get_measurement_rating(35.0, measurement_thresholds['arm_circumference'])},
+                    'bicep_circumference': {'value': 36.0, 'unit': 'cm', **get_measurement_rating(36.0, measurement_thresholds['arm_circumference'])},
+                    'forearm_circumference': {'value': 28.0, 'unit': 'cm', **get_measurement_rating(28.0, [25, 32])},
+                    'wrist_circumference': {'value': 17.0, 'unit': 'cm', **get_measurement_rating(17.0, [15, 19])}
                 },
                 "Torso": {
-                    'waist_circumference': results.get('waist_circumference', 80.0),
-                    'hip_circumference': 96.0,
-                    'neck_circumference': 40.0
+                    'waist_circumference': {'value': results.get('waist_circumference', 80.0), 'unit': 'cm', **get_measurement_rating(results.get('waist_circumference', 80.0), measurement_thresholds['waist_circumference'])},
+                    'hip_circumference': {'value': 96.0, 'unit': 'cm', **get_measurement_rating(96.0, [85, 105])},
+                    'neck_circumference': {'value': 40.0, 'unit': 'cm', **get_measurement_rating(40.0, [35, 45])}
                 },
                 "Lower Body": {
-                    'thigh_circumference': 55.0,
-                    'calf_circumference': 38.0,
-                    'ankle_circumference': 22.0
+                    'thigh_circumference': {'value': 55.0, 'unit': 'cm', **get_measurement_rating(55.0, measurement_thresholds['thigh_circumference'])},
+                    'calf_circumference': {'value': 38.0, 'unit': 'cm', **get_measurement_rating(38.0, measurement_thresholds['calf_circumference'])},
+                    'ankle_circumference': {'value': 22.0, 'unit': 'cm', **get_measurement_rating(22.0, [20, 25])}
                 }
             }
+
+            # Create genetic traits data
+            genetic_traits = [
+                {
+                    'label': 'Frame Size',
+                    'value': traits.get('frame_size', 'Medium'),
+                    'impact': 'Determines overall bone structure and potential muscle mass'
+                },
+                {
+                    'label': 'Bicep Insertion',
+                    'value': traits.get('bicep_insertion', 'Medium'),
+                    'impact': 'Higher insertion = better peak, lower = fuller appearance'
+                },
+                {
+                    'label': 'Calf Insertion',
+                    'value': traits.get('calf_insertion', 'Medium'),
+                    'impact': 'Affects calf muscle shape and development potential'
+                },
+                {
+                    'label': 'Shoulder Structure',
+                    'value': f"{measurements.get('shoulder_width', 48)} cm",
+                    'impact': 'Wider shoulders create better V-taper and aesthetic proportions'
+                },
+                {
+                    'label': 'Metabolic Rate',
+                    'value': f"{traits.get('metabolic_efficiency', 6)}/10",
+                    'impact': 'Higher rate = easier fat loss, lower = easier muscle gain'
+                },
+                {
+                    'label': 'Recovery Genetics',
+                    'value': f"{traits.get('recovery_capacity', 7)}/10",
+                    'impact': 'Better recovery allows more frequent and intense training'
+                }
+            ]
             
             # Debug categorized measurements
             logger.info(f"DEBUG - Categorized measurements keys: {list(categorized_measurements.keys())}")
@@ -568,7 +625,8 @@ def view_analysis_results(analysis_id):
                 has_enhanced_measurements=has_enhanced_measurements,
                 chart_data=chart_data,
                 recommendations=recommendations,
-                user_info=user_info
+                user_info=user_info,
+                genetic_traits=genetic_traits
             )
         else:
             logger.error(f"❌ No analysis results found in session")
