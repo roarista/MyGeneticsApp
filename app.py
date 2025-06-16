@@ -389,6 +389,15 @@ def view_analysis_results(analysis_id):
             # Debug print to see what we're working with
             logger.info(f"DEBUG - Session analysis keys: {list(results.keys())}")
             
+            # Extract user info first to avoid variable scoping issues
+            user_info = results.get('user_info', {
+                'height': 170.0,
+                'weight': 70.0,
+                'age': 25,
+                'gender': 'male',
+                'experience': 'intermediate'
+            })
+            
             # Create bodybuilding object to match template requirements
             bodybuilding = {
                 'body_fat_percentage': results.get('body_fat', 0),
@@ -481,6 +490,8 @@ def view_analysis_results(analysis_id):
             logger.info(f"Back image URL: {back_image_url}")
             logger.info(f"Front path exists: {os.path.exists(front_path) if front_path else False}")
             logger.info(f"Back path exists: {os.path.exists(back_path) if back_path else False}")
+            
+
             
             # Define enhanced measurements with more metrics
             has_enhanced_measurements = True
