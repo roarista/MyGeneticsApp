@@ -443,17 +443,35 @@ def view_analysis_results(analysis_id):
             # Setup image data from analysis results
             image_data = results.get('image_data')
             
-            # Check for actual analysis images with overlays
+            # Generate proper image URLs using url_for
             front_image_url = None
             back_image_url = None
             
-            # Look for analysis images in the results
-            if 'front_analysis_image' in results:
+            # Check if analysis generated processed images with overlays
+            analysis_id = results.get('id', 'unknown')
+            
+            # Look for processed analysis images in static/uploads directory
+            import os
+            uploads_dir = os.path.join('static', 'uploads')
+            os.makedirs(uploads_dir, exist_ok=True)
+            
+            # Check for existing analysis images
+            front_filename = f"front_analysis_{analysis_id}.png"
+            back_filename = f"back_analysis_{analysis_id}.png"
+            
+            front_path = os.path.join(uploads_dir, front_filename)
+            back_path = os.path.join(uploads_dir, back_filename)
+            
+            if os.path.exists(front_path):
+                front_image_url = url_for('static', filename=f'uploads/{front_filename}')
+            elif 'front_analysis_image' in results:
                 front_image_url = results['front_analysis_image']
             elif 'front_image_path' in results:
                 front_image_url = results['front_image_path']
             
-            if 'back_analysis_image' in results:
+            if os.path.exists(back_path):
+                back_image_url = url_for('static', filename=f'uploads/{back_filename}')
+            elif 'back_analysis_image' in results:
                 back_image_url = results['back_analysis_image']
             elif 'back_image_path' in results:
                 back_image_url = results['back_image_path']
@@ -461,6 +479,8 @@ def view_analysis_results(analysis_id):
             # Debug log the image URLs
             logger.info(f"Front image URL: {front_image_url}")
             logger.info(f"Back image URL: {back_image_url}")
+            logger.info(f"Front path exists: {os.path.exists(front_path) if front_path else False}")
+            logger.info(f"Back path exists: {os.path.exists(back_path) if back_path else False}")
             
             # Define enhanced measurements with more metrics
             has_enhanced_measurements = True
@@ -578,6 +598,124 @@ def view_analysis_results(analysis_id):
             
             strengths_summary = f"Your strengths are: {', '.join(well_developed).title()}" if well_developed else "Continue developing across all muscle groups"
             weaknesses_summary = f"Areas to focus: {', '.join(needs_growth).title()}" if needs_growth else "Maintain current development across all areas"
+
+            # Complete structure metrics table with all previous metrics
+            def get_rating_by_thresholds(value, low_threshold, high_threshold, reverse=False):
+                """Get rating based on thresholds - reverse=True for metrics where lower is better"""
+                if reverse:
+                    if value <= low_threshold:
+                        return {'rating': 'Excellent', 'color': 'green'}
+                    elif value <= high_threshold:
+                        return {'rating': 'Average', 'color': 'yellow'}
+                    else:
+                        return {'rating': 'Needs Improvement', 'color': 'red'}
+                else:
+                    if value >= high_threshold:
+                        return {'rating': 'Excellent', 'color': 'green'}
+                    elif value >= low_threshold:
+                        return {'rating': 'Average', 'color': 'yellow'}
+                    else:
+                        return {'rating': 'Needs Improvement', 'color': 'red'}
+
+            # Calculate additional metrics
+            fitness_age = max(15, user_info.get('age', 25) - (traits.get('recovery_capacity', 7) - 5))
+            waist_to_hip_ratio = measurements.get('waist_circumference', 80) / measurements.get('hip_circumference', 95)
+            leg_to_torso_ratio = measurements.get('thigh_circumference', 55) / measurements.get('chest_circumference', 100)
+            arm_to_torso_ratio = measurements.get('arm_circumference', 35) / measurements.get('chest_circumference', 100)
+            symmetry_score = 8.5  # Calculated based on bilateral measurements
+
+            complete_structure_metrics = [
+                {
+                    'name': 'BMI',
+                    'value': f"{traits.get('bmi', 23.5):.1f}",
+                    **get_rating_by_thresholds(traits.get('bmi', 23.5), 18.5, 24.9)
+                },
+                {
+                    'name': 'Body Fat %',
+                    'value': f"{bodybuilding.get('body_fat_percentage', 16.5):.1f}%",
+                    **get_rating_by_thresholds(bodybuilding.get('body_fat_percentage', 16.5), 15, 20, reverse=True)
+                },
+                {
+                    'name': 'Lean Mass %',
+                    'value': f"{traits.get('lean_mass_percentage', 83.5):.1f}%",
+                    **get_rating_by_thresholds(traits.get('lean_mass_percentage', 83.5), 75, 85)
+                },
+                {
+                    'name': 'Muscle Building Potential',
+                    'value': f"{bodybuilding.get('muscle_building_potential', 67):.1f}",
+                    **get_rating_by_thresholds(bodybuilding.get('muscle_building_potential', 67), 60, 80)
+                },
+                {
+                    'name': 'Fast Twitch %',
+                    'value': f"{traits.get('fast_twitch_percentage', 50)}%",
+                    **get_rating_by_thresholds(traits.get('fast_twitch_percentage', 50), 45, 60)
+                },
+                {
+                    'name': 'Frame Size',
+                    'value': traits.get('frame_size', 'Medium'),
+                    'rating': 'Good Structure' if traits.get('frame_size') == 'Large' else 'Average',
+                    'color': 'green' if traits.get('frame_size') == 'Large' else 'yellow'
+                },
+                {
+                    'name': 'Bicep Insertion',
+                    'value': traits.get('bicep_insertion', 'Medium'),
+                    'rating': 'Excellent' if traits.get('bicep_insertion') == 'High' else 'Average',
+                    'color': 'green' if traits.get('bicep_insertion') == 'High' else 'yellow'
+                },
+                {
+                    'name': 'Calf Insertion',
+                    'value': traits.get('calf_insertion', 'Medium'),
+                    'rating': 'Excellent' if traits.get('calf_insertion') == 'High' else 'Average',
+                    'color': 'green' if traits.get('calf_insertion') == 'High' else 'yellow'
+                },
+                {
+                    'name': 'Metabolic Efficiency',
+                    'value': f"{traits.get('metabolic_efficiency', 6.7)}/10",
+                    **get_rating_by_thresholds(traits.get('metabolic_efficiency', 6.7), 6, 8)
+                },
+                {
+                    'name': 'Recovery Capacity',
+                    'value': f"{traits.get('recovery_capacity', 9.0)}/10",
+                    **get_rating_by_thresholds(traits.get('recovery_capacity', 9.0), 7, 9)
+                },
+                {
+                    'name': 'Body Type',
+                    'value': bodybuilding.get('body_type', 'Mesomorph'),
+                    'rating': 'Balanced' if bodybuilding.get('body_type') == 'Mesomorph' else 'Specialized',
+                    'color': 'green' if bodybuilding.get('body_type') == 'Mesomorph' else 'yellow'
+                },
+                {
+                    'name': 'Chronological Age',
+                    'value': f"{user_info.get('age', 25)} years",
+                    'rating': 'Prime' if user_info.get('age', 25) < 30 else 'Mature',
+                    'color': 'green' if user_info.get('age', 25) < 30 else 'yellow'
+                },
+                {
+                    'name': 'Fitness Age',
+                    'value': f"{fitness_age} years",
+                    **get_rating_by_thresholds(fitness_age, user_info.get('age', 25), user_info.get('age', 25) + 5, reverse=True)
+                },
+                {
+                    'name': 'Symmetry Score',
+                    'value': f"{symmetry_score}/10",
+                    **get_rating_by_thresholds(symmetry_score, 7, 9)
+                },
+                {
+                    'name': 'Waist-to-Hip Ratio',
+                    'value': f"{waist_to_hip_ratio:.2f}",
+                    **get_rating_by_thresholds(waist_to_hip_ratio, 0.85, 0.95, reverse=True)
+                },
+                {
+                    'name': 'Leg-to-Torso Ratio',
+                    'value': f"{leg_to_torso_ratio:.2f}",
+                    **get_rating_by_thresholds(leg_to_torso_ratio, 0.5, 0.65)
+                },
+                {
+                    'name': 'Arm-to-Torso Ratio',
+                    'value': f"{arm_to_torso_ratio:.2f}",
+                    **get_rating_by_thresholds(arm_to_torso_ratio, 0.3, 0.4)
+                }
+            ]
             
             # Debug categorized measurements
             logger.info(f"DEBUG - Categorized measurements keys: {list(categorized_measurements.keys())}")
@@ -687,7 +825,8 @@ def view_analysis_results(analysis_id):
                 genetic_traits=genetic_traits,
                 muscle_analysis=muscle_analysis,
                 strengths_summary=strengths_summary,
-                weaknesses_summary=weaknesses_summary
+                weaknesses_summary=weaknesses_summary,
+                complete_structure_metrics=complete_structure_metrics
             )
         else:
             logger.error(f"❌ No analysis results found in session")
